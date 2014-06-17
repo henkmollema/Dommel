@@ -1,0 +1,386 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Dapper.FluentMap</name>
+    </assembly>
+    <members>
+        <member name="T:Dapper.FluentMap.Conventions.Convention">
+            <summary>
+            Represents a convention for mapping entity properties to column names.
+            </summary>
+        </member>
+        <member name="M:Dapper.FluentMap.Conventions.Convention.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:Dapper.FluentMap.Conventions.Convention"/> class.
+            </summary>
+        </member>
+        <member name="M:Dapper.FluentMap.Conventions.Convention.Properties">
+            <summary>
+            Configures a convention that applies on all properties of the entity.
+            </summary>
+            <returns>A configuration object for the convention.</returns>
+        </member>
+        <member name="M:Dapper.FluentMap.Conventions.Convention.Properties``1">
+            <summary>
+            Configures a convention that applies on all the properties of a specified type of the entity.
+            </summary>
+            <typeparam name="T">The type of the properties that the convention will apply to.</typeparam>
+            <returns>A configuration object for the convention.</returns>
+        </member>
+        <member name="M:Dapper.FluentMap.Conventions.Convention.ToString">
+            <inheritdoc/>
+        </member>
+        <member name="M:Dapper.FluentMap.Conventions.Convention.Equals(System.Object)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Dapper.FluentMap.Conventions.Convention.GetHashCode">
+            <inheritdoc/>
+        </member>
+        <member name="M:Dapper.FluentMap.Conventions.Convention.GetType">
+            <inheritdoc/>
+        </member>
+        <member name="T:Dapper.FluentMap.Conventions.ConventionPropertyConfiguration">
+            <summary>
+            Represents configuration of a property via conventions.
+            </summary>
+        </member>
+        <member name="M:Dapper.FluentMap.Conventions.ConventionPropertyConfiguration.HasColumnName(System.String)">
+            <summary>
+            Configures the name of the database column used to store the property.
+            </summary>
+            <param name="columnName">The name of the database column.</param>
+            <returns>The same instance of <see cref="T:Dapper.FluentMap.Conventions.ConventionPropertyConfiguration"/>.</returns>
+        </member>
+        <member name="M:Dapper.FluentMap.Conventions.ConventionPropertyConfiguration.HasPrefix(System.String)">
+            <summary>
+            Configures the prefix of the database column used to store the property.
+            </summary>
+            <param name="prefix">The prefix of the database column.</param>
+            <returns>The same instance of <see cref="T:Dapper.FluentMap.Conventions.ConventionPropertyConfiguration"/>.</returns>
+        </member>
+        <member name="M:Dapper.FluentMap.Conventions.ConventionPropertyConfiguration.Transform(System.Func{System.String,System.String})">
+            <summary>
+            Configures the function for transforming property names to database column names.
+            </summary>
+            <param name="transformer">A function which takes the property name and returns the database colum name.</param>
+            <returns>The same instance of <see cref="T:Dapper.FluentMap.Conventions.ConventionPropertyConfiguration"/>.</returns>
+        </member>
+        <member name="M:Dapper.FluentMap.Conventions.ConventionPropertyConfiguration.ToString">
+            <inheritdoc/>
+        </member>
+        <member name="M:Dapper.FluentMap.Conventions.ConventionPropertyConfiguration.Equals(System.Object)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Dapper.FluentMap.Conventions.ConventionPropertyConfiguration.GetHashCode">
+            <inheritdoc/>
+        </member>
+        <member name="M:Dapper.FluentMap.Conventions.ConventionPropertyConfiguration.GetType">
+            <inheritdoc/>
+        </member>
+        <member name="T:Dapper.FluentMap.Conventions.PropertyConventionConfiguration">
+            <summary>
+            Represents the configuration for a convention.
+            </summary>
+        </member>
+        <member name="M:Dapper.FluentMap.Conventions.PropertyConventionConfiguration.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:Dapper.FluentMap.Conventions.PropertyConventionConfiguration"/> class, 
+            allowing configuration for a convention.
+            </summary>
+        </member>
+        <member name="M:Dapper.FluentMap.Conventions.PropertyConventionConfiguration.Where(System.Func{System.Reflection.PropertyInfo,System.Boolean})">
+            <summary>
+            Filters the properties that this convention applies to based on a predicate.
+            </summary>
+            <param name="predicate">A function to test each property for a condition.</param>
+            <returns>The same instance of <see cref="T:Dapper.FluentMap.Conventions.PropertyConventionConfiguration"/>.</returns>
+        </member>
+        <member name="M:Dapper.FluentMap.Conventions.PropertyConventionConfiguration.Configure(System.Action{Dapper.FluentMap.Conventions.ConventionPropertyConfiguration})">
+            <summary>
+            Configures the properties that this convention applies to.
+            </summary>
+            <param name="configure">An action that performs configuration against <see cref="T:Dapper.FluentMap.Conventions.ConventionPropertyConfiguration"/>.</param>
+        </member>
+        <member name="M:Dapper.FluentMap.Conventions.PropertyConventionConfiguration.ToString">
+            <inheritdoc/>
+        </member>
+        <member name="M:Dapper.FluentMap.Conventions.PropertyConventionConfiguration.Equals(System.Object)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Dapper.FluentMap.Conventions.PropertyConventionConfiguration.GetHashCode">
+            <inheritdoc/>
+        </member>
+        <member name="M:Dapper.FluentMap.Conventions.PropertyConventionConfiguration.GetType">
+            <inheritdoc/>
+        </member>
+        <member name="T:Dapper.FluentMap.Configuration.FluentConventionConfiguration">
+            <summary>
+            Defines methods for configuring conventions.
+            </summary>
+        </member>
+        <member name="M:Dapper.FluentMap.Configuration.FluentConventionConfiguration.#ctor(Dapper.FluentMap.Conventions.Convention)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Dapper.FluentMap.Configuration.FluentConventionConfiguration"/> class,
+            allowing configuration of conventions.
+            </summary>
+            <param name="convention">The convention.</param>
+        </member>
+        <member name="M:Dapper.FluentMap.Configuration.FluentConventionConfiguration.ForEntity``1">
+            <summary>
+            Configures the current covention for the specified entity type.
+            </summary>
+            <typeparam name="T">The type of the entity.</typeparam>
+            <returns>The current instance of <see cref="T:Dapper.FluentMap.Conventions.FluentMapConventionConfiguration"/>.</returns>
+        </member>
+        <member name="M:Dapper.FluentMap.Configuration.FluentConventionConfiguration.ForEntitiesInCurrentAssembly(System.String[])">
+            <summary>
+            Configures the current convention for all the entities in current assembly filtered by the specified namespaces.
+            </summary>
+            <param name="namespaces">An array of namespaces which filter the types in the current assembly. This parameter is optional.</param>
+            <returns>The current instance of <see cref="T:Dapper.FluentMap.Conventions.FluentMapConventionConfiguration"/>.</returns>
+        </member>
+        <member name="M:Dapper.FluentMap.Configuration.FluentConventionConfiguration.ForEntitiesInAssembly(System.Reflection.Assembly,System.String[])">
+            <summary>
+            Configures the current convention for all entities in the specified assembly filtered by the specified namespaces.
+            </summary>
+            <param name="assembly">The assembly to scan for entities.</param>
+            <param name="namespaces">An array of namespaces which filter the types in <paramref name="assembly"/>. This parameter is optional.</param>
+            <returns>The current instance of <see cref="T:Dapper.FluentMap.Conventions.FluentMapConventionConfiguration"/>.</returns>
+        </member>
+        <member name="M:Dapper.FluentMap.Configuration.FluentConventionConfiguration.ToString">
+            <inheritdoc/>
+        </member>
+        <member name="M:Dapper.FluentMap.Configuration.FluentConventionConfiguration.Equals(System.Object)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Dapper.FluentMap.Configuration.FluentConventionConfiguration.GetHashCode">
+            <inheritdoc/>
+        </member>
+        <member name="M:Dapper.FluentMap.Configuration.FluentConventionConfiguration.GetType">
+            <inheritdoc/>
+        </member>
+        <member name="T:Dapper.FluentMap.Mapping.EntityMap">
+            <summary>
+            Represents a non-typed mapping of an entity.
+            This class supports the internal infrastructure and should not be used directly in code.
+            </summary>
+        </member>
+        <member name="M:Dapper.FluentMap.Mapping.EntityMap.#ctor">
+            <remarks>
+            The constructor is internal so classes outside this assembly can't derive from it.
+            </remarks>
+        </member>
+        <member name="P:Dapper.FluentMap.Mapping.EntityMap.PropertyMaps">
+            <summary>
+            Gets the collection of mapped properties.
+            </summary>
+        </member>
+        <member name="T:Dapper.FluentMap.Mapping.EntityMap`1">
+            <summary>
+            Represents a typed mapping of an entity.
+            </summary>
+            <typeparam name="TEntity">The type of the entity to configure the mapping for.</typeparam>
+        </member>
+        <member name="M:Dapper.FluentMap.Mapping.EntityMap`1.Map(System.Linq.Expressions.Expression{System.Func{`0,System.Object}})">
+            <summary>
+            Returns an instance of <see cref="T:Dapper.FluentMap.Mapping.PropertyMap"/> which can perform custom mapping
+            for the specified property on <typeparamref name="TEntity"/>.
+            </summary>
+            <param name="expression">Expression to the property on <typeparamref name="TEntity"/>.</param>
+            <returns>The created <see cref="T:Dapper.FluentMap.Mapping.PropertyMap"/> instance. This enables a fluent API.</returns>
+        </member>
+        <member name="T:Dapper.FluentMap.Configuration.FluentMapConfiguration">
+            <summary>
+            Defines methods for configuring Dapper.FluentMap.
+            </summary>
+        </member>
+        <member name="M:Dapper.FluentMap.Configuration.FluentMapConfiguration.AddMap``1(Dapper.FluentMap.Mapping.EntityMap{``0})">
+            <summary>
+            Adds the specified <see cref="T:Dapper.FluentMap.Mapping.EntityMap"/> to the configuration of Dapper.FluentMap.
+            </summary>
+            <typeparam name="TEntity">The type argument of the entity.</typeparam>
+            <param name="mapper">An instance of the EntityMap classs containing the entity mapping configuration.</param>
+        </member>
+        <member name="M:Dapper.FluentMap.Configuration.FluentMapConfiguration.AddConvention``1">
+            <summary>
+            Adds the specified <see cref="T:Dapper.FluentMap.Conventions.Convention"/> to the configuration of Dapper.FluentMap.
+            </summary>
+            <typeparam name="TConvention">The type of the convention.</typeparam>
+            <returns>
+            An instance of <see cref="T:Dapper.FluentMap.Conventions.FluentMapConventionConfiguration"/> 
+            which allows configuration of the convention.
+            </returns>
+        </member>
+        <member name="M:Dapper.FluentMap.Configuration.FluentMapConfiguration.ToString">
+            <inheritdoc/>
+        </member>
+        <member name="M:Dapper.FluentMap.Configuration.FluentMapConfiguration.Equals(System.Object)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Dapper.FluentMap.Configuration.FluentMapConfiguration.GetHashCode">
+            <inheritdoc/>
+        </member>
+        <member name="M:Dapper.FluentMap.Configuration.FluentMapConfiguration.GetType">
+            <inheritdoc/>
+        </member>
+        <member name="T:Dapper.FluentMap.FluentMapper">
+            <summary>
+            Main entry point for Dapper.FluentMap configuration.
+            </summary>
+        </member>
+        <member name="F:Dapper.FluentMap.FluentMapper.EntityMappers">
+            <summary>
+            Gets the dictionary containing the entity mapping per entity type.
+            </summary>
+        </member>
+        <member name="F:Dapper.FluentMap.FluentMapper.TypeConventions">
+            <summary>
+            Gets the dictionairy containing the conventions per entity type.
+            </summary>
+        </member>
+        <member name="M:Dapper.FluentMap.FluentMapper.Intialize(System.Action{Dapper.FluentMap.Configuration.FluentMapConfiguration})">
+            <summary>
+            Initializes Dapper.FluentMap with the specified configuration. 
+            This is method should be called when the application starts or when the first mapping is needed.
+            </summary>
+            <param name="configure">A callback containing the configuration of Dapper.FluentMap.</param>
+        </member>
+        <member name="M:Dapper.FluentMap.FluentMapper.AddTypeMap``1">
+            <summary>
+            Registers a Dapper type map using fluent mapping for the specified <typeparamref name="TEntity"/>.
+            </summary>
+            <typeparam name="TEntity">The type of the entity.</typeparam>
+        </member>
+        <member name="M:Dapper.FluentMap.FluentMapper.AddTypeMap(System.Type)">
+            <summary>
+            Registers a Dapper type map using fluent mapping for the specified <paramref name="entityType"/>.
+            </summary>
+            <param name="entityType">The type of the entity.</param>
+        </member>
+        <member name="M:Dapper.FluentMap.FluentMapper.AddConventionTypeMap``1">
+            <summary>
+            Registers a Dapper type map using conventions for the specified <typeparamref name="TEntity"/>.
+            </summary>
+            <typeparam name="TEntity">The type of the entity.</typeparam>
+        </member>
+        <member name="M:Dapper.FluentMap.FluentMapper.AddConventionTypeMap(System.Type)">
+            <summary>
+            Registers a Dapper type map using conventions for the specified <paramref name="entityType"/>.
+            </summary>
+            <param name="entityType">The type of the entity.</param>
+        </member>
+        <member name="T:Dapper.FluentMap.TypeMaps.FluentConventionTypeMap`1">
+            <summary>
+            Represents a Dapper type mapping strategy which first tries to map the type using a <see cref="T:Dapper.CustomPropertyTypeMap"/>
+            with the configured conventions. <see cref="T:Dapper.DefaultTypeMap"/> is used as fallback mapping strategy.
+            </summary>
+            <typeparam name="TEntity">The type of the entity.</typeparam>
+        </member>
+        <member name="T:Dapper.FluentMap.TypeMaps.MultiTypeMap">
+            <summary>
+            Represents a Dapper type mapping strategy which consists of multiple strategies.
+            </summary>
+        </member>
+        <member name="M:Dapper.FluentMap.TypeMaps.MultiTypeMap.#ctor(Dapper.SqlMapper.ITypeMap[])">
+            <summary>
+            Initializes an instance of the <see cref="T:Dapper.FluentMap.TypeMaps.MultiTypeMap"/> 
+            class with the specified Dapper type mappers.
+            </summary>
+            <param name="mappers">The type mapping strategies to be used when mapping.</param>
+        </member>
+        <member name="M:Dapper.FluentMap.TypeMaps.FluentConventionTypeMap`1.#ctor">
+            <summary>
+            Intializes a new instance of the <see cref="T:Dapper.FluentMap.FluentMapTypeMapper"/> class 
+            which uses the <see cref="T:Dapper.CustomPropertyTypeMap"/> and <see cref="T:Dapper.DefaultTypeMap"/>
+            as mapping strategies.
+            </summary>
+        </member>
+        <member name="T:Dapper.FluentMap.TypeMaps.FluentMapTypeMap`1">
+            <summary>
+            Represents a Dapper type mapping strategy which first tries to map the type using a <see cref="T:Dapper.CustomPropertyTypeMap"/>, 
+            if that fails, the <see cref="T:Dapper.DefaultTypeMap"/> is used as mapping strategy.
+            </summary>
+            <typeparam name="TEntity">The type of the entity.</typeparam>
+        </member>
+        <member name="M:Dapper.FluentMap.TypeMaps.FluentMapTypeMap`1.#ctor">
+            <summary>
+            Intializes a new instance of the <see cref="T:Dapper.FluentMap.FluentMapTypeMapper"/> class 
+            which uses the <see cref="T:Dapper.CustomPropertyTypeMap"/> and <see cref="T:Dapper.DefaultTypeMap"/>
+            as mapping strategies.
+            </summary>
+        </member>
+        <member name="T:Dapper.FluentMap.Mapping.PropertyMap">
+            <summary>
+            Represents the mapping of a property.
+            </summary>
+        </member>
+        <member name="M:Dapper.FluentMap.Mapping.PropertyMap.#ctor(System.Reflection.PropertyInfo)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Dapper.FluentMap.PropertyMap"/> using 
+            the specified <see cref="T:System.Reflecion.PropertyInfo"/> object representing the property to map.
+            </summary>
+            <param name="info">The <see cref="T:System.Reflection.PropertyInfo"/> object representing to the property to map.</param>
+        </member>
+        <member name="M:Dapper.FluentMap.Mapping.PropertyMap.#ctor(System.Reflection.PropertyInfo,System.String)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Dapper.FluentMap.PropertyMap"/> using 
+            the specified <see cref="T:System.Reflecion.PropertyInfo"/> object representing the property to map 
+            and column name to map the property to.
+            </summary>
+            <param name="info">The <see cref="T:System.Reflection.PropertyInfo"/> object representing to the property to map.</param>
+            <param name="columnName">The column name in the database to map the property to.</param>
+        </member>
+        <member name="M:Dapper.FluentMap.Mapping.PropertyMap.ToColumn(System.String)">
+            <summary>
+            Maps the current property to the specified column name.
+            </summary>
+            <param name="columnName">The name of the column in the data store.</param>
+            <returns>The current <see cref="T:Dapper.FluentMap.Mapping.PropertyMap"/> instance. This enables a fluent API.</returns>
+        </member>
+        <member name="M:Dapper.FluentMap.Mapping.PropertyMap.Ignore">
+            <summary>
+            Marks the current property as ignored, resulting in the property not being mapped by Dapper.
+            </summary>
+            <returns>The current <see cref="T:Dapper.FluentMap.Mapping.PropertyMap"/> instance. This enables a fluent API.</returns>
+        </member>
+        <member name="M:Dapper.FluentMap.Mapping.PropertyMap.ToString">
+            <inheritdoc/>
+        </member>
+        <member name="M:Dapper.FluentMap.Mapping.PropertyMap.Equals(System.Object)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Dapper.FluentMap.Mapping.PropertyMap.GetHashCode">
+            <inheritdoc/>
+        </member>
+        <member name="M:Dapper.FluentMap.Mapping.PropertyMap.GetType">
+            <inheritdoc/>
+        </member>
+        <member name="P:Dapper.FluentMap.Mapping.PropertyMap.ColumnName">
+            <summary>
+            Gets the name of the column in the data store.
+            </summary>
+        </member>
+        <member name="P:Dapper.FluentMap.Mapping.PropertyMap.Ignored">
+            <summary>
+            Gets a value indicating wether the property should be ignored when mapping.
+            </summary>
+        </member>
+        <member name="P:Dapper.FluentMap.Mapping.PropertyMap.PropertyInfo">
+            <summary>
+            Gets the <see cref="T:System.Reflecion.PropertyInfo"/> object for the current property.
+            </summary>
+        </member>
+        <member name="T:Dapper.FluentMap.Utils.ReflectionHelper">
+            <summary>
+            Provides helper methods for reflection operations.
+            </summary>
+        </member>
+        <member name="M:Dapper.FluentMap.Utils.ReflectionHelper.GetMemberInfo(System.Linq.Expressions.LambdaExpression)">
+            <summary>
+            Returns the <see cref="T:System.Reflection.MemberInfo"/> for the specified lamba expression.
+            </summary>
+            <param name="lambda">A lamba expression containing a MemberExpression.</param>
+            <returns>A MemberInfo object for the member in the specified lambda expression.</returns>
+        </member>
+    </members>
+</doc>
