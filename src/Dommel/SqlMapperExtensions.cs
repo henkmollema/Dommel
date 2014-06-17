@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Data;
 using System.Linq;
 using System.Reflection;
@@ -24,10 +25,6 @@ namespace Dommel
 
             var dynamicParams = new DynamicParameters();
             dynamicParams.Add("@id", id);
-
-            //SqlMapper.
-            var t = SqlMapper.GetTypeMap(type);
-            //t.
 
             return con.Query<T>(sql: sql, param: dynamicParams, transaction: transaction, buffered: buffered, commandTimeout: commandTimeout, commandType: commandType).FirstOrDefault();
         }
@@ -74,7 +71,16 @@ namespace Dommel
 
             public PropertyInfo ResolveKeyProperty(Type type)
             {
-                var keyProps = GetTypeProperties(type).Where(p => p.Name.Equals("Id", StringComparison.OrdinalIgnoreCase)).ToList();
+                var allProps = GetTypeProperties(type).ToList();
+
+                // Look for properties with the [Key] attribute.
+                var keyProps = allProps.Where(p => p.GetCustomAttributes(true).Any(a => a is KeyAttribute)).ToList();
+
+                if (keyProps.Count == 0)
+                {
+                    // Search for properties named as 'Id' as fallback.
+                    keyProps = allProps.Where(p => p.Name.Equals("Id", StringComparison.OrdinalIgnoreCase)).ToList();
+                }
 
                 if (keyProps.Count == 0)
                 {
