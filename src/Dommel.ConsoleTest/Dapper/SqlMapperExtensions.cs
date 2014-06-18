@@ -14,7 +14,7 @@ using System.Runtime.CompilerServices;
 namespace Dapper.Contrib.Extensions
 {
 
-    public static class SqlMapperExtensions2
+    public static class SqlMapperExtensions
     {
         public interface IProxy
         {

@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 using Dapper;
-
+//using Dapper.Contrib.Extensions;
 using Dapper.FluentMap;
 using Dapper.FluentMap.Mapping;
 
@@ -37,26 +37,29 @@ namespace Dommel.ConsoleTest
         {
             using (var con = new SqlConnection("Data Source=.\\sql2012;Initial Catalog=DapperTest;Integrated Security=True"))
             {
+                con.Open();
+
                 //SqlMapperExtensions.SetTableNameResolver(new CustomTableNameResolver());
                 FluentMapper.Intialize(c => c.AddMap(new ProductMap()));
 
-                string sql = "insert into tblProduct (strName) values (@Name)";
-
-                var res = con.Execute(sql, new Product { Name = "test2" });
-
-                long newid = con.Insert(new Product { Name = "Dommel Product", NameUrlOptimized = "product", Description = "Nice stuff" });
-
-
-                for (int i = 1; i <= 4; i++)
+                for (int i = 0; i < 10; i++)
                 {
-                    var sw = Stopwatch.StartNew();
-                    var p = con.Get<Product>(i);
-                    sw.Stop();
-
-                    Console.WriteLine("{0}: {1}", p.Id, p.Name);
-                    Console.WriteLine("Query executed in {0}ms", sw.Elapsed.TotalMilliseconds);
-                    Console.WriteLine("");
+                    using (StopwatchHelper.Start("Insert Dommel product"))
+                    {
+                        con.Insert(new Product { Name = "Dommel Product", NameUrlOptimized = "product", Description = "Nice stuff" });
+                    }
                 }
+
+                //for (int i = 1; i <= 4; i++)
+                //{
+                //    var sw = Stopwatch.StartNew();
+                //    var p = con.Get<Product>(i);
+                //    sw.Stop();
+                //
+                //    Console.WriteLine("{0}: {1}", p.Id, p.Name);
+                //    Console.WriteLine("Query executed in {0}ms", sw.Elapsed.TotalMilliseconds);
+                //    Console.WriteLine("");
+                //}
             }
 
             Console.ReadKey();
