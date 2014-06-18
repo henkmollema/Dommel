@@ -38,42 +38,34 @@ namespace Dommel
             return con.Query<T>(sql: sql, param: dynamicParams).FirstOrDefault();
         }
 
-        public static long Insert<TEntity>(this IDbConnection connection, TEntity entity) where TEntity : class
+        public static int Insert<TEntity>(this IDbConnection connection, TEntity entity) where TEntity : class
         {
             // todo: cache sql?
-            // todo: close connection when opened.
+            var type = typeof(TEntity);
+            string tableName = GetTableName(type);
 
-            if (connection.State == ConnectionState.Closed)
+            var sb = new StringBuilder();
+            sb.AppendFormat("insert into {0} (", tableName);
+
+            var allProps = GetTypeProperties(type);
+            var keyProp = GetKeyProperty(type);
+
+            string sql;
+            using (StopwatchHelper.Start("Build sql query"))
             {
-                connection.Open();
-            }
-
-            using (IDbTransaction transaction = connection.BeginTransaction())
-            {
-                var type = typeof(TEntity);
-                string tableName = GetTableName(type);
-
-                var sb = new StringBuilder();
-                sb.AppendFormat("insert into {0} (", tableName);
-
-                var allProps = GetTypeProperties(type);
-                var keyProp = GetKeyProperty(type);
-
                 // todo: support custom column names.
                 string[] names = allProps.Where(p => p != keyProp).Select(p => p.Name).ToArray();
+                string[] paramNams = names.Select(s => "@" + s).ToArray();
 
-                sb.Append(string.Join(", ", names));
-                sb.Append(") values (");
-                sb.Append(string.Join(", ", names.Select(s => "@" + s)));
-                sb.Append(")");
-
-                string sql = sb.ToString();
-                connection.Execute(sql, entity, transaction: transaction);
-                var result = connection.Query("select @@IDENTITY Id", transaction: transaction);
-                transaction.Commit();
-
-                return (long)result.First().Id;
+                // todo: scope_identity() is not supported in sql ce.
+                sql = string.Format("set nocount on insert into {0} ({1}) values ({2}) select cast(scope_identity() as int)",
+                                    tableName,
+                                    string.Join(", ", names),
+                                    string.Join(", ", paramNams));
             }
+
+            var result = connection.Query<int>(sql, entity);
+            return result.Single();
         }
 
         private static PropertyInfo GetKeyProperty(Type type)
