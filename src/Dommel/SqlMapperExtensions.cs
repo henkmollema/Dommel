@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Data;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 
 using Dapper;
 
@@ -13,20 +14,66 @@ namespace Dommel
     {
         private static readonly IDictionary<Type, string> _typeTableNameCache = new Dictionary<Type, string>();
         private static readonly IDictionary<Type, PropertyInfo> _typeKeyPropertyCache = new Dictionary<Type, PropertyInfo>();
+        private static readonly IDictionary<Type, string> _typeSqlCache = new Dictionary<Type, string>();
+        private static readonly IDictionary<Type, IEnumerable<PropertyInfo>> _typePropertiesCache = new Dictionary<Type, IEnumerable<PropertyInfo>>();
 
-        public static T Get<T>(this IDbConnection con, object id, IDbTransaction transaction = null, bool buffered = true, int? commandTimeout = null, CommandType? commandType = null) where T : class
+        public static T Get<T>(this IDbConnection con, object id) where T : class
         {
-            Type type = typeof(T);
+            var type = typeof(T);
 
-            string tableName = GetTableName(type);
-            PropertyInfo keyProperty = GetKeyProperty(type);
+            string sql;
+            if (!_typeSqlCache.TryGetValue(type, out sql))
+            {
+                string tableName = GetTableName(type);
+                var keyProperty = GetKeyProperty(type);
 
-            string sql = string.Format("select * from {0} where {1} = @id", tableName, keyProperty.Name);
+                // todo: support custom id colum name.
+                sql = string.Format("select * from {0} where {1} = @id", tableName, keyProperty.Name);
+                _typeSqlCache[type] = sql;
+            }
 
             var dynamicParams = new DynamicParameters();
             dynamicParams.Add("@id", id);
 
-            return con.Query<T>(sql: sql, param: dynamicParams, transaction: transaction, buffered: buffered, commandTimeout: commandTimeout, commandType: commandType).FirstOrDefault();
+            return con.Query<T>(sql: sql, param: dynamicParams).FirstOrDefault();
+        }
+
+        public static long Insert<TEntity>(this IDbConnection connection, TEntity entity) where TEntity : class
+        {
+            // todo: cache sql?
+            // todo: close connection when opened.
+
+            if (connection.State == ConnectionState.Closed)
+            {
+                connection.Open();
+            }
+
+            using (IDbTransaction transaction = connection.BeginTransaction())
+            {
+                var type = typeof(TEntity);
+                string tableName = GetTableName(type);
+
+                var sb = new StringBuilder();
+                sb.AppendFormat("insert into {0} (", tableName);
+
+                var allProps = GetTypeProperties(type);
+                var keyProp = GetKeyProperty(type);
+
+                // todo: support custom column names.
+                string[] names = allProps.Where(p => p != keyProp).Select(p => p.Name).ToArray();
+
+                sb.Append(string.Join(", ", names));
+                sb.Append(") values (");
+                sb.Append(string.Join(", ", names.Select(s => "@" + s)));
+                sb.Append(")");
+
+                string sql = sb.ToString();
+                connection.Execute(sql, entity, transaction: transaction);
+                var result = connection.Query("select @@IDENTITY Id", transaction: transaction);
+                transaction.Commit();
+
+                return (long)result.First().Id;
+            }
         }
 
         private static PropertyInfo GetKeyProperty(Type type)
@@ -40,7 +87,19 @@ namespace Dommel
 
             return keyProperty;
         }
-        
+
+        private static IEnumerable<PropertyInfo> GetTypeProperties(Type type)
+        {
+            IEnumerable<PropertyInfo> properties;
+            if (!_typePropertiesCache.TryGetValue(type, out properties))
+            {
+                properties = type.GetProperties();
+                _typePropertiesCache[type] = properties;
+            }
+
+            return properties;
+        }
+
         private static string GetTableName(Type type)
         {
             string name;
@@ -67,14 +126,12 @@ namespace Dommel
 
         private sealed class DefaultKeyPropertyResolver : IKeyPropertyResolver
         {
-            private static readonly IDictionary<Type, IEnumerable<PropertyInfo>> _typePropertiesCache = new Dictionary<Type, IEnumerable<PropertyInfo>>();
-
             public PropertyInfo ResolveKeyProperty(Type type)
             {
-                var allProps = GetTypeProperties(type).ToList();
+                List<PropertyInfo> allProps = GetTypeProperties(type).ToList();
 
                 // Look for properties with the [Key] attribute.
-                var keyProps = allProps.Where(p => p.GetCustomAttributes(true).Any(a => a is KeyAttribute)).ToList();
+                List<PropertyInfo> keyProps = allProps.Where(p => p.GetCustomAttributes(true).Any(a => a is KeyAttribute)).ToList();
 
                 if (keyProps.Count == 0)
                 {
@@ -94,20 +151,7 @@ namespace Dommel
 
                 return keyProps[0];
             }
-
-            private static IEnumerable<PropertyInfo> GetTypeProperties(Type type)
-            {
-                IEnumerable<PropertyInfo> properties;
-                if (!_typePropertiesCache.TryGetValue(type, out properties))
-                {
-                    properties = type.GetProperties();
-                    _typePropertiesCache[type] = properties;
-                }
-
-                return properties;
-            }
         }
-
         #endregion
 
         #region Table name resolving
@@ -133,7 +177,7 @@ namespace Dommel
                 {
                     name = name.Substring(1);
                 }
-                // todo: add table attribute.
+                // todo: add table attribute support.
                 return name;
             }
         }
