@@ -44,7 +44,7 @@ namespace Dommel.ConsoleTest
 
                 for (int i = 0; i < 10; i++)
                 {
-                    using (StopwatchHelper.Start("Insert Dommel product"))
+                    using (Profiler.Start("Insert Dommel product"))
                     {
                         con.Insert(new Product { Name = "Dommel Product", NameUrlOptimized = "product", Description = "Nice stuff" });
                     }
