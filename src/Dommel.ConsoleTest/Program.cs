@@ -7,6 +7,8 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
+using Dapper;
+
 using Dapper.FluentMap;
 using Dapper.FluentMap.Mapping;
 
@@ -21,25 +23,31 @@ namespace Dommel.ConsoleTest
         }
     }
 
-    public class CustomTableNameResolver : SqlMapperExtensions.ITableNameResolver
-    {
-        public string ResolveTableName(Type type)
-        {
-            return string.Format("tbl{0}", type.Name);
-        }
-    }
+    //public class CustomTableNameResolver : SqlMapperExtensions.ITableNameResolver
+    //{
+    //    public string ResolveTableName(Type type)
+    //    {
+    //        return string.Format("tbl{0}", type.Name);
+    //    }
+    //}
 
     public class Program
     {
         public static void Main(string[] args)
         {
-            using (var con = new SqlConnection("Data Source=sql2012;Initial Catalog=DapperTest;Integrated Security=True"))
+            using (var con = new SqlConnection("Data Source=.\\sql2012;Initial Catalog=DapperTest;Integrated Security=True"))
             {
-                SqlMapperExtensions.SetTableNameResolver(new CustomTableNameResolver());
+                //SqlMapperExtensions.SetTableNameResolver(new CustomTableNameResolver());
                 FluentMapper.Intialize(c => c.AddMap(new ProductMap()));
 
+                string sql = "insert into tblProduct (strName) values (@Name)";
 
-                for (int i = 1; i <= 7; i++)
+                var res = con.Execute(sql, new Product { Name = "test2" });
+
+                long newid = con.Insert(new Product { Name = "Dommel Product", NameUrlOptimized = "product", Description = "Nice stuff" });
+
+
+                for (int i = 1; i <= 4; i++)
                 {
                     var sw = Stopwatch.StartNew();
                     var p = con.Get<Product>(i);
@@ -60,5 +68,9 @@ namespace Dommel.ConsoleTest
         public int Id { get; set; }
 
         public string Name { get; set; }
+
+        public string NameUrlOptimized { get; set; }
+
+        public string Description { get; set; }
     }
 }

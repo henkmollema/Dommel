@@ -49,6 +49,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Dapper\SqlMapperExtensions.cs" />
+    <None Include="Dapper\SqlMapper.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
