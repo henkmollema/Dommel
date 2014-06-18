@@ -14,7 +14,8 @@ namespace Dommel
     {
         private static readonly IDictionary<Type, string> _typeTableNameCache = new Dictionary<Type, string>();
         private static readonly IDictionary<Type, PropertyInfo> _typeKeyPropertyCache = new Dictionary<Type, PropertyInfo>();
-        private static readonly IDictionary<Type, string> _typeSqlCache = new Dictionary<Type, string>();
+        private static readonly IDictionary<Type, string> _getQueryCache = new Dictionary<Type, string>();
+        private static readonly Dictionary<Type, string> _insertQueryCache = new Dictionary<Type, string>();
         private static readonly IDictionary<Type, IEnumerable<PropertyInfo>> _typePropertiesCache = new Dictionary<Type, IEnumerable<PropertyInfo>>();
 
         public static T Get<T>(this IDbConnection con, object id) where T : class
@@ -22,14 +23,14 @@ namespace Dommel
             var type = typeof(T);
 
             string sql;
-            if (!_typeSqlCache.TryGetValue(type, out sql))
+            if (!_getQueryCache.TryGetValue(type, out sql))
             {
                 string tableName = GetTableName(type);
                 var keyProperty = GetKeyProperty(type);
 
                 // todo: support custom id colum name.
                 sql = string.Format("select * from {0} where {1} = @id", tableName, keyProperty.Name);
-                _typeSqlCache[type] = sql;
+                _getQueryCache[type] = sql;
             }
 
             var dynamicParams = new DynamicParameters();
@@ -40,28 +41,33 @@ namespace Dommel
 
         public static int Insert<TEntity>(this IDbConnection connection, TEntity entity) where TEntity : class
         {
-            // todo: cache sql?
             var type = typeof(TEntity);
-            string tableName = GetTableName(type);
-
-            var sb = new StringBuilder();
-            sb.AppendFormat("insert into {0} (", tableName);
-
-            var allProps = GetTypeProperties(type);
-            var keyProp = GetKeyProperty(type);
 
             string sql;
-            using (StopwatchHelper.Start("Build sql query"))
+            if (!_insertQueryCache.TryGetValue(type, out sql))
             {
-                // todo: support custom column names.
-                string[] names = allProps.Where(p => p != keyProp).Select(p => p.Name).ToArray();
-                string[] paramNams = names.Select(s => "@" + s).ToArray();
+                string tableName = GetTableName(type);
 
-                // todo: scope_identity() is not supported in sql ce.
-                sql = string.Format("set nocount on insert into {0} ({1}) values ({2}) select cast(scope_identity() as int)",
-                                    tableName,
-                                    string.Join(", ", names),
-                                    string.Join(", ", paramNams));
+                var sb = new StringBuilder();
+                sb.AppendFormat("insert into {0} (", tableName);
+
+                var allProps = GetTypeProperties(type);
+                var keyProp = GetKeyProperty(type);
+
+                using (Profiler.Start("Build sql query"))
+                {
+                    // todo: support custom column names.
+                    string[] names = allProps.Where(p => p != keyProp).Select(p => p.Name).ToArray();
+                    string[] paramNams = names.Select(s => "@" + s).ToArray();
+
+                    // todo: scope_identity() is not supported in sql ce.
+                    sql = string.Format("set nocount on insert into {0} ({1}) values ({2}) select cast(scope_identity() as int)",
+                                        tableName,
+                                        string.Join(", ", names),
+                                        string.Join(", ", paramNams));
+
+                    _insertQueryCache[type] = sql;
+                }
             }
 
             var result = connection.Query<int>(sql, entity);

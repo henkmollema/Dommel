@@ -3,7 +3,7 @@ using System.Diagnostics;
 
 namespace Dommel
 {
-    public class StopwatchHelper
+    public static class Profiler
     {
         public static IDisposable Start(string reference = "")
         {
