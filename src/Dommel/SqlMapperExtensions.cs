@@ -13,6 +13,7 @@ namespace Dommel
         private static readonly IDictionary<Type, string> _typeTableNameCache = new Dictionary<Type, string>();
         private static readonly IDictionary<Type, PropertyInfo> _typeKeyPropertyCache = new Dictionary<Type, PropertyInfo>();
         private static readonly IDictionary<Type, PropertyInfo[]> _typePropertiesCache = new Dictionary<Type, PropertyInfo[]>();
+
         private static readonly IDictionary<Type, string> _getQueryCache = new Dictionary<Type, string>();
         private static readonly IDictionary<Type, string> _insertQueryCache = new Dictionary<Type, string>();
         private static readonly IDictionary<Type, string> _updateQueryCache = new Dictionary<Type, string>();
@@ -238,7 +239,7 @@ namespace Dommel
                 {
                     name = name.Substring(1);
                 }
-                // todo: add table attribute support.
+                // todo: add [Table] attribute support.
                 return name;
             }
         }

@@ -43,7 +43,6 @@
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SqlMapperExtensions.cs" />
-    <Compile Include="Profiler.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
