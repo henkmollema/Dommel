@@ -4,8 +4,6 @@ using System.ComponentModel.DataAnnotations;
 using System.Data;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-
 using Dapper;
 
 namespace Dommel
@@ -14,13 +12,21 @@ namespace Dommel
     {
         private static readonly IDictionary<Type, string> _typeTableNameCache = new Dictionary<Type, string>();
         private static readonly IDictionary<Type, PropertyInfo> _typeKeyPropertyCache = new Dictionary<Type, PropertyInfo>();
+        private static readonly IDictionary<Type, PropertyInfo[]> _typePropertiesCache = new Dictionary<Type, PropertyInfo[]>();
         private static readonly IDictionary<Type, string> _getQueryCache = new Dictionary<Type, string>();
-        private static readonly Dictionary<Type, string> _insertQueryCache = new Dictionary<Type, string>();
-        private static readonly IDictionary<Type, IEnumerable<PropertyInfo>> _typePropertiesCache = new Dictionary<Type, IEnumerable<PropertyInfo>>();
+        private static readonly IDictionary<Type, string> _insertQueryCache = new Dictionary<Type, string>();
+        private static readonly IDictionary<Type, string> _updateQueryCache = new Dictionary<Type, string>();
 
-        public static T Get<T>(this IDbConnection con, object id) where T : class
+        /// <summary>
+        /// Retrieves the entity with the specified id.
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the entity.</typeparam>
+        /// <param name="connection">The connection to the database. This can either be open or closed.</param>
+        /// <param name="id">The id of the entity in the database.</param>
+        /// <returns>The entity with the corresponding id.</returns>
+        public static TEntity Get<TEntity>(this IDbConnection connection, object id) where TEntity : class
         {
-            var type = typeof(T);
+            var type = typeof (TEntity);
 
             string sql;
             if (!_getQueryCache.TryGetValue(type, out sql))
@@ -29,49 +35,82 @@ namespace Dommel
                 var keyProperty = GetKeyProperty(type);
 
                 // todo: support custom id colum name.
-                sql = string.Format("select * from {0} where {1} = @id", tableName, keyProperty.Name);
+                sql = string.Format("select * from {0} where {1} = @Id", tableName, keyProperty.Name);
                 _getQueryCache[type] = sql;
             }
 
-            var dynamicParams = new DynamicParameters();
-            dynamicParams.Add("@id", id);
+            var parameters = new DynamicParameters();
+            parameters.Add("Id", id);
 
-            return con.Query<T>(sql: sql, param: dynamicParams).FirstOrDefault();
+            return connection.Query<TEntity>(sql: sql, param: parameters).FirstOrDefault();
         }
 
+        /// <summary>
+        /// Inserts the specified entity into the database and returns the id.
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the entity.</typeparam>
+        /// <param name="connection">The connection to the database. This can either be open or closed.</param>
+        /// <param name="entity">The entity to be inserted.</param>
+        /// <returns>The id of the inserted entity.</returns>
         public static int Insert<TEntity>(this IDbConnection connection, TEntity entity) where TEntity : class
         {
-            var type = typeof(TEntity);
+            var type = typeof (TEntity);
 
             string sql;
             if (!_insertQueryCache.TryGetValue(type, out sql))
             {
                 string tableName = GetTableName(type);
+                var typeProperties = GetTypeProperties(type);
+                var keyProperty = GetKeyProperty(type);
 
-                var sb = new StringBuilder();
-                sb.AppendFormat("insert into {0} (", tableName);
+                // todo: support custom column names.
+                string[] names = typeProperties.Where(p => p != keyProperty).Select(p => p.Name).ToArray();
+                string[] paramNams = names.Select(s => "@" + s).ToArray();
 
-                var allProps = GetTypeProperties(type);
-                var keyProp = GetKeyProperty(type);
+                // todo: scope_identity() is not supported in sql ce.
+                sql = string.Format("set nocount on insert into {0} ({1}) values ({2}) select cast(scope_identity() as int)",
+                    tableName,
+                    string.Join(", ", names),
+                    string.Join(", ", paramNams));
 
-                using (Profiler.Start("Build sql query"))
-                {
-                    // todo: support custom column names.
-                    string[] names = allProps.Where(p => p != keyProp).Select(p => p.Name).ToArray();
-                    string[] paramNams = names.Select(s => "@" + s).ToArray();
-
-                    // todo: scope_identity() is not supported in sql ce.
-                    sql = string.Format("set nocount on insert into {0} ({1}) values ({2}) select cast(scope_identity() as int)",
-                                        tableName,
-                                        string.Join(", ", names),
-                                        string.Join(", ", paramNams));
-
-                    _insertQueryCache[type] = sql;
-                }
+                _insertQueryCache[type] = sql;
             }
 
             var result = connection.Query<int>(sql, entity);
             return result.Single();
+        }
+
+        /// <summary>
+        /// Updates the values of the specified entity in the database. 
+        /// The return value indicates whether the operation succeeded.
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the entity.</typeparam>
+        /// <param name="connection">The connection to the database. This can either be open or closed.</param>
+        /// <param name="entity">The entity in the database.</param>
+        /// <returns>A value indicating whether the update operation succeeded.</returns>
+        public static bool Update<TEntity>(this IDbConnection connection, TEntity entity)
+        {
+            var type = typeof (TEntity);
+
+            string sql;
+            if (!_updateQueryCache.TryGetValue(type, out sql))
+            {
+                string tableName = GetTableName(type);
+                var typeProperties = GetTypeProperties(type);
+                var keyProperty = GetKeyProperty(type);
+
+                // todo: support custom column names.
+                string[] names = typeProperties.Where(p => p != keyProperty).Select(p => p.Name).ToArray();
+
+                sql = string.Format("update {0} set {1} where {2} = @{2}",
+                    tableName,
+                    string.Join(", ", names.Select(n => n + " = @" + n)),
+                    keyProperty.Name);
+
+                _updateQueryCache[type] = sql;
+            }
+
+            return connection.Execute(sql: sql, param: entity) > 0;
         }
 
         private static PropertyInfo GetKeyProperty(Type type)
@@ -88,7 +127,7 @@ namespace Dommel
 
         private static IEnumerable<PropertyInfo> GetTypeProperties(Type type)
         {
-            IEnumerable<PropertyInfo> properties;
+            PropertyInfo[] properties;
             if (!_typePropertiesCache.TryGetValue(type, out properties))
             {
                 properties = type.GetProperties();
