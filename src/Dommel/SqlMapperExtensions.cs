@@ -16,6 +16,7 @@ namespace Dommel
         private static readonly IDictionary<Type, string> _getQueryCache = new Dictionary<Type, string>();
         private static readonly IDictionary<Type, string> _insertQueryCache = new Dictionary<Type, string>();
         private static readonly IDictionary<Type, string> _updateQueryCache = new Dictionary<Type, string>();
+        private static readonly IDictionary<Type, string> _deleteQueryCache = new Dictionary<Type, string>();
 
         /// <summary>
         /// Retrieves the entity with the specified id.
@@ -111,6 +112,29 @@ namespace Dommel
             }
 
             return connection.Execute(sql: sql, param: entity) > 0;
+        }
+
+        /// <summary>
+        /// Deletes the specified entity from the database. 
+        /// Returns a value indicating whether the operation succeeded.
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the entity.</typeparam>
+        /// <param name="connection">The connection to the database. This can either be open or closed.</param>
+        /// <param name="entity">The entity to be deleted.</param>
+        /// <returns>A value indicating whether the delete operation succeeded.</returns>
+        public static bool Delete<TEntity>(this IDbConnection connection, TEntity entity)
+        {
+            var type = typeof (TEntity);
+
+            string sql;
+            if (!_deleteQueryCache.TryGetValue(type, out sql))
+            {
+                string tableName = GetTableName(type);
+                var keyProperty = GetKeyProperty(type);
+
+                sql = string.Format("delete from {0} where {1} = @{1}", tableName, keyProperty.Name);
+            }
+            return connection.Execute(sql, entity) > 0;
         }
 
         private static PropertyInfo GetKeyProperty(Type type)
