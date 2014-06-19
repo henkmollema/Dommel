@@ -39,14 +39,23 @@ namespace Dommel.ConsoleTest
                 //SqlMapperExtensions.SetTableNameResolver(new CustomTableNameResolver());
                 //FluentMapper.Intialize(c => c.AddMap(new ProductMap()));
 
+                //using (Profiler.Start())
+                //{
+                //    var p = con.Get<Product>(1);
+                //
+                //    //p.Name = string.Format("Product: {0:dd-MM HH:mm:ss}", DateTime.Now);
+                //    p.Created = DateTime.Now;
+                //
+                //    con.Update(p);
+                //}
+
                 using (Profiler.Start())
                 {
-                    var p = con.Get<Product>(1);
-
-                    //p.Name = string.Format("Product: {0:dd-MM HH:mm:ss}", DateTime.Now);
-                    p.Created = DateTime.Now;
-
+                    var id = con.Insert(new Product { Created = DateTime.Now, Name = "test" });
+                    var p = con.Get<Product>(id);
+                    p.Description = "gaaf";
                     con.Update(p);
+                    bool res = con.Delete(p);
                 }
 
                 //for (int i = 0; i < 5; i++)
