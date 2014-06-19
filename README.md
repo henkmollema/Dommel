@@ -39,7 +39,7 @@ using (var IDbConnection con = new SqlConnection())
 {
    var product = con.Get<Product>(1);
    product.LastUpdate = DateTime.Now;
-  con.Update(product);
+   con.Update(product);
 }
 ```
 
