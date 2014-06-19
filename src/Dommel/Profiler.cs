@@ -7,7 +7,7 @@ namespace Dommel
     {
         public static IDisposable Start(string reference = "")
         {
-            Stopwatch sw = Stopwatch.StartNew();
+            var sw = Stopwatch.StartNew();
             return new DisposableAction(() =>
                                         {
                                             sw.Stop();
@@ -16,7 +16,7 @@ namespace Dommel
         }
     }
 
-    public class DisposableAction : IDisposable
+    internal class DisposableAction : IDisposable
     {
         private readonly Action _callback;
 
