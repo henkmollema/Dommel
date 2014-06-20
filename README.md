@@ -56,7 +56,7 @@ using (IDbConnection con = new SqlConnection())
 ```
 
 ### Extensibility
-Currently the API exists of 3 extension points:
+Currently the API has 3 extension points:
 ##### `ITableNameResolver`
 Implement this interface if you want to customize the resolving of table names when building SQL queries.
 ```csharp
