@@ -8,6 +8,9 @@ using Dapper;
 
 namespace Dommel
 {
+    /// <summary>
+    /// Simple CRUD commands for Dapper.
+    /// </summary>
     public static class Dommel
     {
         private static readonly IDictionary<Type, string> _typeTableNameCache = new Dictionary<Type, string>();
@@ -106,7 +109,7 @@ namespace Dommel
                 sql = string.Format("update {0} set {1} where {2} = @{3}",
                     tableName,
                     string.Join(", ", columnNames),
-                    _columnNameResolver.ResolveColumnName(type, keyProperty),
+                    _columnNameResolver.ResolveColumnName(keyProperty),
                     keyProperty.Name);
 
                 _updateQueryCache[type] = sql;
@@ -181,7 +184,7 @@ namespace Dommel
             string columnName;
             if (!_columnNameCache.TryGetValue(key, out columnName))
             {
-                columnName = _columnNameResolver.ResolveColumnName(type, propertyInfo);
+                columnName = _columnNameResolver.ResolveColumnName(propertyInfo);
                 _columnNameCache[key] = columnName;
             }
             return columnName;
@@ -190,18 +193,38 @@ namespace Dommel
         #region Key property resolving
         private static IKeyPropertyResolver _keyPropertyResolver = new DefaultKeyPropertyResolver();
 
+        /// <summary>
+        /// Sets the <see cref="Dommel.IKeyPropertyResolver"/> implementation for resolving key properties of entities.
+        /// </summary>
+        /// <param name="resolver">An instance of <see cref="Dommel.IKeyPropertyResolver"/>.</param>
         public static void SetKeyPropertyResolver(IKeyPropertyResolver resolver)
         {
             _keyPropertyResolver = resolver;
         }
 
+        /// <summary>
+        /// Defines methods for resolving the key property of entities. 
+        /// Custom implementations can be registerd with <see cref="M:SetKeyPropertyResolver()"/>.
+        /// </summary>
         public interface IKeyPropertyResolver
         {
+            /// <summary>
+            /// Resolves the key property for the specified type.
+            /// </summary>
+            /// <param name="type">The type to resolve the key property for.</param>
+            /// <returns>A <see cref="PropertyInfo"/> instance of the key property of <paramref name="type"/>.</returns>
             PropertyInfo ResolveKeyProperty(Type type);
         }
 
+        /// <summary>
+        /// Implements the <see cref="Dommel.IKeyPropertyResolver"/> interface by resolving key properties
+        /// with the [Key] attribute or with the name 'Id'.
+        /// </summary>
         private sealed class DefaultKeyPropertyResolver : IKeyPropertyResolver
         {
+            /// <summary>
+            /// Finds the key property by looking for a property with the [Key] attribute or with the name 'Id'.
+            /// </summary>
             public PropertyInfo ResolveKeyProperty(Type type)
             {
                 List<PropertyInfo> allProps = GetTypeProperties(type).ToList();
@@ -233,18 +256,39 @@ namespace Dommel
         #region Table name resolving
         private static ITableNameResolver _tableNameResolver = new DefaultTableNameResolver();
 
+        /// <summary>
+        /// Sets the <see cref="T:Dommel.ITableNameResolver"/> implementation for resolving table names for entities.
+        /// </summary>
+        /// <param name="resolver">An instance of <see cref="T:Dommel.ITableNameResolver"/>.</param>
         public static void SetTableNameResolver(ITableNameResolver resolver)
         {
             _tableNameResolver = resolver;
         }
 
+        /// <summary>
+        /// Defines methods for resolving table names of entities. 
+        /// Custom implementations can be registerd with <see cref="M:SetTableNameResolver()"/>.
+        /// </summary>
         public interface ITableNameResolver
         {
+            /// <summary>
+            /// Resolves the table name for the specified type.
+            /// </summary>
+            /// <param name="type">The type to resolve the table name for.</param>
+            /// <returns>A string containing the resolved table name for for <paramref name="type"/>.</returns>
             string ResolveTableName(Type type);
         }
 
+        /// <summary>
+        /// Implements the <see cref="T:Dommel.ITableNameResolver"/> interface by resolving table names 
+        /// by making the type name plural and removing the 'I' prefix for interfaces. 
+        /// </summary>
         private sealed class DefaultTableNameResolver : ITableNameResolver
         {
+            /// <summary>
+            /// Resolves the table name by making the type plural (+ 's', Product -> Products) 
+            /// and removing the 'I' prefix for interfaces.
+            /// </summary>
             public string ResolveTableName(Type type)
             {
                 string name = type.Name + "s";
@@ -262,19 +306,38 @@ namespace Dommel
         #region Column name resolving
         private static IColumnNameResolver _columnNameResolver = new DefaultColumnNameResolver();
 
+        /// <summary>
+        /// Sets the <see cref="T:Dommel.IColumnNameResolver"/> implementation for resolving column names.
+        /// </summary>
+        /// <param name="resolver">An instance of <see cref="T:Dommel.IColumnNameResolver"/>.</param>
         public static void SetColumnNameResolver(IColumnNameResolver resolver)
         {
             _columnNameResolver = resolver;
         }
 
+        /// <summary>
+        /// Defines methods for resolving column names for entities. 
+        /// Custom implementations can be registerd with <see cref="M:SetColumnNameResolver()"/>.
+        /// </summary>
         public interface IColumnNameResolver
         {
-            string ResolveColumnName(Type type, PropertyInfo propertyInfo);
+            /// <summary>
+            /// Resolves the column name for the specified property.
+            /// </summary>
+            /// <param name="propertyInfo">The property of the entity.</param>
+            /// <returns>The column name for the property.</returns>
+            string ResolveColumnName(PropertyInfo propertyInfo);
         }
 
+        /// <summary>
+        /// Implements the <see cref="Dommel.IKeyPropertyResolver"/>.
+        /// </summary>
         private sealed class DefaultColumnNameResolver : IColumnNameResolver
         {
-            public string ResolveColumnName(Type type, PropertyInfo propertyInfo)
+            /// <summary>
+            /// Resolves the column name for the property. This is just the name of the property.
+            /// </summary>
+            public string ResolveColumnName(PropertyInfo propertyInfo)
             {
                 return propertyInfo.Name;
             }
