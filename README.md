@@ -58,5 +58,57 @@ using (IDbConnection con = new SqlConnection())
 ### Extensibility points
 Currently the API exists of 2 extension points:
 ##### `ITableNameResolver`
+Implement this interface if you want to customize the resolving of table names when building SQL queries.
+```csharp
+public class CustomTableNameResolver : Dommel.ITableNameResolver
+{
+    public string ResolveTableName(Type type)
+    {
+        // Every table has prefix 'tbl'.
+        return "tbl" + type.Name;
+    }
+}
+```
+
+Use the `SetTableNameResolver()` method to register the custom implementation:
+```csharp
+Dommel.SetTableNameResolver(new CustomTableNameResolver());
+```
 
 ##### `IKeyPropertyResolver`
+Implement this interface if you want to customize the resolving of the key property of an entity. By default, Dommel will search for a property with the `[Key]` attribute, or a column with the name 'Id'.
+
+If you, for example, have the naming convention of `{TypeName}Id` for key properties, you would implement the `IKeyPropertyResolver` like this:
+```csharp
+public class CustomKeyPropertyResolver : Dommel.IKeyPropertyResolver
+{
+    public PropertyInfo ResolveKeyProperty(Type type)
+    {
+        return type.GetProperties().Single(p => p.Name == string.Format("{0}Id", type.Name));
+    }
+}
+```
+
+Use the `SetKeyPropertyResolver()` method to register the custom implementation:
+```csharp
+Dommel.SetKeyPropertyResolver(new CustomKeyPropertyResolver());
+```
+
+##### `IColumnNameResolver`
+Implement this interface if you want to customize the resolving of column names for when building SQL queries. This is useful when your naming conventions for database columns are different than your POCO properties.
+
+```csharp
+public class CustomColumnNameResolver : Dommel.IColumnNameResolver
+{
+    public string ResolveColumnName(PropertyInfo propertyInfo)
+    {
+        // Every column has prefix 'fld' and is uppercase.
+        return "fld" + propertyInfo.Name.ToUpper();
+    }
+}
+```
+
+Use the `SetColumnNameResolver()` method to register the custom implementation:
+```csharp
+Dommel.SetColumnNameResolver(new CustomColumnNameResolver());
+```
