@@ -1,5 +1,6 @@
 Dommel
 ======
+[![Build status](https://ci.appveyor.com/api/projects/status/kynsbfu97f9s5bj7)](https://ci.appveyor.com/project/HenkMollema/dommel)
 
 Dommel provides a convenient API for CRUD operations using extension methods on the `IDbConnection` interface. [Dapper](https://github.com/StackExchange/dapper-dot-net) is used for query execution and object mapping. The functionality is basically the same as [Dapper.Contrib](https://github.com/StackExchange/dapper-dot-net/tree/master/Dapper.Contrib) (and Dapper.Rainbow) but since it's not updated any time lately and it has some shortcomings, I decided to create a similar tool.
 
