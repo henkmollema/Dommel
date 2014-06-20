@@ -11,6 +11,7 @@ namespace Dommel
     public static class SqlMapperExtensions
     {
         private static readonly IDictionary<Type, string> _typeTableNameCache = new Dictionary<Type, string>();
+        private static readonly IDictionary<string, string> _columnNameCache = new Dictionary<string, string>();
         private static readonly IDictionary<Type, PropertyInfo> _typeKeyPropertyCache = new Dictionary<Type, PropertyInfo>();
         private static readonly IDictionary<Type, PropertyInfo[]> _typePropertiesCache = new Dictionary<Type, PropertyInfo[]>();
 
@@ -35,9 +36,9 @@ namespace Dommel
             {
                 string tableName = GetTableName(type);
                 var keyProperty = GetKeyProperty(type);
+                string keyColumnName = GetColumnName(type, keyProperty);
 
-                // todo: support custom id colum name.
-                sql = string.Format("select * from {0} where {1} = @Id", tableName, keyProperty.Name);
+                sql = string.Format("select * from {0} where {1} = @Id", tableName, keyColumnName);
                 _getQueryCache[type] = sql;
             }
 
@@ -62,17 +63,16 @@ namespace Dommel
             if (!_insertQueryCache.TryGetValue(type, out sql))
             {
                 string tableName = GetTableName(type);
-                var typeProperties = GetTypeProperties(type);
                 var keyProperty = GetKeyProperty(type);
+                var typeProperties = GetTypeProperties(type).Where(p => p != keyProperty).ToList();
 
-                // todo: support custom column names.
-                string[] names = typeProperties.Where(p => p != keyProperty).Select(p => p.Name).ToArray();
-                string[] paramNams = names.Select(s => "@" + s).ToArray();
+                string[] columnNames = typeProperties.Select(p => GetColumnName(type, p)).ToArray();
+                string[] paramNams = typeProperties.Select(p => "@" + p.Name).ToArray();
 
                 // todo: scope_identity() is not supported in sql ce.
                 sql = string.Format("set nocount on insert into {0} ({1}) values ({2}) select cast(scope_identity() as int)",
                     tableName,
-                    string.Join(", ", names),
+                    string.Join(", ", columnNames),
                     string.Join(", ", paramNams));
 
                 _insertQueryCache[type] = sql;
@@ -98,15 +98,15 @@ namespace Dommel
             if (!_updateQueryCache.TryGetValue(type, out sql))
             {
                 string tableName = GetTableName(type);
-                var typeProperties = GetTypeProperties(type);
                 var keyProperty = GetKeyProperty(type);
+                var typeProperties = GetTypeProperties(type).Where(p => p != keyProperty).ToList();
 
-                // todo: support custom column names.
-                string[] names = typeProperties.Where(p => p != keyProperty).Select(p => p.Name).ToArray();
+                string[] columnNames = typeProperties.Select(p => string.Format("{0} = @{1}", GetColumnName(type, p), p.Name)).ToArray();
 
-                sql = string.Format("update {0} set {1} where {2} = @{2}",
+                sql = string.Format("update {0} set {1} where {2} = @{3}",
                     tableName,
-                    string.Join(", ", names.Select(n => n + " = @" + n)),
+                    string.Join(", ", columnNames),
+                    _columnNameResolver.ResolveColumnName(type, keyProperty),
                     keyProperty.Name);
 
                 _updateQueryCache[type] = sql;
@@ -132,8 +132,9 @@ namespace Dommel
             {
                 string tableName = GetTableName(type);
                 var keyProperty = GetKeyProperty(type);
+                string keyColumnName = GetColumnName(type, keyProperty);
 
-                sql = string.Format("delete from {0} where {1} = @{1}", tableName, keyProperty.Name);
+                sql = string.Format("delete from {0} where {1} = @{2}", tableName, keyColumnName, keyProperty.Name);
             }
             return connection.Execute(sql, entity) > 0;
         }
@@ -171,6 +172,19 @@ namespace Dommel
                 _typeTableNameCache[type] = name;
             }
             return name;
+        }
+
+        private static string GetColumnName(Type type, PropertyInfo propertyInfo)
+        {
+            string key = string.Format("{0}.{1}", type.FullName, propertyInfo.Name);
+
+            string columnName;
+            if (!_columnNameCache.TryGetValue(key, out columnName))
+            {
+                columnName = _columnNameResolver.ResolveColumnName(type, propertyInfo);
+                _columnNameCache[key] = columnName;
+            }
+            return columnName;
         }
 
         #region Key property resolving
@@ -241,6 +255,28 @@ namespace Dommel
                 }
                 // todo: add [Table] attribute support.
                 return name;
+            }
+        }
+        #endregion
+
+        #region Column name resolving
+        private static IColumnNameResolver _columnNameResolver = new DefaultColumnNameResolver();
+
+        public static void SetColumnNameResolver(IColumnNameResolver resolver)
+        {
+            _columnNameResolver = resolver;
+        }
+
+        public interface IColumnNameResolver
+        {
+            string ResolveColumnName(Type type, PropertyInfo propertyInfo);
+        }
+
+        private sealed class DefaultColumnNameResolver : IColumnNameResolver
+        {
+            public string ResolveColumnName(Type type, PropertyInfo propertyInfo)
+            {
+                return propertyInfo.Name;
             }
         }
         #endregion
