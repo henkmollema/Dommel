@@ -6,10 +6,6 @@ Dommel provides a convenient API for CRUD operations using extension methods on 
 
 One of the things I got stuck with using Dapper.Contrib, was mapping of column names. For Dapper, I solved this by creating [Dapper.FluentMap](https://github.com/HenkMollema/Dapper-FluentMap), but this doesn't work for Dapper.Contrib.
 
-### To-do
-* Improve documentation in readme.
-* Add functionality to customize column name mapping of POCO properties.
-
 ### Donwload
 NuGet package comming soon.
 
