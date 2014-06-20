@@ -36,7 +36,7 @@ using (var IDbConnection con = new SqlConnection())
 ##### Updating entities
 
 ```csharp
-using (var IDbConnection con = new SqlConnection())
+using (IDbConnection con = new SqlConnection())
 {
    var product = con.Get<Product>(1);
    product.LastUpdate = DateTime.Now;
@@ -47,7 +47,7 @@ using (var IDbConnection con = new SqlConnection())
 ##### Removing entities
 
 ```csharp
-using (var IDbConnection con = new SqlConnection())
+using (IDbConnection con = new SqlConnection())
 {
    var product = con.Get<Product>(1);
    con.Delete(product);
