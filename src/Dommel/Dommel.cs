@@ -8,7 +8,7 @@ using Dapper;
 
 namespace Dommel
 {
-    public static class SqlMapperExtensions
+    public static class Dommel
     {
         private static readonly IDictionary<Type, string> _typeTableNameCache = new Dictionary<Type, string>();
         private static readonly IDictionary<string, string> _columnNameCache = new Dictionary<string, string>();
