@@ -2,9 +2,7 @@ Dommel
 ======
 [![Build status](https://ci.appveyor.com/api/projects/status/kynsbfu97f9s5bj7)](https://ci.appveyor.com/project/HenkMollema/dommel)
 
-Dommel provides a convenient API for CRUD operations using extension methods on the `IDbConnection` interface. [Dapper](https://github.com/StackExchange/dapper-dot-net) is used for query execution and object mapping. The functionality is basically the same as [Dapper.Contrib](https://github.com/StackExchange/dapper-dot-net/tree/master/Dapper.Contrib) (and Dapper.Rainbow) but since it's not updated any time lately and it has some shortcomings, I decided to create a similar tool.
-
-One of the things I got stuck with using Dapper.Contrib, was mapping of column names. For Dapper, I solved this by creating [Dapper.FluentMap](https://github.com/HenkMollema/Dapper-FluentMap), but this doesn't work for Dapper.Contrib.
+Dommel provides a convenient API for CRUD operations using extension methods on the `IDbConnection` interface. [Dapper](https://github.com/StackExchange/dapper-dot-net) is used for query execution and object mapping. The functionality is basically the same as [Dapper.Contrib](https://github.com/StackExchange/dapper-dot-net/tree/master/Dapper.Contrib) (and Dapper.Rainbow) but since it has not been updated any time lately and it has some shortcomings, Dommel was born.
 
 ### Donwload
 NuGet package comming soon.
@@ -52,7 +50,6 @@ using (IDbConnection con = new SqlConnection())
 ```
 
 ### Extensibility
-Currently the API has 3 extension points:
 ##### `ITableNameResolver`
 Implement this interface if you want to customize the resolving of table names when building SQL queries.
 ```csharp
@@ -108,3 +105,5 @@ Use the `SetColumnNameResolver()` method to register the custom implementation:
 ```csharp
 Dommel.SetColumnNameResolver(new CustomColumnNameResolver());
 ```
+
+I am working on a version of [Dapper.FluentMap](https://github.com/HenkMollema/Dapper-FluentMap) which implements the `IColumnNameResolver` and uses the configured mapping.
