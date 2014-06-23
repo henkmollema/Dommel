@@ -4,8 +4,13 @@ Dommel
 
 Dommel provides a convenient API for CRUD operations using extension methods on the `IDbConnection` interface. [Dapper](https://github.com/StackExchange/dapper-dot-net) is used for query execution and object mapping. The functionality is basically the same as [Dapper.Contrib](https://github.com/StackExchange/dapper-dot-net/tree/master/Dapper.Contrib) (and Dapper.Rainbow) but since it has not been updated any time lately and it has some shortcomings, Dommel was born.
 
-### Donwload
-NuGet package comming soon.
+<hr>
+
+### Download
+[![Download Dommel on NuGet](http://i.imgur.com/g9ZIbID.png "Download Dommel on NuGet")](https://www.nuget.org/packages/Dommel)
+
+<hr>
+
 
 ### The API
 
@@ -48,6 +53,8 @@ using (IDbConnection con = new SqlConnection())
    con.Delete(product);
 }
 ```
+
+<hr>
 
 ### Extensibility
 ##### `ITableNameResolver`
@@ -106,4 +113,4 @@ Use the `SetColumnNameResolver()` method to register the custom implementation:
 Dommel.SetColumnNameResolver(new CustomColumnNameResolver());
 ```
 
-I am working on a version of [Dapper.FluentMap](https://github.com/HenkMollema/Dapper-FluentMap) which implements the `IColumnNameResolver` and uses the configured mapping.
+I am working on a version of [Dapper.FluentMap](https://github.com/HenkMollema/Dapper-FluentMap) which implements these interfaces and use the configured mappings.
