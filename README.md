@@ -113,4 +113,4 @@ Use the `SetColumnNameResolver()` method to register the custom implementation:
 Dommel.SetColumnNameResolver(new CustomColumnNameResolver());
 ```
 
-I am working on a version of [Dapper.FluentMap](https://github.com/HenkMollema/Dapper-FluentMap) which implements these interfaces and use the configured mappings.
+The [Dapper.FluentMap.Dommel](https://www.nuget.org/packages/Dapper.FluentMap.Dommel) extension implements these interfaces using the configured mapping. Also see: [Dapper.FluentMap](https://github.com/HenkMollema/Dapper-FluentMap#dommel).
