@@ -11,7 +11,7 @@ namespace Dommel
     /// <summary>
     /// Simple CRUD commands for Dapper.
     /// </summary>
-    public static class Dommel
+    public static class DommelMapper
     {
         private static readonly IDictionary<Type, string> _typeTableNameCache = new Dictionary<Type, string>();
         private static readonly IDictionary<string, string> _columnNameCache = new Dictionary<string, string>();
@@ -220,9 +220,9 @@ namespace Dommel
         private static IKeyPropertyResolver _keyPropertyResolver = new DefaultKeyPropertyResolver();
 
         /// <summary>
-        /// Sets the <see cref="Dommel.IKeyPropertyResolver"/> implementation for resolving key properties of entities.
+        /// Sets the <see cref="DommelMapper.IKeyPropertyResolver"/> implementation for resolving key properties of entities.
         /// </summary>
-        /// <param name="resolver">An instance of <see cref="Dommel.IKeyPropertyResolver"/>.</param>
+        /// <param name="resolver">An instance of <see cref="DommelMapper.IKeyPropertyResolver"/>.</param>
         public static void SetKeyPropertyResolver(IKeyPropertyResolver resolver)
         {
             _keyPropertyResolver = resolver;
@@ -243,7 +243,7 @@ namespace Dommel
         }
 
         /// <summary>
-        /// Implements the <see cref="Dommel.IKeyPropertyResolver"/> interface by resolving key properties
+        /// Implements the <see cref="DommelMapper.IKeyPropertyResolver"/> interface by resolving key properties
         /// with the [Key] attribute or with the name 'Id'.
         /// </summary>
         private sealed class DefaultKeyPropertyResolver : IKeyPropertyResolver
@@ -356,7 +356,7 @@ namespace Dommel
         }
 
         /// <summary>
-        /// Implements the <see cref="Dommel.IKeyPropertyResolver"/>.
+        /// Implements the <see cref="DommelMapper.IKeyPropertyResolver"/>.
         /// </summary>
         private sealed class DefaultColumnNameResolver : IColumnNameResolver
         {
