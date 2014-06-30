@@ -19,12 +19,13 @@ namespace Dommel
         private static readonly IDictionary<Type, PropertyInfo[]> _typePropertiesCache = new Dictionary<Type, PropertyInfo[]>();
 
         private static readonly IDictionary<Type, string> _getQueryCache = new Dictionary<Type, string>();
+        private static readonly IDictionary<Type, string> _getAllQueryCache = new Dictionary<Type, string>();
         private static readonly IDictionary<Type, string> _insertQueryCache = new Dictionary<Type, string>();
         private static readonly IDictionary<Type, string> _updateQueryCache = new Dictionary<Type, string>();
         private static readonly IDictionary<Type, string> _deleteQueryCache = new Dictionary<Type, string>();
 
         /// <summary>
-        /// Retrieves the entity with the specified id.
+        /// Retrieves the entity of type <typeparamref name="TEntity"/> with the specified id.
         /// </summary>
         /// <typeparam name="TEntity">The type of the entity.</typeparam>
         /// <param name="connection">The connection to the database. This can either be open or closed.</param>
@@ -49,6 +50,31 @@ namespace Dommel
             parameters.Add("Id", id);
 
             return connection.Query<TEntity>(sql: sql, param: parameters).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Retrieves all the entities of type <typeparamref name="TEntity"/>.
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the entity.</typeparam>
+        /// <param name="connection">The connection to the database. This can either be open or closed.</param>
+        /// <param name="buffered">
+        /// A value indicating whether the result of the query should be executed directly, 
+        /// or when the query is materialized (using <c>ToList()</c> for example). 
+        /// </param>
+        /// <returns>A collection of entities of type <typeparamref name="TEntity"/>.</returns>
+        public static IEnumerable<TEntity> GetAll<TEntity>(this IDbConnection connection, bool buffered = true) where TEntity : class
+        {
+            var type = typeof (TEntity);
+
+            string sql;
+            if (!_getAllQueryCache.TryGetValue(type, out sql))
+            {
+                string tableName = GetTableName(type);
+                sql = string.Format("select * from {0}", tableName);
+                _getAllQueryCache[type] = sql;
+            }
+
+            return connection.Query<TEntity>(sql: sql, buffered: buffered);
         }
 
         /// <summary>
