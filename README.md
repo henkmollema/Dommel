@@ -14,12 +14,20 @@ Dommel provides a convenient API for CRUD operations using extension methods on 
 
 ### The API
 
-##### Retrieving entities:
+##### Retrieving entities by id:
 
 ```csharp
 using (IDbConnection con = new SqlConnection())
 {
    var product = con.Get<Product>(1);
+}
+```
+
+##### Retrieving all entities in a table:
+```csharp
+using (IDbConnection con = new SqlConnection())
+{
+   var products = con.GetAll<Product>().ToList();
 }
 ```
 
