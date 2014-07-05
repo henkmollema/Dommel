@@ -34,7 +34,7 @@ using (IDbConnection con = new SqlConnection())
 ##### Inserting entities
 
 ```csharp
-using (var IDbConnection con = new SqlConnection())
+using (IDbConnection con = new SqlConnection())
 {
    var product = new Product { Name = "Awesome bike", InStock = 4 };
    int id = con.Insert(product);
