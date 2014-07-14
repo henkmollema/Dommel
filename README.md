@@ -68,7 +68,7 @@ using (IDbConnection con = new SqlConnection())
 ##### `ITableNameResolver`
 Implement this interface if you want to customize the resolving of table names when building SQL queries.
 ```csharp
-public class CustomTableNameResolver : Dommel.ITableNameResolver
+public class CustomTableNameResolver : DommelMapper.ITableNameResolver
 {
     public string ResolveTableName(Type type)
     {
@@ -80,7 +80,7 @@ public class CustomTableNameResolver : Dommel.ITableNameResolver
 
 Use the `SetTableNameResolver()` method to register the custom implementation:
 ```csharp
-Dommel.SetTableNameResolver(new CustomTableNameResolver());
+DommelMapper.SetTableNameResolver(new CustomTableNameResolver());
 ```
 
 ##### `IKeyPropertyResolver`
@@ -88,7 +88,7 @@ Implement this interface if you want to customize the resolving of the key prope
 
 If you, for example, have the naming convention of `{TypeName}Id` for key properties, you would implement the `IKeyPropertyResolver` like this:
 ```csharp
-public class CustomKeyPropertyResolver : Dommel.IKeyPropertyResolver
+public class CustomKeyPropertyResolver : DommelMapper.IKeyPropertyResolver
 {
     public PropertyInfo ResolveKeyProperty(Type type)
     {
@@ -99,14 +99,14 @@ public class CustomKeyPropertyResolver : Dommel.IKeyPropertyResolver
 
 Use the `SetKeyPropertyResolver()` method to register the custom implementation:
 ```csharp
-Dommel.SetKeyPropertyResolver(new CustomKeyPropertyResolver());
+DommelMapper.SetKeyPropertyResolver(new CustomKeyPropertyResolver());
 ```
 
 ##### `IColumnNameResolver`
 Implement this interface if you want to customize the resolving of column names for when building SQL queries. This is useful when your naming conventions for database columns are different than your POCO properties.
 
 ```csharp
-public class CustomColumnNameResolver : Dommel.IColumnNameResolver
+public class CustomColumnNameResolver : DommelMapper.IColumnNameResolver
 {
     public string ResolveColumnName(PropertyInfo propertyInfo)
     {
@@ -118,7 +118,7 @@ public class CustomColumnNameResolver : Dommel.IColumnNameResolver
 
 Use the `SetColumnNameResolver()` method to register the custom implementation:
 ```csharp
-Dommel.SetColumnNameResolver(new CustomColumnNameResolver());
+DommelMapper.SetColumnNameResolver(new CustomColumnNameResolver());
 ```
 
 The [Dapper.FluentMap.Dommel](https://www.nuget.org/packages/Dapper.FluentMap.Dommel) extension implements these interfaces using the configured mapping. Also see: [Dapper.FluentMap](https://github.com/HenkMollema/Dapper-FluentMap#dommel).
