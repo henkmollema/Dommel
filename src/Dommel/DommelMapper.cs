@@ -17,13 +17,20 @@ namespace Dommel
         private static readonly IDictionary<string, string> _columnNameCache = new Dictionary<string, string>();
         private static readonly IDictionary<Type, PropertyInfo> _typeKeyPropertyCache = new Dictionary<Type, PropertyInfo>();
         private static readonly IDictionary<Type, PropertyInfo[]> _typePropertiesCache = new Dictionary<Type, PropertyInfo[]>();
+        private static readonly IDictionary<string, ISqlBuilder> _sqlBuilders = new Dictionary<string, ISqlBuilder>
+                                                                                    {
+                                                                                        { "sqlconnection", new SqlServerSqlBuilder() },
+                                                                                        { "npgsqlconnection", new SqlServerSqlBuilder() },
+                                                                                        { "sqliteconnection", new SqlServerSqlBuilder() },
+                                                                                        { "mysqlconnection", new SqlServerSqlBuilder() }
+                                                                                    };
 
         private static readonly IDictionary<Type, string> _getQueryCache = new Dictionary<Type, string>();
         private static readonly IDictionary<Type, string> _getAllQueryCache = new Dictionary<Type, string>();
         private static readonly IDictionary<Type, string> _insertQueryCache = new Dictionary<Type, string>();
         private static readonly IDictionary<Type, string> _updateQueryCache = new Dictionary<Type, string>();
         private static readonly IDictionary<Type, string> _deleteQueryCache = new Dictionary<Type, string>();
-
+        
         /// <summary>
         /// Retrieves the entity of type <typeparamref name="TEntity"/> with the specified id.
         /// </summary>
@@ -96,13 +103,12 @@ namespace Dommel
                 var typeProperties = GetTypeProperties(type).Where(p => p != keyProperty).ToList();
 
                 string[] columnNames = typeProperties.Select(p => GetColumnName(type, p)).ToArray();
-                string[] paramNams = typeProperties.Select(p => "@" + p.Name).ToArray();
+                string[] paramNames = typeProperties.Select(p => "@" + p.Name).ToArray();
+
+                var builder = GetBuilder(connection);
 
                 // todo: scope_identity() is not supported in sql ce.
-                sql = string.Format("set nocount on insert into {0} ({1}) values ({2}) select cast(scope_identity() as int)",
-                    tableName,
-                    string.Join(", ", columnNames),
-                    string.Join(", ", paramNams));
+                sql = builder.BuildInsert(tableName, columnNames, paramNames);
 
                 _insertQueryCache[type] = sql;
             }
@@ -369,5 +375,34 @@ namespace Dommel
             }
         }
         #endregion
+
+        public static void AddSqlBuilder(string connectionName, ISqlBuilder builder)
+        {
+            _sqlBuilders.Add(connectionName, builder);
+        }
+
+        private static ISqlBuilder GetBuilder(IDbConnection connection)
+        {
+            string connectionName = connection.GetType().Name.ToLower();
+            ISqlBuilder builder;
+            return _sqlBuilders.TryGetValue(connectionName, out builder) ? builder : new SqlServerSqlBuilder();
+        }
+        
+        public interface ISqlBuilder
+        {
+            string BuildInsert(string tableName, string[] columnNames, string[] paramNames);
+        }
+
+        private sealed class SqlServerSqlBuilder : DommelMapper.ISqlBuilder
+        {
+            public string BuildInsert(string tableName, string[] columnNames, string[] paramNames)
+            {
+                // todo: scope_identity() is not supported in sql ce.
+                return string.Format("set nocount on insert into {0} ({1}) values ({2}) select cast(scope_identity() as int)",
+                    tableName,
+                    string.Join(", ", columnNames),
+                    string.Join(", ", paramNames));
+            }
+        }
     }
 }
