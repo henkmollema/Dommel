@@ -21,8 +21,8 @@ namespace Dommel
                                                                                     {
                                                                                         { "sqlconnection", new SqlServerSqlBuilder() },
                                                                                         { "npgsqlconnection", new SqlServerSqlBuilder() },
-                                                                                        { "sqliteconnection", new SqlServerSqlBuilder() },
-                                                                                        { "mysqlconnection", new SqlServerSqlBuilder() }
+                                                                                        { "sqliteconnection", new SqliteSqlBuilder() },
+                                                                                        { "mysqlconnection", new MySqlSqlBuilder() }
                                                                                     };
 
         private static readonly IDictionary<Type, string> _getQueryCache = new Dictionary<Type, string>();
@@ -107,7 +107,6 @@ namespace Dommel
 
                 var builder = GetBuilder(connection);
 
-                // todo: scope_identity() is not supported in sql ce.
                 sql = builder.BuildInsert(tableName, columnNames, paramNames);
 
                 _insertQueryCache[type] = sql;
@@ -376,9 +375,9 @@ namespace Dommel
         }
         #endregion
 
-        public static void AddSqlBuilder(string connectionName, ISqlBuilder builder)
+        public static void AddSqlBuilder(Type connectionType, ISqlBuilder builder)
         {
-            _sqlBuilders.Add(connectionName, builder);
+            _sqlBuilders[connectionType.Name.ToLower()] = builder;
         }
 
         private static ISqlBuilder GetBuilder(IDbConnection connection)
@@ -390,18 +389,42 @@ namespace Dommel
         
         public interface ISqlBuilder
         {
-            string BuildInsert(string tableName, string[] columnNames, string[] paramNames);
+            string BuildInsert(string tableName, string[] columnNames, string[] paramNames, PropertyInfo keyProperty);
         }
 
-        private sealed class SqlServerSqlBuilder : DommelMapper.ISqlBuilder
+        private sealed class SqlServerSqlBuilder : ISqlBuilder
         {
-            public string BuildInsert(string tableName, string[] columnNames, string[] paramNames)
+            public string BuildInsert(string tableName, string[] columnNames, string[] paramNames, PropertyInfo keyProperty)
             {
                 // todo: scope_identity() is not supported in sql ce.
                 return string.Format("set nocount on insert into {0} ({1}) values ({2}) select cast(scope_identity() as int)",
                     tableName,
                     string.Join(", ", columnNames),
                     string.Join(", ", paramNames));
+            }
+        }
+
+        private sealed class MySqlSqlBuilder : ISqlBuilder
+        {
+            public string BuildInsert(string tableName, string[] columnNames, string[] paramNames, PropertyInfo keyProperty)
+            {
+                // todo: this needs testing
+                return string.Format("insert into {0} ({1}) values ({2}) select LAST_INSERT_ID() id", 
+                    tableName, 
+                    string.Join(", ", columnNames), 
+                    string.Join(", " paramNames));
+            }
+        }
+
+        private sealed class SqliteSqlBuilder : ISqlBuilder
+        {
+            public string BuildInsert(string tableName, string[] columnNames, string[] paramNames, PropertyInfo keyProperty)
+            {
+                // todo: this needs testing
+                return string.Format("insert into {0} ({1}) values ({2}) select last_insert_rowid() id", 
+                    tableName, 
+                    string.Join(", ", columnNames), 
+                    string.Join(", " paramNames));
             }
         }
     }
