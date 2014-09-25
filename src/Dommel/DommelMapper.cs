@@ -412,7 +412,7 @@ namespace Dommel
                 return string.Format("insert into {0} ({1}) values ({2}) select LAST_INSERT_ID() id", 
                     tableName, 
                     string.Join(", ", columnNames), 
-                    string.Join(", " paramNames));
+                    string.Join(", ", paramNames));
             }
         }
 
@@ -424,7 +424,7 @@ namespace Dommel
                 return string.Format("insert into {0} ({1}) values ({2}) select last_insert_rowid() id", 
                     tableName, 
                     string.Join(", ", columnNames), 
-                    string.Join(", " paramNames));
+                    string.Join(", ", paramNames));
             }
         }
     }
