@@ -107,7 +107,7 @@ namespace Dommel
 
                 var builder = GetBuilder(connection);
 
-                sql = builder.BuildInsert(tableName, columnNames, paramNames);
+                sql = builder.BuildInsert(tableName, columnNames, paramNames, keyProperty);
 
                 _insertQueryCache[type] = sql;
             }
