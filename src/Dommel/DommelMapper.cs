@@ -20,7 +20,7 @@ namespace Dommel
         private static readonly IDictionary<string, ISqlBuilder> _sqlBuilders = new Dictionary<string, ISqlBuilder>
                                                                                     {
                                                                                         { "sqlconnection", new SqlServerSqlBuilder() },
-                                                                                        { "npgsqlconnection", new SqlServerSqlBuilder() },
+                                                                                        { "npgsqlconnection", new PostgresSqlBuilder() },
                                                                                         { "sqliteconnection", new SqliteSqlBuilder() },
                                                                                         { "mysqlconnection", new MySqlSqlBuilder() }
                                                                                     };
@@ -328,6 +328,7 @@ namespace Dommel
                 {
                     name = name.Substring(1);
                 }
+
                 // todo: add [Table] attribute support.
                 return name;
             }
@@ -375,6 +376,7 @@ namespace Dommel
         }
         #endregion
 
+        #region Sql builders
         public static void AddSqlBuilder(Type connectionType, ISqlBuilder builder)
         {
             _sqlBuilders[connectionType.Name.ToLower()] = builder;
@@ -427,5 +429,32 @@ namespace Dommel
                     string.Join(", ", paramNames));
             }
         }
+
+        private sealed class PostgresSqlBuilder : ISqlBuilder
+        {
+            public string BuildInsert(string tableName, string[] columnNames, string[] paramNames, PropertyInfo keyProperty)
+            {
+                // todo: this needs testing
+                string sql = string.Format("insert into {0} ({1}) values ({2}) select last_insert_rowid() id", 
+                    tableName, 
+                    string.Join(", ", columnNames), 
+                    string.Join(", ", paramNames));
+
+                if (keyProperty != null)
+                {
+                    string keyColumnName = GetColumnName(keyProperty);
+
+                    sql += " RETURNING " + keyColumnName
+                }
+                else
+                {
+                    // todo: what behavior is desired here?
+                    throw new Exception("A key property is required for the PostgresSqlBuilder.");
+                }
+
+                return sql;
+            }
+        }
+        #endregion
     }
 }
