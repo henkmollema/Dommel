@@ -9,7 +9,7 @@ using Dapper;
 namespace Dommel
 {
     /// <summary>
-    /// Simple CRUD commands for Dapper. 
+    /// Simple CRUD commands for Dapper.
     /// </summary>
     public static class DommelMapper
     {
