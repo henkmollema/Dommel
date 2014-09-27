@@ -175,3 +175,4 @@ FakesAssemblies/
 
 # Dommel
 console/
+*.userprefs
