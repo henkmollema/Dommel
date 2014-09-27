@@ -442,7 +442,7 @@ namespace Dommel
 
                 if (keyProperty != null)
                 {
-                    string keyColumnName = GetColumnName(keyProperty);
+                    string keyColumnName = GetColumnName(keyProperty.DeclaringType, keyProperty);
 
                     sql += " RETURNING " + keyColumnName;
                 }
