@@ -444,7 +444,7 @@ namespace Dommel
                 {
                     string keyColumnName = GetColumnName(keyProperty);
 
-                    sql += " RETURNING " + keyColumnName
+                    sql += " RETURNING " + keyColumnName;
                 }
                 else
                 {
