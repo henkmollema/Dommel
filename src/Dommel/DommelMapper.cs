@@ -17,6 +17,14 @@ namespace Dommel
         private static readonly IDictionary<string, string> _columnNameCache = new Dictionary<string, string>();
         private static readonly IDictionary<Type, PropertyInfo> _typeKeyPropertyCache = new Dictionary<Type, PropertyInfo>();
         private static readonly IDictionary<Type, PropertyInfo[]> _typePropertiesCache = new Dictionary<Type, PropertyInfo[]>();
+        private static readonly IDictionary<string, ISqlBuilder> _sqlBuilders = new Dictionary<string, ISqlBuilder>
+        {
+            { "sqlconnection", new SqlServerSqlBuilder() },
+            { "sqlceconnection", new SqlServerCeSqlBuilder() },
+            { "sqliteconnection", new SqliteSqlBuilder() },
+            { "npgsqlconnection", new PostgresSqlBuilder() },
+            { "mysqlconnection", new MySqlSqlBuilder() }
+        };
 
         private static readonly IDictionary<Type, string> _getQueryCache = new Dictionary<Type, string>();
         private static readonly IDictionary<Type, string> _getAllQueryCache = new Dictionary<Type, string>();
@@ -33,7 +41,7 @@ namespace Dommel
         /// <returns>The entity with the corresponding id.</returns>
         public static TEntity Get<TEntity>(this IDbConnection connection, object id) where TEntity : class
         {
-            var type = typeof (TEntity);
+            var type = typeof(TEntity);
 
             string sql;
             if (!_getQueryCache.TryGetValue(type, out sql))
@@ -64,7 +72,7 @@ namespace Dommel
         /// <returns>A collection of entities of type <typeparamref name="TEntity"/>.</returns>
         public static IEnumerable<TEntity> GetAll<TEntity>(this IDbConnection connection, bool buffered = true) where TEntity : class
         {
-            var type = typeof (TEntity);
+            var type = typeof(TEntity);
 
             string sql;
             if (!_getAllQueryCache.TryGetValue(type, out sql))
@@ -86,7 +94,7 @@ namespace Dommel
         /// <returns>The id of the inserted entity.</returns>
         public static int Insert<TEntity>(this IDbConnection connection, TEntity entity) where TEntity : class
         {
-            var type = typeof (TEntity);
+            var type = typeof(TEntity);
 
             string sql;
             if (!_insertQueryCache.TryGetValue(type, out sql))
@@ -96,13 +104,11 @@ namespace Dommel
                 var typeProperties = GetTypeProperties(type).Where(p => p != keyProperty).ToList();
 
                 string[] columnNames = typeProperties.Select(p => GetColumnName(type, p)).ToArray();
-                string[] paramNams = typeProperties.Select(p => "@" + p.Name).ToArray();
+                string[] paramNames = typeProperties.Select(p => "@" + p.Name).ToArray();
 
-                // todo: scope_identity() is not supported in sql ce.
-                sql = string.Format("set nocount on insert into {0} ({1}) values ({2}) select cast(scope_identity() as int)",
-                    tableName,
-                    string.Join(", ", columnNames),
-                    string.Join(", ", paramNams));
+                var builder = GetBuilder(connection);
+
+                sql = builder.BuildInsert(tableName, columnNames, paramNames, keyProperty);
 
                 _insertQueryCache[type] = sql;
             }
@@ -121,7 +127,7 @@ namespace Dommel
         /// <returns>A value indicating whether the update operation succeeded.</returns>
         public static bool Update<TEntity>(this IDbConnection connection, TEntity entity)
         {
-            var type = typeof (TEntity);
+            var type = typeof(TEntity);
 
             string sql;
             if (!_updateQueryCache.TryGetValue(type, out sql))
@@ -154,7 +160,7 @@ namespace Dommel
         /// <returns>A value indicating whether the delete operation succeeded.</returns>
         public static bool Delete<TEntity>(this IDbConnection connection, TEntity entity)
         {
-            var type = typeof (TEntity);
+            var type = typeof(TEntity);
 
             string sql;
             if (!_deleteQueryCache.TryGetValue(type, out sql))
@@ -217,6 +223,7 @@ namespace Dommel
         }
 
         #region Key property resolving
+
         private static IKeyPropertyResolver _keyPropertyResolver = new DefaultKeyPropertyResolver();
 
         /// <summary>
@@ -277,9 +284,11 @@ namespace Dommel
                 return keyProps[0];
             }
         }
+
         #endregion
 
         #region Table name resolving
+
         private static ITableNameResolver _tableNameResolver = new DefaultTableNameResolver();
 
         /// <summary>
@@ -323,13 +332,16 @@ namespace Dommel
                 {
                     name = name.Substring(1);
                 }
+
                 // todo: add [Table] attribute support.
                 return name;
             }
         }
+
         #endregion
 
         #region Column name resolving
+
         private static IColumnNameResolver _columnNameResolver = new DefaultColumnNameResolver();
 
         /// <summary>
@@ -368,6 +380,121 @@ namespace Dommel
                 return propertyInfo.Name;
             }
         }
+
+        #endregion
+
+        #region Sql builders
+
+        /// <summary>
+        /// Adds a custom implementation of <see cref="T:DommelMapper.ISqlBuilder"/> 
+        /// for the specified ADO.NET connection type.
+        /// </summary>
+        /// <param name="connectionType">
+        /// The ADO.NET conncetion type to use the <paramref name="builder"/> with. 
+        /// Example: <c>typeof(SqlConnection)</c>.
+        /// </param>
+        /// <param name="builder">An implementation of the <see cref="T:DommelMapper.ISqlBuilder interface"/>.</param>
+        public static void AddSqlBuilder(Type connectionType, ISqlBuilder builder)
+        {
+            _sqlBuilders[connectionType.Name.ToLower()] = builder;
+        }
+
+        private static ISqlBuilder GetBuilder(IDbConnection connection)
+        {
+            string connectionName = connection.GetType().Name.ToLower();
+            ISqlBuilder builder;
+            return _sqlBuilders.TryGetValue(connectionName, out builder) ? builder : new SqlServerSqlBuilder();
+        }
+
+        /// <summary>
+        /// Defines methods for building specialized SQL queries.
+        /// </summary>
+        public interface ISqlBuilder
+        {
+            /// <summary>
+            /// Builds an insert query using the specified table name, column names and parameter names. 
+            /// A query to fetch the new id will be included as well.
+            /// </summary>
+            /// <param name="tableName">The name of the table to query.</param>
+            /// <param name="columnNames">The names of the columns in the table.</param>
+            /// <param name="paramNames">The names of the parameters in the database command.</param>
+            /// <param name="keyProperty">The key property. This can be used to query a specific column for the new id. This is optional.</param>
+            /// <returns>An insert query including a query to fetch the new id.</returns>
+            string BuildInsert(string tableName, string[] columnNames, string[] paramNames, PropertyInfo keyProperty);
+        }
+
+        private sealed class SqlServerSqlBuilder : ISqlBuilder
+        {
+            public string BuildInsert(string tableName, string[] columnNames, string[] paramNames, PropertyInfo keyProperty)
+            {
+                return string.Format("set nocount on insert into {0} ({1}) values ({2}) select cast(scope_identity() as int)",
+                    tableName,
+                    string.Join(", ", columnNames),
+                    string.Join(", ", paramNames));
+            }
+        }
+
+        private sealed class SqlServerCeSqlBuilder : ISqlBuilder
+        {
+            public string BuildInsert(string tableName, string[] columnNames, string[] paramNames, PropertyInfo keyProperty)
+            {
+                return string.Format("insert into {0} ({1}) values ({2}) select cast(@@IDENTITY as int)",
+                    tableName,
+                    string.Join(", ", columnNames),
+                    string.Join(", ", paramNames));
+            }
+        }
+
+        private sealed class SqliteSqlBuilder : ISqlBuilder
+        {
+            public string BuildInsert(string tableName, string[] columnNames, string[] paramNames, PropertyInfo keyProperty)
+            {
+                // todo: this needs testing
+                return string.Format("insert into {0} ({1}) values ({2}) select last_insert_rowid() id", 
+                    tableName, 
+                    string.Join(", ", columnNames), 
+                    string.Join(", ", paramNames));
+            }
+        }
+
+        private sealed class MySqlSqlBuilder : ISqlBuilder
+        {
+            public string BuildInsert(string tableName, string[] columnNames, string[] paramNames, PropertyInfo keyProperty)
+            {
+                // todo: this needs testing
+                return string.Format("insert into {0} ({1}) values ({2}) select LAST_INSERT_ID() id", 
+                    tableName, 
+                    string.Join(", ", columnNames), 
+                    string.Join(", ", paramNames));
+            }
+        }
+
+        private sealed class PostgresSqlBuilder : ISqlBuilder
+        {
+            public string BuildInsert(string tableName, string[] columnNames, string[] paramNames, PropertyInfo keyProperty)
+            {
+                // todo: this needs testing
+                string sql = string.Format("insert into {0} ({1}) values ({2}) select last_insert_rowid() id", 
+                                 tableName, 
+                                 string.Join(", ", columnNames), 
+                                 string.Join(", ", paramNames));
+
+                if (keyProperty != null)
+                {
+                    string keyColumnName = GetColumnName(keyProperty.DeclaringType, keyProperty);
+
+                    sql += " RETURNING " + keyColumnName;
+                }
+                else
+                {
+                    // todo: what behavior is desired here?
+                    throw new Exception("A key property is required for the PostgresSqlBuilder.");
+                }
+
+                return sql;
+            }
+        }
+
         #endregion
     }
 }

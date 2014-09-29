@@ -64,6 +64,16 @@ using (IDbConnection con = new SqlConnection())
 
 <hr>
 
+### Query builders
+
+Dommel supports building specialized queries for a certain RDBMS. By default, query builders for the following RDMBS are included: SQL Server, SQL Server CE, SQLite, MySQL and Postgres. The query builder to be used is determined by the connection type. To add or overwrite an existing query builder, use the `AddSqlBuilder()`  method:
+
+```csharp
+DommelMapper.AddSqlBuilder(typeof(SqlConnection), new CustomSqlBuilder());
+```
+
+<hr>
+
 ### Extensibility
 ##### `ITableNameResolver`
 Implement this interface if you want to customize the resolving of table names when building SQL queries.
