@@ -19,9 +19,10 @@ namespace Dommel
         private static readonly IDictionary<Type, PropertyInfo[]> _typePropertiesCache = new Dictionary<Type, PropertyInfo[]>();
         private static readonly IDictionary<string, ISqlBuilder> _sqlBuilders = new Dictionary<string, ISqlBuilder>
                                                                                     {
-                                                                                        { "sqlconnection", new SqlServerSqlBuilder() },
-                                                                                        { "npgsqlconnection", new PostgresSqlBuilder() },
+																						{ "sqlconnection", new SqlServerSqlBuilder() },
+																						{ "sqlceconnection", new SqlServerCeSqlBuilder() },
                                                                                         { "sqliteconnection", new SqliteSqlBuilder() },
+                                                                                        { "npgsqlconnection", new PostgresSqlBuilder() },
                                                                                         { "mysqlconnection", new MySqlSqlBuilder() }
                                                                                     };
 
@@ -419,10 +420,32 @@ namespace Dommel
         {
             public string BuildInsert(string tableName, string[] columnNames, string[] paramNames, PropertyInfo keyProperty)
             {
-                // todo: scope_identity() is not supported in sql ce.
                 return string.Format("set nocount on insert into {0} ({1}) values ({2}) select cast(scope_identity() as int)",
                     tableName,
                     string.Join(", ", columnNames),
+                    string.Join(", ", paramNames));
+            }
+		}
+
+        private sealed class SqlServerCeSqlBuilder : ISqlBuilder
+        {
+            public string BuildInsert(string tableName, string[] columnNames, string[] paramNames, PropertyInfo keyProperty)
+            {
+                return string.Format("insert into {0} ({1}) values ({2}) select cast(@@IDENTITY as int)",
+                    tableName,
+                    string.Join(", ", columnNames),
+                    string.Join(", ", paramNames));
+            }
+		}
+
+        private sealed class SqliteSqlBuilder : ISqlBuilder
+        {
+            public string BuildInsert(string tableName, string[] columnNames, string[] paramNames, PropertyInfo keyProperty)
+            {
+                // todo: this needs testing
+                return string.Format("insert into {0} ({1}) values ({2}) select last_insert_rowid() id", 
+                    tableName, 
+                    string.Join(", ", columnNames), 
                     string.Join(", ", paramNames));
             }
         }
@@ -433,18 +456,6 @@ namespace Dommel
             {
                 // todo: this needs testing
                 return string.Format("insert into {0} ({1}) values ({2}) select LAST_INSERT_ID() id", 
-                    tableName, 
-                    string.Join(", ", columnNames), 
-                    string.Join(", ", paramNames));
-            }
-        }
-
-        private sealed class SqliteSqlBuilder : ISqlBuilder
-        {
-            public string BuildInsert(string tableName, string[] columnNames, string[] paramNames, PropertyInfo keyProperty)
-            {
-                // todo: this needs testing
-                return string.Format("insert into {0} ({1}) values ({2}) select last_insert_rowid() id", 
                     tableName, 
                     string.Join(", ", columnNames), 
                     string.Join(", ", paramNames));
