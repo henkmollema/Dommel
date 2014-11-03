@@ -179,6 +179,11 @@ namespace Dommel
         /// </summary>
         public static class Resolvers
         {
+            /// <summary>
+            /// Gets the key property for the specified type, using the configured <see cref="DommelMapper.IKeyPropertyResolver"/>.
+            /// </summary>
+            /// <param name="type">The <see cref="System.Type"/> to get the key property for.</param>
+            /// <returns>The key property for <paramref name="type"/>.</returns>
             public static PropertyInfo KeyProperty(Type type)
             {
                 PropertyInfo keyProperty;
@@ -191,6 +196,11 @@ namespace Dommel
                 return keyProperty;
             }
 
+            /// <summary>
+            /// Gets all the public properties for the specified type.
+            /// </summary>
+            /// <param name="type">The <see cref="System.Type"/> to get the properties from.</param>
+            /// <returns>>The collection of public properties of <paramref name="type"/>.</returns>
             public static IEnumerable<PropertyInfo> Properties(Type type)
             {
                 PropertyInfo[] properties;
@@ -203,6 +213,12 @@ namespace Dommel
                 return properties;
             }
 
+            /// <summary>
+            /// Gets the name of the table in the database for the specified type, 
+            /// using the configured <see cref="DommelMapper.ITableNameResolver"/>.
+            /// </summary>
+            /// <param name="type">The <see cref="System.Type"/> to get the table name for.</param>
+            /// <returns>The table name in the database for <paramref name="type"/>.</returns>
             public static string Table(Type type)
             {
                 string name;
@@ -214,6 +230,12 @@ namespace Dommel
                 return name;
             }
 
+            /// <summary>
+            /// Gets the name of the column in the database for the specified type,
+            /// using the configured <see cref="T:DommelMapper.IColumnNameResolver"/>.
+            /// </summary>
+            /// <param name="propertyInfo">The <see cref="System.Reflection.PropertyInfo"/> to get the column name for.</param>
+            /// <returns>The column name in the database for <paramref name="type"/>.</returns>
             public static string Column(PropertyInfo propertyInfo)
             {
                 // todo: get type from propertyInfo.
