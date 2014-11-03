@@ -46,9 +46,9 @@ namespace Dommel
             string sql;
             if (!_getQueryCache.TryGetValue(type, out sql))
             {
-                string tableName = GetTableName(type);
-                var keyProperty = GetKeyProperty(type);
-                string keyColumnName = GetColumnName(type, keyProperty);
+                string tableName = Resolvers.Table(type);
+                var keyProperty = Resolvers.KeyProperty(type);
+                string keyColumnName = Resolvers.Column(keyProperty);
 
                 sql = string.Format("select * from {0} where {1} = @Id", tableName, keyColumnName);
                 _getQueryCache[type] = sql;
@@ -77,7 +77,7 @@ namespace Dommel
             string sql;
             if (!_getAllQueryCache.TryGetValue(type, out sql))
             {
-                string tableName = GetTableName(type);
+                string tableName = Resolvers.Table(type);
                 sql = string.Format("select * from {0}", tableName);
                 _getAllQueryCache[type] = sql;
             }
@@ -99,11 +99,11 @@ namespace Dommel
             string sql;
             if (!_insertQueryCache.TryGetValue(type, out sql))
             {
-                string tableName = GetTableName(type);
-                var keyProperty = GetKeyProperty(type);
-                var typeProperties = GetTypeProperties(type).Where(p => p != keyProperty).ToList();
+                string tableName = Resolvers.Table(type);
+                var keyProperty = Resolvers.KeyProperty(type);
+                var typeProperties = Resolvers.Properties(type).Where(p => p != keyProperty).ToList();
 
-                string[] columnNames = typeProperties.Select(p => GetColumnName(type, p)).ToArray();
+                string[] columnNames = typeProperties.Select(p => Resolvers.Column(p)).ToArray();
                 string[] paramNames = typeProperties.Select(p => "@" + p.Name).ToArray();
 
                 var builder = GetBuilder(connection);
@@ -132,11 +132,11 @@ namespace Dommel
             string sql;
             if (!_updateQueryCache.TryGetValue(type, out sql))
             {
-                string tableName = GetTableName(type);
-                var keyProperty = GetKeyProperty(type);
-                var typeProperties = GetTypeProperties(type).Where(p => p != keyProperty).ToList();
+                string tableName = Resolvers.Table(type);
+                var keyProperty = Resolvers.KeyProperty(type);
+                var typeProperties = Resolvers.Properties(type).Where(p => p != keyProperty).ToList();
 
-                string[] columnNames = typeProperties.Select(p => string.Format("{0} = @{1}", GetColumnName(type, p), p.Name)).ToArray();
+                string[] columnNames = typeProperties.Select(p => string.Format("{0} = @{1}", Resolvers.Column(p), p.Name)).ToArray();
 
                 sql = string.Format("update {0} set {1} where {2} = @{3}",
                     tableName,
@@ -165,61 +165,91 @@ namespace Dommel
             string sql;
             if (!_deleteQueryCache.TryGetValue(type, out sql))
             {
-                string tableName = GetTableName(type);
-                var keyProperty = GetKeyProperty(type);
-                string keyColumnName = GetColumnName(type, keyProperty);
+                string tableName = Resolvers.Table(type);
+                var keyProperty = Resolvers.KeyProperty(type);
+                string keyColumnName = Resolvers.Column(keyProperty);
 
                 sql = string.Format("delete from {0} where {1} = @{2}", tableName, keyColumnName, keyProperty.Name);
             }
             return connection.Execute(sql, entity) > 0;
         }
 
-        private static PropertyInfo GetKeyProperty(Type type)
+        /// <summary>
+        /// Helper class for retrieving type metadata to build sql queries using configured resolvers.
+        /// </summary>
+        public static class Resolvers
         {
-            PropertyInfo keyProperty;
-            if (!_typeKeyPropertyCache.TryGetValue(type, out keyProperty))
+            /// <summary>
+            /// Gets the key property for the specified type, using the configured <see cref="DommelMapper.IKeyPropertyResolver"/>.
+            /// </summary>
+            /// <param name="type">The <see cref="System.Type"/> to get the key property for.</param>
+            /// <returns>The key property for <paramref name="type"/>.</returns>
+            public static PropertyInfo KeyProperty(Type type)
             {
-                keyProperty = _keyPropertyResolver.ResolveKeyProperty(type);
-                _typeKeyPropertyCache[type] = keyProperty;
+                PropertyInfo keyProperty;
+                if (!_typeKeyPropertyCache.TryGetValue(type, out keyProperty))
+                {
+                    keyProperty = _keyPropertyResolver.ResolveKeyProperty(type);
+                    _typeKeyPropertyCache[type] = keyProperty;
+                }
+
+                return keyProperty;
             }
 
-            return keyProperty;
-        }
-
-        private static IEnumerable<PropertyInfo> GetTypeProperties(Type type)
-        {
-            PropertyInfo[] properties;
-            if (!_typePropertiesCache.TryGetValue(type, out properties))
+            /// <summary>
+            /// Gets all the public properties for the specified type.
+            /// </summary>
+            /// <param name="type">The <see cref="System.Type"/> to get the properties from.</param>
+            /// <returns>>The collection of public properties of <paramref name="type"/>.</returns>
+            public static IEnumerable<PropertyInfo> Properties(Type type)
             {
-                properties = type.GetProperties();
-                _typePropertiesCache[type] = properties;
+                PropertyInfo[] properties;
+                if (!_typePropertiesCache.TryGetValue(type, out properties))
+                {
+                    properties = type.GetProperties();
+                    _typePropertiesCache[type] = properties;
+                }
+
+                return properties;
             }
 
-            return properties;
-        }
-
-        private static string GetTableName(Type type)
-        {
-            string name;
-            if (!_typeTableNameCache.TryGetValue(type, out name))
+            /// <summary>
+            /// Gets the name of the table in the database for the specified type, 
+            /// using the configured <see cref="DommelMapper.ITableNameResolver"/>.
+            /// </summary>
+            /// <param name="type">The <see cref="System.Type"/> to get the table name for.</param>
+            /// <returns>The table name in the database for <paramref name="type"/>.</returns>
+            public static string Table(Type type)
             {
-                name = _tableNameResolver.ResolveTableName(type);
-                _typeTableNameCache[type] = name;
+                string name;
+                if (!_typeTableNameCache.TryGetValue(type, out name))
+                {
+                    name = _tableNameResolver.ResolveTableName(type);
+                    _typeTableNameCache[type] = name;
+                }
+                return name;
             }
-            return name;
-        }
 
-        private static string GetColumnName(Type type, PropertyInfo propertyInfo)
-        {
-            string key = string.Format("{0}.{1}", type.FullName, propertyInfo.Name);
-
-            string columnName;
-            if (!_columnNameCache.TryGetValue(key, out columnName))
+            /// <summary>
+            /// Gets the name of the column in the database for the specified type,
+            /// using the configured <see cref="T:DommelMapper.IColumnNameResolver"/>.
+            /// </summary>
+            /// <param name="propertyInfo">The <see cref="System.Reflection.PropertyInfo"/> to get the column name for.</param>
+            /// <returns>The column name in the database for <paramref name="type"/>.</returns>
+            public static string Column(PropertyInfo propertyInfo)
             {
-                columnName = _columnNameResolver.ResolveColumnName(propertyInfo);
-                _columnNameCache[key] = columnName;
+                // todo: get type from propertyInfo.
+                string key = string.Format("{0}.{1}", propertyInfo.DeclaringType, propertyInfo.Name);
+
+                string columnName;
+                if (!_columnNameCache.TryGetValue(key, out columnName))
+                {
+                    columnName = _columnNameResolver.ResolveColumnName(propertyInfo);
+                    _columnNameCache[key] = columnName;
+                }
+
+                return columnName;
             }
-            return columnName;
         }
 
         #region Key property resolving
@@ -260,7 +290,7 @@ namespace Dommel
             /// </summary>
             public PropertyInfo ResolveKeyProperty(Type type)
             {
-                List<PropertyInfo> allProps = GetTypeProperties(type).ToList();
+                List<PropertyInfo> allProps = Resolvers.Properties(type).ToList();
 
                 // Look for properties with the [Key] attribute.
                 List<PropertyInfo> keyProps = allProps.Where(p => p.GetCustomAttributes(true).Any(a => a is KeyAttribute)).ToList();
@@ -481,7 +511,7 @@ namespace Dommel
 
                 if (keyProperty != null)
                 {
-                    string keyColumnName = GetColumnName(keyProperty.DeclaringType, keyProperty);
+                    string keyColumnName = Resolvers.Column(keyProperty);
 
                     sql += " RETURNING " + keyColumnName;
                 }
