@@ -112,7 +112,6 @@ namespace Dommel
 
                 _insertQueryCache[type] = sql;
             }
-
             var result = connection.Query<int>(sql, entity);
             return result.Single();
         }
@@ -207,10 +206,35 @@ namespace Dommel
                 if (!_typePropertiesCache.TryGetValue(type, out properties))
                 {
                     properties = type.GetProperties();
+
                     _typePropertiesCache[type] = properties;
                 }
 
-                return properties;
+                return properties.Where(p => p.PropertyType.IsPrimitive ||
+                                             
+                                             p.PropertyType.Name.Equals("Decimal") ||
+                                             p.PropertyType.Name.Equals("String") ||
+                                             p.PropertyType.Name.Equals("Int32") ||
+                                             p.PropertyType.Name.Equals("Int64") ||
+                                             p.PropertyType.Name.Equals("DateTime") ||
+
+                                             (p.PropertyType.IsGenericType && 
+                                                p.PropertyType.GetGenericTypeDefinition() == typeof(Nullable<>) &&
+                                                p.PropertyType.GetGenericArguments().FirstOrDefault().Name.Equals("Decimal")) ||
+                                                (p.PropertyType.IsGenericType &&
+                                                p.PropertyType.GetGenericTypeDefinition() == typeof(Nullable<>) &&
+                                                p.PropertyType.GetGenericArguments().FirstOrDefault().Name.Equals("String")) ||
+                                                (p.PropertyType.IsGenericType &&
+                                                p.PropertyType.GetGenericTypeDefinition() == typeof(Nullable<>) &&
+                                                p.PropertyType.GetGenericArguments().FirstOrDefault().Name.Equals("Int32")) ||
+                                                (p.PropertyType.IsGenericType &&
+                                                p.PropertyType.GetGenericTypeDefinition() == typeof(Nullable<>) &&
+                                                p.PropertyType.GetGenericArguments().FirstOrDefault().Name.Equals("Int64")) ||
+                                                (p.PropertyType.IsGenericType &&
+                                                p.PropertyType.GetGenericTypeDefinition() == typeof(Nullable<>) &&
+                                                p.PropertyType.GetGenericArguments().FirstOrDefault().Name.Equals("DateTime"))                             
+                                             );
+
             }
 
             /// <summary>
@@ -245,6 +269,10 @@ namespace Dommel
                 if (!_columnNameCache.TryGetValue(key, out columnName))
                 {
                     columnName = _columnNameResolver.ResolveColumnName(propertyInfo);
+
+                    if (string.IsNullOrEmpty(columnName))
+                        columnName = propertyInfo.Name;
+
                     _columnNameCache[key] = columnName;
                 }
 
