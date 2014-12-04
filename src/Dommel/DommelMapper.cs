@@ -9,7 +9,7 @@ using Dapper;
 namespace Dommel
 {
     /// <summary>
-    /// Simple CRUD commands for Dapper.
+    /// Simple CRUD operations for Dapper.
     /// </summary>
     public static class DommelMapper
     {
@@ -18,13 +18,13 @@ namespace Dommel
         private static readonly IDictionary<Type, PropertyInfo> _typeKeyPropertyCache = new Dictionary<Type, PropertyInfo>();
         private static readonly IDictionary<Type, PropertyInfo[]> _typePropertiesCache = new Dictionary<Type, PropertyInfo[]>();
         private static readonly IDictionary<string, ISqlBuilder> _sqlBuilders = new Dictionary<string, ISqlBuilder>
-        {
-            { "sqlconnection", new SqlServerSqlBuilder() },
-            { "sqlceconnection", new SqlServerCeSqlBuilder() },
-            { "sqliteconnection", new SqliteSqlBuilder() },
-            { "npgsqlconnection", new PostgresSqlBuilder() },
-            { "mysqlconnection", new MySqlSqlBuilder() }
-        };
+                                                                                    {
+                                                                                        { "sqlconnection", new SqlServerSqlBuilder() },
+                                                                                        { "sqlceconnection", new SqlServerCeSqlBuilder() },
+                                                                                        { "sqliteconnection", new SqliteSqlBuilder() },
+                                                                                        { "npgsqlconnection", new PostgresSqlBuilder() },
+                                                                                        { "mysqlconnection", new MySqlSqlBuilder() }
+                                                                                    };
 
         private static readonly IDictionary<Type, string> _getQueryCache = new Dictionary<Type, string>();
         private static readonly IDictionary<Type, string> _getAllQueryCache = new Dictionary<Type, string>();
@@ -41,7 +41,7 @@ namespace Dommel
         /// <returns>The entity with the corresponding id.</returns>
         public static TEntity Get<TEntity>(this IDbConnection connection, object id) where TEntity : class
         {
-            var type = typeof(TEntity);
+            var type = typeof (TEntity);
 
             string sql;
             if (!_getQueryCache.TryGetValue(type, out sql))
@@ -72,7 +72,7 @@ namespace Dommel
         /// <returns>A collection of entities of type <typeparamref name="TEntity"/>.</returns>
         public static IEnumerable<TEntity> GetAll<TEntity>(this IDbConnection connection, bool buffered = true) where TEntity : class
         {
-            var type = typeof(TEntity);
+            var type = typeof (TEntity);
 
             string sql;
             if (!_getAllQueryCache.TryGetValue(type, out sql))
@@ -94,7 +94,7 @@ namespace Dommel
         /// <returns>The id of the inserted entity.</returns>
         public static int Insert<TEntity>(this IDbConnection connection, TEntity entity) where TEntity : class
         {
-            var type = typeof(TEntity);
+            var type = typeof (TEntity);
 
             string sql;
             if (!_insertQueryCache.TryGetValue(type, out sql))
@@ -103,7 +103,7 @@ namespace Dommel
                 var keyProperty = Resolvers.KeyProperty(type);
                 var typeProperties = Resolvers.Properties(type).Where(p => p != keyProperty).ToList();
 
-                string[] columnNames = typeProperties.Select(p => Resolvers.Column(p)).ToArray();
+                string[] columnNames = typeProperties.Select(Resolvers.Column).ToArray();
                 string[] paramNames = typeProperties.Select(p => "@" + p.Name).ToArray();
 
                 var builder = GetBuilder(connection);
@@ -127,7 +127,7 @@ namespace Dommel
         /// <returns>A value indicating whether the update operation succeeded.</returns>
         public static bool Update<TEntity>(this IDbConnection connection, TEntity entity)
         {
-            var type = typeof(TEntity);
+            var type = typeof (TEntity);
 
             string sql;
             if (!_updateQueryCache.TryGetValue(type, out sql))
@@ -160,7 +160,7 @@ namespace Dommel
         /// <returns>A value indicating whether the delete operation succeeded.</returns>
         public static bool Delete<TEntity>(this IDbConnection connection, TEntity entity)
         {
-            var type = typeof(TEntity);
+            var type = typeof (TEntity);
 
             string sql;
             if (!_deleteQueryCache.TryGetValue(type, out sql))
@@ -197,16 +197,16 @@ namespace Dommel
             }
 
             /// <summary>
-            /// Gets all the public properties for the specified type.
+            /// Gets the properties to be mapped for the specified type, using the configured <see cref="DommelMapper.IPropertyResolver"/>.
             /// </summary>
             /// <param name="type">The <see cref="System.Type"/> to get the properties from.</param>
-            /// <returns>>The collection of public properties of <paramref name="type"/>.</returns>
+            /// <returns>>The collection of to be mapped properties of <paramref name="type"/>.</returns>
             public static IEnumerable<PropertyInfo> Properties(Type type)
             {
                 PropertyInfo[] properties;
                 if (!_typePropertiesCache.TryGetValue(type, out properties))
                 {
-                    properties = type.GetProperties();
+                    properties = _propertyResolver.ResolveProperties(type).ToArray();
                     _typePropertiesCache[type] = properties;
                 }
 
@@ -235,10 +235,9 @@ namespace Dommel
             /// using the configured <see cref="T:DommelMapper.IColumnNameResolver"/>.
             /// </summary>
             /// <param name="propertyInfo">The <see cref="System.Reflection.PropertyInfo"/> to get the column name for.</param>
-            /// <returns>The column name in the database for <paramref name="type"/>.</returns>
+            /// <returns>The column name in the database for <paramref name="propertyInfo"/>.</returns>
             public static string Column(PropertyInfo propertyInfo)
             {
-                // todo: get type from propertyInfo.
                 string key = string.Format("{0}.{1}", propertyInfo.DeclaringType, propertyInfo.Name);
 
                 string columnName;
@@ -252,8 +251,96 @@ namespace Dommel
             }
         }
 
-        #region Key property resolving
+        #region Property resolving
+        private static IPropertyResolver _propertyResolver = new DefaultPropertyResolver();
 
+        /// <summary>
+        /// Defines methods for resolving the properties of entities. 
+        /// Custom implementations can be registerd with <see cref="M:SetPropertyResolver()"/>.
+        /// </summary>
+        public interface IPropertyResolver
+        {
+            /// <summary>
+            /// Resolves the properties to be mapped for the specified type.
+            /// </summary>
+            /// <param name="type">The type to resolve the properties to be mapped for.</param>
+            /// <returns>A collection of <see cref="PropertyInfo"/>'s of the <paramref name="type"/>.</returns>
+            IEnumerable<PropertyInfo> ResolveProperties(Type type);
+        }
+
+        /// <summary>
+        /// Sets the <see cref="DommelMapper.IPropertyResolver"/> implementation for resolving key of entities.
+        /// </summary>
+        /// <param name="propertyResolver">An instance of <see cref="DommelMapper.IPropertyResolver"/>.</param>
+        public static void SetPropertyResolver(IPropertyResolver propertyResolver)
+        {
+            _propertyResolver = propertyResolver;
+        }
+
+        /// <summary>
+        /// Represents the base class for property resolvers.
+        /// </summary>
+        public abstract class PropertyResolverBase : IPropertyResolver
+        {
+            private static readonly HashSet<Type> _primitiveTypes = new HashSet<Type>
+                                                                        {
+                                                                            typeof (object),
+                                                                            typeof (string),
+                                                                            typeof (decimal),
+                                                                            typeof (double),
+                                                                            typeof (float),
+                                                                            typeof (DateTime),
+                                                                            typeof (TimeSpan)
+                                                                        };
+
+            public abstract IEnumerable<PropertyInfo> ResolveProperties(Type type);
+
+            /// <summary>
+            /// Gets a collection of types that are considered 'primitive' for Dommel but are not for the CLR.
+            /// Override this if you need your own implementation of this.
+            /// </summary>
+            protected virtual HashSet<Type> PrimitiveTypes
+            {
+                get
+                {
+                    return _primitiveTypes;
+                }
+            }
+
+            /// <summary>
+            /// Filters the complex types from the specified collection of properties.
+            /// </summary>
+            /// <param name="properties">A collection of properties.</param>
+            /// <returns>The properties that are considered 'primitive' of <paramref name="properties"/>.</returns>
+            protected virtual IEnumerable<PropertyInfo> FilterComplexTypes(IEnumerable<PropertyInfo> properties)
+            {
+                foreach (var property in properties)
+                {
+                    Type type = property.PropertyType;
+                    type = Nullable.GetUnderlyingType(type) ?? type;
+
+                    if (type.IsPrimitive)
+                    {
+                        yield return property;
+                    }
+                    else if (PrimitiveTypes.Contains(type))
+                    {
+                        yield return property;
+                    }
+                }
+            }
+        }
+
+        private sealed class DefaultPropertyResolver : PropertyResolverBase
+        {
+            public override IEnumerable<PropertyInfo> ResolveProperties(Type type)
+            {
+                return FilterComplexTypes(type.GetProperties());
+            }
+        }
+        #endregion
+
+        #region Key property resolving
         private static IKeyPropertyResolver _keyPropertyResolver = new DefaultKeyPropertyResolver();
 
         /// <summary>
@@ -314,11 +401,9 @@ namespace Dommel
                 return keyProps[0];
             }
         }
-
         #endregion
 
         #region Table name resolving
-
         private static ITableNameResolver _tableNameResolver = new DefaultTableNameResolver();
 
         /// <summary>
@@ -367,11 +452,9 @@ namespace Dommel
                 return name;
             }
         }
-
         #endregion
 
         #region Column name resolving
-
         private static IColumnNameResolver _columnNameResolver = new DefaultColumnNameResolver();
 
         /// <summary>
@@ -410,11 +493,9 @@ namespace Dommel
                 return propertyInfo.Name;
             }
         }
-
         #endregion
 
         #region Sql builders
-
         /// <summary>
         /// Adds a custom implementation of <see cref="T:DommelMapper.ISqlBuilder"/> 
         /// for the specified ADO.NET connection type.
@@ -480,9 +561,9 @@ namespace Dommel
             public string BuildInsert(string tableName, string[] columnNames, string[] paramNames, PropertyInfo keyProperty)
             {
                 // todo: this needs testing
-                return string.Format("insert into {0} ({1}) values ({2}) select last_insert_rowid() id", 
-                    tableName, 
-                    string.Join(", ", columnNames), 
+                return string.Format("insert into {0} ({1}) values ({2}) select last_insert_rowid() id",
+                    tableName,
+                    string.Join(", ", columnNames),
                     string.Join(", ", paramNames));
             }
         }
@@ -492,9 +573,9 @@ namespace Dommel
             public string BuildInsert(string tableName, string[] columnNames, string[] paramNames, PropertyInfo keyProperty)
             {
                 // todo: this needs testing
-                return string.Format("insert into {0} ({1}) values ({2}) select LAST_INSERT_ID() id", 
-                    tableName, 
-                    string.Join(", ", columnNames), 
+                return string.Format("insert into {0} ({1}) values ({2}) select LAST_INSERT_ID() id",
+                    tableName,
+                    string.Join(", ", columnNames),
                     string.Join(", ", paramNames));
             }
         }
@@ -504,10 +585,10 @@ namespace Dommel
             public string BuildInsert(string tableName, string[] columnNames, string[] paramNames, PropertyInfo keyProperty)
             {
                 // todo: this needs testing
-                string sql = string.Format("insert into {0} ({1}) values ({2}) select last_insert_rowid() id", 
-                                 tableName, 
-                                 string.Join(", ", columnNames), 
-                                 string.Join(", ", paramNames));
+                string sql = string.Format("insert into {0} ({1}) values ({2}) select last_insert_rowid() id",
+                    tableName,
+                    string.Join(", ", columnNames),
+                    string.Join(", ", paramNames));
 
                 if (keyProperty != null)
                 {
@@ -524,7 +605,6 @@ namespace Dommel
                 return sql;
             }
         }
-
         #endregion
     }
 }
