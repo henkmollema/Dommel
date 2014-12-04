@@ -92,9 +92,9 @@ namespace Dommel
         /// <param name="connection">The connection to the database. This can either be open or closed.</param>
         /// <param name="entity">The entity to be inserted.</param>
         /// <returns>The id of the inserted entity.</returns>
-        public static int Insert<TEntity>(this IDbConnection connection, TEntity entity) where TEntity : class
+        public static int Insert<TEntity>(this IDbConnection connection, TEntity entity,IDbTransaction transaction = null) where TEntity : class
         {
-            var type = typeof (TEntity);
+            var type = typeof(TEntity);
 
             string sql;
             if (!_insertQueryCache.TryGetValue(type, out sql))
@@ -103,7 +103,7 @@ namespace Dommel
                 var keyProperty = Resolvers.KeyProperty(type);
                 var typeProperties = Resolvers.Properties(type).Where(p => p != keyProperty).ToList();
 
-                string[] columnNames = typeProperties.Select(Resolvers.Column).ToArray();
+                string[] columnNames = typeProperties.Select(p => Resolvers.Column(p)).ToArray();
                 string[] paramNames = typeProperties.Select(p => "@" + p.Name).ToArray();
 
                 var builder = GetBuilder(connection);
@@ -112,8 +112,7 @@ namespace Dommel
 
                 _insertQueryCache[type] = sql;
             }
-
-            var result = connection.Query<int>(sql, entity);
+            var result = connection.Query<int>(sql, entity,transaction);
             return result.Single();
         }
 
@@ -125,9 +124,9 @@ namespace Dommel
         /// <param name="connection">The connection to the database. This can either be open or closed.</param>
         /// <param name="entity">The entity in the database.</param>
         /// <returns>A value indicating whether the update operation succeeded.</returns>
-        public static bool Update<TEntity>(this IDbConnection connection, TEntity entity)
+        public static bool Update<TEntity>(this IDbConnection connection, TEntity entity, IDbTransaction transaction = null)
         {
-            var type = typeof (TEntity);
+            var type = typeof(TEntity);
 
             string sql;
             if (!_updateQueryCache.TryGetValue(type, out sql))
@@ -147,7 +146,7 @@ namespace Dommel
                 _updateQueryCache[type] = sql;
             }
 
-            return connection.Execute(sql: sql, param: entity) > 0;
+            return connection.Execute(sql: sql, param: entity,transaction:transaction) > 0;
         }
 
         /// <summary>
@@ -158,9 +157,9 @@ namespace Dommel
         /// <param name="connection">The connection to the database. This can either be open or closed.</param>
         /// <param name="entity">The entity to be deleted.</param>
         /// <returns>A value indicating whether the delete operation succeeded.</returns>
-        public static bool Delete<TEntity>(this IDbConnection connection, TEntity entity)
+        public static bool Delete<TEntity>(this IDbConnection connection, TEntity entity, IDbTransaction transaction = null)
         {
-            var type = typeof (TEntity);
+            var type = typeof(TEntity);
 
             string sql;
             if (!_deleteQueryCache.TryGetValue(type, out sql))
@@ -171,7 +170,7 @@ namespace Dommel
 
                 sql = string.Format("delete from {0} where {1} = @{2}", tableName, keyColumnName, keyProperty.Name);
             }
-            return connection.Execute(sql, entity) > 0;
+            return connection.Execute(sql, entity,transaction) > 0;
         }
 
         /// <summary>
