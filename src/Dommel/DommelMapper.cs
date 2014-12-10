@@ -91,8 +91,9 @@ namespace Dommel
         /// <typeparam name="TEntity">The type of the entity.</typeparam>
         /// <param name="connection">The connection to the database. This can either be open or closed.</param>
         /// <param name="entity">The entity to be inserted.</param>
+        /// <param name="transaction">Optional transaction for the command.</param>
         /// <returns>The id of the inserted entity.</returns>
-        public static int Insert<TEntity>(this IDbConnection connection, TEntity entity) where TEntity : class
+        public static int Insert<TEntity>(this IDbConnection connection, TEntity entity, IDbTransaction transaction = null) where TEntity : class
         {
             var type = typeof (TEntity);
 
@@ -113,7 +114,7 @@ namespace Dommel
                 _insertQueryCache[type] = sql;
             }
 
-            var result = connection.Query<int>(sql, entity);
+            var result = connection.Query<int>(sql, entity, transaction);
             return result.Single();
         }
 
@@ -124,8 +125,9 @@ namespace Dommel
         /// <typeparam name="TEntity">The type of the entity.</typeparam>
         /// <param name="connection">The connection to the database. This can either be open or closed.</param>
         /// <param name="entity">The entity in the database.</param>
+        /// <param name="transaction">Optional transaction for the command.</param>
         /// <returns>A value indicating whether the update operation succeeded.</returns>
-        public static bool Update<TEntity>(this IDbConnection connection, TEntity entity)
+        public static bool Update<TEntity>(this IDbConnection connection, TEntity entity, IDbTransaction transaction = null)
         {
             var type = typeof (TEntity);
 
@@ -147,7 +149,7 @@ namespace Dommel
                 _updateQueryCache[type] = sql;
             }
 
-            return connection.Execute(sql: sql, param: entity) > 0;
+            return connection.Execute(sql, entity, transaction) > 0;
         }
 
         /// <summary>
@@ -157,8 +159,9 @@ namespace Dommel
         /// <typeparam name="TEntity">The type of the entity.</typeparam>
         /// <param name="connection">The connection to the database. This can either be open or closed.</param>
         /// <param name="entity">The entity to be deleted.</param>
+        /// <param name="transaction">Optional transaction for the command.</param>
         /// <returns>A value indicating whether the delete operation succeeded.</returns>
-        public static bool Delete<TEntity>(this IDbConnection connection, TEntity entity)
+        public static bool Delete<TEntity>(this IDbConnection connection, TEntity entity, IDbTransaction transaction = null)
         {
             var type = typeof (TEntity);
 
@@ -171,7 +174,8 @@ namespace Dommel
 
                 sql = string.Format("delete from {0} where {1} = @{2}", tableName, keyColumnName, keyProperty.Name);
             }
-            return connection.Execute(sql, entity) > 0;
+
+            return connection.Execute(sql, entity, transaction) > 0;
         }
 
         /// <summary>
@@ -293,6 +297,11 @@ namespace Dommel
                                                                             typeof (TimeSpan)
                                                                         };
 
+            /// <summary>
+            /// Resolves the properties to be mapped for the specified type.
+            /// </summary>
+            /// <param name="type">The type to resolve the properties to be mapped for.</param>
+            /// <returns>A collection of <see cref="PropertyInfo"/>'s of the <paramref name="type"/>.</returns>
             public abstract IEnumerable<PropertyInfo> ResolveProperties(Type type);
 
             /// <summary>
