@@ -13,12 +13,11 @@ Dommel provides some extensibility points to change the bevahior of resolving ta
 
 <hr>
 
-
 ### The API
 
 ##### Retrieving entities by id
 ```csharp
-using (IDbConnection con = new SqlConnection())
+using (var con = new SqlConnection())
 {
    var product = con.Get<Product>(1);
 }
@@ -26,31 +25,26 @@ using (IDbConnection con = new SqlConnection())
 
 ##### Retrieving all entities in a table
 ```csharp
-using (IDbConnection con = new SqlConnection())
+using (var con = new SqlConnection())
 {
    var products = con.GetAll<Product>().ToList();
 }
 ```
 
 ##### Selecting entities using a predicate
-Dommel allows you to specify a predicate which is being translated into a SQL expression.
+Dommel allows you to specify a predicate which is being translated into a SQL expression. The arguments in the lambda expression are added as parameters to the command.
 ```csharp
-using (IDbConnection con = new SqlConnection())
+using (var con = new SqlConnection())
 {
    var products = con.Select<Product>(p => p.Name == "Awesome bike");
-   // output: select * from Products where Name = @p0
-   // @p0 = "Awesome bike"
    
    var products = con.Select<Product>(p => p.Created < new DateTime(2014, 12, 31) && p.InStock > 5);
-   // output: select * from Products where Created = @p0 and InStock > @p1
-   // @p0 = '2014-12-31'
-   // @p1 = 5
 }
 ```
 
 ##### Inserting entities
 ```csharp
-using (IDbConnection con = new SqlConnection())
+using (var con = new SqlConnection())
 {
    var product = new Product { Name = "Awesome bike", InStock = 4 };
    int id = con.Insert(product);
@@ -59,7 +53,7 @@ using (IDbConnection con = new SqlConnection())
 
 ##### Updating entities
 ```csharp
-using (IDbConnection con = new SqlConnection())
+using (var con = new SqlConnection())
 {
    var product = con.Get<Product>(1);
    product.LastUpdate = DateTime.Now;
@@ -69,7 +63,7 @@ using (IDbConnection con = new SqlConnection())
 
 ##### Removing entities
 ```csharp
-using (IDbConnection con = new SqlConnection())
+using (var con = new SqlConnection())
 {
    var product = con.Get<Product>(1);
    con.Delete(product);
