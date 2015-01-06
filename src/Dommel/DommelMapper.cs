@@ -434,7 +434,7 @@ namespace Dommel
                 sql = string.Format("update {0} set {1} where {2} = @{3}",
                     tableName,
                     string.Join(", ", columnNames),
-                    _columnNameResolver.ResolveColumnName(keyProperty),
+                    Resolvers.Column(keyProperty),
                     keyProperty.Name);
 
                 _updateQueryCache[type] = sql;
