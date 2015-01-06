@@ -2,7 +2,9 @@ Dommel
 ======
 [![Build status](https://ci.appveyor.com/api/projects/status/kynsbfu97f9s5bj7?svg=true)](https://ci.appveyor.com/project/henkmollema/dommel)
 
-Dommel provides a convenient API for CRUD operations using extension methods on the `IDbConnection` interface. [Dapper](https://github.com/StackExchange/dapper-dot-net) is used for query execution and object mapping. The functionality is basically the same as [Dapper.Contrib](https://github.com/StackExchange/dapper-dot-net/tree/master/Dapper.Contrib) (and Dapper.Rainbow) but since it has not been updated any time lately and it has some shortcomings, Dommel was born.
+Dommel provides a convenient API for CRUD operations using extension methods on the `IDbConnection` interface. The SQL queries are generated based on your POCO entities. Dommel also supports LINQ expressions which are being translated to SQL expressions. [Dapper](https://github.com/StackExchange/dapper-dot-net) is used for query execution and object mapping.
+
+Dommel provides some extensibility points to change the bevahior of resolving table names, column names, the key property and POCO properties. See [Extensibility](https://github.com/henkmollema/Dommel#extensibility) for more details.
 
 <hr>
 
@@ -15,7 +17,6 @@ Dommel provides a convenient API for CRUD operations using extension methods on 
 ### The API
 
 ##### Retrieving entities by id
-
 ```csharp
 using (IDbConnection con = new SqlConnection())
 {
@@ -31,8 +32,23 @@ using (IDbConnection con = new SqlConnection())
 }
 ```
 
-##### Inserting entities
+##### Selecting entities using a predicate
+Dommel allows you to specify a predicate which is being translated into a SQL expression.
+```csharp
+using (IDbConnection con = new SqlConnection())
+{
+   var products = con.Select<Product>(p => p.Name == "Awesome bike");
+   // output: select * from Products where Name = @p0
+   // @p0 = "Awesome bike"
+   
+   var products = con.Select<Product>(p => p.Created < new DateTime(2014, 12, 31) && p.InStock > 5);
+   // output: select * from Products where Created = @p0 and InStock > @p1
+   // @p0 = '2014-12-31'
+   // @p1 = 5
+}
+```
 
+##### Inserting entities
 ```csharp
 using (IDbConnection con = new SqlConnection())
 {
@@ -42,7 +58,6 @@ using (IDbConnection con = new SqlConnection())
 ```
 
 ##### Updating entities
-
 ```csharp
 using (IDbConnection con = new SqlConnection())
 {
@@ -53,7 +68,6 @@ using (IDbConnection con = new SqlConnection())
 ```
 
 ##### Removing entities
-
 ```csharp
 using (IDbConnection con = new SqlConnection())
 {
