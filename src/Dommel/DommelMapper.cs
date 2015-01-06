@@ -184,6 +184,7 @@ namespace Dommel
                         return VisitBinary((BinaryExpression)expression);
 
                     case ExpressionType.Convert:
+                    case ExpressionType.Not:
                         return VisitUnary((UnaryExpression)expression);
 
                     case ExpressionType.New:
@@ -200,7 +201,7 @@ namespace Dommel
             }
 
             /// <summary>
-            /// Process a lambda expression.
+            /// Processes a lambda expression.
             /// </summary>
             /// <param name="epxression">The lambda expression.</param>
             /// <returns>The result of the processing.</returns>
@@ -219,7 +220,7 @@ namespace Dommel
             }
 
             /// <summary>
-            /// Process a binary expression.
+            /// Processes a binary expression.
             /// </summary>
             /// <param name="expression">The binary expression.</param>
             /// <returns>The result of the processing.</returns>
@@ -270,7 +271,7 @@ namespace Dommel
             }
 
             /// <summary>
-            /// Processes the unary expression.
+            /// Processes a unary expression.
             /// </summary>
             /// <param name="expression">The unary expression.</param>
             /// <returns>The result of the processing.</returns>
@@ -279,15 +280,21 @@ namespace Dommel
                 switch (expression.NodeType)
                 {
                         // todo: implement.
-                        //case ExpressionType.Not:
-                        //    var o = VisitExpression(expression.Operand);
-                        //
-                        //    if (!(o is string))
-                        //    {
-                        //        return !((bool)o);
-                        //    }
-                        //
-                        //    return VisitExpression(expression.Operand);
+                    case ExpressionType.Not:
+                        var o = VisitExpression(expression.Operand);
+                        if (!(o is string))
+                        {
+                            return !(bool)o;
+                        }
+
+                        var memberExpression = expression.Operand as MemberExpression;
+                        if (memberExpression != null &&
+                            Resolvers.Properties(memberExpression.Expression.Type).Any(p => p.Name == (string)o))
+                        {
+                            o = string.Format("{0} = '1'", o);
+                        }
+
+                        return string.Format("not ({0})", o);
                     case ExpressionType.Convert:
                         if (expression.Method != null)
                         {
@@ -300,7 +307,7 @@ namespace Dommel
             }
 
             /// <summary>
-            /// Processes the new expression.
+            /// Processes a new expression.
             /// </summary>
             /// <param name="expression">The new expression.</param>
             /// <returns>The result of the processing.</returns>
