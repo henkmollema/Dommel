@@ -159,6 +159,11 @@ namespace Dommel
                 _whereBuilder.Append(sqlExpression);
             }
 
+            /// <summary>
+            /// Visits the expression.
+            /// </summary>
+            /// <param name="expression">The expression to visit.</param>
+            /// <returns>The result of the visit.</returns>
             protected virtual object VisitExpression(Expression expression)
             {
                 switch (expression.NodeType)
@@ -194,6 +199,11 @@ namespace Dommel
                 return expression;
             }
 
+            /// <summary>
+            /// Process a lambda expression.
+            /// </summary>
+            /// <param name="epxression">The lambda expression.</param>
+            /// <returns>The result of the processing.</returns>
             protected virtual object VisitLambda(LambdaExpression epxression)
             {
                 if (epxression.Body.NodeType == ExpressionType.MemberAccess)
@@ -208,6 +218,11 @@ namespace Dommel
                 return VisitExpression(epxression.Body);
             }
 
+            /// <summary>
+            /// Process a binary expression.
+            /// </summary>
+            /// <param name="expression">The binary expression.</param>
+            /// <returns>The result of the processing.</returns>
             protected virtual object VisitBinary(BinaryExpression expression)
             {
                 object left, right;
@@ -242,6 +257,7 @@ namespace Dommel
                 }
                 else
                 {
+                    // It's a single expression.
                     left = VisitExpression(expression.Left);
                     right = VisitExpression(expression.Right);
 
@@ -253,6 +269,11 @@ namespace Dommel
                 return string.Format("{0} {1} {2}", left, operand, right);
             }
 
+            /// <summary>
+            /// Processes the unary expression.
+            /// </summary>
+            /// <param name="expression">The unary expression.</param>
+            /// <returns>The result of the processing.</returns>
             protected virtual object VisitUnary(UnaryExpression expression)
             {
                 switch (expression.NodeType)
@@ -278,6 +299,11 @@ namespace Dommel
                 return VisitExpression(expression.Operand);
             }
 
+            /// <summary>
+            /// Processes the new expression.
+            /// </summary>
+            /// <param name="expression">The new expression.</param>
+            /// <returns>The result of the processing.</returns>
             protected virtual object VisitNew(NewExpression expression)
             {
                 var member = Expression.Convert(expression, typeof (object));
@@ -286,6 +312,11 @@ namespace Dommel
                 return getter();
             }
 
+            /// <summary>
+            /// Processes a member access expression.
+            /// </summary>
+            /// <param name="expression">The member access expression.</param>
+            /// <returns>The result of the processing.</returns>
             protected virtual object VisitMemberAccess(MemberExpression expression)
             {
                 if (expression.Expression != null)
@@ -299,16 +330,31 @@ namespace Dommel
                 return getter();
             }
 
+            /// <summary>
+            /// Processes a constant expression.
+            /// </summary>
+            /// <param name="expression">The constant expression.</param>
+            /// <returns>The result of the processing.</returns>
             protected virtual object VisitConstantExpression(ConstantExpression expression)
             {
                 return expression.Value ?? "null";
             }
 
+            /// <summary>
+            /// Proccesses a member expression.
+            /// </summary>
+            /// <param name="expression">The member expression.</param>
+            /// <returns>The result of the processing.</returns>
             protected virtual string MemberToColumn(MemberExpression expression)
             {
                 return Resolvers.Column((PropertyInfo)expression.Member);
             }
 
+            /// <summary>
+            /// Returns the expression operand for the specified expression type. 
+            /// </summary>
+            /// <param name="expressionType">The expression type for node of an expression tree.</param>
+            /// <returns>The expression operand equivalent of the <paramref name="expressionType"/>.</returns>
             protected virtual string BindOperant(ExpressionType expressionType)
             {
                 switch (expressionType)
