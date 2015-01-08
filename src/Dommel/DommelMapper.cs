@@ -279,7 +279,6 @@ namespace Dommel
             {
                 switch (expression.NodeType)
                 {
-                        // todo: implement.
                     case ExpressionType.Not:
                         var o = VisitExpression(expression.Operand);
                         if (!(o is string))
@@ -326,7 +325,7 @@ namespace Dommel
             /// <returns>The result of the processing.</returns>
             protected virtual object VisitMemberAccess(MemberExpression expression)
             {
-                if (expression.Expression != null)
+                if (expression.Expression != null && expression.Expression.NodeType == ExpressionType.Parameter)
                 {
                     return MemberToColumn(expression);
                 }
