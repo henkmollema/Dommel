@@ -228,7 +228,7 @@ namespace Dommel
             {
                 object left, right;
                 string operand = BindOperant(expression.NodeType);
-                if (operand == "AND" || operand == "OR")
+                if (operand == "and" || operand == "or")
                 {
                     // Left side.
                     var member = expression.Left as MemberExpression;
