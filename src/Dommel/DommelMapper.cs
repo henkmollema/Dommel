@@ -569,8 +569,7 @@ namespace Dommel
         {
             public string BuildInsert(string tableName, string[] columnNames, string[] paramNames, PropertyInfo keyProperty)
             {
-                // todo: this needs testing
-                return string.Format("insert into {0} ({1}) values ({2}) select last_insert_rowid() id",
+                return string.Format("insert into {0} ({1}) values ({2}); select last_insert_rowid() id",
                     tableName,
                     string.Join(", ", columnNames),
                     string.Join(", ", paramNames));
@@ -581,7 +580,6 @@ namespace Dommel
         {
             public string BuildInsert(string tableName, string[] columnNames, string[] paramNames, PropertyInfo keyProperty)
             {
-                // todo: this needs testing
                 return string.Format("insert into {0} ({1}) values ({2}) select LAST_INSERT_ID() id",
                     tableName,
                     string.Join(", ", columnNames),
@@ -593,7 +591,6 @@ namespace Dommel
         {
             public string BuildInsert(string tableName, string[] columnNames, string[] paramNames, PropertyInfo keyProperty)
             {
-                // todo: this needs testing
                 string sql = string.Format("insert into {0} ({1}) values ({2}) select last_insert_rowid() id",
                     tableName,
                     string.Join(", ", columnNames),
