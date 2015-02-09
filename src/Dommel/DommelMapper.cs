@@ -173,6 +173,8 @@ namespace Dommel
                 string keyColumnName = Resolvers.Column(keyProperty);
 
                 sql = string.Format("delete from {0} where {1} = @{2}", tableName, keyColumnName, keyProperty.Name);
+
+                _deleteQueryCache[type] = sql;
             }
 
             return connection.Execute(sql, entity, transaction) > 0;
