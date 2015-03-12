@@ -259,7 +259,7 @@ namespace Dommel
             /// <summary>
             /// Provides access to default resolver implementations.
             /// </summary>
-            public class Default
+            public static class Default
             {
                 /// <summary>
                 /// The default column name resolver.
