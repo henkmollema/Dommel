@@ -255,6 +255,32 @@ namespace Dommel
 
                 return columnName;
             }
+
+            /// <summary>
+            /// Provides access to default resolver implementations.
+            /// </summary>
+            public class Default
+            {
+                /// <summary>
+                /// The default column name resolver.
+                /// </summary>
+                public static readonly IColumnNameResolver ColumnNameResolver = new DefaultColumnNameResolver();
+
+                /// <summary>
+                /// The default property resolver.
+                /// </summary>
+                public static readonly IPropertyResolver PropertyResolver = new DefaultPropertyResolver();
+
+                /// <summary>
+                /// The default key property resolver.
+                /// </summary>
+                public static readonly IKeyPropertyResolver KeyPropertyResolver = new DefaultKeyPropertyResolver();
+
+                /// <summary>
+                /// The default table name resolver.
+                /// </summary>
+                public static readonly ITableNameResolver TableNameResolver = new DefaultTableNameResolver();
+            }
         }
 
         #region Property resolving
@@ -342,7 +368,10 @@ namespace Dommel
             }
         }
 
-        private sealed class DefaultPropertyResolver : PropertyResolverBase
+        /// <summary>
+        /// Default implemenation of the <see cref="DommelMapper.IPropertyResolver"/> interface.
+        /// </summary>
+        public class DefaultPropertyResolver : PropertyResolverBase
         {
             public override IEnumerable<PropertyInfo> ResolveProperties(Type type)
             {
@@ -381,12 +410,12 @@ namespace Dommel
         /// Implements the <see cref="DommelMapper.IKeyPropertyResolver"/> interface by resolving key properties
         /// with the [Key] attribute or with the name 'Id'.
         /// </summary>
-        private sealed class DefaultKeyPropertyResolver : IKeyPropertyResolver
+        public class DefaultKeyPropertyResolver : IKeyPropertyResolver
         {
             /// <summary>
             /// Finds the key property by looking for a property with the [Key] attribute or with the name 'Id'.
             /// </summary>
-            public PropertyInfo ResolveKeyProperty(Type type)
+            public virtual PropertyInfo ResolveKeyProperty(Type type)
             {
                 List<PropertyInfo> allProps = Resolvers.Properties(type).ToList();
 
@@ -444,13 +473,13 @@ namespace Dommel
         /// Implements the <see cref="T:Dommel.ITableNameResolver"/> interface by resolving table names 
         /// by making the type name plural and removing the 'I' prefix for interfaces. 
         /// </summary>
-        private sealed class DefaultTableNameResolver : ITableNameResolver
+        public class DefaultTableNameResolver : ITableNameResolver
         {
             /// <summary>
             /// Resolves the table name by making the type plural (+ 's', Product -> Products) 
             /// and removing the 'I' prefix for interfaces.
             /// </summary>
-            public string ResolveTableName(Type type)
+            public virtual string ResolveTableName(Type type)
             {
                 string name = type.Name + "s";
 
@@ -494,12 +523,12 @@ namespace Dommel
         /// <summary>
         /// Implements the <see cref="DommelMapper.IKeyPropertyResolver"/>.
         /// </summary>
-        private sealed class DefaultColumnNameResolver : IColumnNameResolver
+        public class DefaultColumnNameResolver : IColumnNameResolver
         {
             /// <summary>
             /// Resolves the column name for the property. This is just the name of the property.
             /// </summary>
-            public string ResolveColumnName(PropertyInfo propertyInfo)
+            public virtual string ResolveColumnName(PropertyInfo propertyInfo)
             {
                 return propertyInfo.Name;
             }
