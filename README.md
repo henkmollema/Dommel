@@ -2,7 +2,9 @@ Dommel
 ======
 [![Build status](https://ci.appveyor.com/api/projects/status/kynsbfu97f9s5bj7?svg=true)](https://ci.appveyor.com/project/henkmollema/dommel)
 
-Dommel provides a convenient API for CRUD operations using extension methods on the `IDbConnection` interface. [Dapper](https://github.com/StackExchange/dapper-dot-net) is used for query execution and object mapping. The functionality is basically the same as [Dapper.Contrib](https://github.com/StackExchange/dapper-dot-net/tree/master/Dapper.Contrib) (and Dapper.Rainbow) but since it has not been updated any time lately and it has some shortcomings, Dommel was born.
+Dommel provides a convenient API for CRUD operations using extension methods on the `IDbConnection` interface. The SQL queries are generated based on your POCO entities. Dommel also supports LINQ expressions which are being translated to SQL expressions. [Dapper](https://github.com/StackExchange/dapper-dot-net) is used for query execution and object mapping.
+
+Dommel provides some extensibility points to change the bevahior of resolving table names, column names, the key property and POCO properties. See [Extensibility](https://github.com/henkmollema/Dommel#extensibility) for more details.
 
 <hr>
 
@@ -11,13 +13,11 @@ Dommel provides a convenient API for CRUD operations using extension methods on 
 
 <hr>
 
-
 ### The API
 
 ##### Retrieving entities by id
-
 ```csharp
-using (IDbConnection con = new SqlConnection())
+using (var con = new SqlConnection())
 {
    var product = con.Get<Product>(1);
 }
@@ -25,16 +25,26 @@ using (IDbConnection con = new SqlConnection())
 
 ##### Retrieving all entities in a table
 ```csharp
-using (IDbConnection con = new SqlConnection())
+using (var con = new SqlConnection())
 {
    var products = con.GetAll<Product>().ToList();
 }
 ```
 
-##### Inserting entities
-
+##### Selecting entities using a predicate
+Dommel allows you to specify a predicate which is being translated into a SQL expression. The arguments in the lambda expression are added as parameters to the command.
 ```csharp
-using (IDbConnection con = new SqlConnection())
+using (var con = new SqlConnection())
+{
+   var products = con.Select<Product>(p => p.Name == "Awesome bike");
+   
+   var products = con.Select<Product>(p => p.Created < new DateTime(2014, 12, 31) && p.InStock > 5);
+}
+```
+
+##### Inserting entities
+```csharp
+using (var con = new SqlConnection())
 {
    var product = new Product { Name = "Awesome bike", InStock = 4 };
    int id = con.Insert(product);
@@ -42,9 +52,8 @@ using (IDbConnection con = new SqlConnection())
 ```
 
 ##### Updating entities
-
 ```csharp
-using (IDbConnection con = new SqlConnection())
+using (var con = new SqlConnection())
 {
    var product = con.Get<Product>(1);
    product.LastUpdate = DateTime.Now;
@@ -53,9 +62,8 @@ using (IDbConnection con = new SqlConnection())
 ```
 
 ##### Removing entities
-
 ```csharp
-using (IDbConnection con = new SqlConnection())
+using (var con = new SqlConnection())
 {
    var product = con.Get<Product>(1);
    con.Delete(product);
