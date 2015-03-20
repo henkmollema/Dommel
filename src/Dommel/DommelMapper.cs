@@ -699,11 +699,7 @@ namespace Dommel
                     Type type = property.PropertyType;
                     type = Nullable.GetUnderlyingType(type) ?? type;
 
-                    if (type.IsPrimitive)
-                    {
-                        yield return property;
-                    }
-                    else if (PrimitiveTypes.Contains(type))
+                    if (type.IsPrimitive || type.IsEnum || PrimitiveTypes.Contains(type))
                     {
                         yield return property;
                     }
