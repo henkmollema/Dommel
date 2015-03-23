@@ -15,10 +15,6 @@ namespace Dommel
     /// </summary>
     public static class DommelMapper
     {
-        private static readonly IDictionary<Type, string> _typeTableNameCache = new Dictionary<Type, string>();
-        private static readonly IDictionary<string, string> _columnNameCache = new Dictionary<string, string>();
-        private static readonly IDictionary<Type, PropertyInfo> _typeKeyPropertyCache = new Dictionary<Type, PropertyInfo>();
-        private static readonly IDictionary<Type, PropertyInfo[]> _typePropertiesCache = new Dictionary<Type, PropertyInfo[]>();
         private static readonly IDictionary<string, ISqlBuilder> _sqlBuilders = new Dictionary<string, ISqlBuilder>
                                                                                     {
                                                                                         { "sqlconnection", new SqlServerSqlBuilder() },
@@ -63,6 +59,127 @@ namespace Dommel
         }
 
         /// <summary>
+        /// Retrieves the entity of type <typeparamref name="TReturn"/> with the specified id 
+        /// joined with the types specified as type parameters.
+        /// </summary>
+        /// <typeparam name="T1">The first type parameter. This is the source entity.</typeparam>
+        /// <typeparam name="T2">The second type parameter.</typeparam>
+        /// <typeparam name="TReturn">The return type parameter.</typeparam>
+        /// <param name="connection">The connection to the database. This can either be open or closed.</param>
+        /// <param name="id">The id of the entity in the database.</param>
+        /// <param name="map">The mapping to perform on the entities in the result set.</param>
+        /// <returns>The entity with the corresponding id joined with the specified types.</returns>
+        public static TReturn Get<T1, T2, TReturn>(this IDbConnection connection, object id, Func<T1, T2, TReturn> map) where TReturn : class
+        {
+            return MultiMap<T1, T2, DontMap, DontMap, DontMap, DontMap, DontMap, TReturn>(connection, map, id).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Retrieves the entity of type <typeparamref name="TReturn"/> with the specified id 
+        /// joined with the types specified as type parameters.
+        /// </summary>
+        /// <typeparam name="T1">The first type parameter. This is the source entity.</typeparam>
+        /// <typeparam name="T2">The second type parameter.</typeparam>
+        /// <typeparam name="T3">The third type parameter.</typeparam>
+        /// <typeparam name="TReturn">The return type parameter.</typeparam>
+        /// <param name="connection">The connection to the database. This can either be open or closed.</param>
+        /// <param name="id">The id of the entity in the database.</param>
+        /// <param name="map">The mapping to perform on the entities in the result set.</param>
+        /// <returns>The entity with the corresponding id joined with the specified types.</returns>
+        public static TReturn Get<T1, T2, T3, TReturn>(this IDbConnection connection,
+                                                       object id,
+                                                       Func<T1, T2, T3, TReturn> map) where TReturn : class
+        {
+            return MultiMap<T1, T2, T3, DontMap, DontMap, DontMap, DontMap, TReturn>(connection, map, id).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Retrieves the entity of type <typeparamref name="TReturn"/> with the specified id 
+        /// joined with the types specified as type parameters.
+        /// </summary>
+        /// <typeparam name="T1">The first type parameter. This is the source entity.</typeparam>
+        /// <typeparam name="T2">The second type parameter.</typeparam>
+        /// <typeparam name="T3">The third type parameter.</typeparam>
+        /// <typeparam name="T4">The fourth type parameter.</typeparam>
+        /// <typeparam name="TReturn">The return type parameter.</typeparam>
+        /// <param name="connection">The connection to the database. This can either be open or closed.</param>
+        /// <param name="id">The id of the entity in the database.</param>
+        /// <param name="map">The mapping to perform on the entities in the result set.</param>
+        /// <returns>The entity with the corresponding id joined with the specified types.</returns>
+        public static TReturn Get<T1, T2, T3, T4, TReturn>(this IDbConnection connection,
+                                                           object id,
+                                                           Func<T1, T2, T3, T4, TReturn> map) where TReturn : class
+        {
+            return MultiMap<T1, T2, T3, T4, DontMap, DontMap, DontMap, TReturn>(connection, map, id).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Retrieves the entity of type <typeparamref name="TReturn"/> with the specified id 
+        /// joined with the types specified as type parameters.
+        /// </summary>
+        /// <typeparam name="T1">The first type parameter. This is the source entity.</typeparam>
+        /// <typeparam name="T2">The second type parameter.</typeparam>
+        /// <typeparam name="T3">The third type parameter.</typeparam>
+        /// <typeparam name="T4">The fourth type parameter.</typeparam>
+        /// <typeparam name="T5">The fifth type parameter.</typeparam>
+        /// <typeparam name="TReturn">The return type parameter.</typeparam>
+        /// <param name="connection">The connection to the database. This can either be open or closed.</param>
+        /// <param name="id">The id of the entity in the database.</param>
+        /// <param name="map">The mapping to perform on the entities in the result set.</param>
+        /// <returns>The entity with the corresponding id joined with the specified types.</returns>
+        public static TReturn Get<T1, T2, T3, T4, T5, TReturn>(this IDbConnection connection,
+                                                               object id,
+                                                               Func<T1, T2, T3, T4, T5, TReturn> map) where TReturn : class
+        {
+            return MultiMap<T1, T2, T3, T4, T5, DontMap, DontMap, TReturn>(connection, map, id).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Retrieves the entity of type <typeparamref name="TReturn"/> with the specified id 
+        /// joined with the types specified as type parameters.
+        /// </summary>
+        /// <typeparam name="T1">The first type parameter. This is the source entity.</typeparam>
+        /// <typeparam name="T2">The second type parameter.</typeparam>
+        /// <typeparam name="T3">The third type parameter.</typeparam>
+        /// <typeparam name="T4">The fourth type parameter.</typeparam>
+        /// <typeparam name="T5">The fifth type parameter.</typeparam>
+        /// <typeparam name="T6">The sixth type parameter.</typeparam>
+        /// <typeparam name="TReturn">The return type parameter.</typeparam>
+        /// <param name="connection">The connection to the database. This can either be open or closed.</param>
+        /// <param name="id">The id of the entity in the database.</param>
+        /// <param name="map">The mapping to perform on the entities in the result set.</param>
+        /// <returns>The entity with the corresponding id joined with the specified types.</returns>
+        public static TReturn Get<T1, T2, T3, T4, T5, T6, TReturn>(this IDbConnection connection,
+                                                                   object id,
+                                                                   Func<T1, T2, T3, T4, T5, T6, TReturn> map) where TReturn : class
+        {
+            return MultiMap<T1, T2, T3, T4, T5, T6, DontMap, TReturn>(connection, map, id).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Retrieves the entity of type <typeparamref name="TReturn"/> with the specified id 
+        /// joined with the types specified as type parameters.
+        /// </summary>
+        /// <typeparam name="T1">The first type parameter. This is the source entity.</typeparam>
+        /// <typeparam name="T2">The second type parameter.</typeparam>
+        /// <typeparam name="T3">The third type parameter.</typeparam>
+        /// <typeparam name="T4">The fourth type parameter.</typeparam>
+        /// <typeparam name="T5">The fifth type parameter.</typeparam>
+        /// <typeparam name="T6">The sixth type parameter.</typeparam>
+        /// <typeparam name="T7">The seventh type parameter.</typeparam>
+        /// <typeparam name="TReturn">The return type parameter.</typeparam>
+        /// <param name="connection">The connection to the database. This can either be open or closed.</param>
+        /// <param name="id">The id of the entity in the database.</param>
+        /// <param name="map">The mapping to perform on the entities in the result set.</param>
+        /// <returns>The entity with the corresponding id joined with the specified types.</returns>
+        public static TReturn Get<T1, T2, T3, T4, T5, T6, T7, TReturn>(this IDbConnection connection,
+                                                                       object id,
+                                                                       Func<T1, T2, T3, T4, T5, T6, T7, TReturn> map) where TReturn : class
+        {
+            return MultiMap<T1, T2, T3, T4, T5, T6, T7, TReturn>(connection, map, id).FirstOrDefault();
+        }
+
+        /// <summary>
         /// Retrieves all the entities of type <typeparamref name="TEntity"/>.
         /// </summary>
         /// <typeparam name="TEntity">The type of the entity.</typeparam>
@@ -85,6 +202,222 @@ namespace Dommel
             }
 
             return connection.Query<TEntity>(sql: sql, buffered: buffered);
+        }
+
+        /// <summary>
+        /// Retrieves all the entities of type <typeparamref name="TReturn"/> 
+        /// joined with the types specified as type parameters.
+        /// </summary>
+        /// <typeparam name="T1">The first type parameter. This is the source entity.</typeparam>
+        /// <typeparam name="T2">The second type parameter.</typeparam>
+        /// <typeparam name="TReturn">The return type parameter.</typeparam>
+        /// <param name="connection">The connection to the database. This can either be open or closed.</param>
+        /// <param name="map">The mapping to perform on the entities in the result set.</param>
+        /// <param name="buffered">
+        /// A value indicating whether the result of the query should be executed directly, 
+        /// or when the query is materialized (using <c>ToList()</c> for example). 
+        /// </param>
+        /// <returns>
+        /// A collection of entities of type <typeparamref name="TReturn"/> 
+        /// joined with the specified type types.
+        /// </returns>
+        public static IEnumerable<TReturn> GetAll<T1, T2, TReturn>(this IDbConnection connection, Func<T1, T2, TReturn> map, bool buffered = true)
+        {
+            return MultiMap<T1, T2, DontMap, DontMap, DontMap, DontMap, DontMap, TReturn>(connection, map, buffered: buffered);
+        }
+
+        /// <summary>
+        /// Retrieves all the entities of type <typeparamref name="TReturn"/> 
+        /// joined with the types specified as type parameters.
+        /// </summary>
+        /// <typeparam name="T1">The first type parameter. This is the source entity.</typeparam>
+        /// <typeparam name="T2">The second type parameter.</typeparam>
+        /// <typeparam name="T3">The third type parameter.</typeparam>
+        /// <typeparam name="TReturn">The return type parameter.</typeparam>
+        /// <param name="connection">The connection to the database. This can either be open or closed.</param>
+        /// <param name="map">The mapping to perform on the entities in the result set.</param>
+        /// <param name="buffered">
+        /// A value indicating whether the result of the query should be executed directly, 
+        /// or when the query is materialized (using <c>ToList()</c> for example). 
+        /// </param>
+        /// <returns>
+        /// A collection of entities of type <typeparamref name="TReturn"/> 
+        /// joined with the specified type types.
+        /// </returns>
+        public static IEnumerable<TReturn> GetAll<T1, T2, T3, TReturn>(this IDbConnection connection, Func<T1, T2, T3, TReturn> map, bool buffered = true)
+        {
+            return MultiMap<T1, T2, T3, DontMap, DontMap, DontMap, DontMap, TReturn>(connection, map, buffered: buffered);
+        }
+
+        /// <summary>
+        /// Retrieves all the entities of type <typeparamref name="TReturn"/> 
+        /// joined with the types specified as type parameters.
+        /// </summary>
+        /// <typeparam name="T1">The first type parameter. This is the source entity.</typeparam>
+        /// <typeparam name="T2">The second type parameter.</typeparam>
+        /// <typeparam name="T3">The third type parameter.</typeparam>
+        /// <typeparam name="T4">The fourth type parameter.</typeparam>
+        /// <typeparam name="TReturn">The return type parameter.</typeparam>
+        /// <param name="connection">The connection to the database. This can either be open or closed.</param>
+        /// <param name="map">The mapping to perform on the entities in the result set.</param>
+        /// <param name="buffered">
+        /// A value indicating whether the result of the query should be executed directly, 
+        /// or when the query is materialized (using <c>ToList()</c> for example). 
+        /// </param>
+        /// <returns>
+        /// A collection of entities of type <typeparamref name="TReturn"/> 
+        /// joined with the specified type types.
+        /// </returns>
+        public static IEnumerable<TReturn> GetAll<T1, T2, T3, T4, TReturn>(this IDbConnection connection, Func<T1, T2, T3, T4, TReturn> map, bool buffered = true)
+        {
+            return MultiMap<T1, T2, T3, T4, DontMap, DontMap, DontMap, TReturn>(connection, map, buffered: buffered);
+        }
+
+        /// <summary>
+        /// Retrieves all the entities of type <typeparamref name="TReturn"/> 
+        /// joined with the types specified as type parameters.
+        /// </summary>
+        /// <typeparam name="T1">The first type parameter. This is the source entity.</typeparam>
+        /// <typeparam name="T2">The second type parameter.</typeparam>
+        /// <typeparam name="T3">The third type parameter.</typeparam>
+        /// <typeparam name="T4">The fourth type parameter.</typeparam>
+        /// <typeparam name="T5">The fifth type parameter.</typeparam>
+        /// <typeparam name="TReturn">The return type parameter.</typeparam>
+        /// <param name="connection">The connection to the database. This can either be open or closed.</param>
+        /// <param name="map">The mapping to perform on the entities in the result set.</param>
+        /// <param name="buffered">
+        /// A value indicating whether the result of the query should be executed directly, 
+        /// or when the query is materialized (using <c>ToList()</c> for example). 
+        /// </param>
+        /// <returns>
+        /// A collection of entities of type <typeparamref name="TReturn"/> 
+        /// joined with the specified type types.
+        /// </returns>
+        public static IEnumerable<TReturn> GetAll<T1, T2, T3, T4, T5, TReturn>(this IDbConnection connection, Func<T1, T2, T3, T4, T5, TReturn> map, bool buffered = true)
+        {
+            return MultiMap<T1, T2, T3, T4, T5, DontMap, DontMap, TReturn>(connection, map, buffered: buffered);
+        }
+
+        /// <summary>
+        /// Retrieves all the entities of type <typeparamref name="TReturn"/> 
+        /// joined with the types specified as type parameters.
+        /// </summary>
+        /// <typeparam name="T1">The first type parameter. This is the source entity.</typeparam>
+        /// <typeparam name="T2">The second type parameter.</typeparam>
+        /// <typeparam name="T3">The third type parameter.</typeparam>
+        /// <typeparam name="T4">The fourth type parameter.</typeparam>
+        /// <typeparam name="T5">The fifth type parameter.</typeparam>
+        /// <typeparam name="T6">The sixth type parameter.</typeparam>
+        /// <typeparam name="TReturn">The return type parameter.</typeparam>
+        /// <param name="connection">The connection to the database. This can either be open or closed.</param>
+        /// <param name="map">The mapping to perform on the entities in the result set.</param>
+        /// <param name="buffered">
+        /// A value indicating whether the result of the query should be executed directly, 
+        /// or when the query is materialized (using <c>ToList()</c> for example). 
+        /// </param>
+        /// <returns>
+        /// A collection of entities of type <typeparamref name="TReturn"/> 
+        /// joined with the specified type types.
+        /// </returns>
+        public static IEnumerable<TReturn> GetAll<T1, T2, T3, T4, T5, T6, TReturn>(this IDbConnection connection, Func<T1, T2, T3, T4, T5, T6, TReturn> map, bool buffered = true)
+        {
+            return MultiMap<T1, T2, T3, T4, T5, T6, DontMap, TReturn>(connection, map, buffered: buffered);
+        }
+
+        /// <summary>
+        /// Retrieves all the entities of type <typeparamref name="TReturn"/> 
+        /// joined with the types specified as type parameters.
+        /// </summary>
+        /// <typeparam name="T1">The first type parameter. This is the source entity.</typeparam>
+        /// <typeparam name="T2">The second type parameter.</typeparam>
+        /// <typeparam name="T3">The third type parameter.</typeparam>
+        /// <typeparam name="T4">The fourth type parameter.</typeparam>
+        /// <typeparam name="T5">The fifth type parameter.</typeparam>
+        /// <typeparam name="T6">The sixth type parameter.</typeparam>
+        /// <typeparam name="T7">The seventh type parameter.</typeparam>
+        /// <typeparam name="TReturn">The return type parameter.</typeparam>
+        /// <param name="connection">The connection to the database. This can either be open or closed.</param>
+        /// <param name="map">The mapping to perform on the entities in the result set.</param>
+        /// <param name="buffered">
+        /// A value indicating whether the result of the query should be executed directly, 
+        /// or when the query is materialized (using <c>ToList()</c> for example). 
+        /// </param>
+        /// <returns>
+        /// A collection of entities of type <typeparamref name="TReturn"/> 
+        /// joined with the specified type types.
+        /// </returns>
+        public static IEnumerable<TReturn> GetAll<T1, T2, T3, T4, T5, T6, T7, TReturn>(this IDbConnection connection, Func<T1, T2, T3, T4, T5, T6, T7, TReturn> map, bool buffered = true)
+        {
+            return MultiMap<T1, T2, T3, T4, T5, T6, T7, TReturn>(connection, map, buffered: buffered);
+        }
+
+        private static IEnumerable<TReturn> MultiMap<T1, T2, T3, T4, T5, T6, T7, TReturn>(IDbConnection connection, Delegate map, object id = null, bool buffered = true)
+        {
+            var type = typeof (TReturn);
+
+            string tableName = Resolvers.Table(type);
+            var keyProperty = Resolvers.KeyProperty(type);
+            string keyColumnName = Resolvers.Column(keyProperty);
+
+            string sql = string.Format("select * from {0}", tableName);
+
+            var includeTypes = new[]
+                                   {
+                                       typeof (T1),
+                                       typeof (T2),
+                                       typeof (T3),
+                                       typeof (T4),
+                                       typeof (T5),
+                                       typeof (T6),
+                                       typeof (T7)
+                                   }
+                .Where(t => t != typeof (DontMap))
+                .ToArray();
+
+            foreach (var includeType in includeTypes.Where(t => t != type))
+            {
+                var includeTableName = Resolvers.Table(includeType);
+                var includeKeyProperty = Resolvers.KeyProperty(includeType);
+                var includeKeyColumnName = Resolvers.Column(includeKeyProperty);
+                var foreignKeyProperty = Resolvers.ForeignKeyProperty(type, includeType);
+
+                sql += string.Format(" inner join {0} on {1}.{2} = {0}.{3}",
+                    includeTableName,
+                    tableName,
+                    foreignKeyProperty.Name,
+                    includeKeyColumnName);
+            }
+
+            DynamicParameters parameters = null;
+            if (id != null)
+            {
+                sql += string.Format(" where {0}.{1} = @{1}", tableName, keyColumnName);
+
+                parameters = new DynamicParameters();
+                parameters.Add("Id", id);
+            }
+
+            switch (includeTypes.Length)
+            {
+                case 2:
+                    return connection.Query(sql, (Func<T1, T2, TReturn>)map, parameters, buffered: buffered);
+                case 3:
+                    return connection.Query(sql, (Func<T1, T2, T3, TReturn>)map, parameters, buffered: buffered);
+                case 4:
+                    return connection.Query(sql, (Func<T1, T2, T3, T4, TReturn>)map, parameters, buffered: buffered);
+                case 5:
+                    return connection.Query(sql, (Func<T1, T2, T3, T4, T5, TReturn>)map, parameters, buffered: buffered);
+                case 6:
+                    return connection.Query(sql, (Func<T1, T2, T3, T4, T5, T6, TReturn>)map, parameters, buffered: buffered);
+                case 7:
+                    return connection.Query(sql, (Func<T1, T2, T3, T4, T5, T6, T7, TReturn>)map, parameters, buffered: buffered);
+            }
+
+            throw new InvalidOperationException();
+        }
+
+        private class DontMap
+        {
         }
 
         /// <summary>
@@ -528,6 +861,12 @@ namespace Dommel
         /// </summary>
         public static class Resolvers
         {
+            private static readonly IDictionary<Type, string> _typeTableNameCache = new Dictionary<Type, string>();
+            private static readonly IDictionary<string, string> _columnNameCache = new Dictionary<string, string>();
+            private static readonly IDictionary<Type, PropertyInfo> _typeKeyPropertyCache = new Dictionary<Type, PropertyInfo>();
+            private static readonly IDictionary<Type, PropertyInfo[]> _typePropertiesCache = new Dictionary<Type, PropertyInfo[]>();
+            private static readonly IDictionary<string, PropertyInfo> _typeForeignKeyPropertyCache = new Dictionary<string, PropertyInfo>();
+
             /// <summary>
             /// Gets the key property for the specified type, using the configured <see cref="DommelMapper.IKeyPropertyResolver"/>.
             /// </summary>
@@ -540,6 +879,27 @@ namespace Dommel
                 {
                     keyProperty = _keyPropertyResolver.ResolveKeyProperty(type);
                     _typeKeyPropertyCache[type] = keyProperty;
+                }
+
+                return keyProperty;
+            }
+
+            /// <summary>
+            /// Gets the foreign key property for the specified source type and including type 
+            /// using the configure d<see cref="DommelMapper.IForeignKeyPropertyResolver"/>.
+            /// </summary>
+            /// <param name="sourceType">The source type which should contain the foreign key property.</param>
+            /// <param name="includingType">The type of the foreign key relation.</param>
+            /// <returns>The foreign key property for <paramref name="sourceType"/> and <paramref name="includingType"/>.</returns>
+            public static PropertyInfo ForeignKeyProperty(Type sourceType, Type includingType)
+            {
+                string key = string.Format("{0};{1}", sourceType.FullName, includingType.FullName);
+
+                PropertyInfo keyProperty;
+                if (!_typeForeignKeyPropertyCache.TryGetValue(key, out keyProperty))
+                {
+                    keyProperty = _foreignKeyPropertyResolver.ResolveForeignKeyProperty(sourceType, includingType);
+                    _typeForeignKeyPropertyCache[key] = keyProperty;
                 }
 
                 return keyProperty;
@@ -587,7 +947,7 @@ namespace Dommel
             /// <returns>The column name in the database for <paramref name="propertyInfo"/>.</returns>
             public static string Column(PropertyInfo propertyInfo)
             {
-                string key = string.Format("{0}.{1}", propertyInfo.DeclaringType, propertyInfo.Name);
+                string key = String.Format("{0}.{1}", propertyInfo.DeclaringType, propertyInfo.Name);
 
                 string columnName;
                 if (!_columnNameCache.TryGetValue(key, out columnName))
@@ -778,6 +1138,60 @@ namespace Dommel
                 }
 
                 return keyProps[0];
+            }
+        }
+        #endregion
+
+        #region Foreign key property resolving
+        private static IForeignKeyPropertyResolver _foreignKeyPropertyResolver = new DefaultForeignKeyPropertyResolver();
+
+        /// <summary>
+        /// Sets the <see cref="T:DommelMapper.IForeignKeyPropertyResolver"/> implementation for resolving foreign key properties.
+        /// </summary>
+        /// <param name="resolver">An instance of <see cref="T:DommelMapper.IForeignKeyPropertyResolver"/>.</param>
+        public static void SetForeignKeyPropertyResolver(IForeignKeyPropertyResolver resolver)
+        {
+            _foreignKeyPropertyResolver = resolver;
+        }
+
+        /// <summary>
+        /// Defines methods for resolving foreign key properties.
+        /// </summary>
+        public interface IForeignKeyPropertyResolver
+        {
+            /// <summary>
+            /// Resolves the foreign key property for the specified source type and including type.
+            /// </summary>
+            /// <param name="sourceType">The source type which should contain the foreign key property.</param>
+            /// <param name="includingType">The type of the foreign key relation.</param>
+            /// <returns>The foreign key property for <paramref name="sourceType"/> and <paramref name="includingType"/>.</returns>
+            PropertyInfo ResolveForeignKeyProperty(Type sourceType, Type includingType);
+        }
+
+        /// <summary>
+        /// Implements the <see cref="T:DommelMapper.IForeignKeyPropertyResolver"/> interface.
+        /// </summary>
+        public class DefaultForeignKeyPropertyResolver : IForeignKeyPropertyResolver
+        {
+            /// <summary>
+            /// Resolves the foreign key property for the specified source type and including type 
+            /// by using <paramref name="includingType"/> + Id as property name.
+            /// </summary>
+            /// <param name="sourceType">The source type which should contain the foreign key property.</param>
+            /// <param name="includingType">The type of the foreign key relation.</param>
+            /// <returns>The foreign key property for <paramref name="sourceType"/> and <paramref name="includingType"/>.</returns>
+            public virtual PropertyInfo ResolveForeignKeyProperty(Type sourceType, Type includingType)
+            {
+                string foreignKeyName = includingType.Name + "Id";
+                PropertyInfo foreignKeyProperty = sourceType.GetProperties().FirstOrDefault(p => p.Name == foreignKeyName);
+
+                if (foreignKeyProperty == null)
+                {
+                    string msg = string.Format("Could not for foreign key property for type '{0}' in type '{1}'.", includingType.FullName, sourceType.FullName);
+                    throw new Exception(msg);
+                }
+
+                return foreignKeyProperty;
             }
         }
         #endregion
