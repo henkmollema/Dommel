@@ -381,7 +381,10 @@ namespace Dommel
                 var includeKeyColumnName = Resolvers.Column(includeKeyProperty);
                 var foreignKeyProperty = Resolvers.ForeignKeyProperty(type, includeType);
 
-                sql += string.Format(" inner join {0} on {1}.{2} = {0}.{3}",
+                sql += string.Format(" {0} join {1} on {2}.{3} = {1}.{4}",
+                    Nullable.GetUnderlyingType(foreignKeyProperty.PropertyType) != null
+                        ? "left"
+                        : "inner",
                     includeTableName,
                     tableName,
                     foreignKeyProperty.Name,
