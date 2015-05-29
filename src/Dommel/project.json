@@ -1,0 +1,43 @@
+﻿{
+  "version": "1.4.0-beta3",
+  "description": "Simple CRUD operations for Dapper.",
+  "authors": [ "henkmollema" ],
+  "tags": [ "dommel", "crud", "dapper", "database", "orm", "ado.net" ],
+  "projectUrl": "https://github.com/henkmollema/Dommel",
+  "licenseUrl": "http://opensource.org/licenses/MIT",
+  "compile": [ "../Dommel-net40/*.cs" ],
+  "dependencies": {
+    "Dapper": "1.41-beta5"
+  },
+  "frameworks": {
+    "net40": {
+      "frameworkAssemblies": {
+        "System.ComponentModel.DataAnnotations": "4.0.0.0",
+        "System.Data": "4.0.0.0"
+      }
+    },
+    "net45": {
+      "frameworkAssemblies": {
+        "System.ComponentModel.DataAnnotations": "4.0.0.0",
+        "System.Data": "4.0.0.0"
+      }
+    },
+    "dnx451": {
+      "frameworkAssemblies": {
+        "System.ComponentModel.DataAnnotations": "4.0.0.0",
+        "System.Data": "4.0.0.0"
+      }
+    },
+    "dnxcore50": {
+      "dependencies": {
+        "Microsoft.CSharp": "4.0.0-beta-*",
+        "System.Collections": "4.0.10-beta-*",
+        "System.ComponentModel.Annotations": "4.0.10-beta-*",
+        "System.Data.Common": "4.0.0-beta-*",
+        "System.Linq": "4.0.0-beta-*",
+        "System.Reflection": "4.0.10-beta-*",
+        "System.Reflection.Extensions": "4.0.0-beta-*"
+      }
+    }
+  }
+}
