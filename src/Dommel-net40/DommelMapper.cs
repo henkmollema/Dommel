@@ -49,9 +49,9 @@ namespace Dommel
             string sql;
             if (!_getQueryCache.TryGetValue(type, out sql))
             {
-                string tableName = Resolvers.Table(type);
+                var tableName = Resolvers.Table(type);
                 var keyProperty = Resolvers.KeyProperty(type);
-                string keyColumnName = Resolvers.Column(keyProperty);
+                var keyColumnName = Resolvers.Column(keyProperty);
 
                 sql = string.Format("select * from {0} where {1} = @Id", tableName, keyColumnName);
                 _getQueryCache[type] = sql;
@@ -201,7 +201,7 @@ namespace Dommel
             string sql;
             if (!_getAllQueryCache.TryGetValue(type, out sql))
             {
-                string tableName = Resolvers.Table(type);
+                var tableName = Resolvers.Table(type);
                 sql = string.Format("select * from {0}", tableName);
                 _getAllQueryCache[type] = sql;
             }
@@ -360,9 +360,9 @@ namespace Dommel
         {
             var type = typeof (TReturn);
 
-            string tableName = Resolvers.Table(type);
+            var tableName = Resolvers.Table(type);
             var keyProperty = Resolvers.KeyProperty(type);
-            string keyColumnName = Resolvers.Column(keyProperty);
+            var keyColumnName = Resolvers.Column(keyProperty);
 
             string sql = string.Format("select * from {0}", tableName);
 
@@ -446,7 +446,7 @@ namespace Dommel
             string sql;
             if (!_getAllQueryCache.TryGetValue(type, out sql))
             {
-                string tableName = Resolvers.Table(type);
+                var tableName = Resolvers.Table(type);
                 sql = string.Format("select * from {0}", tableName);
                 _getAllQueryCache[type] = sql;
             }
@@ -482,7 +482,7 @@ namespace Dommel
 
             private void AppendToWhere(string conditionOperator, Expression expression)
             {
-                string sqlExpression = VisitExpression(expression).ToString();
+                var sqlExpression = VisitExpression(expression).ToString();
                 AppendToWhere(conditionOperator, sqlExpression);
             }
 
@@ -568,7 +568,7 @@ namespace Dommel
             protected virtual object VisitBinary(BinaryExpression expression)
             {
                 object left, right;
-                string operand = BindOperant(expression.NodeType);
+                var operand = BindOperant(expression.NodeType);
                 if (operand == "and" || operand == "or")
                 {
                     // Left side.
@@ -603,7 +603,7 @@ namespace Dommel
                     left = VisitExpression(expression.Left);
                     right = VisitExpression(expression.Right);
 
-                    string paramName = "p" + _parameterIndex++;
+                    var paramName = "p" + _parameterIndex++;
                     _parameters.Add(paramName, value: right);
                     return string.Format("{0} {1} @{2}", left, operand, paramName);
                 }
@@ -784,12 +784,12 @@ namespace Dommel
             string sql;
             if (!_insertQueryCache.TryGetValue(type, out sql))
             {
-                string tableName = Resolvers.Table(type);
+                var tableName = Resolvers.Table(type);
                 var keyProperty = Resolvers.KeyProperty(type);
                 var typeProperties = Resolvers.Properties(type).Where(p => p != keyProperty).ToList();
 
-                string[] columnNames = typeProperties.Select(Resolvers.Column).ToArray();
-                string[] paramNames = typeProperties.Select(p => "@" + p.Name).ToArray();
+                var columnNames = typeProperties.Select(Resolvers.Column).ToArray();
+                var paramNames = typeProperties.Select(p => "@" + p.Name).ToArray();
 
                 var builder = GetBuilder(connection);
 
@@ -818,11 +818,11 @@ namespace Dommel
             string sql;
             if (!_updateQueryCache.TryGetValue(type, out sql))
             {
-                string tableName = Resolvers.Table(type);
+                var tableName = Resolvers.Table(type);
                 var keyProperty = Resolvers.KeyProperty(type);
                 var typeProperties = Resolvers.Properties(type).Where(p => p != keyProperty).ToList();
 
-                string[] columnNames = typeProperties.Select(p => string.Format("{0} = @{1}", Resolvers.Column(p), p.Name)).ToArray();
+                var columnNames = typeProperties.Select(p => string.Format("{0} = @{1}", Resolvers.Column(p), p.Name)).ToArray();
 
                 sql = string.Format("update {0} set {1} where {2} = @{3}",
                     tableName,
@@ -852,9 +852,9 @@ namespace Dommel
             string sql;
             if (!_deleteQueryCache.TryGetValue(type, out sql))
             {
-                string tableName = Resolvers.Table(type);
+                var tableName = Resolvers.Table(type);
                 var keyProperty = Resolvers.KeyProperty(type);
-                string keyColumnName = Resolvers.Column(keyProperty);
+                var keyColumnName = Resolvers.Column(keyProperty);
 
                 sql = string.Format("delete from {0} where {1} = @{2}", tableName, keyColumnName, keyProperty.Name);
 
@@ -955,7 +955,7 @@ namespace Dommel
             /// <returns>The column name in the database for <paramref name="propertyInfo"/>.</returns>
             public static string Column(PropertyInfo propertyInfo)
             {
-                string key = String.Format("{0}.{1}", propertyInfo.DeclaringType, propertyInfo.Name);
+                string key = string.Format("{0}.{1}", propertyInfo.DeclaringType, propertyInfo.Name);
 
                 string columnName;
                 if (!_columnNameCache.TryGetValue(key, out columnName))
@@ -1128,10 +1128,10 @@ namespace Dommel
             /// </summary>
             public virtual PropertyInfo ResolveKeyProperty(Type type)
             {
-                List<PropertyInfo> allProps = Resolvers.Properties(type).ToList();
+                var allProps = Resolvers.Properties(type).ToList();
 
                 // Look for properties with the [Key] attribute.
-                List<PropertyInfo> keyProps = allProps.Where(p => p.GetCustomAttributes(true).Any(a => a is KeyAttribute)).ToList();
+                var keyProps = allProps.Where(p => p.GetCustomAttributes(true).Any(a => a is KeyAttribute)).ToList();
 
                 if (keyProps.Count == 0)
                 {
@@ -1194,12 +1194,12 @@ namespace Dommel
             /// <returns>The foreign key property for <paramref name="sourceType"/> and <paramref name="includingType"/>.</returns>
             public virtual PropertyInfo ResolveForeignKeyProperty(Type sourceType, Type includingType)
             {
-                string foreignKeyName = includingType.Name + "Id";
-                PropertyInfo foreignKeyProperty = sourceType.GetProperties().FirstOrDefault(p => p.Name == foreignKeyName);
+                var foreignKeyName = includingType.Name + "Id";
+                var foreignKeyProperty = sourceType.GetProperties().FirstOrDefault(p => p.Name == foreignKeyName);
 
                 if (foreignKeyProperty == null)
                 {
-                    string msg = string.Format("Could not for foreign key property for type '{0}' in type '{1}'.", includingType.FullName, sourceType.FullName);
+                    var msg = string.Format("Could not for foreign key property for type '{0}' in type '{1}'.", includingType.FullName, sourceType.FullName);
                     throw new Exception(msg);
                 }
 
@@ -1320,7 +1320,7 @@ namespace Dommel
 
         private static ISqlBuilder GetBuilder(IDbConnection connection)
         {
-            string connectionName = connection.GetType().Name.ToLower();
+            var connectionName = connection.GetType().Name.ToLower();
             ISqlBuilder builder;
             return _sqlBuilders.TryGetValue(connectionName, out builder) ? builder : new SqlServerSqlBuilder();
         }
@@ -1390,14 +1390,14 @@ namespace Dommel
         {
             public string BuildInsert(string tableName, string[] columnNames, string[] paramNames, PropertyInfo keyProperty)
             {
-                string sql = string.Format("insert into {0} ({1}) values ({2}) select last_insert_rowid() id",
+                var sql = string.Format("insert into {0} ({1}) values ({2}) select last_insert_rowid() id",
                     tableName,
                     string.Join(", ", columnNames),
                     string.Join(", ", paramNames));
 
                 if (keyProperty != null)
                 {
-                    string keyColumnName = Resolvers.Column(keyProperty);
+                    var keyColumnName = Resolvers.Column(keyProperty);
 
                     sql += " RETURNING " + keyColumnName;
                 }
