@@ -358,13 +358,11 @@ namespace Dommel
 
         private static IEnumerable<TReturn> MultiMap<T1, T2, T3, T4, T5, T6, T7, TReturn>(IDbConnection connection, Delegate map, object id = null, bool buffered = true)
         {
-            var type = typeof (TReturn);
+            var resultType = typeof(TReturn);
+            var resultTableName = Resolvers.Table(resultType);
+            var resultTableKeyColumnName = Resolvers.Column(Resolvers.KeyProperty(resultType));
 
-            var tableName = Resolvers.Table(type);
-            var keyProperty = Resolvers.KeyProperty(type);
-            var keyColumnName = Resolvers.Column(keyProperty);
-
-            string sql = string.Format("select * from {0}", tableName);
+            var sql = string.Format("select * from {0}", resultTableName);
 
             var includeTypes = new[]
                                    {
@@ -379,27 +377,64 @@ namespace Dommel
                 .Where(t => t != typeof (DontMap))
                 .ToArray();
 
-            foreach (var includeType in includeTypes.Where(t => t != type))
+            for (var i = 1; i < includeTypes.Length; i++)
             {
-                var includeTableName = Resolvers.Table(includeType);
-                var includeKeyProperty = Resolvers.KeyProperty(includeType);
-                var includeKeyColumnName = Resolvers.Column(includeKeyProperty);
-                var foreignKeyProperty = Resolvers.ForeignKeyProperty(type, includeType);
+                // Determine the table to join with.
+                var sourceType = includeTypes[i - 1];
+                var sourceTableName = Resolvers.Table(sourceType);
 
-                sql += string.Format(" {0} join {1} on {2}.{3} = {1}.{4}",
-                    Nullable.GetUnderlyingType(foreignKeyProperty.PropertyType) != null
-                        ? "left"
-                        : "inner",
-                    includeTableName,
-                    tableName,
-                    foreignKeyProperty.Name,
-                    includeKeyColumnName);
+                // Determine the table name of the joined table.
+                var includeType = includeTypes[i];
+                var foreignKeyTableName = Resolvers.Table(includeType);
+
+                // Determine the foreign key and the relationship type.
+                ForeignKeyRelation relation;
+                var foreignKeyProperty = Resolvers.ForeignKeyProperty(sourceType, includeType, out relation);
+                var foreignKeyPropertyName = Resolvers.Column(foreignKeyProperty);
+
+                // If the foreign key property is nullable, use a left-join.
+                var joinType = Nullable.GetUnderlyingType(foreignKeyProperty.PropertyType) != null
+                                   ? "left"
+                                   : "inner";
+
+                switch (relation)
+                {
+                    case ForeignKeyRelation.OneToOne:
+                        // Determine the primary key of the foreign key table.
+                        var foreignKeyTableKeyColumName = Resolvers.Column(Resolvers.KeyProperty(includeType));
+
+                        sql += string.Format(" {0} join {1} on {2}.{3} = {1}.{4}",
+                            joinType,
+                            foreignKeyTableName,
+                            sourceTableName,
+                            foreignKeyPropertyName,
+                            foreignKeyTableKeyColumName);
+                        break;
+
+                    case ForeignKeyRelation.OneToMany:
+                        // Determine the primary key of the source table.
+                        var sourceKeyColumnName = Resolvers.Column(Resolvers.KeyProperty(sourceType));
+
+                        sql += string.Format(" {0} join {1} on {2}.{3} = {1}.{4}",
+                            joinType,
+                            foreignKeyTableName,
+                            sourceTableName,
+                            sourceKeyColumnName,
+                            foreignKeyPropertyName);
+                        break;
+
+                    case ForeignKeyRelation.ManyToMany:
+                        throw new NotImplementedException("Many-to-many relationships are not supported yet.");
+
+                    default:
+                        throw new NotImplementedException(string.Format("Foreign key relation type '{0}' is not implemented.", relation));
+                }
             }
 
             DynamicParameters parameters = null;
             if (id != null)
             {
-                sql += string.Format(" where {0}.{1} = @{1}", tableName, keyColumnName);
+                sql += string.Format(" where {0}.{1} = @{1}", resultTableName, resultTableKeyColumnName);
 
                 parameters = new DynamicParameters();
                 parameters.Add("Id", id);
@@ -873,7 +908,7 @@ namespace Dommel
             private static readonly IDictionary<string, string> _columnNameCache = new Dictionary<string, string>();
             private static readonly IDictionary<Type, PropertyInfo> _typeKeyPropertyCache = new Dictionary<Type, PropertyInfo>();
             private static readonly IDictionary<Type, PropertyInfo[]> _typePropertiesCache = new Dictionary<Type, PropertyInfo[]>();
-            private static readonly IDictionary<string, PropertyInfo> _typeForeignKeyPropertyCache = new Dictionary<string, PropertyInfo>();
+            private static readonly IDictionary<string, ForeignKeyInfo> _typeForeignKeyPropertyCache = new Dictionary<string, ForeignKeyInfo>();
 
             /// <summary>
             /// Gets the key property for the specified type, using the configured <see cref="DommelMapper.IKeyPropertyResolver"/>.
@@ -894,23 +929,42 @@ namespace Dommel
 
             /// <summary>
             /// Gets the foreign key property for the specified source type and including type
-            /// using the configure d<see cref="DommelMapper.IForeignKeyPropertyResolver"/>.
+            /// using the configure d<see cref="IForeignKeyPropertyResolver"/>.
             /// </summary>
             /// <param name="sourceType">The source type which should contain the foreign key property.</param>
             /// <param name="includingType">The type of the foreign key relation.</param>
+            /// <param name="foreignKeyRelation">The foreign key relationship type.</param>
             /// <returns>The foreign key property for <paramref name="sourceType"/> and <paramref name="includingType"/>.</returns>
-            public static PropertyInfo ForeignKeyProperty(Type sourceType, Type includingType)
+            public static PropertyInfo ForeignKeyProperty(Type sourceType, Type includingType, out ForeignKeyRelation foreignKeyRelation)
             {
-                string key = string.Format("{0};{1}", sourceType.FullName, includingType.FullName);
+                var key = string.Format("{0};{1}", sourceType.FullName, includingType.FullName);
 
-                PropertyInfo keyProperty;
-                if (!_typeForeignKeyPropertyCache.TryGetValue(key, out keyProperty))
+                ForeignKeyInfo foreignKeyInfo;
+                if (!_typeForeignKeyPropertyCache.TryGetValue(key, out foreignKeyInfo))
                 {
-                    keyProperty = _foreignKeyPropertyResolver.ResolveForeignKeyProperty(sourceType, includingType);
-                    _typeForeignKeyPropertyCache[key] = keyProperty;
+                    // Resole the property and relation.
+                    var foreignKeyProperty = _foreignKeyPropertyResolver.ResolveForeignKeyProperty(sourceType, includingType, out foreignKeyRelation);
+
+                    // Cache the info.
+                    foreignKeyInfo = new ForeignKeyInfo(foreignKeyProperty, foreignKeyRelation);
+                    _typeForeignKeyPropertyCache[key] = foreignKeyInfo;
                 }
 
-                return keyProperty;
+                foreignKeyRelation = foreignKeyInfo.Relation;
+                return foreignKeyInfo.PropertyInfo;
+            }
+
+            private class ForeignKeyInfo
+            {
+                public ForeignKeyInfo(PropertyInfo propertyInfo, ForeignKeyRelation relation)
+                {
+                    PropertyInfo = propertyInfo;
+                    Relation = relation;
+                }
+
+                public PropertyInfo PropertyInfo { get; private set; }
+
+                public ForeignKeyRelation Relation { get; private set; }
             }
 
             /// <summary>
@@ -955,7 +1009,7 @@ namespace Dommel
             /// <returns>The column name in the database for <paramref name="propertyInfo"/>.</returns>
             public static string Column(PropertyInfo propertyInfo)
             {
-                string key = string.Format("{0}.{1}", propertyInfo.DeclaringType, propertyInfo.Name);
+                var key = string.Format("{0}.{1}", propertyInfo.DeclaringType, propertyInfo.Name);
 
                 string columnName;
                 if (!_columnNameCache.TryGetValue(key, out columnName))
@@ -994,7 +1048,7 @@ namespace Dommel
             }
         }
 
-#region Property resolving
+        #region Property resolving
         private static IPropertyResolver _propertyResolver = new DefaultPropertyResolver();
 
         /// <summary>
@@ -1026,7 +1080,7 @@ namespace Dommel
         public abstract class PropertyResolverBase : IPropertyResolver
         {
             private static readonly HashSet<Type> _primitiveTypes = new HashSet<Type>
-                                                                        {
+                                                                    {
                                                                             typeof (object),
                                                                             typeof (string),
                                                                             typeof(Guid),
@@ -1035,7 +1089,7 @@ namespace Dommel
                                                                             typeof (float),
                                                                             typeof (DateTime),
                                                                             typeof (TimeSpan)
-                                                                        };
+                                                                    };
 
             /// <summary>
             /// Resolves the properties to be mapped for the specified type.
@@ -1090,9 +1144,9 @@ namespace Dommel
                 return FilterComplexTypes(type.GetProperties());
             }
         }
-#endregion
+        #endregion
 
-#region Key property resolving
+        #region Key property resolving
         private static IKeyPropertyResolver _keyPropertyResolver = new DefaultKeyPropertyResolver();
 
         /// <summary>
@@ -1153,9 +1207,30 @@ namespace Dommel
                 return keyProps[0];
             }
         }
-#endregion
+        #endregion
 
-#region Foreign key property resolving
+        #region Foreign key property resolving
+        /// <summary>
+        /// Describes a foreign key relationship.
+        /// </summary>
+        public enum ForeignKeyRelation
+        {
+            /// <summary>
+            /// Specifies a one-to-one relationship.
+            /// </summary>
+            OneToOne,
+
+            /// <summary>
+            /// Specifies a one-to-many relationship.
+            /// </summary>
+            OneToMany,
+
+            /// <summary>
+            /// Specifies a many-to-many relationship.
+            /// </summary>
+            ManyToMany
+        }
+
         private static IForeignKeyPropertyResolver _foreignKeyPropertyResolver = new DefaultForeignKeyPropertyResolver();
 
         /// <summary>
@@ -1177,8 +1252,9 @@ namespace Dommel
             /// </summary>
             /// <param name="sourceType">The source type which should contain the foreign key property.</param>
             /// <param name="includingType">The type of the foreign key relation.</param>
+            /// <param name="foreignKeyRelation">The foreign key relationship type.</param>
             /// <returns>The foreign key property for <paramref name="sourceType"/> and <paramref name="includingType"/>.</returns>
-            PropertyInfo ResolveForeignKeyProperty(Type sourceType, Type includingType);
+            PropertyInfo ResolveForeignKeyProperty(Type sourceType, Type includingType, out ForeignKeyRelation foreignKeyRelation);
         }
 
         /// <summary>
@@ -1192,24 +1268,48 @@ namespace Dommel
             /// </summary>
             /// <param name="sourceType">The source type which should contain the foreign key property.</param>
             /// <param name="includingType">The type of the foreign key relation.</param>
+            /// <param name="foreignKeyRelation">The foreign key relationship type.</param>
             /// <returns>The foreign key property for <paramref name="sourceType"/> and <paramref name="includingType"/>.</returns>
-            public virtual PropertyInfo ResolveForeignKeyProperty(Type sourceType, Type includingType)
+            public virtual PropertyInfo ResolveForeignKeyProperty(Type sourceType, Type includingType, out ForeignKeyRelation foreignKeyRelation)
             {
+                var oneToOneFk = ResolveOneToOne(sourceType, includingType);
+                if (oneToOneFk != null)
+                {
+                    foreignKeyRelation = ForeignKeyRelation.OneToOne;
+                    return oneToOneFk;
+                }
+
+                var oneToManyFk = ResolveOneToMany(sourceType, includingType);
+                if (oneToManyFk != null)
+                {
+                    foreignKeyRelation = ForeignKeyRelation.OneToMany;
+                    return oneToManyFk;
+                }
+
+                var msg = string.Format("Could not resolve foreign key property. Source type '{0}'; including type: '{1}'.", sourceType.FullName, includingType.FullName);
+                throw new Exception(msg);
+            }
+
+            private static PropertyInfo ResolveOneToOne(Type sourceType, Type includingType)
+            {
+                // Look for the foreign key on the source type.
                 var foreignKeyName = includingType.Name + "Id";
                 var foreignKeyProperty = sourceType.GetProperties().FirstOrDefault(p => p.Name == foreignKeyName);
 
-                if (foreignKeyProperty == null)
-                {
-                    var msg = string.Format("Could not for foreign key property for type '{0}' in type '{1}'.", includingType.FullName, sourceType.FullName);
-                    throw new Exception(msg);
-                }
+                return foreignKeyProperty;
+            }
 
+            private static PropertyInfo ResolveOneToMany(Type sourceType, Type includingType)
+            {
+                // Look for the foreign key on the including type.
+                var foreignKeyName = sourceType.Name + "Id";
+                var foreignKeyProperty = includingType.GetProperties().FirstOrDefault(p => p.Name == foreignKeyName);
                 return foreignKeyProperty;
             }
         }
-#endregion
+        #endregion
 
-#region Table name resolving
+        #region Table name resolving
         private static ITableNameResolver _tableNameResolver = new DefaultTableNameResolver();
 
         /// <summary>
@@ -1247,7 +1347,7 @@ namespace Dommel
             /// </summary>
             public virtual string ResolveTableName(Type type)
             {
-                string name = type.Name + "s";
+                var name = type.Name + "s";
 #if DNXCORE50
                 if (type.GetTypeInfo().IsInterface && name.StartsWith("I"))
 #else
@@ -1261,9 +1361,9 @@ namespace Dommel
                 return name;
             }
         }
-#endregion
+        #endregion
 
-#region Column name resolving
+        #region Column name resolving
         private static IColumnNameResolver _columnNameResolver = new DefaultColumnNameResolver();
 
         /// <summary>
@@ -1302,9 +1402,9 @@ namespace Dommel
                 return propertyInfo.Name;
             }
         }
-#endregion
+        #endregion
 
-#region Sql builders
+        #region Sql builders
         /// <summary>
         /// Adds a custom implementation of <see cref="T:DommelMapper.ISqlBuilder"/>
         /// for the specified ADO.NET connection type.
@@ -1411,6 +1511,6 @@ namespace Dommel
                 return sql;
             }
         }
-#endregion
+        #endregion
     }
 }
