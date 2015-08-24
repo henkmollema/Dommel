@@ -64,7 +64,7 @@ namespace Dommel
         }
 
         /// <summary>
-        /// Retrieves the entity of type <typeparamref name="TReturn"/> with the specified id 
+        /// Retrieves the entity of type <typeparamref name="TReturn"/> with the specified id
         /// joined with the types specified as type parameters.
         /// </summary>
         /// <typeparam name="T1">The first type parameter. This is the source entity.</typeparam>
@@ -80,7 +80,7 @@ namespace Dommel
         }
 
         /// <summary>
-        /// Retrieves the entity of type <typeparamref name="TReturn"/> with the specified id 
+        /// Retrieves the entity of type <typeparamref name="TReturn"/> with the specified id
         /// joined with the types specified as type parameters.
         /// </summary>
         /// <typeparam name="T1">The first type parameter. This is the source entity.</typeparam>
@@ -99,7 +99,7 @@ namespace Dommel
         }
 
         /// <summary>
-        /// Retrieves the entity of type <typeparamref name="TReturn"/> with the specified id 
+        /// Retrieves the entity of type <typeparamref name="TReturn"/> with the specified id
         /// joined with the types specified as type parameters.
         /// </summary>
         /// <typeparam name="T1">The first type parameter. This is the source entity.</typeparam>
@@ -119,7 +119,7 @@ namespace Dommel
         }
 
         /// <summary>
-        /// Retrieves the entity of type <typeparamref name="TReturn"/> with the specified id 
+        /// Retrieves the entity of type <typeparamref name="TReturn"/> with the specified id
         /// joined with the types specified as type parameters.
         /// </summary>
         /// <typeparam name="T1">The first type parameter. This is the source entity.</typeparam>
@@ -140,7 +140,7 @@ namespace Dommel
         }
 
         /// <summary>
-        /// Retrieves the entity of type <typeparamref name="TReturn"/> with the specified id 
+        /// Retrieves the entity of type <typeparamref name="TReturn"/> with the specified id
         /// joined with the types specified as type parameters.
         /// </summary>
         /// <typeparam name="T1">The first type parameter. This is the source entity.</typeparam>
@@ -162,7 +162,7 @@ namespace Dommel
         }
 
         /// <summary>
-        /// Retrieves the entity of type <typeparamref name="TReturn"/> with the specified id 
+        /// Retrieves the entity of type <typeparamref name="TReturn"/> with the specified id
         /// joined with the types specified as type parameters.
         /// </summary>
         /// <typeparam name="T1">The first type parameter. This is the source entity.</typeparam>
@@ -190,8 +190,8 @@ namespace Dommel
         /// <typeparam name="TEntity">The type of the entity.</typeparam>
         /// <param name="connection">The connection to the database. This can either be open or closed.</param>
         /// <param name="buffered">
-        /// A value indicating whether the result of the query should be executed directly, 
-        /// or when the query is materialized (using <c>ToList()</c> for example). 
+        /// A value indicating whether the result of the query should be executed directly,
+        /// or when the query is materialized (using <c>ToList()</c> for example).
         /// </param>
         /// <returns>A collection of entities of type <typeparamref name="TEntity"/>.</returns>
         public static IEnumerable<TEntity> GetAll<TEntity>(this IDbConnection connection, bool buffered = true) where TEntity : class
@@ -210,7 +210,7 @@ namespace Dommel
         }
 
         /// <summary>
-        /// Retrieves all the entities of type <typeparamref name="TReturn"/> 
+        /// Retrieves all the entities of type <typeparamref name="TReturn"/>
         /// joined with the types specified as type parameters.
         /// </summary>
         /// <typeparam name="T1">The first type parameter. This is the source entity.</typeparam>
@@ -219,11 +219,11 @@ namespace Dommel
         /// <param name="connection">The connection to the database. This can either be open or closed.</param>
         /// <param name="map">The mapping to perform on the entities in the result set.</param>
         /// <param name="buffered">
-        /// A value indicating whether the result of the query should be executed directly, 
-        /// or when the query is materialized (using <c>ToList()</c> for example). 
+        /// A value indicating whether the result of the query should be executed directly,
+        /// or when the query is materialized (using <c>ToList()</c> for example).
         /// </param>
         /// <returns>
-        /// A collection of entities of type <typeparamref name="TReturn"/> 
+        /// A collection of entities of type <typeparamref name="TReturn"/>
         /// joined with the specified type types.
         /// </returns>
         public static IEnumerable<TReturn> GetAll<T1, T2, TReturn>(this IDbConnection connection, Func<T1, T2, TReturn> map, bool buffered = true)
@@ -232,7 +232,7 @@ namespace Dommel
         }
 
         /// <summary>
-        /// Retrieves all the entities of type <typeparamref name="TReturn"/> 
+        /// Retrieves all the entities of type <typeparamref name="TReturn"/>
         /// joined with the types specified as type parameters.
         /// </summary>
         /// <typeparam name="T1">The first type parameter. This is the source entity.</typeparam>
@@ -242,11 +242,11 @@ namespace Dommel
         /// <param name="connection">The connection to the database. This can either be open or closed.</param>
         /// <param name="map">The mapping to perform on the entities in the result set.</param>
         /// <param name="buffered">
-        /// A value indicating whether the result of the query should be executed directly, 
-        /// or when the query is materialized (using <c>ToList()</c> for example). 
+        /// A value indicating whether the result of the query should be executed directly,
+        /// or when the query is materialized (using <c>ToList()</c> for example).
         /// </param>
         /// <returns>
-        /// A collection of entities of type <typeparamref name="TReturn"/> 
+        /// A collection of entities of type <typeparamref name="TReturn"/>
         /// joined with the specified type types.
         /// </returns>
         public static IEnumerable<TReturn> GetAll<T1, T2, T3, TReturn>(this IDbConnection connection, Func<T1, T2, T3, TReturn> map, bool buffered = true)
@@ -255,7 +255,7 @@ namespace Dommel
         }
 
         /// <summary>
-        /// Retrieves all the entities of type <typeparamref name="TReturn"/> 
+        /// Retrieves all the entities of type <typeparamref name="TReturn"/>
         /// joined with the types specified as type parameters.
         /// </summary>
         /// <typeparam name="T1">The first type parameter. This is the source entity.</typeparam>
@@ -266,11 +266,11 @@ namespace Dommel
         /// <param name="connection">The connection to the database. This can either be open or closed.</param>
         /// <param name="map">The mapping to perform on the entities in the result set.</param>
         /// <param name="buffered">
-        /// A value indicating whether the result of the query should be executed directly, 
-        /// or when the query is materialized (using <c>ToList()</c> for example). 
+        /// A value indicating whether the result of the query should be executed directly,
+        /// or when the query is materialized (using <c>ToList()</c> for example).
         /// </param>
         /// <returns>
-        /// A collection of entities of type <typeparamref name="TReturn"/> 
+        /// A collection of entities of type <typeparamref name="TReturn"/>
         /// joined with the specified type types.
         /// </returns>
         public static IEnumerable<TReturn> GetAll<T1, T2, T3, T4, TReturn>(this IDbConnection connection, Func<T1, T2, T3, T4, TReturn> map, bool buffered = true)
@@ -279,7 +279,7 @@ namespace Dommel
         }
 
         /// <summary>
-        /// Retrieves all the entities of type <typeparamref name="TReturn"/> 
+        /// Retrieves all the entities of type <typeparamref name="TReturn"/>
         /// joined with the types specified as type parameters.
         /// </summary>
         /// <typeparam name="T1">The first type parameter. This is the source entity.</typeparam>
@@ -291,11 +291,11 @@ namespace Dommel
         /// <param name="connection">The connection to the database. This can either be open or closed.</param>
         /// <param name="map">The mapping to perform on the entities in the result set.</param>
         /// <param name="buffered">
-        /// A value indicating whether the result of the query should be executed directly, 
-        /// or when the query is materialized (using <c>ToList()</c> for example). 
+        /// A value indicating whether the result of the query should be executed directly,
+        /// or when the query is materialized (using <c>ToList()</c> for example).
         /// </param>
         /// <returns>
-        /// A collection of entities of type <typeparamref name="TReturn"/> 
+        /// A collection of entities of type <typeparamref name="TReturn"/>
         /// joined with the specified type types.
         /// </returns>
         public static IEnumerable<TReturn> GetAll<T1, T2, T3, T4, T5, TReturn>(this IDbConnection connection, Func<T1, T2, T3, T4, T5, TReturn> map, bool buffered = true)
@@ -304,7 +304,7 @@ namespace Dommel
         }
 
         /// <summary>
-        /// Retrieves all the entities of type <typeparamref name="TReturn"/> 
+        /// Retrieves all the entities of type <typeparamref name="TReturn"/>
         /// joined with the types specified as type parameters.
         /// </summary>
         /// <typeparam name="T1">The first type parameter. This is the source entity.</typeparam>
@@ -317,11 +317,11 @@ namespace Dommel
         /// <param name="connection">The connection to the database. This can either be open or closed.</param>
         /// <param name="map">The mapping to perform on the entities in the result set.</param>
         /// <param name="buffered">
-        /// A value indicating whether the result of the query should be executed directly, 
-        /// or when the query is materialized (using <c>ToList()</c> for example). 
+        /// A value indicating whether the result of the query should be executed directly,
+        /// or when the query is materialized (using <c>ToList()</c> for example).
         /// </param>
         /// <returns>
-        /// A collection of entities of type <typeparamref name="TReturn"/> 
+        /// A collection of entities of type <typeparamref name="TReturn"/>
         /// joined with the specified type types.
         /// </returns>
         public static IEnumerable<TReturn> GetAll<T1, T2, T3, T4, T5, T6, TReturn>(this IDbConnection connection, Func<T1, T2, T3, T4, T5, T6, TReturn> map, bool buffered = true)
@@ -330,7 +330,7 @@ namespace Dommel
         }
 
         /// <summary>
-        /// Retrieves all the entities of type <typeparamref name="TReturn"/> 
+        /// Retrieves all the entities of type <typeparamref name="TReturn"/>
         /// joined with the types specified as type parameters.
         /// </summary>
         /// <typeparam name="T1">The first type parameter. This is the source entity.</typeparam>
@@ -344,11 +344,11 @@ namespace Dommel
         /// <param name="connection">The connection to the database. This can either be open or closed.</param>
         /// <param name="map">The mapping to perform on the entities in the result set.</param>
         /// <param name="buffered">
-        /// A value indicating whether the result of the query should be executed directly, 
-        /// or when the query is materialized (using <c>ToList()</c> for example). 
+        /// A value indicating whether the result of the query should be executed directly,
+        /// or when the query is materialized (using <c>ToList()</c> for example).
         /// </param>
         /// <returns>
-        /// A collection of entities of type <typeparamref name="TReturn"/> 
+        /// A collection of entities of type <typeparamref name="TReturn"/>
         /// joined with the specified type types.
         /// </returns>
         public static IEnumerable<TReturn> GetAll<T1, T2, T3, T4, T5, T6, T7, TReturn>(this IDbConnection connection, Func<T1, T2, T3, T4, T5, T6, T7, TReturn> map, bool buffered = true)
@@ -435,8 +435,8 @@ namespace Dommel
         /// <param name="connection">The connection to the database. This can either be open or closed.</param>
         /// <param name="predicate">A predicate to filter the results.</param>
         /// <param name="buffered">
-        /// A value indicating whether the result of the query should be executed directly, 
-        /// or when the query is materialized (using <c>ToList()</c> for example). 
+        /// A value indicating whether the result of the query should be executed directly,
+        /// or when the query is materialized (using <c>ToList()</c> for example).
         /// </param>
         /// <returns>A collection of entities of type <typeparamref name="TEntity"/> matching the specified <paramref name="predicate"/>.</returns>
         public static IEnumerable<TEntity> Select<TEntity>(this IDbConnection connection, Expression<Func<TEntity, bool>> predicate, bool buffered = true)
@@ -698,7 +698,7 @@ namespace Dommel
             }
 
             /// <summary>
-            /// Returns the expression operand for the specified expression type. 
+            /// Returns the expression operand for the specified expression type.
             /// </summary>
             /// <param name="expressionType">The expression type for node of an expression tree.</param>
             /// <returns>The expression operand equivalent of the <paramref name="expressionType"/>.</returns>
@@ -803,7 +803,7 @@ namespace Dommel
         }
 
         /// <summary>
-        /// Updates the values of the specified entity in the database. 
+        /// Updates the values of the specified entity in the database.
         /// The return value indicates whether the operation succeeded.
         /// </summary>
         /// <typeparam name="TEntity">The type of the entity.</typeparam>
@@ -837,7 +837,7 @@ namespace Dommel
         }
 
         /// <summary>
-        /// Deletes the specified entity from the database. 
+        /// Deletes the specified entity from the database.
         /// Returns a value indicating whether the operation succeeded.
         /// </summary>
         /// <typeparam name="TEntity">The type of the entity.</typeparam>
@@ -893,7 +893,7 @@ namespace Dommel
             }
 
             /// <summary>
-            /// Gets the foreign key property for the specified source type and including type 
+            /// Gets the foreign key property for the specified source type and including type
             /// using the configure d<see cref="DommelMapper.IForeignKeyPropertyResolver"/>.
             /// </summary>
             /// <param name="sourceType">The source type which should contain the foreign key property.</param>
@@ -931,7 +931,7 @@ namespace Dommel
             }
 
             /// <summary>
-            /// Gets the name of the table in the database for the specified type, 
+            /// Gets the name of the table in the database for the specified type,
             /// using the configured <see cref="DommelMapper.ITableNameResolver"/>.
             /// </summary>
             /// <param name="type">The <see cref="System.Type"/> to get the table name for.</param>
@@ -998,7 +998,7 @@ namespace Dommel
         private static IPropertyResolver _propertyResolver = new DefaultPropertyResolver();
 
         /// <summary>
-        /// Defines methods for resolving the properties of entities. 
+        /// Defines methods for resolving the properties of entities.
         /// Custom implementations can be registerd with <see cref="M:SetPropertyResolver()"/>.
         /// </summary>
         public interface IPropertyResolver
@@ -1029,6 +1029,7 @@ namespace Dommel
                                                                         {
                                                                             typeof (object),
                                                                             typeof (string),
+                                                                            typeof(Guid),
                                                                             typeof (decimal),
                                                                             typeof (double),
                                                                             typeof (float),
@@ -1104,7 +1105,7 @@ namespace Dommel
         }
 
         /// <summary>
-        /// Defines methods for resolving the key property of entities. 
+        /// Defines methods for resolving the key property of entities.
         /// Custom implementations can be registerd with <see cref="M:SetKeyPropertyResolver()"/>.
         /// </summary>
         public interface IKeyPropertyResolver
@@ -1186,7 +1187,7 @@ namespace Dommel
         public class DefaultForeignKeyPropertyResolver : IForeignKeyPropertyResolver
         {
             /// <summary>
-            /// Resolves the foreign key property for the specified source type and including type 
+            /// Resolves the foreign key property for the specified source type and including type
             /// by using <paramref name="includingType"/> + Id as property name.
             /// </summary>
             /// <param name="sourceType">The source type which should contain the foreign key property.</param>
@@ -1221,7 +1222,7 @@ namespace Dommel
         }
 
         /// <summary>
-        /// Defines methods for resolving table names of entities. 
+        /// Defines methods for resolving table names of entities.
         /// Custom implementations can be registerd with <see cref="M:SetTableNameResolver()"/>.
         /// </summary>
         public interface ITableNameResolver
@@ -1235,13 +1236,13 @@ namespace Dommel
         }
 
         /// <summary>
-        /// Implements the <see cref="T:Dommel.ITableNameResolver"/> interface by resolving table names 
-        /// by making the type name plural and removing the 'I' prefix for interfaces. 
+        /// Implements the <see cref="T:Dommel.ITableNameResolver"/> interface by resolving table names
+        /// by making the type name plural and removing the 'I' prefix for interfaces.
         /// </summary>
         public class DefaultTableNameResolver : ITableNameResolver
         {
             /// <summary>
-            /// Resolves the table name by making the type plural (+ 's', Product -> Products) 
+            /// Resolves the table name by making the type plural (+ 's', Product -> Products)
             /// and removing the 'I' prefix for interfaces.
             /// </summary>
             public virtual string ResolveTableName(Type type)
@@ -1275,7 +1276,7 @@ namespace Dommel
         }
 
         /// <summary>
-        /// Defines methods for resolving column names for entities. 
+        /// Defines methods for resolving column names for entities.
         /// Custom implementations can be registerd with <see cref="M:SetColumnNameResolver()"/>.
         /// </summary>
         public interface IColumnNameResolver
@@ -1305,11 +1306,11 @@ namespace Dommel
 
 #region Sql builders
         /// <summary>
-        /// Adds a custom implementation of <see cref="T:DommelMapper.ISqlBuilder"/> 
+        /// Adds a custom implementation of <see cref="T:DommelMapper.ISqlBuilder"/>
         /// for the specified ADO.NET connection type.
         /// </summary>
         /// <param name="connectionType">
-        /// The ADO.NET conncetion type to use the <paramref name="builder"/> with. 
+        /// The ADO.NET conncetion type to use the <paramref name="builder"/> with.
         /// Example: <c>typeof(SqlConnection)</c>.
         /// </param>
         /// <param name="builder">An implementation of the <see cref="T:DommelMapper.ISqlBuilder interface"/>.</param>
@@ -1331,7 +1332,7 @@ namespace Dommel
         public interface ISqlBuilder
         {
             /// <summary>
-            /// Builds an insert query using the specified table name, column names and parameter names. 
+            /// Builds an insert query using the specified table name, column names and parameter names.
             /// A query to fetch the new id will be included as well.
             /// </summary>
             /// <param name="tableName">The name of the table to query.</param>
