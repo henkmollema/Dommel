@@ -1230,7 +1230,7 @@ namespace Dommel
         }
 
         /// <summary>
-        /// Defines methods for resolving the key property of entities.
+        /// Defines methods for resolving the key properties of entities.
         /// Custom implementations can be registerd with <see cref="M:SetKeyPropertyResolver()"/>.
         /// </summary>
         public interface IKeyPropertyResolver
