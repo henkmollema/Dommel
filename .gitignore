@@ -178,3 +178,6 @@ FakesAssemblies/
 # Dommel
 console/
 *.userprefs
+
+# Dapper DLLs
+!src/packages/Dapper.1.41-beta5/lib/*/Dapper.dll
