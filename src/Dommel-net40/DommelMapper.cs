@@ -32,6 +32,7 @@ namespace Dommel
         private static readonly IDictionary<Type, string> _getQueryCache = new Dictionary<Type, string>();
         private static readonly IDictionary<Type, string> _getAllQueryCache = new Dictionary<Type, string>();
         private static readonly IDictionary<Type, string> _insertQueryCache = new Dictionary<Type, string>();
+        private static readonly IDictionary<Type, string> _insertAllQueryCache = new Dictionary<Type, string>();
         private static readonly IDictionary<Type, string> _updateQueryCache = new Dictionary<Type, string>();
         private static readonly IDictionary<Type, string> _deleteQueryCache = new Dictionary<Type, string>();
 
@@ -51,11 +52,17 @@ namespace Dommel
             {
                 var tableName = Resolvers.Table(type);
                 var keyProperty = Resolvers.KeyProperty(type);
-                var keyColumnName = Resolvers.Column(keyProperty);
 
-                sql = string.Format("select * from {0} where {1} = @Id", tableName, keyColumnName);
+                if (keyProperty != null)
+                {
+                    var keyColumnName = Resolvers.Column(keyProperty);
+                    sql = string.Format("select * from {0} where {1} = @Id", tableName, keyColumnName);
+                }
+
                 _getQueryCache[type] = sql;
             }
+
+            if (string.IsNullOrEmpty(sql)) return null;
 
             var parameters = new DynamicParameters();
             parameters.Add("Id", id);
@@ -360,7 +367,14 @@ namespace Dommel
         {
             var resultType = typeof(TReturn);
             var resultTableName = Resolvers.Table(resultType);
-            var resultTableKeyColumnName = Resolvers.Column(Resolvers.KeyProperty(resultType));
+            var resultTableKeyProperty = Resolvers.KeyProperty(resultType);
+
+            if (resultTableKeyProperty == null)
+            {
+                throw new NullReferenceException(string.Format("Unable to determine single key for {0}", resultTableName));
+            }
+
+            var resultTableKeyColumnName = Resolvers.Column(resultTableKeyProperty);
 
             var sql = string.Format("select * from {0}", resultTableName);
 
@@ -401,7 +415,14 @@ namespace Dommel
                 {
                     case ForeignKeyRelation.OneToOne:
                         // Determine the primary key of the foreign key table.
-                        var foreignKeyTableKeyColumName = Resolvers.Column(Resolvers.KeyProperty(includeType));
+                        var foreignKeyTableKeyProperty = Resolvers.KeyProperty(includeType);
+
+                        if (foreignKeyTableKeyProperty == null)
+                        {
+                            throw new NullReferenceException(string.Format("Unable to determine single key for {0}", foreignKeyTableName));
+                        }
+
+                        var foreignKeyTableKeyColumName = Resolvers.Column(foreignKeyTableKeyProperty);
 
                         sql += string.Format(" {0} join {1} on {2}.{3} = {1}.{4}",
                             joinType,
@@ -413,7 +434,14 @@ namespace Dommel
 
                     case ForeignKeyRelation.OneToMany:
                         // Determine the primary key of the source table.
-                        var sourceKeyColumnName = Resolvers.Column(Resolvers.KeyProperty(sourceType));
+                        var sourceKeyProperty = Resolvers.KeyProperty(sourceType);
+
+                        if (sourceKeyProperty == null)
+                        {
+                            throw new NullReferenceException(string.Format("Unable to determine single key for {0}", sourceTableName));
+                        }
+
+                        var sourceKeyColumnName = Resolvers.Column(sourceKeyProperty);
 
                         sql += string.Format(" {0} join {1} on {2}.{3} = {1}.{4}",
                             joinType,
@@ -838,6 +866,38 @@ namespace Dommel
         }
 
         /// <summary>
+        /// Inserts the specified entity into the database.
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the entity.</typeparam>
+        /// <param name="connection">The connection to the database. This can either be open or closed.</param>
+        /// <param name="entity">The entity to be inserted.</param>
+        /// <param name="transaction">Optional transaction for the command.</param>
+        /// <returns>A value indicating whether the update operation succeeded.</returns>
+        public static bool InsertAll<TEntity>(this IDbConnection connection, TEntity entity, IDbTransaction transaction = null) where TEntity : class
+        {
+            var type = typeof(TEntity);
+
+            string sql;
+            if (!_insertAllQueryCache.TryGetValue(type, out sql))
+            {
+                var tableName = Resolvers.Table(type);
+                var typeProperties = Resolvers.Properties(type).ToList();
+
+                var columnNames = typeProperties.Select(Resolvers.Column).ToArray();
+                var paramNames = typeProperties.Select(p => "@" + p.Name).ToArray();
+
+                sql = string.Format("INSERT INTO {0} ({1}) VALUES ({2})",
+                    tableName,
+                    string.Join(", ", columnNames),
+                    string.Join(", ", paramNames));
+
+                _insertAllQueryCache[type] = sql;
+            }
+
+            return connection.Execute(sql, entity, transaction) > 0;
+        }
+
+        /// <summary>
         /// Updates the values of the specified entity in the database.
         /// The return value indicates whether the operation succeeded.
         /// </summary>
@@ -854,16 +914,16 @@ namespace Dommel
             if (!_updateQueryCache.TryGetValue(type, out sql))
             {
                 var tableName = Resolvers.Table(type);
-                var keyProperty = Resolvers.KeyProperty(type);
-                var typeProperties = Resolvers.Properties(type).Where(p => p != keyProperty).ToList();
+                var keyProperties = Resolvers.KeyProperties(type);
+                var typeProperties = Resolvers.Properties(type).Where(p => !keyProperties.Contains(p)).ToList();
 
                 var columnNames = typeProperties.Select(p => string.Format("{0} = @{1}", Resolvers.Column(p), p.Name)).ToArray();
+                var keyNames = keyProperties.Select(p => string.Format("{0} = @{1}", Resolvers.Column(p), p.Name)).ToArray();
 
-                sql = string.Format("update {0} set {1} where {2} = @{3}",
+                sql = string.Format("UPDATE {0} SET {1} WHERE {2}",
                     tableName,
                     string.Join(", ", columnNames),
-                    Resolvers.Column(keyProperty),
-                    keyProperty.Name);
+                    string.Join(" AND ", keyNames));
 
                 _updateQueryCache[type] = sql;
             }
@@ -888,10 +948,10 @@ namespace Dommel
             if (!_deleteQueryCache.TryGetValue(type, out sql))
             {
                 var tableName = Resolvers.Table(type);
-                var keyProperty = Resolvers.KeyProperty(type);
-                var keyColumnName = Resolvers.Column(keyProperty);
+                var keyProperties = Resolvers.KeyProperties(type);
+                var keyNames = keyProperties.Select(p => string.Format("{0} = @{1}", Resolvers.Column(p), p.Name)).ToArray();
 
-                sql = string.Format("delete from {0} where {1} = @{2}", tableName, keyColumnName, keyProperty.Name);
+                sql = string.Format("DELETE FROM {0} WHERE {1}", tableName, string.Join(" AND ", keyNames));
 
                 _deleteQueryCache[type] = sql;
             }
@@ -906,25 +966,36 @@ namespace Dommel
         {
             private static readonly IDictionary<Type, string> _typeTableNameCache = new Dictionary<Type, string>();
             private static readonly IDictionary<string, string> _columnNameCache = new Dictionary<string, string>();
-            private static readonly IDictionary<Type, PropertyInfo> _typeKeyPropertyCache = new Dictionary<Type, PropertyInfo>();
+            private static readonly IDictionary<Type, PropertyInfo[]> _typeKeyPropertiesCache = new Dictionary<Type, PropertyInfo[]>();
             private static readonly IDictionary<Type, PropertyInfo[]> _typePropertiesCache = new Dictionary<Type, PropertyInfo[]>();
             private static readonly IDictionary<string, ForeignKeyInfo> _typeForeignKeyPropertyCache = new Dictionary<string, ForeignKeyInfo>();
 
             /// <summary>
-            /// Gets the key property for the specified type, using the configured <see cref="DommelMapper.IKeyPropertyResolver"/>.
+            /// Gets the key properties for the specified type, using the configured <see cref="DommelMapper.IKeyPropertyResolver"/>.
+            /// </summary>
+            /// <param name="type">The <see cref="System.Type"/> to get the key property for.</param>
+            /// <returns>The key properties for <paramref name="type"/>.</returns>
+            public static IEnumerable<PropertyInfo> KeyProperties(Type type)
+            {
+                PropertyInfo[] keyProperties;
+                if (!_typeKeyPropertiesCache.TryGetValue(type, out keyProperties))
+                {
+                    keyProperties = _keyPropertyResolver.ResolveKeyProperties(type).ToArray();
+                    _typeKeyPropertiesCache[type] = keyProperties;
+                }
+
+                return keyProperties;
+            }
+
+            /// <summary>
+            /// Gets the key property for the specified type if only one is present, using the configured <see cref="DommelMapper.IKeyPropertyResolver"/>.
             /// </summary>
             /// <param name="type">The <see cref="System.Type"/> to get the key property for.</param>
             /// <returns>The key property for <paramref name="type"/>.</returns>
             public static PropertyInfo KeyProperty(Type type)
             {
-                PropertyInfo keyProperty;
-                if (!_typeKeyPropertyCache.TryGetValue(type, out keyProperty))
-                {
-                    keyProperty = _keyPropertyResolver.ResolveKeyProperty(type);
-                    _typeKeyPropertyCache[type] = keyProperty;
-                }
-
-                return keyProperty;
+                var keyProperties = KeyProperties(type);
+                return keyProperties.Count() == 1 ? keyProperties.First() : null;
             }
 
             /// <summary>
@@ -1169,7 +1240,7 @@ namespace Dommel
             /// </summary>
             /// <param name="type">The type to resolve the key property for.</param>
             /// <returns>A <see cref="PropertyInfo"/> instance of the key property of <paramref name="type"/>.</returns>
-            PropertyInfo ResolveKeyProperty(Type type);
+            IEnumerable<PropertyInfo> ResolveKeyProperties(Type type);
         }
 
         /// <summary>
@@ -1181,7 +1252,7 @@ namespace Dommel
             /// <summary>
             /// Finds the key property by looking for a property with the [Key] attribute or with the name 'Id'.
             /// </summary>
-            public virtual PropertyInfo ResolveKeyProperty(Type type)
+            public virtual IEnumerable<PropertyInfo> ResolveKeyProperties(Type type)
             {
                 var allProps = Resolvers.Properties(type).ToList();
 
@@ -1199,12 +1270,12 @@ namespace Dommel
                     throw new Exception(string.Format("Could not find the key property for type '{0}'.", type.FullName));
                 }
 
-                if (keyProps.Count > 1)
+                /*if (keyProps.Count > 1)
                 {
                     throw new Exception(string.Format("Multiple key properties were found for type '{0}'.", type.FullName));
-                }
+                }*/
 
-                return keyProps[0];
+                return keyProps;
             }
         }
         #endregion
