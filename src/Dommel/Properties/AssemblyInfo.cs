@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("Dommel")]
-[assembly: AssemblyCopyright("Copyright © 2014 Henk Mollema")]
+[assembly: AssemblyCopyright("Copyright © 2016 Henk Mollema")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -22,4 +22,4 @@ using System.Runtime.InteropServices;
 // The following GUID is for the ID of the typelib if this project is exposed to COM
 [assembly: Guid("6c76538f-9fb2-4789-972c-d72e2f468462")]
 
-[assembly: AssemblyVersion("1.4.0")]
+[assembly: AssemblyVersion("1.3.4")]
