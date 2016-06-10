@@ -8,11 +8,6 @@ using System.Reflection;
 using System.Text;
 using Dapper;
 
-#if DOTNET5_4
-using IDbTransaction = System.Data.Common.DbTransaction;
-using IDbConnection = System.Data.Common.DbConnection;
-#endif
-
 namespace Dommel
 {
     /// <summary>
@@ -21,13 +16,13 @@ namespace Dommel
     public static class DommelMapper
     {
         private static readonly IDictionary<string, ISqlBuilder> _sqlBuilders = new Dictionary<string, ISqlBuilder>
-                                                                                    {
-                                                                                        { "sqlconnection", new SqlServerSqlBuilder() },
-                                                                                        { "sqlceconnection", new SqlServerCeSqlBuilder() },
-                                                                                        { "sqliteconnection", new SqliteSqlBuilder() },
-                                                                                        { "npgsqlconnection", new PostgresSqlBuilder() },
-                                                                                        { "mysqlconnection", new MySqlSqlBuilder() }
-                                                                                    };
+                                                                                {
+                                                                                    { "sqlconnection", new SqlServerSqlBuilder() },
+                                                                                    { "sqlceconnection", new SqlServerCeSqlBuilder() },
+                                                                                    { "sqliteconnection", new SqliteSqlBuilder() },
+                                                                                    { "npgsqlconnection", new PostgresSqlBuilder() },
+                                                                                    { "mysqlconnection", new MySqlSqlBuilder() }
+                                                                                };
 
         private static readonly IDictionary<Type, string> _getQueryCache = new Dictionary<Type, string>();
         private static readonly IDictionary<Type, string> _getAllQueryCache = new Dictionary<Type, string>();
@@ -44,7 +39,7 @@ namespace Dommel
         /// <returns>The entity with the corresponding id.</returns>
         public static TEntity Get<TEntity>(this IDbConnection connection, object id) where TEntity : class
         {
-            var type = typeof (TEntity);
+            var type = typeof(TEntity);
 
             string sql;
             if (!_getQueryCache.TryGetValue(type, out sql))
@@ -196,7 +191,7 @@ namespace Dommel
         /// <returns>A collection of entities of type <typeparamref name="TEntity"/>.</returns>
         public static IEnumerable<TEntity> GetAll<TEntity>(this IDbConnection connection, bool buffered = true) where TEntity : class
         {
-            var type = typeof (TEntity);
+            var type = typeof(TEntity);
 
             string sql;
             if (!_getAllQueryCache.TryGetValue(type, out sql))
@@ -365,17 +360,17 @@ namespace Dommel
             var sql = string.Format("select * from {0}", resultTableName);
 
             var includeTypes = new[]
-                                   {
-                                       typeof (T1),
-                                       typeof (T2),
-                                       typeof (T3),
-                                       typeof (T4),
-                                       typeof (T5),
-                                       typeof (T6),
-                                       typeof (T7)
-                                   }
-                .Where(t => t != typeof (DontMap))
-                .ToArray();
+                               {
+                                   typeof(T1),
+                                   typeof(T2),
+                                   typeof(T3),
+                                   typeof(T4),
+                                   typeof(T5),
+                                   typeof(T6),
+                                   typeof(T7)
+                               }
+                .Where(t => t != typeof(DontMap))
+                 .ToArray();
 
             for (var i = 1; i < includeTypes.Length; i++)
             {
@@ -473,10 +468,13 @@ namespace Dommel
         /// A value indicating whether the result of the query should be executed directly,
         /// or when the query is materialized (using <c>ToList()</c> for example).
         /// </param>
-        /// <returns>A collection of entities of type <typeparamref name="TEntity"/> matching the specified <paramref name="predicate"/>.</returns>
+        /// <returns>
+        /// A collection of entities of type <typeparamref name="TEntity"/> matching the specified
+        /// <paramref name="predicate"/>.
+        /// </returns>
         public static IEnumerable<TEntity> Select<TEntity>(this IDbConnection connection, Expression<Func<TEntity, bool>> predicate, bool buffered = true)
         {
-            var type = typeof (TEntity);
+            var type = typeof(TEntity);
 
             string sql;
             if (!_getAllQueryCache.TryGetValue(type, out sql))
@@ -489,7 +487,7 @@ namespace Dommel
             DynamicParameters parameters;
             sql += new SqlExpression<TEntity>()
                 .Where(predicate)
-                .ToSql(out parameters);
+                 .ToSql(out parameters);
 
             return connection.Query<TEntity>(sql: sql, param: parameters, buffered: buffered);
         }
@@ -688,7 +686,7 @@ namespace Dommel
             /// <returns>The result of the processing.</returns>
             protected virtual object VisitNew(NewExpression expression)
             {
-                var member = Expression.Convert(expression, typeof (object));
+                var member = Expression.Convert(expression, typeof(object));
                 var lambda = Expression.Lambda<Func<object>>(member);
                 var getter = lambda.Compile();
                 return getter();
@@ -706,7 +704,7 @@ namespace Dommel
                     return MemberToColumn(expression);
                 }
 
-                var member = Expression.Convert(expression, typeof (object));
+                var member = Expression.Convert(expression, typeof(object));
                 var lambda = Expression.Lambda<Func<object>>(member);
                 var getter = lambda.Compile();
                 return getter();
@@ -814,7 +812,7 @@ namespace Dommel
         /// <returns>The id of the inserted entity.</returns>
         public static int Insert<TEntity>(this IDbConnection connection, TEntity entity, IDbTransaction transaction = null) where TEntity : class
         {
-            var type = typeof (TEntity);
+            var type = typeof(TEntity);
 
             string sql;
             if (!_insertQueryCache.TryGetValue(type, out sql))
@@ -848,7 +846,7 @@ namespace Dommel
         /// <returns>A value indicating whether the update operation succeeded.</returns>
         public static bool Update<TEntity>(this IDbConnection connection, TEntity entity, IDbTransaction transaction = null)
         {
-            var type = typeof (TEntity);
+            var type = typeof(TEntity);
 
             string sql;
             if (!_updateQueryCache.TryGetValue(type, out sql))
@@ -882,7 +880,7 @@ namespace Dommel
         /// <returns>A value indicating whether the delete operation succeeded.</returns>
         public static bool Delete<TEntity>(this IDbConnection connection, TEntity entity, IDbTransaction transaction = null)
         {
-            var type = typeof (TEntity);
+            var type = typeof(TEntity);
 
             string sql;
             if (!_deleteQueryCache.TryGetValue(type, out sql))
@@ -968,7 +966,8 @@ namespace Dommel
             }
 
             /// <summary>
-            /// Gets the properties to be mapped for the specified type, using the configured <see cref="DommelMapper.IPropertyResolver"/>.
+            /// Gets the properties to be mapped for the specified type, using the configured
+            /// <see cref="DommelMapper.IPropertyResolver"/>.
             /// </summary>
             /// <param name="type">The <see cref="System.Type"/> to get the properties from.</param>
             /// <returns>>The collection of to be mapped properties of <paramref name="type"/>.</returns>
@@ -1081,14 +1080,14 @@ namespace Dommel
         {
             private static readonly HashSet<Type> _primitiveTypes = new HashSet<Type>
                                                                     {
-                                                                            typeof (object),
-                                                                            typeof (string),
-                                                                            typeof(Guid),
-                                                                            typeof (decimal),
-                                                                            typeof (double),
-                                                                            typeof (float),
-                                                                            typeof (DateTime),
-                                                                            typeof (TimeSpan)
+                                                                        typeof(object),
+                                                                        typeof(string),
+                                                                        typeof(Guid),
+                                                                        typeof(decimal),
+                                                                        typeof(double),
+                                                                        typeof(float),
+                                                                        typeof(DateTime),
+                                                                        typeof(TimeSpan)
                                                                     };
 
             /// <summary>
@@ -1122,11 +1121,7 @@ namespace Dommel
                     var type = property.PropertyType;
                     type = Nullable.GetUnderlyingType(type) ?? type;
 
-#if DOTNET5_4
                     if (type.GetTypeInfo().IsPrimitive || type.GetTypeInfo().IsEnum || PrimitiveTypes.Contains(type))
-#else
-                    if (type.IsPrimitive || type.IsEnum || PrimitiveTypes.Contains(type))
-#endif
                     {
                         yield return property;
                     }
@@ -1348,11 +1343,7 @@ namespace Dommel
             public virtual string ResolveTableName(Type type)
             {
                 var name = type.Name + "s";
-#if DOTNET5_4
                 if (type.GetTypeInfo().IsInterface && name.StartsWith("I"))
-#else
-                if (type.IsInterface && name.StartsWith("I"))
-#endif
                 {
                     name = name.Substring(1);
                 }
@@ -1438,7 +1429,10 @@ namespace Dommel
             /// <param name="tableName">The name of the table to query.</param>
             /// <param name="columnNames">The names of the columns in the table.</param>
             /// <param name="paramNames">The names of the parameters in the database command.</param>
-            /// <param name="keyProperty">The key property. This can be used to query a specific column for the new id. This is optional.</param>
+            /// <param name="keyProperty">
+            /// The key property. This can be used to query a specific column for the new id. This is
+            /// optional.
+            /// </param>
             /// <returns>An insert query including a query to fetch the new id.</returns>
             string BuildInsert(string tableName, string[] columnNames, string[] paramNames, PropertyInfo keyProperty);
         }

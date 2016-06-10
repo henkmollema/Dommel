@@ -1,29 +1,25 @@
 ﻿{
-  "version": "1.5.0",
+  "version": "1.6.0",
   "title": "Dommel",
   "description": "Simple CRUD operations for Dapper.",
-  "summary": "Simple CRUD operations for Dapper.",
   "authors": [ "henkmollema" ],
   "copyright": "© 2016 Henk Mollema",
-  "tags": [ "dommel", "crud", "dapper", "database", "orm", "ado.net" ],
-  "projectUrl": "https://github.com/henkmollema/Dommel",
-  "licenseUrl": "http://opensource.org/licenses/MIT",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/henkmollema/Dommel"
+  "packOptions": {
+    "summary": "Simple CRUD operations for Dapper.",
+    "tags": [ "dommel", "crud", "dapper", "database", "orm" ],
+    "projectUrl": "https://github.com/henkmollema/Dommel",
+    "licenseUrl": "http://opensource.org/licenses/MIT",
+    "repository": {
+      "type": "git",
+      "url": "https://github.com/henkmollema/Dommel"
+    }
   },
 
   "dependencies": {
-    "Dapper": "1.50.0-beta8"
+    "Dapper": "1.50.0-rc2b"
   },
 
   "frameworks": {
-    "net40": {
-      "frameworkAssemblies": {
-        "System.ComponentModel.DataAnnotations": "4.0.0.0",
-        "System.Data": "4.0.0.0"
-      }
-    },
     "net45": {
       "frameworkAssemblies": {
         "System.ComponentModel.DataAnnotations": "4.0.0.0",
@@ -36,14 +32,13 @@
         "System.Data": "4.0.0.0"
       }
     },
-    "dotnet5.4": {
+    "netstandard1.3": {
+      "buildOptions": {
+        "define": [ "COREFX" ]
+      },
       "dependencies": {
-        "Microsoft.CSharp": "4.0.0",
-        "System.Collections": "4.0.10",
-        "System.ComponentModel.Annotations": "4.0.10",
-        "System.Data.Common": "4.0.0",
-        "System.Linq": "4.0.0",
-        "System.Reflection.Extensions": "4.0.0"
+        "NETStandard.Library": "1.5.0-rc2-24027",
+        "System.ComponentModel.Annotations": "4.1.0-rc2-24027"
       }
     }
   }
