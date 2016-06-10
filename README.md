@@ -1,10 +1,19 @@
-Dommel
-======
+# Dommel
+Simple CRUD operations for Dapper.
+
+<hr>
+
 [![Build status](https://ci.appveyor.com/api/projects/status/kynsbfu97f9s5bj7?svg=true)](https://ci.appveyor.com/project/henkmollema/dommel)
+
+| Windows | Linux | OS X |
+| --- | --- | --- |
+| [![Build status](https://ci.appveyor.com/api/projects/status/kynsbfu97f9s5bj7?svg=true)](https://ci.appveyor.com/project/henkmollema/dommel) | [![Build Status](https://travis-ci.org/henkmollema/Dommel.svg)](https://travis-ci.org/henkmollema/Dommel) | [![Build Status](https://travis-ci.org/henkmollema/Dommel.svg)](https://travis-ci.org/henkmollema/Dommel) |
+
+--
 
 Dommel provides a convenient API for CRUD operations using extension methods on the `IDbConnection` interface. The SQL queries are generated based on your POCO entities. Dommel also supports LINQ expressions which are being translated to SQL expressions. [Dapper](https://github.com/StackExchange/dapper-dot-net) is used for query execution and object mapping.
 
-Dommel provides some extensibility points to change the bevahior of resolving table names, column names, the key property and POCO properties. See [Extensibility](https://github.com/henkmollema/Dommel#extensibility) for more details.
+Dommel also provides extensibility points to change the bevahior of resolving table names, column names, the key property and POCO properties. See [Extensibility](https://github.com/henkmollema/Dommel#extensibility) for more details.
 
 <hr>
 
