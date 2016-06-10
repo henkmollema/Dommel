@@ -3,8 +3,6 @@ Simple CRUD operations for Dapper.
 
 <hr>
 
-[![Build status](https://ci.appveyor.com/api/projects/status/kynsbfu97f9s5bj7?svg=true)](https://ci.appveyor.com/project/henkmollema/dommel)
-
 | Windows | Linux | OS X |
 | --- | --- | --- |
 | [![Build status](https://ci.appveyor.com/api/projects/status/kynsbfu97f9s5bj7?svg=true)](https://ci.appveyor.com/project/henkmollema/dommel) | [![Build Status](https://travis-ci.org/henkmollema/Dommel.svg)](https://travis-ci.org/henkmollema/Dommel) | [![Build Status](https://travis-ci.org/henkmollema/Dommel.svg)](https://travis-ci.org/henkmollema/Dommel) |
