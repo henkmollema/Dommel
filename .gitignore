@@ -3,6 +3,7 @@
 .nuget/
 packages/
 artifacts/
+pack/
 PublishProfiles/
 .vs/
 debugSettings.json

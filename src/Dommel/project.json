@@ -41,5 +41,9 @@
         "System.ComponentModel.Annotations": "4.1.0-rc2-24027"
       }
     }
+  },
+
+  "buildOptions": {
+    "xmlDoc": true
   }
 }
