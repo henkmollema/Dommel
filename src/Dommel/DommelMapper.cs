@@ -41,8 +41,9 @@ namespace Dommel
         /// <typeparam name="TEntity">The type of the entity.</typeparam>
         /// <param name="connection">The connection to the database. This can either be open or closed.</param>
         /// <param name="id">The id of the entity in the database.</param>
+        /// <param name="transaction">The transaction associated with the connection.</param>
         /// <returns>The entity with the corresponding id.</returns>
-        public static TEntity Get<TEntity>(this IDbConnection connection, object id) where TEntity : class
+        public static TEntity Get<TEntity>(this IDbConnection connection, object id, IDbTransaction transaction = null) where TEntity : class
         {
             var type = typeof(TEntity);
 
@@ -60,7 +61,7 @@ namespace Dommel
             var parameters = new DynamicParameters();
             parameters.Add("Id", id);
 
-            return connection.Query<TEntity>(sql: sql, param: parameters).FirstOrDefault();
+            return connection.Query<TEntity>(sql, parameters, transaction).FirstOrDefault();
         }
 
         /// <summary>
@@ -73,10 +74,11 @@ namespace Dommel
         /// <param name="connection">The connection to the database. This can either be open or closed.</param>
         /// <param name="id">The id of the entity in the database.</param>
         /// <param name="map">The mapping to perform on the entities in the result set.</param>
+        /// <param name="transaction">The transaction associated with the connection.</param>
         /// <returns>The entity with the corresponding id joined with the specified types.</returns>
-        public static TReturn Get<T1, T2, TReturn>(this IDbConnection connection, object id, Func<T1, T2, TReturn> map) where TReturn : class
+        public static TReturn Get<T1, T2, TReturn>(this IDbConnection connection, object id, Func<T1, T2, TReturn> map, IDbTransaction transaction = null) where TReturn : class
         {
-            return MultiMap<T1, T2, DontMap, DontMap, DontMap, DontMap, DontMap, TReturn>(connection, map, id).FirstOrDefault();
+            return MultiMap<T1, T2, DontMap, DontMap, DontMap, DontMap, DontMap, TReturn>(connection, map, id, transaction).FirstOrDefault();
         }
 
         /// <summary>
@@ -90,12 +92,14 @@ namespace Dommel
         /// <param name="connection">The connection to the database. This can either be open or closed.</param>
         /// <param name="id">The id of the entity in the database.</param>
         /// <param name="map">The mapping to perform on the entities in the result set.</param>
+        /// <param name="transaction">The transaction associated with the connection.</param>
         /// <returns>The entity with the corresponding id joined with the specified types.</returns>
         public static TReturn Get<T1, T2, T3, TReturn>(this IDbConnection connection,
                                                        object id,
-                                                       Func<T1, T2, T3, TReturn> map) where TReturn : class
+                                                       Func<T1, T2, T3, TReturn> map,
+                                                       IDbTransaction transaction = null) where TReturn : class
         {
-            return MultiMap<T1, T2, T3, DontMap, DontMap, DontMap, DontMap, TReturn>(connection, map, id).FirstOrDefault();
+            return MultiMap<T1, T2, T3, DontMap, DontMap, DontMap, DontMap, TReturn>(connection, map, id,transaction).FirstOrDefault();
         }
 
         /// <summary>
@@ -110,12 +114,14 @@ namespace Dommel
         /// <param name="connection">The connection to the database. This can either be open or closed.</param>
         /// <param name="id">The id of the entity in the database.</param>
         /// <param name="map">The mapping to perform on the entities in the result set.</param>
+        /// <param name="transaction">The transaction associated with the connection.</param>
         /// <returns>The entity with the corresponding id joined with the specified types.</returns>
         public static TReturn Get<T1, T2, T3, T4, TReturn>(this IDbConnection connection,
                                                            object id,
-                                                           Func<T1, T2, T3, T4, TReturn> map) where TReturn : class
+                                                           Func<T1, T2, T3, T4, TReturn> map,
+                                                           IDbTransaction transaction = null) where TReturn : class
         {
-            return MultiMap<T1, T2, T3, T4, DontMap, DontMap, DontMap, TReturn>(connection, map, id).FirstOrDefault();
+            return MultiMap<T1, T2, T3, T4, DontMap, DontMap, DontMap, TReturn>(connection, map, id, transaction).FirstOrDefault();
         }
 
         /// <summary>
@@ -131,12 +137,14 @@ namespace Dommel
         /// <param name="connection">The connection to the database. This can either be open or closed.</param>
         /// <param name="id">The id of the entity in the database.</param>
         /// <param name="map">The mapping to perform on the entities in the result set.</param>
+        /// <param name="transaction">The transaction associated with the connection.</param>
         /// <returns>The entity with the corresponding id joined with the specified types.</returns>
         public static TReturn Get<T1, T2, T3, T4, T5, TReturn>(this IDbConnection connection,
                                                                object id,
-                                                               Func<T1, T2, T3, T4, T5, TReturn> map) where TReturn : class
+                                                               Func<T1, T2, T3, T4, T5, TReturn> map,
+                                                               IDbTransaction transaction = null) where TReturn : class
         {
-            return MultiMap<T1, T2, T3, T4, T5, DontMap, DontMap, TReturn>(connection, map, id).FirstOrDefault();
+            return MultiMap<T1, T2, T3, T4, T5, DontMap, DontMap, TReturn>(connection, map, id,transaction).FirstOrDefault();
         }
 
         /// <summary>
@@ -153,12 +161,14 @@ namespace Dommel
         /// <param name="connection">The connection to the database. This can either be open or closed.</param>
         /// <param name="id">The id of the entity in the database.</param>
         /// <param name="map">The mapping to perform on the entities in the result set.</param>
+        /// <param name="transaction">The transaction associated with the connection.</param>
         /// <returns>The entity with the corresponding id joined with the specified types.</returns>
         public static TReturn Get<T1, T2, T3, T4, T5, T6, TReturn>(this IDbConnection connection,
                                                                    object id,
-                                                                   Func<T1, T2, T3, T4, T5, T6, TReturn> map) where TReturn : class
+                                                                   Func<T1, T2, T3, T4, T5, T6, TReturn> map,
+                                                                   IDbTransaction transaction = null) where TReturn : class
         {
-            return MultiMap<T1, T2, T3, T4, T5, T6, DontMap, TReturn>(connection, map, id).FirstOrDefault();
+            return MultiMap<T1, T2, T3, T4, T5, T6, DontMap, TReturn>(connection, map, id,transaction).FirstOrDefault();
         }
 
         /// <summary>
@@ -176,12 +186,14 @@ namespace Dommel
         /// <param name="connection">The connection to the database. This can either be open or closed.</param>
         /// <param name="id">The id of the entity in the database.</param>
         /// <param name="map">The mapping to perform on the entities in the result set.</param>
+        /// <param name="transaction">The transaction associated with the connection.</param>
         /// <returns>The entity with the corresponding id joined with the specified types.</returns>
         public static TReturn Get<T1, T2, T3, T4, T5, T6, T7, TReturn>(this IDbConnection connection,
                                                                        object id,
-                                                                       Func<T1, T2, T3, T4, T5, T6, T7, TReturn> map) where TReturn : class
+                                                                       Func<T1, T2, T3, T4, T5, T6, T7, TReturn> map,
+                                                                       IDbTransaction transaction = null) where TReturn : class
         {
-            return MultiMap<T1, T2, T3, T4, T5, T6, T7, TReturn>(connection, map, id).FirstOrDefault();
+            return MultiMap<T1, T2, T3, T4, T5, T6, T7, TReturn>(connection, map, id,transaction).FirstOrDefault();
         }
 
         /// <summary>
@@ -189,12 +201,13 @@ namespace Dommel
         /// </summary>
         /// <typeparam name="TEntity">The type of the entity.</typeparam>
         /// <param name="connection">The connection to the database. This can either be open or closed.</param>
+        /// <param name="transaction">The transaction associated with the connection.</param>
         /// <param name="buffered">
         /// A value indicating whether the result of the query should be executed directly,
         /// or when the query is materialized (using <c>ToList()</c> for example).
         /// </param>
         /// <returns>A collection of entities of type <typeparamref name="TEntity"/>.</returns>
-        public static IEnumerable<TEntity> GetAll<TEntity>(this IDbConnection connection, bool buffered = true) where TEntity : class
+        public static IEnumerable<TEntity> GetAll<TEntity>(this IDbConnection connection, IDbTransaction transaction = null, bool buffered = true) where TEntity : class
         {
             var type = typeof(TEntity);
 
@@ -206,7 +219,7 @@ namespace Dommel
                 _getAllQueryCache[type] = sql;
             }
 
-            return connection.Query<TEntity>(sql: sql, buffered: buffered);
+            return connection.Query<TEntity>(sql, transaction: transaction, buffered: buffered);
         }
 
         /// <summary>
@@ -218,6 +231,7 @@ namespace Dommel
         /// <typeparam name="TReturn">The return type parameter.</typeparam>
         /// <param name="connection">The connection to the database. This can either be open or closed.</param>
         /// <param name="map">The mapping to perform on the entities in the result set.</param>
+        /// <param name="transaction">The transaction associated with the connection.</param>
         /// <param name="buffered">
         /// A value indicating whether the result of the query should be executed directly,
         /// or when the query is materialized (using <c>ToList()</c> for example).
@@ -226,9 +240,9 @@ namespace Dommel
         /// A collection of entities of type <typeparamref name="TReturn"/>
         /// joined with the specified type types.
         /// </returns>
-        public static IEnumerable<TReturn> GetAll<T1, T2, TReturn>(this IDbConnection connection, Func<T1, T2, TReturn> map, bool buffered = true)
+        public static IEnumerable<TReturn> GetAll<T1, T2, TReturn>(this IDbConnection connection, Func<T1, T2, TReturn> map, IDbTransaction transaction = null, bool buffered = true)
         {
-            return MultiMap<T1, T2, DontMap, DontMap, DontMap, DontMap, DontMap, TReturn>(connection, map, buffered: buffered);
+            return MultiMap<T1, T2, DontMap, DontMap, DontMap, DontMap, DontMap, TReturn>(connection, map, transaction: transaction, buffered: buffered);
         }
 
         /// <summary>
@@ -241,6 +255,7 @@ namespace Dommel
         /// <typeparam name="TReturn">The return type parameter.</typeparam>
         /// <param name="connection">The connection to the database. This can either be open or closed.</param>
         /// <param name="map">The mapping to perform on the entities in the result set.</param>
+        /// <param name="transaction">The transaction associated with the connection.</param>
         /// <param name="buffered">
         /// A value indicating whether the result of the query should be executed directly,
         /// or when the query is materialized (using <c>ToList()</c> for example).
@@ -249,9 +264,9 @@ namespace Dommel
         /// A collection of entities of type <typeparamref name="TReturn"/>
         /// joined with the specified type types.
         /// </returns>
-        public static IEnumerable<TReturn> GetAll<T1, T2, T3, TReturn>(this IDbConnection connection, Func<T1, T2, T3, TReturn> map, bool buffered = true)
+        public static IEnumerable<TReturn> GetAll<T1, T2, T3, TReturn>(this IDbConnection connection, Func<T1, T2, T3, TReturn> map, IDbTransaction transaction = null, bool buffered = true)
         {
-            return MultiMap<T1, T2, T3, DontMap, DontMap, DontMap, DontMap, TReturn>(connection, map, buffered: buffered);
+            return MultiMap<T1, T2, T3, DontMap, DontMap, DontMap, DontMap, TReturn>(connection, map, transaction: transaction, buffered: buffered);
         }
 
         /// <summary>
@@ -265,6 +280,7 @@ namespace Dommel
         /// <typeparam name="TReturn">The return type parameter.</typeparam>
         /// <param name="connection">The connection to the database. This can either be open or closed.</param>
         /// <param name="map">The mapping to perform on the entities in the result set.</param>
+        /// <param name="transaction">The transaction associated with the connection.</param>
         /// <param name="buffered">
         /// A value indicating whether the result of the query should be executed directly,
         /// or when the query is materialized (using <c>ToList()</c> for example).
@@ -273,9 +289,9 @@ namespace Dommel
         /// A collection of entities of type <typeparamref name="TReturn"/>
         /// joined with the specified type types.
         /// </returns>
-        public static IEnumerable<TReturn> GetAll<T1, T2, T3, T4, TReturn>(this IDbConnection connection, Func<T1, T2, T3, T4, TReturn> map, bool buffered = true)
+        public static IEnumerable<TReturn> GetAll<T1, T2, T3, T4, TReturn>(this IDbConnection connection, Func<T1, T2, T3, T4, TReturn> map, IDbTransaction transaction = null, bool buffered = true)
         {
-            return MultiMap<T1, T2, T3, T4, DontMap, DontMap, DontMap, TReturn>(connection, map, buffered: buffered);
+            return MultiMap<T1, T2, T3, T4, DontMap, DontMap, DontMap, TReturn>(connection, map, transaction: transaction, buffered: buffered);
         }
 
         /// <summary>
@@ -290,6 +306,7 @@ namespace Dommel
         /// <typeparam name="TReturn">The return type parameter.</typeparam>
         /// <param name="connection">The connection to the database. This can either be open or closed.</param>
         /// <param name="map">The mapping to perform on the entities in the result set.</param>
+        /// <param name="transaction">The transaction associated with the connection.</param>
         /// <param name="buffered">
         /// A value indicating whether the result of the query should be executed directly,
         /// or when the query is materialized (using <c>ToList()</c> for example).
@@ -298,9 +315,9 @@ namespace Dommel
         /// A collection of entities of type <typeparamref name="TReturn"/>
         /// joined with the specified type types.
         /// </returns>
-        public static IEnumerable<TReturn> GetAll<T1, T2, T3, T4, T5, TReturn>(this IDbConnection connection, Func<T1, T2, T3, T4, T5, TReturn> map, bool buffered = true)
+        public static IEnumerable<TReturn> GetAll<T1, T2, T3, T4, T5, TReturn>(this IDbConnection connection, Func<T1, T2, T3, T4, T5, TReturn> map, IDbTransaction transaction = null, bool buffered = true)
         {
-            return MultiMap<T1, T2, T3, T4, T5, DontMap, DontMap, TReturn>(connection, map, buffered: buffered);
+            return MultiMap<T1, T2, T3, T4, T5, DontMap, DontMap, TReturn>(connection, map, transaction: transaction, buffered: buffered);
         }
 
         /// <summary>
@@ -316,6 +333,7 @@ namespace Dommel
         /// <typeparam name="TReturn">The return type parameter.</typeparam>
         /// <param name="connection">The connection to the database. This can either be open or closed.</param>
         /// <param name="map">The mapping to perform on the entities in the result set.</param>
+        /// <param name="transaction">The transaction associated with the connection.</param>
         /// <param name="buffered">
         /// A value indicating whether the result of the query should be executed directly,
         /// or when the query is materialized (using <c>ToList()</c> for example).
@@ -324,9 +342,9 @@ namespace Dommel
         /// A collection of entities of type <typeparamref name="TReturn"/>
         /// joined with the specified type types.
         /// </returns>
-        public static IEnumerable<TReturn> GetAll<T1, T2, T3, T4, T5, T6, TReturn>(this IDbConnection connection, Func<T1, T2, T3, T4, T5, T6, TReturn> map, bool buffered = true)
+        public static IEnumerable<TReturn> GetAll<T1, T2, T3, T4, T5, T6, TReturn>(this IDbConnection connection, Func<T1, T2, T3, T4, T5, T6, TReturn> map, IDbTransaction transaction = null, bool buffered = true)
         {
-            return MultiMap<T1, T2, T3, T4, T5, T6, DontMap, TReturn>(connection, map, buffered: buffered);
+            return MultiMap<T1, T2, T3, T4, T5, T6, DontMap, TReturn>(connection, map, transaction: transaction, buffered: buffered);
         }
 
         /// <summary>
@@ -343,6 +361,7 @@ namespace Dommel
         /// <typeparam name="TReturn">The return type parameter.</typeparam>
         /// <param name="connection">The connection to the database. This can either be open or closed.</param>
         /// <param name="map">The mapping to perform on the entities in the result set.</param>
+        /// <param name="transaction">The transaction associated with the connection.</param>
         /// <param name="buffered">
         /// A value indicating whether the result of the query should be executed directly,
         /// or when the query is materialized (using <c>ToList()</c> for example).
@@ -351,12 +370,12 @@ namespace Dommel
         /// A collection of entities of type <typeparamref name="TReturn"/>
         /// joined with the specified type types.
         /// </returns>
-        public static IEnumerable<TReturn> GetAll<T1, T2, T3, T4, T5, T6, T7, TReturn>(this IDbConnection connection, Func<T1, T2, T3, T4, T5, T6, T7, TReturn> map, bool buffered = true)
+        public static IEnumerable<TReturn> GetAll<T1, T2, T3, T4, T5, T6, T7, TReturn>(this IDbConnection connection, Func<T1, T2, T3, T4, T5, T6, T7, TReturn> map, IDbTransaction transaction = null, bool buffered = true)
         {
-            return MultiMap<T1, T2, T3, T4, T5, T6, T7, TReturn>(connection, map, buffered: buffered);
+            return MultiMap<T1, T2, T3, T4, T5, T6, T7, TReturn>(connection, map, transaction: transaction, buffered: buffered);
         }
 
-        private static IEnumerable<TReturn> MultiMap<T1, T2, T3, T4, T5, T6, T7, TReturn>(IDbConnection connection, Delegate map, object id = null, bool buffered = true)
+        private static IEnumerable<TReturn> MultiMap<T1, T2, T3, T4, T5, T6, T7, TReturn>(IDbConnection connection, Delegate map, object id = null, IDbTransaction transaction = null, bool buffered = true)
         {
             var resultType = typeof(TReturn);
             var resultTableName = Resolvers.Table(resultType);
@@ -443,24 +462,20 @@ namespace Dommel
             switch (includeTypes.Length)
             {
                 case 2:
-                    return connection.Query(sql, (Func<T1, T2, TReturn>)map, parameters, buffered: buffered);
+                    return connection.Query(sql, (Func<T1, T2, TReturn>)map, parameters, transaction, buffered);
                 case 3:
-                    return connection.Query(sql, (Func<T1, T2, T3, TReturn>)map, parameters, buffered: buffered);
+                    return connection.Query(sql, (Func<T1, T2, T3, TReturn>)map, parameters, transaction, buffered);
                 case 4:
-                    return connection.Query(sql, (Func<T1, T2, T3, T4, TReturn>)map, parameters, buffered: buffered);
+                    return connection.Query(sql, (Func<T1, T2, T3, T4, TReturn>)map, parameters, transaction, buffered);
                 case 5:
-                    return connection.Query(sql, (Func<T1, T2, T3, T4, T5, TReturn>)map, parameters, buffered: buffered);
+                    return connection.Query(sql, (Func<T1, T2, T3, T4, T5, TReturn>)map, parameters, transaction, buffered);
                 case 6:
-                    return connection.Query(sql, (Func<T1, T2, T3, T4, T5, T6, TReturn>)map, parameters, buffered: buffered);
+                    return connection.Query(sql, (Func<T1, T2, T3, T4, T5, T6, TReturn>)map, parameters, transaction, buffered);
                 case 7:
-                    return connection.Query(sql, (Func<T1, T2, T3, T4, T5, T6, T7, TReturn>)map, parameters, buffered: buffered);
+                    return connection.Query(sql, (Func<T1, T2, T3, T4, T5, T6, T7, TReturn>)map, parameters, transaction, buffered);
             }
 
-            throw new InvalidOperationException();
-        }
-
-        private class DontMap
-        {
+            throw new InvalidOperationException($"Invalid amount of include types: {includeTypes.Length}.");
         }
 
         /// <summary>
@@ -469,6 +484,7 @@ namespace Dommel
         /// <typeparam name="TEntity">The type of the entity.</typeparam>
         /// <param name="connection">The connection to the database. This can either be open or closed.</param>
         /// <param name="predicate">A predicate to filter the results.</param>
+        /// <param name="transaction">The transaction associated with the connection.</param>
         /// <param name="buffered">
         /// A value indicating whether the result of the query should be executed directly,
         /// or when the query is materialized (using <c>ToList()</c> for example).
@@ -477,7 +493,7 @@ namespace Dommel
         /// A collection of entities of type <typeparamref name="TEntity"/> matching the specified
         /// <paramref name="predicate"/>.
         /// </returns>
-        public static IEnumerable<TEntity> Select<TEntity>(this IDbConnection connection, Expression<Func<TEntity, bool>> predicate, bool buffered = true)
+        public static IEnumerable<TEntity> Select<TEntity>(this IDbConnection connection, Expression<Func<TEntity, bool>> predicate, IDbTransaction transaction = null, bool buffered = true)
         {
             var type = typeof(TEntity);
 
@@ -494,7 +510,7 @@ namespace Dommel
                 .Where(predicate)
                  .ToSql(out parameters);
 
-            return connection.Query<TEntity>(sql: sql, param: parameters, buffered: buffered);
+            return connection.Query<TEntity>(sql, parameters, transaction, buffered);
         }
 
         /// <summary>
@@ -526,8 +542,7 @@ namespace Dommel
                 _insertQueryCache[type] = sql;
             }
 
-            var result = connection.Query<int>(sql, entity, transaction);
-            return result.Single();
+            return connection.QueryFirst<int>(sql, entity, transaction);
         }
 
         /// <summary>
@@ -586,6 +601,11 @@ namespace Dommel
             }
 
             return connection.Execute(sql, entity, transaction) > 0;
+        }
+
+
+        private class DontMap
+        {
         }
     }
 }
