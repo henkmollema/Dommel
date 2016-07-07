@@ -603,7 +603,6 @@ namespace Dommel
             return connection.Execute(sql, entity, transaction) > 0;
         }
 
-
         private class DontMap
         {
         }
