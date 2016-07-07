@@ -1,10 +1,11 @@
 ﻿{
-  "version": "1.6.0",
+  "version": "1.6.1",
   "title": "Dommel",
   "description": "Simple CRUD operations for Dapper.",
-  "authors": [ "henkmollema" ],
-  "copyright": "© 2016 Henk Mollema",
+  "authors": [ "Henk Mollema" ],
+  "copyright": "Copyright © Henk Mollema 2016",
   "packOptions": {
+    "owners": [ "Henk Mollema" ],
     "summary": "Simple CRUD operations for Dapper.",
     "tags": [ "dommel", "crud", "dapper", "database", "orm" ],
     "projectUrl": "https://github.com/henkmollema/Dommel",
@@ -16,7 +17,7 @@
   },
 
   "dependencies": {
-    "Dapper": "1.50.0-rc2b"
+    "Dapper": "1.50.0"
   },
 
   "frameworks": {
@@ -37,8 +38,8 @@
         "define": [ "COREFX" ]
       },
       "dependencies": {
-        "NETStandard.Library": "1.5.0-rc2-24027",
-        "System.ComponentModel.Annotations": "4.1.0-rc2-24027"
+        "NETStandard.Library": "1.6.0",
+        "System.ComponentModel.Annotations": "4.1.0"
       }
     }
   },

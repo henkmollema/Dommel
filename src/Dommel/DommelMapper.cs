@@ -1134,6 +1134,7 @@ namespace Dommel
         /// </summary>
         public class DefaultPropertyResolver : PropertyResolverBase
         {
+            /// <inheritdoc />
             public override IEnumerable<PropertyInfo> ResolveProperties(Type type)
             {
                 return FilterComplexTypes(type.GetProperties());
