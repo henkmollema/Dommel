@@ -1486,7 +1486,7 @@ namespace Dommel
         {
             public string BuildInsert(string tableName, string[] columnNames, string[] paramNames, PropertyInfo keyProperty)
             {
-                var sql = string.Format("insert into {0} ({1}) values ({2}) select last_insert_rowid() id",
+                var sql = string.Format("insert into {0} ({1}) values ({2})",
                     tableName,
                     string.Join(", ", columnNames),
                     string.Join(", ", paramNames));
