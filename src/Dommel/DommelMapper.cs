@@ -6,6 +6,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
+using System.Threading.Tasks;
 using Dapper;
 
 namespace Dommel
@@ -39,8 +40,27 @@ namespace Dommel
         /// <returns>The entity with the corresponding id.</returns>
         public static TEntity Get<TEntity>(this IDbConnection connection, object id) where TEntity : class
         {
-            var type = typeof(TEntity);
+            DynamicParameters parameters;
+            var sql = BuildGetById(typeof(TEntity), id, out parameters);
+            return connection.QueryFirstOrDefault<TEntity>(sql, parameters);
+        }
 
+        /// <summary>
+        /// Retrieves the entity of type <typeparamref name="TEntity"/> with the specified id.
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the entity.</typeparam>
+        /// <param name="connection">The connection to the database. This can either be open or closed.</param>
+        /// <param name="id">The id of the entity in the database.</param>
+        /// <returns>The entity with the corresponding id.</returns>
+        public static Task<TEntity> GetAsync<TEntity>(this IDbConnection connection, object id) where TEntity : class
+        {
+            DynamicParameters parameters;
+            var sql = BuildGetById(typeof(TEntity), id, out parameters);
+            return connection.QueryFirstOrDefaultAsync<TEntity>(sql, parameters);
+        }
+
+        private static string BuildGetById(Type type, object id, out DynamicParameters parameters)
+        {
             string sql;
             if (!_getQueryCache.TryGetValue(type, out sql))
             {
@@ -48,14 +68,55 @@ namespace Dommel
                 var keyProperty = Resolvers.KeyProperty(type);
                 var keyColumnName = Resolvers.Column(keyProperty);
 
-                sql = string.Format("select * from {0} where {1} = @Id", tableName, keyColumnName);
+                sql = $"select * from {tableName} where {keyColumnName} = @Id";
                 _getQueryCache[type] = sql;
             }
 
-            var parameters = new DynamicParameters();
+            parameters = new DynamicParameters();
             parameters.Add("Id", id);
 
-            return connection.Query<TEntity>(sql: sql, param: parameters).FirstOrDefault();
+            return sql;
+        }
+
+        /// <summary>
+        /// Retrieves all the entities of type <typeparamref name="TEntity"/>.
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the entity.</typeparam>
+        /// <param name="connection">The connection to the database. This can either be open or closed.</param>
+        /// <param name="buffered">
+        /// A value indicating whether the result of the query should be executed directly,
+        /// or when the query is materialized (using <c>ToList()</c> for example).
+        /// </param>
+        /// <returns>A collection of entities of type <typeparamref name="TEntity"/>.</returns>
+        public static IEnumerable<TEntity> GetAll<TEntity>(this IDbConnection connection, bool buffered = true) where TEntity : class
+        {
+            var sql = BuildGetAllQuery(typeof(TEntity));
+            return connection.Query<TEntity>(sql, buffered: buffered);
+        }
+
+        /// <summary>
+        /// Retrieves all the entities of type <typeparamref name="TEntity"/>.
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the entity.</typeparam>
+        /// <param name="connection">The connection to the database. This can either be open or closed.</param>
+        /// <returns>A collection of entities of type <typeparamref name="TEntity"/>.</returns>
+        public static Task<IEnumerable<TEntity>> GetAllAsync<TEntity>(this IDbConnection connection) where TEntity : class
+        {
+            var sql = BuildGetAllQuery(typeof(TEntity));
+            return connection.QueryAsync<TEntity>(sql);
+        }
+
+        private static string BuildGetAllQuery(Type type)
+        {
+            string sql;
+            if (!_getAllQueryCache.TryGetValue(type, out sql))
+            {
+                var tableName = Resolvers.Table(type);
+                sql = $"select * from {tableName}";
+                _getAllQueryCache[type] = sql;
+            }
+
+            return sql;
         }
 
         /// <summary>
@@ -80,6 +141,22 @@ namespace Dommel
         /// </summary>
         /// <typeparam name="T1">The first type parameter. This is the source entity.</typeparam>
         /// <typeparam name="T2">The second type parameter.</typeparam>
+        /// <typeparam name="TReturn">The return type parameter.</typeparam>
+        /// <param name="connection">The connection to the database. This can either be open or closed.</param>
+        /// <param name="id">The id of the entity in the database.</param>
+        /// <param name="map">The mapping to perform on the entities in the result set.</param>
+        /// <returns>The entity with the corresponding id joined with the specified types.</returns>
+        public static async Task<TReturn> GetAsync<T1, T2, TReturn>(this IDbConnection connection, object id, Func<T1, T2, TReturn> map) where TReturn : class
+        {
+            return (await MultiMapAsync<T1, T2, DontMap, DontMap, DontMap, DontMap, DontMap, TReturn>(connection, map, id)).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Retrieves the entity of type <typeparamref name="TReturn"/> with the specified id
+        /// joined with the types specified as type parameters.
+        /// </summary>
+        /// <typeparam name="T1">The first type parameter. This is the source entity.</typeparam>
+        /// <typeparam name="T2">The second type parameter.</typeparam>
         /// <typeparam name="T3">The third type parameter.</typeparam>
         /// <typeparam name="TReturn">The return type parameter.</typeparam>
         /// <param name="connection">The connection to the database. This can either be open or closed.</param>
@@ -91,6 +168,25 @@ namespace Dommel
                                                        Func<T1, T2, T3, TReturn> map) where TReturn : class
         {
             return MultiMap<T1, T2, T3, DontMap, DontMap, DontMap, DontMap, TReturn>(connection, map, id).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Retrieves the entity of type <typeparamref name="TReturn"/> with the specified id
+        /// joined with the types specified as type parameters.
+        /// </summary>
+        /// <typeparam name="T1">The first type parameter. This is the source entity.</typeparam>
+        /// <typeparam name="T2">The second type parameter.</typeparam>
+        /// <typeparam name="T3">The third type parameter.</typeparam>
+        /// <typeparam name="TReturn">The return type parameter.</typeparam>
+        /// <param name="connection">The connection to the database. This can either be open or closed.</param>
+        /// <param name="id">The id of the entity in the database.</param>
+        /// <param name="map">The mapping to perform on the entities in the result set.</param>
+        /// <returns>The entity with the corresponding id joined with the specified types.</returns>
+        public static async Task<TReturn> GetAsync<T1, T2, T3, TReturn>(this IDbConnection connection,
+                                                                        object id,
+                                                                        Func<T1, T2, T3, TReturn> map) where TReturn : class
+        {
+            return (await MultiMapAsync<T1, T2, T3, DontMap, DontMap, DontMap, DontMap, TReturn>(connection, map, id)).FirstOrDefault();
         }
 
         /// <summary>
@@ -121,6 +217,26 @@ namespace Dommel
         /// <typeparam name="T2">The second type parameter.</typeparam>
         /// <typeparam name="T3">The third type parameter.</typeparam>
         /// <typeparam name="T4">The fourth type parameter.</typeparam>
+        /// <typeparam name="TReturn">The return type parameter.</typeparam>
+        /// <param name="connection">The connection to the database. This can either be open or closed.</param>
+        /// <param name="id">The id of the entity in the database.</param>
+        /// <param name="map">The mapping to perform on the entities in the result set.</param>
+        /// <returns>The entity with the corresponding id joined with the specified types.</returns>
+        public static async Task<TReturn> GetAsync<T1, T2, T3, T4, TReturn>(this IDbConnection connection,
+                                                                            object id,
+                                                                            Func<T1, T2, T3, T4, TReturn> map) where TReturn : class
+        {
+            return (await MultiMapAsync<T1, T2, T3, T4, DontMap, DontMap, DontMap, TReturn>(connection, map, id)).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Retrieves the entity of type <typeparamref name="TReturn"/> with the specified id
+        /// joined with the types specified as type parameters.
+        /// </summary>
+        /// <typeparam name="T1">The first type parameter. This is the source entity.</typeparam>
+        /// <typeparam name="T2">The second type parameter.</typeparam>
+        /// <typeparam name="T3">The third type parameter.</typeparam>
+        /// <typeparam name="T4">The fourth type parameter.</typeparam>
         /// <typeparam name="T5">The fifth type parameter.</typeparam>
         /// <typeparam name="TReturn">The return type parameter.</typeparam>
         /// <param name="connection">The connection to the database. This can either be open or closed.</param>
@@ -132,6 +248,27 @@ namespace Dommel
                                                                Func<T1, T2, T3, T4, T5, TReturn> map) where TReturn : class
         {
             return MultiMap<T1, T2, T3, T4, T5, DontMap, DontMap, TReturn>(connection, map, id).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Retrieves the entity of type <typeparamref name="TReturn"/> with the specified id
+        /// joined with the types specified as type parameters.
+        /// </summary>
+        /// <typeparam name="T1">The first type parameter. This is the source entity.</typeparam>
+        /// <typeparam name="T2">The second type parameter.</typeparam>
+        /// <typeparam name="T3">The third type parameter.</typeparam>
+        /// <typeparam name="T4">The fourth type parameter.</typeparam>
+        /// <typeparam name="T5">The fifth type parameter.</typeparam>
+        /// <typeparam name="TReturn">The return type parameter.</typeparam>
+        /// <param name="connection">The connection to the database. This can either be open or closed.</param>
+        /// <param name="id">The id of the entity in the database.</param>
+        /// <param name="map">The mapping to perform on the entities in the result set.</param>
+        /// <returns>The entity with the corresponding id joined with the specified types.</returns>
+        public static async Task<TReturn> GetAsync<T1, T2, T3, T4, T5, TReturn>(this IDbConnection connection,
+                                                                                object id,
+                                                                                Func<T1, T2, T3, T4, T5, TReturn> map) where TReturn : class
+        {
+            return (await MultiMapAsync<T1, T2, T3, T4, T5, DontMap, DontMap, TReturn>(connection, map, id)).FirstOrDefault();
         }
 
         /// <summary>
@@ -166,6 +303,28 @@ namespace Dommel
         /// <typeparam name="T4">The fourth type parameter.</typeparam>
         /// <typeparam name="T5">The fifth type parameter.</typeparam>
         /// <typeparam name="T6">The sixth type parameter.</typeparam>
+        /// <typeparam name="TReturn">The return type parameter.</typeparam>
+        /// <param name="connection">The connection to the database. This can either be open or closed.</param>
+        /// <param name="id">The id of the entity in the database.</param>
+        /// <param name="map">The mapping to perform on the entities in the result set.</param>
+        /// <returns>The entity with the corresponding id joined with the specified types.</returns>
+        public static async Task<TReturn> GetAsync<T1, T2, T3, T4, T5, T6, TReturn>(this IDbConnection connection,
+                                                                                    object id,
+                                                                                    Func<T1, T2, T3, T4, T5, T6, TReturn> map) where TReturn : class
+        {
+            return (await MultiMapAsync<T1, T2, T3, T4, T5, T6, DontMap, TReturn>(connection, map, id)).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Retrieves the entity of type <typeparamref name="TReturn"/> with the specified id
+        /// joined with the types specified as type parameters.
+        /// </summary>
+        /// <typeparam name="T1">The first type parameter. This is the source entity.</typeparam>
+        /// <typeparam name="T2">The second type parameter.</typeparam>
+        /// <typeparam name="T3">The third type parameter.</typeparam>
+        /// <typeparam name="T4">The fourth type parameter.</typeparam>
+        /// <typeparam name="T5">The fifth type parameter.</typeparam>
+        /// <typeparam name="T6">The sixth type parameter.</typeparam>
         /// <typeparam name="T7">The seventh type parameter.</typeparam>
         /// <typeparam name="TReturn">The return type parameter.</typeparam>
         /// <param name="connection">The connection to the database. This can either be open or closed.</param>
@@ -180,28 +339,26 @@ namespace Dommel
         }
 
         /// <summary>
-        /// Retrieves all the entities of type <typeparamref name="TEntity"/>.
+        /// Retrieves the entity of type <typeparamref name="TReturn"/> with the specified id
+        /// joined with the types specified as type parameters.
         /// </summary>
-        /// <typeparam name="TEntity">The type of the entity.</typeparam>
+        /// <typeparam name="T1">The first type parameter. This is the source entity.</typeparam>
+        /// <typeparam name="T2">The second type parameter.</typeparam>
+        /// <typeparam name="T3">The third type parameter.</typeparam>
+        /// <typeparam name="T4">The fourth type parameter.</typeparam>
+        /// <typeparam name="T5">The fifth type parameter.</typeparam>
+        /// <typeparam name="T6">The sixth type parameter.</typeparam>
+        /// <typeparam name="T7">The seventh type parameter.</typeparam>
+        /// <typeparam name="TReturn">The return type parameter.</typeparam>
         /// <param name="connection">The connection to the database. This can either be open or closed.</param>
-        /// <param name="buffered">
-        /// A value indicating whether the result of the query should be executed directly,
-        /// or when the query is materialized (using <c>ToList()</c> for example).
-        /// </param>
-        /// <returns>A collection of entities of type <typeparamref name="TEntity"/>.</returns>
-        public static IEnumerable<TEntity> GetAll<TEntity>(this IDbConnection connection, bool buffered = true) where TEntity : class
+        /// <param name="id">The id of the entity in the database.</param>
+        /// <param name="map">The mapping to perform on the entities in the result set.</param>
+        /// <returns>The entity with the corresponding id joined with the specified types.</returns>
+        public static async Task<TReturn> GetAsync<T1, T2, T3, T4, T5, T6, T7, TReturn>(this IDbConnection connection,
+                                                                                        object id,
+                                                                                        Func<T1, T2, T3, T4, T5, T6, T7, TReturn> map) where TReturn : class
         {
-            var type = typeof(TEntity);
-
-            string sql;
-            if (!_getAllQueryCache.TryGetValue(type, out sql))
-            {
-                var tableName = Resolvers.Table(type);
-                sql = string.Format("select * from {0}", tableName);
-                _getAllQueryCache[type] = sql;
-            }
-
-            return connection.Query<TEntity>(sql: sql, buffered: buffered);
+            return (await MultiMapAsync<T1, T2, T3, T4, T5, T6, T7, TReturn>(connection, map, id)).FirstOrDefault();
         }
 
         /// <summary>
@@ -232,6 +389,28 @@ namespace Dommel
         /// </summary>
         /// <typeparam name="T1">The first type parameter. This is the source entity.</typeparam>
         /// <typeparam name="T2">The second type parameter.</typeparam>
+        /// <typeparam name="TReturn">The return type parameter.</typeparam>
+        /// <param name="connection">The connection to the database. This can either be open or closed.</param>
+        /// <param name="map">The mapping to perform on the entities in the result set.</param>
+        /// <param name="buffered">
+        /// A value indicating whether the result of the query should be executed directly,
+        /// or when the query is materialized (using <c>ToList()</c> for example).
+        /// </param>
+        /// <returns>
+        /// A collection of entities of type <typeparamref name="TReturn"/>
+        /// joined with the specified type types.
+        /// </returns>
+        public static Task<IEnumerable<TReturn>> GetAllAsync<T1, T2, TReturn>(this IDbConnection connection, Func<T1, T2, TReturn> map, bool buffered = true)
+        {
+            return MultiMapAsync<T1, T2, DontMap, DontMap, DontMap, DontMap, DontMap, TReturn>(connection, map, buffered: buffered);
+        }
+
+        /// <summary>
+        /// Retrieves all the entities of type <typeparamref name="TReturn"/>
+        /// joined with the types specified as type parameters.
+        /// </summary>
+        /// <typeparam name="T1">The first type parameter. This is the source entity.</typeparam>
+        /// <typeparam name="T2">The second type parameter.</typeparam>
         /// <typeparam name="T3">The third type parameter.</typeparam>
         /// <typeparam name="TReturn">The return type parameter.</typeparam>
         /// <param name="connection">The connection to the database. This can either be open or closed.</param>
@@ -247,6 +426,29 @@ namespace Dommel
         public static IEnumerable<TReturn> GetAll<T1, T2, T3, TReturn>(this IDbConnection connection, Func<T1, T2, T3, TReturn> map, bool buffered = true)
         {
             return MultiMap<T1, T2, T3, DontMap, DontMap, DontMap, DontMap, TReturn>(connection, map, buffered: buffered);
+        }
+
+        /// <summary>
+        /// Retrieves all the entities of type <typeparamref name="TReturn"/>
+        /// joined with the types specified as type parameters.
+        /// </summary>
+        /// <typeparam name="T1">The first type parameter. This is the source entity.</typeparam>
+        /// <typeparam name="T2">The second type parameter.</typeparam>
+        /// <typeparam name="T3">The third type parameter.</typeparam>
+        /// <typeparam name="TReturn">The return type parameter.</typeparam>
+        /// <param name="connection">The connection to the database. This can either be open or closed.</param>
+        /// <param name="map">The mapping to perform on the entities in the result set.</param>
+        /// <param name="buffered">
+        /// A value indicating whether the result of the query should be executed directly,
+        /// or when the query is materialized (using <c>ToList()</c> for example).
+        /// </param>
+        /// <returns>
+        /// A collection of entities of type <typeparamref name="TReturn"/>
+        /// joined with the specified type types.
+        /// </returns>
+        public static Task<IEnumerable<TReturn>> GetAllAsync<T1, T2, T3, TReturn>(this IDbConnection connection, Func<T1, T2, T3, TReturn> map, bool buffered = true)
+        {
+            return MultiMapAsync<T1, T2, T3, DontMap, DontMap, DontMap, DontMap, TReturn>(connection, map, buffered: buffered);
         }
 
         /// <summary>
@@ -281,6 +483,30 @@ namespace Dommel
         /// <typeparam name="T2">The second type parameter.</typeparam>
         /// <typeparam name="T3">The third type parameter.</typeparam>
         /// <typeparam name="T4">The fourth type parameter.</typeparam>
+        /// <typeparam name="TReturn">The return type parameter.</typeparam>
+        /// <param name="connection">The connection to the database. This can either be open or closed.</param>
+        /// <param name="map">The mapping to perform on the entities in the result set.</param>
+        /// <param name="buffered">
+        /// A value indicating whether the result of the query should be executed directly,
+        /// or when the query is materialized (using <c>ToList()</c> for example).
+        /// </param>
+        /// <returns>
+        /// A collection of entities of type <typeparamref name="TReturn"/>
+        /// joined with the specified type types.
+        /// </returns>
+        public static Task<IEnumerable<TReturn>> GetAllAsync<T1, T2, T3, T4, TReturn>(this IDbConnection connection, Func<T1, T2, T3, T4, TReturn> map, bool buffered = true)
+        {
+            return MultiMapAsync<T1, T2, T3, T4, DontMap, DontMap, DontMap, TReturn>(connection, map, buffered: buffered);
+        }
+
+        /// <summary>
+        /// Retrieves all the entities of type <typeparamref name="TReturn"/>
+        /// joined with the types specified as type parameters.
+        /// </summary>
+        /// <typeparam name="T1">The first type parameter. This is the source entity.</typeparam>
+        /// <typeparam name="T2">The second type parameter.</typeparam>
+        /// <typeparam name="T3">The third type parameter.</typeparam>
+        /// <typeparam name="T4">The fourth type parameter.</typeparam>
         /// <typeparam name="T5">The fifth type parameter.</typeparam>
         /// <typeparam name="TReturn">The return type parameter.</typeparam>
         /// <param name="connection">The connection to the database. This can either be open or closed.</param>
@@ -296,6 +522,31 @@ namespace Dommel
         public static IEnumerable<TReturn> GetAll<T1, T2, T3, T4, T5, TReturn>(this IDbConnection connection, Func<T1, T2, T3, T4, T5, TReturn> map, bool buffered = true)
         {
             return MultiMap<T1, T2, T3, T4, T5, DontMap, DontMap, TReturn>(connection, map, buffered: buffered);
+        }
+
+        /// <summary>
+        /// Retrieves all the entities of type <typeparamref name="TReturn"/>
+        /// joined with the types specified as type parameters.
+        /// </summary>
+        /// <typeparam name="T1">The first type parameter. This is the source entity.</typeparam>
+        /// <typeparam name="T2">The second type parameter.</typeparam>
+        /// <typeparam name="T3">The third type parameter.</typeparam>
+        /// <typeparam name="T4">The fourth type parameter.</typeparam>
+        /// <typeparam name="T5">The fifth type parameter.</typeparam>
+        /// <typeparam name="TReturn">The return type parameter.</typeparam>
+        /// <param name="connection">The connection to the database. This can either be open or closed.</param>
+        /// <param name="map">The mapping to perform on the entities in the result set.</param>
+        /// <param name="buffered">
+        /// A value indicating whether the result of the query should be executed directly,
+        /// or when the query is materialized (using <c>ToList()</c> for example).
+        /// </param>
+        /// <returns>
+        /// A collection of entities of type <typeparamref name="TReturn"/>
+        /// joined with the specified type types.
+        /// </returns>
+        public static Task<IEnumerable<TReturn>> GetAllAsync<T1, T2, T3, T4, T5, TReturn>(this IDbConnection connection, Func<T1, T2, T3, T4, T5, TReturn> map, bool buffered = true)
+        {
+            return MultiMapAsync<T1, T2, T3, T4, T5, DontMap, DontMap, TReturn>(connection, map, buffered: buffered);
         }
 
         /// <summary>
@@ -334,6 +585,32 @@ namespace Dommel
         /// <typeparam name="T4">The fourth type parameter.</typeparam>
         /// <typeparam name="T5">The fifth type parameter.</typeparam>
         /// <typeparam name="T6">The sixth type parameter.</typeparam>
+        /// <typeparam name="TReturn">The return type parameter.</typeparam>
+        /// <param name="connection">The connection to the database. This can either be open or closed.</param>
+        /// <param name="map">The mapping to perform on the entities in the result set.</param>
+        /// <param name="buffered">
+        /// A value indicating whether the result of the query should be executed directly,
+        /// or when the query is materialized (using <c>ToList()</c> for example).
+        /// </param>
+        /// <returns>
+        /// A collection of entities of type <typeparamref name="TReturn"/>
+        /// joined with the specified type types.
+        /// </returns>
+        public static Task<IEnumerable<TReturn>> GetAllAsync<T1, T2, T3, T4, T5, T6, TReturn>(this IDbConnection connection, Func<T1, T2, T3, T4, T5, T6, TReturn> map, bool buffered = true)
+        {
+            return MultiMapAsync<T1, T2, T3, T4, T5, T6, DontMap, TReturn>(connection, map, buffered: buffered);
+        }
+
+        /// <summary>
+        /// Retrieves all the entities of type <typeparamref name="TReturn"/>
+        /// joined with the types specified as type parameters.
+        /// </summary>
+        /// <typeparam name="T1">The first type parameter. This is the source entity.</typeparam>
+        /// <typeparam name="T2">The second type parameter.</typeparam>
+        /// <typeparam name="T3">The third type parameter.</typeparam>
+        /// <typeparam name="T4">The fourth type parameter.</typeparam>
+        /// <typeparam name="T5">The fifth type parameter.</typeparam>
+        /// <typeparam name="T6">The sixth type parameter.</typeparam>
         /// <typeparam name="T7">The seventh type parameter.</typeparam>
         /// <typeparam name="TReturn">The return type parameter.</typeparam>
         /// <param name="connection">The connection to the database. This can either be open or closed.</param>
@@ -351,15 +628,38 @@ namespace Dommel
             return MultiMap<T1, T2, T3, T4, T5, T6, T7, TReturn>(connection, map, buffered: buffered);
         }
 
+        /// <summary>
+        /// Retrieves all the entities of type <typeparamref name="TReturn"/>
+        /// joined with the types specified as type parameters.
+        /// </summary>
+        /// <typeparam name="T1">The first type parameter. This is the source entity.</typeparam>
+        /// <typeparam name="T2">The second type parameter.</typeparam>
+        /// <typeparam name="T3">The third type parameter.</typeparam>
+        /// <typeparam name="T4">The fourth type parameter.</typeparam>
+        /// <typeparam name="T5">The fifth type parameter.</typeparam>
+        /// <typeparam name="T6">The sixth type parameter.</typeparam>
+        /// <typeparam name="T7">The seventh type parameter.</typeparam>
+        /// <typeparam name="TReturn">The return type parameter.</typeparam>
+        /// <param name="connection">The connection to the database. This can either be open or closed.</param>
+        /// <param name="map">The mapping to perform on the entities in the result set.</param>
+        /// <param name="buffered">
+        /// A value indicating whether the result of the query should be executed directly,
+        /// or when the query is materialized (using <c>ToList()</c> for example).
+        /// </param>
+        /// <returns>
+        /// A collection of entities of type <typeparamref name="TReturn"/>
+        /// joined with the specified type types.
+        /// </returns>
+        public static Task<IEnumerable<TReturn>> GetAllAsync<T1, T2, T3, T4, T5, T6, T7, TReturn>(this IDbConnection connection, Func<T1, T2, T3, T4, T5, T6, T7, TReturn> map, bool buffered = true)
+        {
+            return MultiMapAsync<T1, T2, T3, T4, T5, T6, T7, TReturn>(connection, map, buffered: buffered);
+        }
+
         private static IEnumerable<TReturn> MultiMap<T1, T2, T3, T4, T5, T6, T7, TReturn>(IDbConnection connection, Delegate map, object id = null, bool buffered = true)
         {
             var resultType = typeof(TReturn);
-            var resultTableName = Resolvers.Table(resultType);
-            var resultTableKeyColumnName = Resolvers.Column(Resolvers.KeyProperty(resultType));
-
-            var sql = string.Format("select * from {0}", resultTableName);
-
-            var includeTypes = new[]
+            var
+                includeTypes = new[]
                                {
                                    typeof(T1),
                                    typeof(T2),
@@ -369,8 +669,76 @@ namespace Dommel
                                    typeof(T6),
                                    typeof(T7)
                                }
-                .Where(t => t != typeof(DontMap))
-                 .ToArray();
+                    .Where(t => t != typeof(DontMap))
+                    .ToArray();
+
+            DynamicParameters parameters;
+            var sql = BuildMultiMapQuery(resultType, includeTypes, id, out parameters);
+
+            switch (includeTypes.Length)
+            {
+                case 2:
+                    return connection.Query(sql, (Func<T1, T2, TReturn>)map, parameters, buffered: buffered);
+                case 3:
+                    return connection.Query(sql, (Func<T1, T2, T3, TReturn>)map, parameters, buffered: buffered);
+                case 4:
+                    return connection.Query(sql, (Func<T1, T2, T3, T4, TReturn>)map, parameters, buffered: buffered);
+                case 5:
+                    return connection.Query(sql, (Func<T1, T2, T3, T4, T5, TReturn>)map, parameters, buffered: buffered);
+                case 6:
+                    return connection.Query(sql, (Func<T1, T2, T3, T4, T5, T6, TReturn>)map, parameters, buffered: buffered);
+                case 7:
+                    return connection.Query(sql, (Func<T1, T2, T3, T4, T5, T6, T7, TReturn>)map, parameters, buffered: buffered);
+            }
+
+            throw new InvalidOperationException($"Invalid amount of include types: {includeTypes.Length}.");
+        }
+
+        private static Task<IEnumerable<TReturn>> MultiMapAsync<T1, T2, T3, T4, T5, T6, T7, TReturn>(IDbConnection connection, Delegate map, object id = null, bool buffered = true)
+        {
+            var resultType = typeof(TReturn);
+            var
+                includeTypes = new[]
+                               {
+                                   typeof(T1),
+                                   typeof(T2),
+                                   typeof(T3),
+                                   typeof(T4),
+                                   typeof(T5),
+                                   typeof(T6),
+                                   typeof(T7)
+                               }
+                    .Where(t => t != typeof(DontMap))
+                    .ToArray();
+
+            DynamicParameters parameters;
+            var sql = BuildMultiMapQuery(resultType, includeTypes, id, out parameters);
+
+            switch (includeTypes.Length)
+            {
+                case 2:
+                    return connection.QueryAsync(sql, (Func<T1, T2, TReturn>)map, parameters, buffered: buffered);
+                case 3:
+                    return connection.QueryAsync(sql, (Func<T1, T2, T3, TReturn>)map, parameters, buffered: buffered);
+                case 4:
+                    return connection.QueryAsync(sql, (Func<T1, T2, T3, T4, TReturn>)map, parameters, buffered: buffered);
+                case 5:
+                    return connection.QueryAsync(sql, (Func<T1, T2, T3, T4, T5, TReturn>)map, parameters, buffered: buffered);
+                case 6:
+                    return connection.QueryAsync(sql, (Func<T1, T2, T3, T4, T5, T6, TReturn>)map, parameters, buffered: buffered);
+                case 7:
+                    return connection.QueryAsync(sql, (Func<T1, T2, T3, T4, T5, T6, T7, TReturn>)map, parameters, buffered: buffered);
+            }
+
+            throw new InvalidOperationException($"Invalid amount of include types: {includeTypes.Length}.");
+        }
+
+        private static string BuildMultiMapQuery(Type resultType, Type[] includeTypes, object id, out DynamicParameters parameters)
+        {
+            var resultTableName = Resolvers.Table(resultType);
+            var resultTableKeyColumnName = Resolvers.Column(Resolvers.KeyProperty(resultType));
+
+            var sql = $"select * from {resultTableName}";
 
             for (var i = 1; i < includeTypes.Length; i++)
             {
@@ -399,11 +767,11 @@ namespace Dommel
                         var foreignKeyTableKeyColumName = Resolvers.Column(Resolvers.KeyProperty(includeType));
 
                         sql += string.Format(" {0} join {1} on {2}.{3} = {1}.{4}",
-                            joinType,
-                            foreignKeyTableName,
-                            sourceTableName,
-                            foreignKeyPropertyName,
-                            foreignKeyTableKeyColumName);
+                                             joinType,
+                                             foreignKeyTableName,
+                                             sourceTableName,
+                                             foreignKeyPropertyName,
+                                             foreignKeyTableKeyColumName);
                         break;
 
                     case ForeignKeyRelation.OneToMany:
@@ -411,22 +779,22 @@ namespace Dommel
                         var sourceKeyColumnName = Resolvers.Column(Resolvers.KeyProperty(sourceType));
 
                         sql += string.Format(" {0} join {1} on {2}.{3} = {1}.{4}",
-                            joinType,
-                            foreignKeyTableName,
-                            sourceTableName,
-                            sourceKeyColumnName,
-                            foreignKeyPropertyName);
+                                             joinType,
+                                             foreignKeyTableName,
+                                             sourceTableName,
+                                             sourceKeyColumnName,
+                                             foreignKeyPropertyName);
                         break;
 
                     case ForeignKeyRelation.ManyToMany:
                         throw new NotImplementedException("Many-to-many relationships are not supported yet.");
 
                     default:
-                        throw new NotImplementedException(string.Format("Foreign key relation type '{0}' is not implemented.", relation));
+                        throw new NotImplementedException($"Foreign key relation type '{relation}' is not implemented.");
                 }
             }
 
-            DynamicParameters parameters = null;
+            parameters = null;
             if (id != null)
             {
                 sql += string.Format(" where {0}.{1} = @{1}", resultTableName, resultTableKeyColumnName);
@@ -435,23 +803,7 @@ namespace Dommel
                 parameters.Add("Id", id);
             }
 
-            switch (includeTypes.Length)
-            {
-                case 2:
-                    return connection.Query(sql, (Func<T1, T2, TReturn>)map, parameters, buffered: buffered);
-                case 3:
-                    return connection.Query(sql, (Func<T1, T2, T3, TReturn>)map, parameters, buffered: buffered);
-                case 4:
-                    return connection.Query(sql, (Func<T1, T2, T3, T4, TReturn>)map, parameters, buffered: buffered);
-                case 5:
-                    return connection.Query(sql, (Func<T1, T2, T3, T4, T5, TReturn>)map, parameters, buffered: buffered);
-                case 6:
-                    return connection.Query(sql, (Func<T1, T2, T3, T4, T5, T6, TReturn>)map, parameters, buffered: buffered);
-                case 7:
-                    return connection.Query(sql, (Func<T1, T2, T3, T4, T5, T6, T7, TReturn>)map, parameters, buffered: buffered);
-            }
-
-            throw new InvalidOperationException();
+            return sql;
         }
 
         private class DontMap
@@ -474,22 +826,43 @@ namespace Dommel
         /// </returns>
         public static IEnumerable<TEntity> Select<TEntity>(this IDbConnection connection, Expression<Func<TEntity, bool>> predicate, bool buffered = true)
         {
-            var type = typeof(TEntity);
+            DynamicParameters parameters;
+            var sql = BuildSelectSql(predicate, out parameters);
+            return connection.Query<TEntity>(sql, parameters, buffered: buffered);
+        }
 
+        /// <summary>
+        /// Selects all the entities matching the specified predicate.
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the entity.</typeparam>
+        /// <param name="connection">The connection to the database. This can either be open or closed.</param>
+        /// <param name="predicate">A predicate to filter the results.</param>
+        /// <returns>
+        /// A collection of entities of type <typeparamref name="TEntity"/> matching the specified
+        /// <paramref name="predicate"/>.
+        /// </returns>
+        public static Task<IEnumerable<TEntity>> SelectAsync<TEntity>(this IDbConnection connection, Expression<Func<TEntity, bool>> predicate)
+        {
+            DynamicParameters parameters;
+            var sql = BuildSelectSql(predicate, out parameters);
+            return connection.QueryAsync<TEntity>(sql, parameters);
+        }
+
+        private static string BuildSelectSql<TEntity>(Expression<Func<TEntity, bool>> predicate, out DynamicParameters parameters)
+        {
+            var type = typeof(TEntity);
             string sql;
             if (!_getAllQueryCache.TryGetValue(type, out sql))
             {
                 var tableName = Resolvers.Table(type);
-                sql = string.Format("select * from {0}", tableName);
+                sql = $"select * from {tableName}";
                 _getAllQueryCache[type] = sql;
             }
 
-            DynamicParameters parameters;
             sql += new SqlExpression<TEntity>()
                 .Where(predicate)
-                 .ToSql(out parameters);
-
-            return connection.Query<TEntity>(sql: sql, param: parameters, buffered: buffered);
+                .ToSql(out parameters);
+            return sql;
         }
 
         /// <summary>
@@ -584,9 +957,9 @@ namespace Dommel
                 if (epxression.Body.NodeType == ExpressionType.MemberAccess)
                 {
                     var member = epxression.Body as MemberExpression;
-                    if (member.Expression != null)
+                    if (member?.Expression != null)
                     {
-                        return string.Format("{0} = '1'", VisitMemberAccess(member));
+                        return $"{VisitMemberAccess(member)} = '1'";
                     }
                 }
 
@@ -610,7 +983,7 @@ namespace Dommel
                         member.Expression != null &&
                         member.Expression.NodeType == ExpressionType.Parameter)
                     {
-                        left = string.Format("{0} = '1'", VisitMemberAccess(member));
+                        left = $"{VisitMemberAccess(member)} = '1'";
                     }
                     else
                     {
@@ -623,7 +996,7 @@ namespace Dommel
                         member.Expression != null &&
                         member.Expression.NodeType == ExpressionType.Parameter)
                     {
-                        right = string.Format("{0} = '1'", VisitMemberAccess(member));
+                        right = $"{VisitMemberAccess(member)} = '1'";
                     }
                     else
                     {
@@ -638,10 +1011,10 @@ namespace Dommel
 
                     var paramName = "p" + _parameterIndex++;
                     _parameters.Add(paramName, value: right);
-                    return string.Format("{0} {1} @{2}", left, operand, paramName);
+                    return $"{left} {operand} @{paramName}";
                 }
 
-                return string.Format("{0} {1} {2}", left, operand, right);
+                return $"{left} {operand} {right}";
             }
 
             /// <summary>
@@ -664,10 +1037,10 @@ namespace Dommel
                         if (memberExpression != null &&
                             Resolvers.Properties(memberExpression.Expression.Type).Any(p => p.Name == (string)o))
                         {
-                            o = string.Format("{0} = '1'", o);
+                            o = $"{o} = '1'";
                         }
 
-                        return string.Format("not ({0})", o);
+                        return $"not ({o})";
                     case ExpressionType.Convert:
                         if (expression.Method != null)
                         {
@@ -810,16 +1183,37 @@ namespace Dommel
         /// <param name="entity">The entity to be inserted.</param>
         /// <param name="transaction">Optional transaction for the command.</param>
         /// <returns>The id of the inserted entity.</returns>
-        public static int Insert<TEntity>(this IDbConnection connection, TEntity entity, IDbTransaction transaction = null) where TEntity : class
+        public static object Insert<TEntity>(this IDbConnection connection, TEntity entity, IDbTransaction transaction = null) where TEntity : class
         {
-            var type = typeof(TEntity);
+            var sql = BuildInsertQuery(connection, typeof(TEntity));
+            return connection.ExecuteScalar(sql, entity, transaction);
+        }
 
+        /// <summary>
+        /// Inserts the specified entity into the database and returns the id.
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the entity.</typeparam>
+        /// <param name="connection">The connection to the database. This can either be open or closed.</param>
+        /// <param name="entity">The entity to be inserted.</param>
+        /// <param name="transaction">Optional transaction for the command.</param>
+        /// <returns>The id of the inserted entity.</returns>
+        public static Task<object> InsertAsync<TEntity>(this IDbConnection connection, TEntity entity, IDbTransaction transaction = null) where TEntity : class
+        {
+            var sql = BuildInsertQuery(connection, typeof(TEntity));
+            return connection.ExecuteScalarAsync(sql, entity, transaction);
+        }
+
+        private static string BuildInsertQuery(IDbConnection connection, Type type)
+        {
             string sql;
             if (!_insertQueryCache.TryGetValue(type, out sql))
             {
                 var tableName = Resolvers.Table(type);
                 var keyProperty = Resolvers.KeyProperty(type);
-                var typeProperties = Resolvers.Properties(type).Where(p => p != keyProperty).ToList();
+                var typeProperties = Resolvers.Properties(type)
+                                              .Where(p => p != keyProperty || keyProperty.GetSetMethod() != null)
+                                              .Where(p => p.GetSetMethod() != null)
+                                              .ToArray();
 
                 var columnNames = typeProperties.Select(Resolvers.Column).ToArray();
                 var paramNames = typeProperties.Select(p => "@" + p.Name).ToArray();
@@ -831,8 +1225,7 @@ namespace Dommel
                 _insertQueryCache[type] = sql;
             }
 
-            var result = connection.Query<int>(sql, entity, transaction);
-            return result.Single();
+            return sql;
         }
 
         /// <summary>
@@ -846,27 +1239,47 @@ namespace Dommel
         /// <returns>A value indicating whether the update operation succeeded.</returns>
         public static bool Update<TEntity>(this IDbConnection connection, TEntity entity, IDbTransaction transaction = null)
         {
-            var type = typeof(TEntity);
+            var sql = BuildUpdateQuery(typeof(TEntity));
+            return connection.Execute(sql, entity, transaction) > 0;
+        }
 
+        /// <summary>
+        /// Updates the values of the specified entity in the database.
+        /// The return value indicates whether the operation succeeded.
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the entity.</typeparam>
+        /// <param name="connection">The connection to the database. This can either be open or closed.</param>
+        /// <param name="entity">The entity in the database.</param>
+        /// <param name="transaction">Optional transaction for the command.</param>
+        /// <returns>A value indicating whether the update operation succeeded.</returns>
+        public static async Task<bool> UpdateAsync<TEntity>(this IDbConnection connection, TEntity entity, IDbTransaction transaction = null)
+        {
+            var sql = BuildUpdateQuery(typeof(TEntity));
+            return await connection.ExecuteAsync(sql, entity, transaction) > 0;
+        }
+
+        private static string BuildUpdateQuery(Type type)
+        {
             string sql;
             if (!_updateQueryCache.TryGetValue(type, out sql))
             {
                 var tableName = Resolvers.Table(type);
                 var keyProperty = Resolvers.KeyProperty(type);
-                var typeProperties = Resolvers.Properties(type).Where(p => p != keyProperty).ToList();
 
-                var columnNames = typeProperties.Select(p => string.Format("{0} = @{1}", Resolvers.Column(p), p.Name)).ToArray();
+                // Use all properties which are settable.
+                var typeProperties = Resolvers.Properties(type)
+                                              .Where(p => p != keyProperty)
+                                              .Where(p => p.GetSetMethod() != null)
+                                              .ToArray();
 
-                sql = string.Format("update {0} set {1} where {2} = @{3}",
-                    tableName,
-                    string.Join(", ", columnNames),
-                    Resolvers.Column(keyProperty),
-                    keyProperty.Name);
+                var columnNames = typeProperties.Select(p => $"{Resolvers.Column(p)} = @{p.Name}").ToArray();
+
+                sql = $"update {tableName} set {string.Join(", ", columnNames)} where {Resolvers.Column(keyProperty)} = @{keyProperty.Name}";
 
                 _updateQueryCache[type] = sql;
             }
 
-            return connection.Execute(sql, entity, transaction) > 0;
+            return sql;
         }
 
         /// <summary>
@@ -880,8 +1293,27 @@ namespace Dommel
         /// <returns>A value indicating whether the delete operation succeeded.</returns>
         public static bool Delete<TEntity>(this IDbConnection connection, TEntity entity, IDbTransaction transaction = null)
         {
-            var type = typeof(TEntity);
+            var sql = BuildDeleteQuery(typeof(TEntity));
+            return connection.Execute(sql, entity, transaction) > 0;
+        }
 
+        /// <summary>
+        /// Deletes the specified entity from the database.
+        /// Returns a value indicating whether the operation succeeded.
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the entity.</typeparam>
+        /// <param name="connection">The connection to the database. This can either be open or closed.</param>
+        /// <param name="entity">The entity to be deleted.</param>
+        /// <param name="transaction">Optional transaction for the command.</param>
+        /// <returns>A value indicating whether the delete operation succeeded.</returns>
+        public static async Task<bool> DeleteAsync<TEntity>(this IDbConnection connection, TEntity entity, IDbTransaction transaction = null)
+        {
+            var sql = BuildDeleteQuery(typeof(TEntity));
+            return await connection.ExecuteAsync(sql, entity, transaction) > 0;
+        }
+
+        private static string BuildDeleteQuery(Type type)
+        {
             string sql;
             if (!_deleteQueryCache.TryGetValue(type, out sql))
             {
@@ -889,12 +1321,12 @@ namespace Dommel
                 var keyProperty = Resolvers.KeyProperty(type);
                 var keyColumnName = Resolvers.Column(keyProperty);
 
-                sql = string.Format("delete from {0} where {1} = @{2}", tableName, keyColumnName, keyProperty.Name);
+                sql = $"delete from {tableName} where {keyColumnName} = @{keyProperty.Name}";
 
                 _deleteQueryCache[type] = sql;
             }
 
-            return connection.Execute(sql, entity, transaction) > 0;
+            return sql;
         }
 
         /// <summary>
@@ -935,7 +1367,7 @@ namespace Dommel
             /// <returns>The foreign key property for <paramref name="sourceType"/> and <paramref name="includingType"/>.</returns>
             public static PropertyInfo ForeignKeyProperty(Type sourceType, Type includingType, out ForeignKeyRelation foreignKeyRelation)
             {
-                var key = string.Format("{0};{1}", sourceType.FullName, includingType.FullName);
+                var key = $"{sourceType.FullName};{includingType.FullName}";
 
                 ForeignKeyInfo foreignKeyInfo;
                 if (!_typeForeignKeyPropertyCache.TryGetValue(key, out foreignKeyInfo))
@@ -1008,7 +1440,7 @@ namespace Dommel
             /// <returns>The column name in the database for <paramref name="propertyInfo"/>.</returns>
             public static string Column(PropertyInfo propertyInfo)
             {
-                var key = string.Format("{0}.{1}", propertyInfo.DeclaringType, propertyInfo.Name);
+                var key = $"{propertyInfo.DeclaringType}.{propertyInfo.Name}";
 
                 string columnName;
                 if (!_columnNameCache.TryGetValue(key, out columnName))
@@ -1101,13 +1533,7 @@ namespace Dommel
             /// Gets a collection of types that are considered 'primitive' for Dommel but are not for the CLR.
             /// Override this if you need your own implementation of this.
             /// </summary>
-            protected virtual HashSet<Type> PrimitiveTypes
-            {
-                get
-                {
-                    return _primitiveTypes;
-                }
-            }
+            protected virtual HashSet<Type> PrimitiveTypes => _primitiveTypes;
 
             /// <summary>
             /// Filters the complex types from the specified collection of properties.
@@ -1134,7 +1560,7 @@ namespace Dommel
         /// </summary>
         public class DefaultPropertyResolver : PropertyResolverBase
         {
-            /// <inheritdoc />
+            /// <inheritdoc/>
             public override IEnumerable<PropertyInfo> ResolveProperties(Type type)
             {
                 return FilterComplexTypes(type.GetProperties());
@@ -1192,12 +1618,12 @@ namespace Dommel
 
                 if (keyProps.Count == 0)
                 {
-                    throw new Exception(string.Format("Could not find the key property for type '{0}'.", type.FullName));
+                    throw new Exception($"Could not find the key property for type '{type.FullName}'.");
                 }
 
                 if (keyProps.Count > 1)
                 {
-                    throw new Exception(string.Format("Multiple key properties were found for type '{0}'.", type.FullName));
+                    throw new Exception($"Multiple key properties were found for type '{type.FullName}'.");
                 }
 
                 return keyProps[0];
@@ -1282,7 +1708,7 @@ namespace Dommel
                     return oneToManyFk;
                 }
 
-                var msg = string.Format("Could not resolve foreign key property. Source type '{0}'; including type: '{1}'.", sourceType.FullName, includingType.FullName);
+                var msg = $"Could not resolve foreign key property. Source type '{sourceType.FullName}'; including type: '{includingType.FullName}'.";
                 throw new Exception(msg);
             }
 
@@ -1442,10 +1868,7 @@ namespace Dommel
         {
             public string BuildInsert(string tableName, string[] columnNames, string[] paramNames, PropertyInfo keyProperty)
             {
-                return string.Format("set nocount on insert into {0} ({1}) values ({2}) select cast(scope_identity() as int)",
-                    tableName,
-                    string.Join(", ", columnNames),
-                    string.Join(", ", paramNames));
+                return $"set nocount on insert into {tableName} ({string.Join(", ", columnNames)}) values ({string.Join(", ", paramNames)}) select cast(scope_identity() as int)";
             }
         }
 
@@ -1453,10 +1876,7 @@ namespace Dommel
         {
             public string BuildInsert(string tableName, string[] columnNames, string[] paramNames, PropertyInfo keyProperty)
             {
-                return string.Format("insert into {0} ({1}) values ({2}) select cast(@@IDENTITY as int)",
-                    tableName,
-                    string.Join(", ", columnNames),
-                    string.Join(", ", paramNames));
+                return $"insert into {tableName} ({string.Join(", ", columnNames)}) values ({string.Join(", ", paramNames)}) select cast(@@IDENTITY as int)";
             }
         }
 
@@ -1464,10 +1884,7 @@ namespace Dommel
         {
             public string BuildInsert(string tableName, string[] columnNames, string[] paramNames, PropertyInfo keyProperty)
             {
-                return string.Format("insert into {0} ({1}) values ({2}); select last_insert_rowid() id",
-                    tableName,
-                    string.Join(", ", columnNames),
-                    string.Join(", ", paramNames));
+                return $"insert into {tableName} ({string.Join(", ", columnNames)}) values ({string.Join(", ", paramNames)}); select last_insert_rowid() id";
             }
         }
 
@@ -1475,10 +1892,7 @@ namespace Dommel
         {
             public string BuildInsert(string tableName, string[] columnNames, string[] paramNames, PropertyInfo keyProperty)
             {
-                return string.Format("insert into {0} ({1}) values ({2}); select LAST_INSERT_ID() id",
-                    tableName,
-                    string.Join(", ", columnNames),
-                    string.Join(", ", paramNames));
+                return $"insert into {tableName} ({string.Join(", ", columnNames)}) values ({string.Join(", ", paramNames)}); select LAST_INSERT_ID() id";
             }
         }
 
@@ -1486,10 +1900,7 @@ namespace Dommel
         {
             public string BuildInsert(string tableName, string[] columnNames, string[] paramNames, PropertyInfo keyProperty)
             {
-                var sql = string.Format("insert into {0} ({1}) values ({2}) select last_insert_rowid() id",
-                    tableName,
-                    string.Join(", ", columnNames),
-                    string.Join(", ", paramNames));
+                var sql = $"insert into {tableName} ({string.Join(", ", columnNames)}) values ({string.Join(", ", paramNames)}) select last_insert_rowid() id";
 
                 if (keyProperty != null)
                 {

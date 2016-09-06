@@ -1,5 +1,5 @@
 ﻿{
-  "version": "1.6.1",
+  "version": "1.7.0",
   "title": "Dommel",
   "description": "Simple CRUD operations for Dapper.",
   "authors": [ "Henk Mollema" ],
@@ -17,7 +17,7 @@
   },
 
   "dependencies": {
-    "Dapper": "1.50.0"
+    "Dapper": "1.50.2"
   },
 
   "frameworks": {
