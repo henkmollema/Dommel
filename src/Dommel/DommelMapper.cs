@@ -1257,11 +1257,11 @@ namespace Dommel
         /// <returns>A value indicating whether the update operation succeeded.</returns>
         public static async Task<bool> UpdateAsync<TEntity>(this IDbConnection connection, TEntity entity, IDbTransaction transaction = null)
         {
-            var sql = BuildUpdateQuery(typeof(TEntity));
+            var sql = BuildUpdateQuery(typeof(TEntity), connection);
             return await connection.ExecuteAsync(sql, entity, transaction) > 0;
         }
 
-        private static string BuildUpdateQuery(Type type, IDbConnection connection = null)
+        private static string BuildUpdateQuery(Type type, IDbConnection connection)
         {
             string sql;
             if (!_updateQueryCache.TryGetValue(type, out sql))
