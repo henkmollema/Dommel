@@ -1,7 +1,10 @@
 init:
   - git config --global core.autocrlf true
 build_script:
-  - build.cmd verify
+  - build.cmd --quiet verify
 clone_depth: 1
 test: off
 deploy: off
+environment:
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: 1
