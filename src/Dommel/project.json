@@ -1,5 +1,5 @@
 ﻿{
-  "version": "1.7.1",
+  "version": "1.7.2",
   "title": "Dommel",
   "description": "Simple CRUD operations for Dapper.",
   "authors": [ "Henk Mollema" ],
@@ -38,8 +38,8 @@
         "define": [ "COREFX" ]
       },
       "dependencies": {
-        "NETStandard.Library": "1.6.0",
-        "System.ComponentModel.Annotations": "4.1.0"
+        "NETStandard.Library": "1.6.1",
+        "System.ComponentModel.Annotations": "4.3.0"
       }
     }
   },
