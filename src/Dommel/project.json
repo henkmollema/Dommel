@@ -24,7 +24,8 @@
     "net45": {
       "frameworkAssemblies": {
         "System.ComponentModel.DataAnnotations": "4.0.0.0",
-        "System.Data": "4.0.0.0"
+        "System.Data": "4.0.0.0",
+        "System.Xml": "4.0.0.0"
       }
     },
     "net451": {
