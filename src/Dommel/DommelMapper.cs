@@ -30,6 +30,7 @@ namespace Dommel
         private static readonly IDictionary<Type, string> _insertQueryCache = new Dictionary<Type, string>();
         private static readonly IDictionary<Type, string> _updateQueryCache = new Dictionary<Type, string>();
         private static readonly IDictionary<Type, string> _deleteQueryCache = new Dictionary<Type, string>();
+        private static readonly IDictionary<Type, string> _deleteAllQueryCache = new Dictionary<Type, string>();
 
         /// <summary>
         /// Retrieves the entity of type <typeparamref name="TEntity"/> with the specified id.
@@ -1324,6 +1325,96 @@ namespace Dommel
                 sql = $"delete from {tableName} where {keyColumnName} = @{keyProperty.Name}";
 
                 _deleteQueryCache[type] = sql;
+            }
+
+            return sql;
+        }
+
+        /// <summary>
+        /// Deletes all entities of type <typeparamref name="TEntity"/> matching the specified predicate from the database.
+        /// Returns a value indicating whether the operation succeeded.
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the entity.</typeparam>
+        /// <param name="connection">The connection to the database. This can either be open or closed.</param>
+        /// <param name="predicate">A predicate to filter which entities are deleted.</param>
+        /// <param name="transaction">Optional transaction for the command.</param>
+        /// <returns>A value indicating whether the delete operation succeeded.</returns>
+        public static bool DeleteMultiple<TEntity>(this IDbConnection connection, Expression<Func<TEntity, bool>> predicate, IDbTransaction transaction = null)
+        {
+            DynamicParameters parameters;
+            var sql = BuildDeleteMultipleQuery(predicate, out parameters);
+            return connection.Execute(sql, parameters, transaction) > 0;
+        }
+
+        /// <summary>
+        /// Deletes all entities of type <typeparamref name="TEntity"/> matching the specified predicate from the database.
+        /// Returns a value indicating whether the operation succeeded.
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the entity.</typeparam>
+        /// <param name="connection">The connection to the database. This can either be open or closed.</param>
+        /// <param name="predicate">A predicate to filter which entities are deleted.</param>
+        /// <param name="transaction">Optional transaction for the command.</param>
+        /// <returns>A value indicating whether the delete operation succeeded.</returns>
+        public static async Task<bool> DeleteMultipleAsync<TEntity>(this IDbConnection connection, Expression<Func<TEntity, bool>> predicate, IDbTransaction transaction = null)
+        {
+            DynamicParameters parameters;
+            var sql = BuildDeleteMultipleQuery(predicate, out parameters);
+            return await connection.ExecuteAsync(sql, parameters, transaction) > 0;
+        }
+
+        private static string BuildDeleteMultipleQuery<TEntity>(Expression<Func<TEntity, bool>> predicate, out DynamicParameters parameters)
+        {
+            var type = typeof(TEntity);
+            string sql;
+            if (!_deleteAllQueryCache.TryGetValue(type, out sql))
+            {
+                var tableName = Resolvers.Table(type);
+                sql = $"delete from {tableName}";
+                _deleteAllQueryCache[type] = sql;
+            }
+
+            sql += new SqlExpression<TEntity>()
+                .Where(predicate)
+                .ToSql(out parameters);
+            return sql;
+        }
+
+        /// <summary>
+        /// Deletes all entities of type <typeparamref name="TEntity"/> from the database.
+        /// Returns a value indicating whether the operation succeeded.
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the entity.</typeparam>
+        /// <param name="connection">The connection to the database. This can either be open or closed.</param>
+        /// <param name="transaction">Optional transaction for the command.</param>
+        /// <returns>A value indicating whether the delete operation succeeded.</returns>
+        public static bool DeleteAll<TEntity>(this IDbConnection connection, IDbTransaction transaction = null)
+        {
+            var sql = BuildDeleteAllQuery(typeof(TEntity));
+            return connection.Execute(sql, transaction: transaction) > 0;
+        }
+
+        /// <summary>
+        /// Deletes all entities of type <typeparamref name="TEntity"/> from the database.
+        /// Returns a value indicating whether the operation succeeded.
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the entity.</typeparam>
+        /// <param name="connection">The connection to the database. This can either be open or closed.</param>
+        /// <param name="transaction">Optional transaction for the command.</param>
+        /// <returns>A value indicating whether the delete operation succeeded.</returns>
+        public static async Task<bool> DeleteAllAsync<TEntity>(this IDbConnection connection, IDbTransaction transaction = null)
+        {
+            var sql = BuildDeleteAllQuery(typeof(TEntity));
+            return await connection.ExecuteAsync(sql, transaction: transaction) > 0;
+        }
+
+        private static string BuildDeleteAllQuery(Type type)
+        {
+            string sql;
+            if (!_deleteAllQueryCache.TryGetValue(type, out sql))
+            {
+                var tableName = Resolvers.Table(type);
+                sql = $"delete from {tableName}";
+                _deleteAllQueryCache[type] = sql;
             }
 
             return sql;
