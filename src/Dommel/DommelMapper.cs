@@ -1610,6 +1610,7 @@ namespace Dommel
                                                                         typeof(double),
                                                                         typeof(float),
                                                                         typeof(DateTime),
+                                                                        typeof(DateTimeOffset),
                                                                         typeof(TimeSpan)
                                                                     };
 
