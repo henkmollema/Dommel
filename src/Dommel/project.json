@@ -1,5 +1,5 @@
 ﻿{
-  "version": "1.7.2",
+  "version": "1.7.3",
   "title": "Dommel",
   "description": "Simple CRUD operations for Dapper.",
   "authors": [ "Henk Mollema" ],
