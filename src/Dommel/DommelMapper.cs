@@ -1212,7 +1212,7 @@ namespace Dommel
                 var tableName = Resolvers.Table(type);
                 var keyProperty = Resolvers.KeyProperty(type);
                 var typeProperties = Resolvers.Properties(type)
-                                              .Where(p => p != keyProperty || keyProperty.GetSetMethod() != null)
+                                              .Where(p => p != keyProperty)
                                               .Where(p => p.GetSetMethod() != null)
                                               .ToArray();
 
