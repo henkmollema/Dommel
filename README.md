@@ -1,28 +1,26 @@
 # Dommel
 Simple CRUD operations for Dapper.
 
+| Windows | Linux |
+| --- | --- |
+| [![Build status](https://ci.appveyor.com/api/projects/status/kynsbfu97f9s5bj7?svg=true)](https://ci.appveyor.com/project/henkmollema/dommel) | [![Build Status](https://travis-ci.org/henkmollema/Dommel.svg)](https://travis-ci.org/henkmollema/Dommel)
+
 <hr>
-
-| Windows | Linux | OS X |
-| --- | --- | --- |
-| [![Build status](https://ci.appveyor.com/api/projects/status/kynsbfu97f9s5bj7?svg=true)](https://ci.appveyor.com/project/henkmollema/dommel) | [![Build Status](https://travis-ci.org/henkmollema/Dommel.svg)](https://travis-ci.org/henkmollema/Dommel) | [![Build Status](https://travis-ci.org/henkmollema/Dommel.svg)](https://travis-ci.org/henkmollema/Dommel) |
-
---
 
 Dommel provides a convenient API for CRUD operations using extension methods on the `IDbConnection` interface. The SQL queries are generated based on your POCO entities. Dommel also supports LINQ expressions which are being translated to SQL expressions. [Dapper](https://github.com/StackExchange/dapper-dot-net) is used for query execution and object mapping.
 
-Dommel also provides extensibility points to change the bevahior of resolving table names, column names, the key property and POCO properties. See [Extensibility](https://github.com/henkmollema/Dommel#extensibility) for more details.
+Dommel also provides extensibility points to change the bahavior of resolving table names, column names, the key property and POCO properties. See [Extensibility](https://github.com/henkmollema/Dommel#extensibility) for more details.
 
 <hr>
 
-### Download
+## Download
 [![Download Dommel on NuGet](http://i.imgur.com/g9ZIbID.png "Download Dommel on NuGet")](https://www.nuget.org/packages/Dommel)
 
 <hr>
 
-### The API
+## API
 
-##### Retrieving entities by id
+#### Retrieving entities by id
 ```csharp
 using (var con = new SqlConnection())
 {
@@ -30,7 +28,7 @@ using (var con = new SqlConnection())
 }
 ```
 
-##### Retrieving all entities in a table
+#### Retrieving all entities in a table
 ```csharp
 using (var con = new SqlConnection())
 {
@@ -38,7 +36,7 @@ using (var con = new SqlConnection())
 }
 ```
 
-##### Selecting entities using a predicate
+#### Selecting entities using a predicate
 Dommel allows you to specify a predicate which is being translated into a SQL expression. The arguments in the lambda expression are added as parameters to the command.
 ```csharp
 using (var con = new SqlConnection())
@@ -49,7 +47,7 @@ using (var con = new SqlConnection())
 }
 ```
 
-##### Inserting entities
+#### Inserting entities
 ```csharp
 using (var con = new SqlConnection())
 {
@@ -58,7 +56,7 @@ using (var con = new SqlConnection())
 }
 ```
 
-##### Updating entities
+#### Updating entities
 ```csharp
 using (var con = new SqlConnection())
 {
@@ -68,7 +66,7 @@ using (var con = new SqlConnection())
 }
 ```
 
-##### Removing entities
+#### Removing entities
 ```csharp
 using (var con = new SqlConnection())
 {
@@ -79,7 +77,7 @@ using (var con = new SqlConnection())
 
 <hr>
 
-### Query builders
+## Query builders
 
 Dommel supports building specialized queries for a certain RDBMS. By default, query builders for the following RDMBS are included: SQL Server, SQL Server CE, SQLite, MySQL and Postgres. The query builder to be used is determined by the connection type. To add or overwrite an existing query builder, use the `AddSqlBuilder()`  method:
 
@@ -89,8 +87,8 @@ DommelMapper.AddSqlBuilder(typeof(SqlConnection), new CustomSqlBuilder());
 
 <hr>
 
-### Extensibility
-##### `ITableNameResolver`
+## Extensibility
+#### `ITableNameResolver`
 Implement this interface if you want to customize the resolving of table names when building SQL queries.
 ```csharp
 public class CustomTableNameResolver : DommelMapper.ITableNameResolver
@@ -108,7 +106,7 @@ Use the `SetTableNameResolver()` method to register the custom implementation:
 DommelMapper.SetTableNameResolver(new CustomTableNameResolver());
 ```
 
-##### `IKeyPropertyResolver`
+#### `IKeyPropertyResolver`
 Implement this interface if you want to customize the resolving of the key property of an entity. By default, Dommel will search for a property with the `[Key]` attribute, or a column with the name 'Id'.
 
 If you, for example, have the naming convention of `{TypeName}Id` for key properties, you would implement the `IKeyPropertyResolver` like this:
@@ -127,7 +125,7 @@ Use the `SetKeyPropertyResolver()` method to register the custom implementation:
 DommelMapper.SetKeyPropertyResolver(new CustomKeyPropertyResolver());
 ```
 
-##### `IColumnNameResolver`
+#### `IColumnNameResolver`
 Implement this interface if you want to customize the resolving of column names for when building SQL queries. This is useful when your naming conventions for database columns are different than your POCO properties.
 
 ```csharp
