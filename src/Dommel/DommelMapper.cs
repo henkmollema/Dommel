@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Data;
@@ -16,7 +17,7 @@ namespace Dommel
     /// </summary>
     public static class DommelMapper
     {
-        private static readonly IDictionary<string, ISqlBuilder> _sqlBuilders = new Dictionary<string, ISqlBuilder>
+        private static readonly Dictionary<string, ISqlBuilder> _sqlBuilders = new Dictionary<string, ISqlBuilder>
                                                                                 {
                                                                                     { "sqlconnection", new SqlServerSqlBuilder() },
                                                                                     { "sqlceconnection", new SqlServerCeSqlBuilder() },
@@ -25,12 +26,12 @@ namespace Dommel
                                                                                     { "mysqlconnection", new MySqlSqlBuilder() }
                                                                                 };
 
-        private static readonly IDictionary<Type, string> _getQueryCache = new Dictionary<Type, string>();
-        private static readonly IDictionary<Type, string> _getAllQueryCache = new Dictionary<Type, string>();
-        private static readonly IDictionary<Type, string> _insertQueryCache = new Dictionary<Type, string>();
-        private static readonly IDictionary<Type, string> _updateQueryCache = new Dictionary<Type, string>();
-        private static readonly IDictionary<Type, string> _deleteQueryCache = new Dictionary<Type, string>();
-        private static readonly IDictionary<Type, string> _deleteAllQueryCache = new Dictionary<Type, string>();
+        private static readonly ConcurrentDictionary<Type, string> _getQueryCache = new ConcurrentDictionary<Type, string>();
+        private static readonly ConcurrentDictionary<Type, string> _getAllQueryCache = new ConcurrentDictionary<Type, string>();
+        private static readonly ConcurrentDictionary<Type, string> _insertQueryCache = new ConcurrentDictionary<Type, string>();
+        private static readonly ConcurrentDictionary<Type, string> _updateQueryCache = new ConcurrentDictionary<Type, string>();
+        private static readonly ConcurrentDictionary<Type, string> _deleteQueryCache = new ConcurrentDictionary<Type, string>();
+        private static readonly ConcurrentDictionary<Type, string> _deleteAllQueryCache = new ConcurrentDictionary<Type, string>();
 
         /// <summary>
         /// Retrieves the entity of type <typeparamref name="TEntity"/> with the specified id.
@@ -70,7 +71,7 @@ namespace Dommel
                 var keyColumnName = Resolvers.Column(keyProperty);
 
                 sql = $"select * from {tableName} where {keyColumnName} = @Id";
-                _getQueryCache[type] = sql;
+                _getQueryCache.TryAdd(type, sql);
             }
 
             parameters = new DynamicParameters();
@@ -114,7 +115,7 @@ namespace Dommel
             {
                 var tableName = Resolvers.Table(type);
                 sql = $"select * from {tableName}";
-                _getAllQueryCache[type] = sql;
+                _getAllQueryCache.TryAdd(type, sql);
             }
 
             return sql;
@@ -857,7 +858,7 @@ namespace Dommel
             {
                 var tableName = Resolvers.Table(type);
                 sql = $"select * from {tableName}";
-                _getAllQueryCache[type] = sql;
+                _getAllQueryCache.TryAdd(type, sql);
             }
 
             sql += new SqlExpression<TEntity>()
@@ -1223,7 +1224,7 @@ namespace Dommel
 
                 sql = builder.BuildInsert(tableName, columnNames, paramNames, keyProperty);
 
-                _insertQueryCache[type] = sql;
+                _insertQueryCache.TryAdd(type, sql);
             }
 
             return sql;
@@ -1277,7 +1278,7 @@ namespace Dommel
 
                 sql = $"update {tableName} set {string.Join(", ", columnNames)} where {Resolvers.Column(keyProperty)} = @{keyProperty.Name}";
 
-                _updateQueryCache[type] = sql;
+                _updateQueryCache.TryAdd(type, sql);
             }
 
             return sql;
@@ -1324,7 +1325,7 @@ namespace Dommel
 
                 sql = $"delete from {tableName} where {keyColumnName} = @{keyProperty.Name}";
 
-                _deleteQueryCache[type] = sql;
+                _deleteQueryCache.TryAdd(type, sql);
             }
 
             return sql;
@@ -1370,7 +1371,7 @@ namespace Dommel
             {
                 var tableName = Resolvers.Table(type);
                 sql = $"delete from {tableName}";
-                _deleteAllQueryCache[type] = sql;
+                _deleteAllQueryCache.TryAdd(type, sql);
             }
 
             sql += new SqlExpression<TEntity>()
@@ -1414,7 +1415,7 @@ namespace Dommel
             {
                 var tableName = Resolvers.Table(type);
                 sql = $"delete from {tableName}";
-                _deleteAllQueryCache[type] = sql;
+                _deleteAllQueryCache.TryAdd(type, sql);
             }
 
             return sql;
@@ -1425,11 +1426,11 @@ namespace Dommel
         /// </summary>
         public static class Resolvers
         {
-            private static readonly IDictionary<Type, string> _typeTableNameCache = new Dictionary<Type, string>();
-            private static readonly IDictionary<string, string> _columnNameCache = new Dictionary<string, string>();
-            private static readonly IDictionary<Type, PropertyInfo> _typeKeyPropertyCache = new Dictionary<Type, PropertyInfo>();
-            private static readonly IDictionary<Type, PropertyInfo[]> _typePropertiesCache = new Dictionary<Type, PropertyInfo[]>();
-            private static readonly IDictionary<string, ForeignKeyInfo> _typeForeignKeyPropertyCache = new Dictionary<string, ForeignKeyInfo>();
+            private static readonly ConcurrentDictionary<Type, string> _typeTableNameCache = new ConcurrentDictionary<Type, string>();
+            private static readonly ConcurrentDictionary<string, string> _columnNameCache = new ConcurrentDictionary<string, string>();
+            private static readonly ConcurrentDictionary<Type, PropertyInfo> _typeKeyPropertyCache = new ConcurrentDictionary<Type, PropertyInfo>();
+            private static readonly ConcurrentDictionary<Type, PropertyInfo[]> _typePropertiesCache = new ConcurrentDictionary<Type, PropertyInfo[]>();
+            private static readonly ConcurrentDictionary<string, ForeignKeyInfo> _typeForeignKeyPropertyCache = new ConcurrentDictionary<string, ForeignKeyInfo>();
 
             /// <summary>
             /// Gets the key property for the specified type, using the configured <see cref="DommelMapper.IKeyPropertyResolver"/>.
@@ -1442,7 +1443,7 @@ namespace Dommel
                 if (!_typeKeyPropertyCache.TryGetValue(type, out keyProperty))
                 {
                     keyProperty = _keyPropertyResolver.ResolveKeyProperty(type);
-                    _typeKeyPropertyCache[type] = keyProperty;
+                    _typeKeyPropertyCache.TryAdd(type, keyProperty);
                 }
 
                 return keyProperty;
@@ -1468,7 +1469,7 @@ namespace Dommel
 
                     // Cache the info.
                     foreignKeyInfo = new ForeignKeyInfo(foreignKeyProperty, foreignKeyRelation);
-                    _typeForeignKeyPropertyCache[key] = foreignKeyInfo;
+                    _typeForeignKeyPropertyCache.TryAdd(key, foreignKeyInfo);
                 }
 
                 foreignKeyRelation = foreignKeyInfo.Relation;
@@ -1500,7 +1501,7 @@ namespace Dommel
                 if (!_typePropertiesCache.TryGetValue(type, out properties))
                 {
                     properties = _propertyResolver.ResolveProperties(type).ToArray();
-                    _typePropertiesCache[type] = properties;
+                    _typePropertiesCache.TryAdd(type, properties);
                 }
 
                 return properties;
@@ -1518,7 +1519,7 @@ namespace Dommel
                 if (!_typeTableNameCache.TryGetValue(type, out name))
                 {
                     name = _tableNameResolver.ResolveTableName(type);
-                    _typeTableNameCache[type] = name;
+                    _typeTableNameCache.TryAdd(type, name);
                 }
                 return name;
             }
@@ -1537,7 +1538,7 @@ namespace Dommel
                 if (!_columnNameCache.TryGetValue(key, out columnName))
                 {
                     columnName = _columnNameResolver.ResolveColumnName(propertyInfo);
-                    _columnNameCache[key] = columnName;
+                    _columnNameCache.TryAdd(key, columnName);
                 }
 
                 return columnName;
