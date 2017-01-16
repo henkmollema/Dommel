@@ -3,7 +3,7 @@
   "title": "Dommel",
   "description": "Simple CRUD operations for Dapper.",
   "authors": [ "Henk Mollema" ],
-  "copyright": "Copyright © Henk Mollema 2016",
+  "copyright": "Copyright © Henk Mollema 2017",
   "packOptions": {
     "owners": [ "Henk Mollema" ],
     "summary": "Simple CRUD operations for Dapper.",
