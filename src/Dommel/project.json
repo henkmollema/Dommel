@@ -38,8 +38,8 @@
         "define": [ "COREFX" ]
       },
       "dependencies": {
-        "NETStandard.Library": "1.6.1",
-        "System.ComponentModel.Annotations": "4.3.0"
+        "NETStandard.Library": "1.6.0",
+        "System.ComponentModel.Annotations": "4.1.0"
       }
     }
   },
