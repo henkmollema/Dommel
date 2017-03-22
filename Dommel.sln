@@ -1,16 +1,11 @@
-﻿
+
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25123.0
+# Visual Studio 15
+VisualStudioVersion = 15.0.26114.2
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{29200F34-D24D-4E3F-979A-CB6F2CA7C0F0}"
-	ProjectSection(SolutionItems) = preProject
-		global.json = global.json
-	EndProjectSection
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{52003D59-962F-488A-A712-85CB866D6ADF}"
 EndProject
-Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Dommel", "src\Dommel\Dommel.xproj", "{9D3463BE-F1A3-4B31-A63F-6A84F36E3108}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dommel", "src\Dommel\Dommel.csproj", "{9D3463BE-F1A3-4B31-A63F-6A84F36E3108}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
