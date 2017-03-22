@@ -1,10 +1,11 @@
 init:
   - git config --global core.autocrlf true
 build_script:
-  - build.cmd --quiet verify
+  - ps: .\build.ps1
 clone_depth: 1
 test: off
 deploy: off
 environment:
   DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
   DOTNET_CLI_TELEMETRY_OPTOUT: 1
+os: Visual Studio 2017
