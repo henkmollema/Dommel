@@ -936,7 +936,10 @@ namespace Dommel
             /// <returns>The current <see cref="DommelMapper.SqlExpression&lt;TEntity&gt;"/> instance.</returns>
             public virtual SqlExpression<TEntity> Where(Expression<Func<TEntity, bool>> expression)
             {
-                AppendToWhere("and", expression);
+                if (expression != null)
+                {
+                    AppendToWhere("and", expression);
+                }
                 return this;
             }
 
