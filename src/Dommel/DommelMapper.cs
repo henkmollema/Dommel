@@ -920,6 +920,78 @@ namespace Dommel
         }
 
         /// <summary>
+        /// Selects the paginated entities matching the specified predicate.
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the entity.</typeparam>
+        /// <param name="connection">The connection to the database. This can either be open or closed.</param>
+        /// <param name="predicate">A predicate to filter the results.</param>
+        /// <param name="orderByExpression">A expression to order by the results.</param>
+        /// <param name="orderByAsc">Order by type.</param>
+        /// <param name="pageNo">The page number of the results.</param>
+        /// <param name="pageSize">The page size of the results.</param>
+        /// <returns>
+        /// A collection of entities of type <typeparamref name="TEntity"/> matching the specified
+        /// <paramref name="predicate"/>.
+        /// </returns>
+        public static IEnumerable<TEntity> Query<TEntity>(this IDbConnection connection,
+            Expression<Func<TEntity, bool>> predicate,
+            Expression<Func<TEntity, object>> orderByExpression = null,
+            bool orderByAsc = true,
+            int? pageNo = null, int? pageSize = null)
+        {
+            var tableName = Resolvers.Table(typeof(TEntity));
+            var orderBySql = BuildOrderSql(orderByExpression, orderByAsc);
+
+            DynamicParameters parameters;
+            var sql = BuildSelectSql<TEntity>(predicate, out parameters);
+            if (pageNo == null || pageSize == null)
+            {
+                sql = $"{sql} {orderBySql}";
+            }
+            else
+            {
+                sql = BuildPaginationSql(connection, tableName, sql, orderBySql, orderByAsc, pageNo.Value, pageSize.Value);
+            }
+
+            return connection.Query<TEntity>(sql, (object) parameters);
+        }
+
+        private static string BuildOrderSql<TEntity>(Expression<Func<TEntity, object>> predicate, bool orderByAsc)
+        {
+            if (predicate != null)
+            {
+                MemberExpression memberExpression = null;
+
+                var predicateBodyNodeType = predicate.Body.NodeType;
+                if (predicateBodyNodeType == ExpressionType.Convert ||
+                    predicateBodyNodeType == ExpressionType.ConvertChecked)
+                {
+                    var unaryExpression = predicate.Body as UnaryExpression;
+                    memberExpression = unaryExpression?.Operand as MemberExpression;
+                }
+                else if (predicate.Body.NodeType == ExpressionType.MemberAccess)
+                {
+                    memberExpression = predicate.Body as MemberExpression;
+                }
+
+                if (memberExpression?.Expression != null)
+                {
+                    var property = new SqlExpression<TEntity>().VisitMemberAccess(memberExpression);
+                    return $" ORDER BY {property} " + (orderByAsc ? "ASC" : "DESC");
+                }
+            }
+
+            return "";
+        }
+
+        private static string BuildPaginationSql(IDbConnection connection, string tableName, string sql,
+            string orderBySql, bool orderByAsc, int pageNo, int pageSize)
+        {
+            var builder = GetBuilder(connection);
+            return builder.BuildPagination(tableName, sql, orderBySql, orderByAsc, pageNo, pageSize);
+        }
+
+        /// <summary>
         /// Represents a typed SQL expression.
         /// </summary>
         /// <typeparam name="TEntity">The type of the entity.</typeparam>
@@ -1127,7 +1199,7 @@ namespace Dommel
             /// </summary>
             /// <param name="expression">The member access expression.</param>
             /// <returns>The result of the processing.</returns>
-            protected virtual object VisitMemberAccess(MemberExpression expression)
+            public virtual object VisitMemberAccess(MemberExpression expression)
             {
                 if (expression.Expression != null && expression.Expression.NodeType == ExpressionType.Parameter)
                 {
@@ -2070,6 +2142,18 @@ namespace Dommel
             /// </param>
             /// <returns>An insert query including a query to fetch the new id.</returns>
             string BuildInsert(string tableName, string[] columnNames, string[] paramNames, PropertyInfo keyProperty);
+
+            /// <summary>
+            /// Builds an pagination query using the specified page number and page size.
+            /// </summary>
+            /// <param name="tableName">The table name.</param>
+            /// <param name="whereSql">Sql including where</param>
+            /// <param name="orderBySql">Order by clause.</param>
+            /// <param name="orderByAsc">Order by type.</param>
+            /// <param name="pageNo">The page number.</param>
+            /// <param name="pageSize">The page size.</param>
+            /// <returns>The pagination query.</returns>
+            string BuildPagination(string tableName, string whereSql, string orderBySql, bool orderByAsc, int pageNo, int pageSize);
         }
 
         private sealed class SqlServerSqlBuilder : ISqlBuilder
@@ -2077,6 +2161,25 @@ namespace Dommel
             public string BuildInsert(string tableName, string[] columnNames, string[] paramNames, PropertyInfo keyProperty)
             {
                 return $"set nocount on insert into {tableName} ({string.Join(", ", columnNames)}) values ({string.Join(", ", paramNames)}) select cast(scope_identity() as int)";
+            }
+
+            public string BuildPagination(string tableName, string sql, string orderBySql, bool orderByAsc, int pageNo, int pageSize)
+            {
+                var start = pageNo >= 1 ? (pageNo - 1) * pageSize : 0;
+                var end = pageNo * pageSize;
+
+                if (string.IsNullOrWhiteSpace(orderBySql))
+                {
+                    orderBySql = " ORDER BY ID ";
+                }
+
+                return
+                $" SELECT  * FROM ( SELECT ROW_NUMBER() OVER ( {orderBySql} ) AS RowNum, * "+
+                $" FROM {tableName} " +
+                " ) AS RowConstrainedResult " +
+                $" WHERE RowNum >= {start} " +
+                $" AND RowNum <= {end} " +
+                " ORDER BY RowNum " + (orderByAsc ? "ASC" : "DESC");
             }
         }
 
@@ -2086,6 +2189,20 @@ namespace Dommel
             {
                 return $"insert into {tableName} ({string.Join(", ", columnNames)}) values ({string.Join(", ", paramNames)}) select cast(@@IDENTITY as int)";
             }
+
+            public string BuildPagination(string tableName, string sql, string orderBySql, bool orderByAsc, int pageNo, int pageSize)
+            {
+                var start = pageNo >= 1 ? (pageNo - 1) * pageSize : 0;
+                var end = pageNo * pageSize;
+
+                return
+                    $" SELECT  * FROM ( SELECT ROW_NUMBER() OVER ( {orderBySql} ) AS RowNum, * "+
+                    $" FROM {tableName} " +
+                    " ) AS RowConstrainedResult " +
+                    $" WHERE RowNum >= {start} " +
+                    $" AND RowNum <= {end} " +
+                    " ORDER BY RowNum " + (orderByAsc ? "ASC" : "DESC");
+            }
         }
 
         private sealed class SqliteSqlBuilder : ISqlBuilder
@@ -2094,6 +2211,12 @@ namespace Dommel
             {
                 return $"insert into {tableName} ({string.Join(", ", columnNames)}) values ({string.Join(", ", paramNames)}); select last_insert_rowid() id";
             }
+
+            public string BuildPagination(string tableName, string sql, string orderBySql, bool orderByAsc, int pageNo, int pageSize)
+            {
+                var start = pageNo >= 1 ? (pageNo - 1) * pageSize : 0;
+                return $" {sql} {orderBySql} LIMIT {start}, {pageSize} ";
+            }
         }
 
         private sealed class MySqlSqlBuilder : ISqlBuilder
@@ -2101,6 +2224,12 @@ namespace Dommel
             public string BuildInsert(string tableName, string[] columnNames, string[] paramNames, PropertyInfo keyProperty)
             {
                 return $"insert into {tableName} ({string.Join(", ", columnNames)}) values ({string.Join(", ", paramNames)}); select LAST_INSERT_ID() id";
+            }
+
+            public string BuildPagination(string tableName, string sql, string orderBySql, bool orderByAsc, int pageNo, int pageSize)
+            {
+                var start = pageNo >= 1 ? (pageNo - 1) * pageSize : 0;
+                return $" {sql} {orderBySql} LIMIT {start}, {pageSize} ";
             }
         }
 
@@ -2123,6 +2252,12 @@ namespace Dommel
                 }
 
                 return sql;
+            }
+
+            public string BuildPagination(string tableName, string sql, string orderBySql, bool orderByAsc, int pageNo, int pageSize)
+            {
+                var start = pageNo >= 1 ? (pageNo - 1) * pageSize : 0;
+                return $" {sql} {orderBySql} OFFSET {start} LIMIT {pageSize} ";
             }
         }
         #endregion
