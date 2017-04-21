@@ -96,7 +96,7 @@ public class CustomTableNameResolver : DommelMapper.ITableNameResolver
     public string ResolveTableName(Type type)
     {
         // Every table has prefix 'tbl'.
-        return "tbl" + type.Name;
+        return $"tbl{type.Name}";
     }
 }
 ```
@@ -115,7 +115,7 @@ public class CustomKeyPropertyResolver : DommelMapper.IKeyPropertyResolver
 {
     public PropertyInfo ResolveKeyProperty(Type type)
     {
-        return type.GetProperties().Single(p => p.Name == string.Format("{0}Id", type.Name));
+        return type.GetProperties().Single(p => p.Name == $"{type.Name}Id");
     }
 }
 ```
@@ -134,7 +134,7 @@ public class CustomColumnNameResolver : DommelMapper.IColumnNameResolver
     public string ResolveColumnName(PropertyInfo propertyInfo)
     {
         // Every column has prefix 'fld' and is uppercase.
-        return "fld" + propertyInfo.Name.ToUpper();
+        return $"fld{propertyInfo.Name.ToUpper()}";
     }
 }
 ```
