@@ -3,7 +3,7 @@
     <Description>Simple CRUD operations for Dapper.</Description>
     <Copyright>Copyright © Henk Mollema 2017</Copyright>
     <AssemblyTitle>Dommel</AssemblyTitle>
-    <VersionPrefix>1.8.1</VersionPrefix>
+    <VersionPrefix>1.8.3</VersionPrefix>
     <Authors>Henk Mollema</Authors>
     <TargetFrameworks>net45;net451;netstandard1.3</TargetFrameworks>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
