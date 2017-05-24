@@ -869,13 +869,13 @@ namespace Dommel
         }
 
         /// <summary>
-        /// Count the entities matching the specified predicate.
+        /// Returns the number of entities matching the specified predicate.
         /// </summary>
         /// <typeparam name="TEntity">The type of the entity.</typeparam>
         /// <param name="connection">The connection to the database. This can either be open or closed.</param>
         /// <param name="predicate">A predicate to filter the results.</param>
         /// <returns>
-        /// Count of entities of type <typeparamref name="TEntity"/> matching the specified
+        /// The number of entities matching the specified predicate.
         /// <paramref name="predicate"/>.
         /// </returns>
         public static long Count<TEntity>(this IDbConnection connection, Expression<Func<TEntity, bool>> predicate)
@@ -886,13 +886,13 @@ namespace Dommel
         }
 
         /// <summary>
-        /// Selects all the entities matching the specified predicate.
+        /// Returns the number of entities matching the specified predicate.
         /// </summary>
         /// <typeparam name="TEntity">The type of the entity.</typeparam>
         /// <param name="connection">The connection to the database. This can either be open or closed.</param>
         /// <param name="predicate">A predicate to filter the results.</param>
         /// <returns>
-        /// A collection of entities of type <typeparamref name="TEntity"/> matching the specified
+        /// The number of entities matching the specified predicate.
         /// <paramref name="predicate"/>.
         /// </returns>
         public static Task<long> CountAsync<TEntity>(this IDbConnection connection, Expression<Func<TEntity, bool>> predicate)
