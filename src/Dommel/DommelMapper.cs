@@ -955,33 +955,9 @@ namespace Dommel
 
             return connection.Query<TEntity>(sql, (object) parameters);
         }
-
         private static string BuildOrderSql<TEntity>(Expression<Func<TEntity, object>> predicate, bool orderByAsc)
         {
-            if (predicate != null)
-            {
-                MemberExpression memberExpression = null;
-
-                var predicateBodyNodeType = predicate.Body.NodeType;
-                if (predicateBodyNodeType == ExpressionType.Convert ||
-                    predicateBodyNodeType == ExpressionType.ConvertChecked)
-                {
-                    var unaryExpression = predicate.Body as UnaryExpression;
-                    memberExpression = unaryExpression?.Operand as MemberExpression;
-                }
-                else if (predicate.Body.NodeType == ExpressionType.MemberAccess)
-                {
-                    memberExpression = predicate.Body as MemberExpression;
-                }
-
-                if (memberExpression?.Expression != null)
-                {
-                    var property = new SqlExpression<TEntity>().VisitMemberAccess(memberExpression);
-                    return $" ORDER BY {property} " + (orderByAsc ? "ASC" : "DESC");
-                }
-            }
-
-            return "";
+            return new SqlExpression<TEntity>().BuildOrderSql(predicate, orderByAsc);
         }
 
         private static string BuildPaginationSql(IDbConnection connection, string tableName, string sql,
@@ -1013,6 +989,45 @@ namespace Dommel
                     AppendToWhere("and", expression);
                 }
                 return this;
+            }
+            
+            /// <summary>
+            /// Builds a SQL expression for the specified filter expression.
+            /// </summary>
+            /// <param name="expression">The filter expression on the entity.</param>
+            /// <param name="orderByAsc">Order by type.</param>
+            /// <returns></returns>
+            public string BuildOrderSql(Expression<Func<TEntity, object>> expression, bool orderByAsc)
+            {
+                var sql = "";
+                if (expression == null)
+                {
+                    return sql;
+                }
+                
+                MemberExpression memberExpression = null;
+
+                var predicateBodyNodeType = expression.Body.NodeType;
+                if (predicateBodyNodeType == ExpressionType.Convert ||
+                    predicateBodyNodeType == ExpressionType.ConvertChecked)
+                {
+                    var unaryExpression = expression.Body as UnaryExpression;
+                    memberExpression = unaryExpression?.Operand as MemberExpression;
+                }
+                else if (expression.Body.NodeType == ExpressionType.MemberAccess)
+                {
+                    memberExpression = expression.Body as MemberExpression;
+                }
+
+                if (memberExpression?.Expression == null)
+                {
+                    return sql;
+                }
+                
+                var property = new SqlExpression<TEntity>().VisitMemberAccess(memberExpression);
+                sql = $" ORDER BY {property} " + (orderByAsc ? "ASC" : "DESC");
+                
+                return sql;
             }
 
             private void AppendToWhere(string conditionOperator, Expression expression)
@@ -1199,7 +1214,7 @@ namespace Dommel
             /// </summary>
             /// <param name="expression">The member access expression.</param>
             /// <returns>The result of the processing.</returns>
-            public virtual object VisitMemberAccess(MemberExpression expression)
+            protected virtual object VisitMemberAccess(MemberExpression expression)
             {
                 if (expression.Expression != null && expression.Expression.NodeType == ExpressionType.Parameter)
                 {
