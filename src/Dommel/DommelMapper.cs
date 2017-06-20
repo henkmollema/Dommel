@@ -1657,7 +1657,8 @@ namespace Dommel
                                                                         typeof(float),
                                                                         typeof(DateTime),
                                                                         typeof(DateTimeOffset),
-                                                                        typeof(TimeSpan)
+                                                                        typeof(TimeSpan),
+                                                                        typeof(byte[])
                                                                     };
 
             /// <summary>
