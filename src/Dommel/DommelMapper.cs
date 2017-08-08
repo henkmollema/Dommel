@@ -884,7 +884,10 @@ namespace Dommel
             /// <returns>The current <see cref="DommelMapper.SqlExpression&lt;TEntity&gt;"/> instance.</returns>
             public virtual SqlExpression<TEntity> Where(Expression<Func<TEntity, bool>> expression)
             {
-                AppendToWhere("and", expression);
+                if (expression != null)
+                {
+                    AppendToWhere("and", expression);
+                }
                 return this;
             }
 
@@ -1654,7 +1657,8 @@ namespace Dommel
                                                                         typeof(float),
                                                                         typeof(DateTime),
                                                                         typeof(DateTimeOffset),
-                                                                        typeof(TimeSpan)
+                                                                        typeof(TimeSpan),
+                                                                        typeof(byte[])
                                                                     };
 
             /// <summary>
@@ -2045,7 +2049,7 @@ namespace Dommel
         {
             public string BuildInsert(string tableName, string[] columnNames, string[] paramNames, PropertyInfo keyProperty)
             {
-                return $"insert into {tableName} ({string.Join(", ", columnNames)}) values ({string.Join(", ", paramNames)}); select LAST_INSERT_ID() id";
+                return $"insert into {tableName} (`{string.Join("`, `", columnNames)}`) values ({string.Join(", ", paramNames)}); select LAST_INSERT_ID() id";
             }
         }
 
