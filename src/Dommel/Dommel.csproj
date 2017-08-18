@@ -3,7 +3,7 @@
     <Description>Simple CRUD operations for Dapper.</Description>
     <Copyright>Copyright © Henk Mollema 2017</Copyright>
     <AssemblyTitle>Dommel</AssemblyTitle>
-    <VersionPrefix>1.8.1</VersionPrefix>
+    <VersionPrefix>1.9.0</VersionPrefix>
     <Authors>Henk Mollema</Authors>
     <TargetFrameworks>net45;net451;netstandard1.3</TargetFrameworks>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
@@ -12,18 +12,9 @@
     <PackageLicenseUrl>https://github.com/henkmollema/Dommel/blob/master/LICENSE</PackageLicenseUrl>
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/henkmollema/Dommel</RepositoryUrl>
-    <NetStandardImplicitPackageVersion Condition=" '$(TargetFramework)' == 'netstandard1.3' ">1.6.0</NetStandardImplicitPackageVersion>
-  </PropertyGroup>
-  
+  </PropertyGroup>  
   <ItemGroup>
     <PackageReference Include="Dapper" Version="1.50.2" />
-  </ItemGroup>
-
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net45' OR '$(TargetFramework)' == 'net451' ">
-    <Reference Include="System.ComponentModel.DataAnnotations" />
-  </ItemGroup>
-
-  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard1.3' ">
-    <PackageReference Include="System.ComponentModel.Annotations" Version="4.1.0" />
+    <PackageReference Include="System.ComponentModel.Annotations" Version="4.4.0" />
   </ItemGroup>
 </Project>
