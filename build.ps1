@@ -1,2 +1,2 @@
 dotnet build
-dotnet pack -c Release
+dotnet pack -c Release -o ..\..\artifacts
