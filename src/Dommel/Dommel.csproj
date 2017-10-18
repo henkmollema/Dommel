@@ -15,6 +15,7 @@
     <Authors>Troy Schmidt, Henk Mollema</Authors>
     <TargetFrameworks>net45;net451;netstandard1.3</TargetFrameworks>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <PackageId>Dommel.Forked</PackageId>
     <PackageTags>dommel;crud;dapper;database;orm</PackageTags>
     <PackageProjectUrl>https://github.com/TroySchmidt/Dommel</PackageProjectUrl>
     <PackageLicenseUrl>https://github.com/TroySchmidt/Dommel/blob/master/LICENSE</PackageLicenseUrl>
