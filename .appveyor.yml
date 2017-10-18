@@ -4,7 +4,16 @@ build_script:
   - ps: .\build.ps1
 clone_depth: 1
 test: off
-deploy: off
+artifacts:
+- path: artifacts/Dommel.Forked.*.nupkg
+deploy:
+  provider: NuGet
+  server:                  # remove to push to NuGet.org
+  api_key:
+    secure: J/kBk0D1gaPkP7Fo+RJW87ymHDLVuZ7+Gd3xWMlnZSqMA+8JYuJKLljpgP/UEWym
+  skip_symbols: false
+  symbol_server:           # remove to push symbols to SymbolSource.org
+  artifact: /Dommel.Forked.*\.nupkg/
 environment:
   DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
   DOTNET_CLI_TELEMETRY_OPTOUT: 1
