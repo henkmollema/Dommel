@@ -1136,8 +1136,7 @@ namespace Dommel
         /// <typeparam name="TEntity">The type of the entity.</typeparam>
         /// <param name="connection">The connection to the database. This can either be open or closed.</param>
         /// <param name="predicate">A predicate to filter the results.</param>
-        /// <param name="orderByExpression">A expression to order by the results.</param>
-        /// <param name="orderByAsc">Order by type.</param>
+        /// <param name="sortFields">Array of fields to be used in sorting.</param>
         /// <param name="pageNo">The page number of the results.</param>
         /// <param name="pageSize">The page size of the results.</param>
         /// <returns>
@@ -1146,29 +1145,28 @@ namespace Dommel
         /// </returns>
         public static IEnumerable<TEntity> Query<TEntity>(this IDbConnection connection,
             Expression<Func<TEntity, bool>> predicate,
-            Expression<Func<TEntity, object>> orderByExpression = null,
-            bool orderByAsc = true,
+            IList<SortField> sortFields = null,
             int? pageNo = null, int? pageSize = null)
         {
             var tableName = Resolvers.Table(typeof(TEntity));
-            var orderBySql = BuildOrderSql(orderByExpression, orderByAsc);
+            var orderBySql = BuildOrderSql<TEntity>(sortFields);
 
-            DynamicParameters parameters;
-            var sql = BuildSelectSql<TEntity>(predicate, out parameters);
+            var sql = BuildSelectSql(predicate, out DynamicParameters parameters);
             if (pageNo == null || pageSize == null)
             {
                 sql = $"{sql} {orderBySql}";
             }
             else
             {
-                sql = BuildPaginationSql(connection, tableName, sql, orderBySql, orderByAsc, pageNo.Value, pageSize.Value);
+                sql = BuildPaginationSql(connection, tableName, sql, orderBySql, true, pageNo.Value, pageSize.Value);
             }
 
             return connection.Query<TEntity>(sql, (object)parameters);
         }
-        private static string BuildOrderSql<TEntity>(Expression<Func<TEntity, object>> predicate, bool orderByAsc)
+        private static string BuildOrderSql<TEntity>(IList<SortField> sortFields = null)
         {
-            return new SqlExpression<TEntity>().BuildOrderSql(predicate, orderByAsc);
+            new SqlExpression<TEntity>().BuildOrderSql(sortFields).ToSql(out var orderBy, out var paginationOffset);
+            return orderBy;
         }
 
         private static string BuildPaginationSql(IDbConnection connection, string tableName, string sql,

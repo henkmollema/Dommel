@@ -17,6 +17,8 @@ namespace Dommel
     {
         private readonly StringBuilder _whereBuilder = new StringBuilder();
         private readonly DynamicParameters _parameters = new DynamicParameters();
+        private readonly StringBuilder _orderBy = new StringBuilder();
+        private readonly StringBuilder _paginationOffset = new StringBuilder();
         private int _parameterIndex;
 
         /// <summary>
@@ -39,37 +41,28 @@ namespace Dommel
         /// <param name="expression">The filter expression on the entity.</param>
         /// <param name="orderByAsc">Order by type.</param>
         /// <returns></returns>
-        public string BuildOrderSql(Expression<Func<TEntity, object>> expression, bool orderByAsc)
+        public SqlExpression<TEntity> BuildOrderSql(IList<SortField> sortFields)
         {
-            var sql = "";
-            if (expression == null)
+            if (sortFields == null || sortFields.Count() == 0) return this;
+
+            _orderBy.Append("ORDER BY ");
+            foreach (var sortField in sortFields)
             {
-                return sql;
+                _orderBy.Append($"{Resolvers.Table(typeof(TEntity))}.{Resolvers.Column(typeof(TEntity), sortField.FieldName)} {sortField.Direction}");
+                if (sortFields.Count() > 1)
+                {
+                    _orderBy.Append(",");
+                }
             }
+            return this;
+        }
 
-            MemberExpression memberExpression = null;
-
-            var predicateBodyNodeType = expression.Body.NodeType;
-            if (predicateBodyNodeType == ExpressionType.Convert ||
-                predicateBodyNodeType == ExpressionType.ConvertChecked)
-            {
-                var unaryExpression = expression.Body as UnaryExpression;
-                memberExpression = unaryExpression?.Operand as MemberExpression;
-            }
-            else if (expression.Body.NodeType == ExpressionType.MemberAccess)
-            {
-                memberExpression = expression.Body as MemberExpression;
-            }
-
-            if (memberExpression?.Expression == null)
-            {
-                return sql;
-            }
-
-            var property = new SqlExpression<TEntity>().VisitMemberAccess(memberExpression);
-            sql = $" ORDER BY {property} " + (orderByAsc ? "ASC" : "DESC");
-
-            return sql;
+        public SqlExpression<TEntity> BuildPaginationOffset(int page = 0, int limit = 0)
+        {
+            if (page == 0 || limit == 0) return this;
+            var offset = (page - 1) * limit;
+            _paginationOffset.Append($"OFFSET {offset} ROWS FETCH NEXT {limit} ROWS ONLY");
+            return this;
         }
 
         private void AppendToWhere(string conditionOperator, Expression expression)
@@ -141,6 +134,16 @@ namespace Dommel
                         var sql = $"{columnName} IN ({CreateInParamSql((IEnumerable)values)})";
                         return sql;
                     }
+                    if (m.Object != null && m.Object.Type == typeof(string) && m.Method.Name == "Contains" && m.Arguments.Count == 1)
+                    {
+                        // We are going to assume this is an IEnumerable and evaluate the contains as an IN at this point.
+                        var args = m.Arguments;
+                        var value = VisitExpression(m.Arguments[0]);
+                        var columnName = VisitMemberAccess((MemberExpression)m.Object);
+
+                        var sql = $"{columnName} LIKE '%{value}%'";
+                        return sql;
+                    }
                     if (m.Object == null && m.Method.Name == "Contains" && m.Arguments.Count == 2)
                     {
                         var args = m.Arguments;
@@ -167,7 +170,7 @@ namespace Dommel
                 var paramName = "p" + _parameterIndex++;
                 _parameters.Add(paramName, value: item);
 
-                sbParams.Append($"@{paramName}");   
+                sbParams.Append($"@{paramName}");
             }
             return sbParams.ToString();
         }
@@ -271,7 +274,7 @@ namespace Dommel
                 case ExpressionType.Convert:
                     if (expression.Method != null)
                         return Expression.Lambda(expression).Compile().DynamicInvoke();
-                   
+
                     break;
             }
 
@@ -318,7 +321,7 @@ namespace Dommel
         {
             return expression.Value ?? "null";
         }
-        
+
         /// <summary>
         /// Returns the expression operand for the specified expression type.
         /// </summary>
@@ -378,6 +381,21 @@ namespace Dommel
         public string ToSql(out DynamicParameters parameters)
         {
             parameters = _parameters;
+            return _whereBuilder.ToString();
+        }
+
+        public string ToSql(out string orderBy, out string paginationOffset)
+        {
+            orderBy = _orderBy.ToString().TrimEnd(',');
+            paginationOffset = _paginationOffset.ToString();
+            return _whereBuilder.ToString();
+        }
+
+        public string ToSql(out DynamicParameters parameters, out string orderBy, out string paginationOffset)
+        {
+            parameters = _parameters;
+            orderBy = _orderBy.ToString().TrimEnd(',');
+            paginationOffset = _paginationOffset.ToString();
             return _whereBuilder.ToString();
         }
 
