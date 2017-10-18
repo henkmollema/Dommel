@@ -994,6 +994,40 @@ namespace Dommel
         }
 
         /// <summary>
+        /// Selects the first entity matching the specified predicate, or a default value if no entity matched.
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the entity.</typeparam>
+        /// <param name="connection">The connection to the database. This can either be open or closed.</param>
+        /// <param name="predicate">A predicate to filter the results.</param>
+        /// <returns>
+        /// A instance of type <typeparamref name="TEntity"/> matching the specified
+        /// <paramref name="predicate"/>.
+        /// </returns>
+        public static TEntity FirstOrDefault<TEntity>(this IDbConnection connection, Expression<Func<TEntity, bool>> predicate)
+        {
+            DynamicParameters parameters;
+            var sql = BuildSelectSql(predicate, out parameters);
+            return connection.QueryFirstOrDefault<TEntity>(sql, parameters);
+        }
+
+        /// <summary>
+        /// Selects the first entity matching the specified predicate, or a default value if no entity matched.
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the entity.</typeparam>
+        /// <param name="connection">The connection to the database. This can either be open or closed.</param>
+        /// <param name="predicate">A predicate to filter the results.</param>
+        /// <returns>
+        /// A instance of type <typeparamref name="TEntity"/> matching the specified
+        /// <paramref name="predicate"/>.
+        /// </returns>
+        public static Task<TEntity> FirstOrDefaultAsync<TEntity>(this IDbConnection connection, Expression<Func<TEntity, bool>> predicate)
+        {
+            DynamicParameters parameters;
+            var sql = BuildSelectSql(predicate, out parameters);
+            return connection.QueryFirstOrDefaultAsync<TEntity>(sql, parameters);
+        }
+
+        /// <summary>
         /// Count the entities matching the specified predicate.
         /// </summary>
         /// <typeparam name="TEntity">The type of the entity.</typeparam>
@@ -1421,7 +1455,6 @@ namespace Dommel
         {
             PropertyResolver = propertyResolver;
         }
-
 
         #endregion
 
