@@ -1,17 +1,27 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup Label="Globals">
+    <SccProjectName>SAK</SccProjectName>
+    <SccProvider>SAK</SccProvider>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccLocalPath>SAK</SccLocalPath>
+  </PropertyGroup>
+
   <PropertyGroup>
     <Description>Simple CRUD operations for Dapper.</Description>
-    <Copyright>Copyright © Henk Mollema 2017</Copyright>
-    <AssemblyTitle>Dommel</AssemblyTitle>
-    <VersionPrefix>1.9.0</VersionPrefix>
-    <Authors>Henk Mollema</Authors>
+    <Copyright>Copyright © Troy Schmidt 2017</Copyright>
+    <AssemblyTitle>Dommel.Forked</AssemblyTitle>
+    <VersionPrefix>2.0.0</VersionPrefix>
+    <Authors>Troy Schmidt, Henk Mollema</Authors>
     <TargetFrameworks>net45;net451;netstandard1.3</TargetFrameworks>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <PackageId>Dommel.Forked</PackageId>
     <PackageTags>dommel;crud;dapper;database;orm</PackageTags>
-    <PackageProjectUrl>https://github.com/henkmollema/Dommel</PackageProjectUrl>
-    <PackageLicenseUrl>https://github.com/henkmollema/Dommel/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/TroySchmidt/Dommel</PackageProjectUrl>
+    <PackageLicenseUrl>https://github.com/TroySchmidt/Dommel/blob/master/LICENSE</PackageLicenseUrl>
     <RepositoryType>git</RepositoryType>
-    <RepositoryUrl>https://github.com/henkmollema/Dommel</RepositoryUrl>
+    <RepositoryUrl>https://github.com/TroySchmidt/Dommel</RepositoryUrl>
+    <Version>2.0.1</Version>
   </PropertyGroup>  
   <ItemGroup>
     <PackageReference Include="Dapper" Version="1.50.2" />

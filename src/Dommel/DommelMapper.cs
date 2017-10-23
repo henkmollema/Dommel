@@ -32,6 +32,7 @@ namespace Dommel
         private static readonly ConcurrentDictionary<Type, string> _updateQueryCache = new ConcurrentDictionary<Type, string>();
         private static readonly ConcurrentDictionary<Type, string> _deleteQueryCache = new ConcurrentDictionary<Type, string>();
         private static readonly ConcurrentDictionary<Type, string> _deleteAllQueryCache = new ConcurrentDictionary<Type, string>();
+        private static readonly ConcurrentDictionary<Type, string> _getCountCache = new ConcurrentDictionary<Type, string>();
 
         /// <summary>
         /// Retrieves the entity of type <typeparamref name="TEntity"/> with the specified id.
@@ -54,11 +55,11 @@ namespace Dommel
         /// <param name="connection">The connection to the database. This can either be open or closed.</param>
         /// <param name="id">The id of the entity in the database.</param>
         /// <returns>The entity with the corresponding id.</returns>
-        public static Task<TEntity> GetAsync<TEntity>(this IDbConnection connection, object id) where TEntity : class
+        public static Task<TEntity> GetAsync<TEntity>(this IDbConnection connection, object id, IDbTransaction transaction = null) where TEntity : class
         {
             DynamicParameters parameters;
             var sql = BuildGetById(typeof(TEntity), id, out parameters);
-            return connection.QueryFirstOrDefaultAsync<TEntity>(sql, parameters);
+            return connection.QueryFirstOrDefaultAsync<TEntity>(sql, parameters, transaction);
         }
 
         private static string BuildGetById(Type type, object id, out DynamicParameters parameters)
@@ -78,6 +79,15 @@ namespace Dommel
             parameters.Add("Id", id);
 
             return sql;
+        }
+
+        public static Task<IEnumerable<TEntity>> FindAllAsync<TEntity>(this IDbConnection connection, Expression<Func<TEntity, bool>> predicate, IDbTransaction transaction = null )
+        {
+            DynamicParameters parameters;
+            string splitOn;
+            var sql = Dommel.DommelMapper.BuildQueryMultiple<TEntity>(predicate, out parameters, out splitOn);
+
+            return connection.QueryAsync<TEntity>(sql, parameters, transaction);
         }
 
         /// <summary>
@@ -477,6 +487,11 @@ namespace Dommel
             return MultiMap<T1, T2, T3, T4, DontMap, DontMap, DontMap, TReturn>(connection, map, buffered: buffered);
         }
 
+        public static Task<IQuery> GetAsync<TEntity>(this IDbConnection connection, Expression<Func<TEntity, bool>> expression)
+        {
+            return null; 
+        }
+
         /// <summary>
         /// Retrieves all the entities of type <typeparamref name="TReturn"/>
         /// joined with the types specified as type parameters.
@@ -680,7 +695,7 @@ namespace Dommel
             switch (includeTypes.Length)
             {
                 case 2:
-                    return connection.Query(sql, (Func<T1, T2, TReturn>)map, parameters, buffered: buffered);
+                    return connection.Query(sql, (Func<T1, T2, TReturn>)map, parameters, buffered: buffered, splitOn: Resolvers.ForeignKeyColumn(typeof(T1), typeof(T2)));
                 case 3:
                     return connection.Query(sql, (Func<T1, T2, T3, TReturn>)map, parameters, buffered: buffered);
                 case 4:
@@ -716,20 +731,26 @@ namespace Dommel
             DynamicParameters parameters;
             var sql = BuildMultiMapQuery(resultType, includeTypes, id, out parameters);
 
+            var splitIds = new List< string >( );
+            for ( int i = 1; i < includeTypes.Length; i++ )
+            {
+                splitIds.Add( Resolvers.ForeignKeyColumn( typeof( T1 ), includeTypes[ i ] ) );
+            }
+
             switch (includeTypes.Length)
             {
                 case 2:
-                    return connection.QueryAsync(sql, (Func<T1, T2, TReturn>)map, parameters, buffered: buffered);
+                    return connection.QueryAsync(sql, (Func<T1, T2, TReturn>)map, parameters, buffered: buffered, splitOn: string.Join(",", splitIds.ToArray()));
                 case 3:
-                    return connection.QueryAsync(sql, (Func<T1, T2, T3, TReturn>)map, parameters, buffered: buffered);
+                    return connection.QueryAsync(sql, (Func<T1, T2, T3, TReturn>)map, parameters, buffered: buffered, splitOn: string.Join(",", splitIds.ToArray()));
                 case 4:
-                    return connection.QueryAsync(sql, (Func<T1, T2, T3, T4, TReturn>)map, parameters, buffered: buffered);
+                    return connection.QueryAsync(sql, (Func<T1, T2, T3, T4, TReturn>)map, parameters, buffered: buffered, splitOn: string.Join(",", splitIds.ToArray()));
                 case 5:
-                    return connection.QueryAsync(sql, (Func<T1, T2, T3, T4, T5, TReturn>)map, parameters, buffered: buffered);
+                    return connection.QueryAsync(sql, (Func<T1, T2, T3, T4, T5, TReturn>)map, parameters, buffered: buffered, splitOn: string.Join(",", splitIds.ToArray()));
                 case 6:
-                    return connection.QueryAsync(sql, (Func<T1, T2, T3, T4, T5, T6, TReturn>)map, parameters, buffered: buffered);
+                    return connection.QueryAsync(sql, (Func<T1, T2, T3, T4, T5, T6, TReturn>)map, parameters, buffered: buffered, splitOn: string.Join(",", splitIds.ToArray()));
                 case 7:
-                    return connection.QueryAsync(sql, (Func<T1, T2, T3, T4, T5, T6, T7, TReturn>)map, parameters, buffered: buffered);
+                    return connection.QueryAsync(sql, (Func<T1, T2, T3, T4, T5, T6, T7, TReturn>)map, parameters, buffered: buffered, splitOn: string.Join(",", splitIds.ToArray()));
             }
 
             throw new InvalidOperationException($"Invalid amount of include types: {includeTypes.Length}.");
@@ -745,7 +766,7 @@ namespace Dommel
             for (var i = 1; i < includeTypes.Length; i++)
             {
                 // Determine the table to join with.
-                var sourceType = includeTypes[i - 1];
+                var sourceType = includeTypes[0];
                 var sourceTableName = Resolvers.Table(sourceType);
 
                 // Determine the table name of the joined table.
@@ -780,12 +801,7 @@ namespace Dommel
                         // Determine the primary key of the source table.
                         var sourceKeyColumnName = Resolvers.Column(Resolvers.KeyProperty(sourceType));
 
-                        sql += string.Format(" {0} join {1} on {2}.{3} = {1}.{4}",
-                                             joinType,
-                                             foreignKeyTableName,
-                                             sourceTableName,
-                                             sourceKeyColumnName,
-                                             foreignKeyPropertyName);
+                        sql += $" {joinType} join {foreignKeyTableName} on {sourceTableName}.{sourceKeyColumnName} = {foreignKeyTableName}.{foreignKeyPropertyName}";
                         break;
 
                     case ForeignKeyRelation.ManyToMany:
@@ -802,14 +818,129 @@ namespace Dommel
                 sql += string.Format(" where {0}.{1} = @{1}", resultTableName, resultTableKeyColumnName);
 
                 parameters = new DynamicParameters();
-                parameters.Add("Id", id);
+                parameters.Add($"{resultTableKeyColumnName}", id);
             }
 
             return sql;
         }
-
-        private class DontMap
+        
+        private static string GenerateMultiMapQuery<T1, T2, T3, T4, T5, T6, T7, TReturn>(Expression<Func<TReturn, bool>> predicate, out DynamicParameters parameters, out string splitOn, IEnumerable<IRelationshipMapping> relationships = null)
         {
+            var resultType = typeof(TReturn);
+            var
+                includeTypes = new[]
+                    {
+                        typeof(T1),
+                        typeof(T2),
+                        typeof(T3),
+                        typeof(T4),
+                        typeof(T5),
+                        typeof(T6),
+                        typeof(T7)
+                    }
+                    .Where(t => t != typeof(DontMap))
+                    .ToArray();
+
+
+            var resultTableName = Resolvers.Table(resultType);
+            var resultTableKeyColumnName = Resolvers.Column(Resolvers.KeyProperty(resultType));
+
+            // need to make this querymultiple so it can do the joining on the one to one and querymultiple on the one to many relationships.
+            var whereCondition = new SqlExpression< TReturn >( ).Where( predicate ).ToSql( out parameters );
+
+            // Determine the table to join with.
+            var sourceType = includeTypes[0];
+            var sourceTableName = Resolvers.Table(sourceType);
+
+            var fieldNames = new List<string>()
+            {
+                $"{Resolvers.Table(resultType)}.{string.Join($", {Resolvers.Table(resultType)}.", Resolvers.Properties(resultType).Select(Resolvers.Column))}"
+            };
+
+            var sqlArray = new List<string>()
+            {
+                string.Empty
+            };
+
+            var oneToManySql = $"SELECT {resultTableKeyColumnName} FROM {resultTableName} {whereCondition}";
+            var splitIds = new List<string>();
+
+            for (var i = 1; i < includeTypes.Length; i++)
+            {
+                // Determine the table name of the joined table.
+                var includeType = includeTypes[i];
+                var foreignKeyTableName = Resolvers.Table(includeType);
+
+                // Determine the foreign key and the relationship type.
+                
+                var relationship = relationships?.SingleOrDefault(x => x.RelatedType == includeType);
+                if (relationship == null)
+                {
+                    relationship = ForeignRelationship(typeof(T1), includeType);
+                    if (relationship.Relation == ForeignKeyRelation.OneToMany)
+                    {
+                        relationship.JoinClause = $"{relationship.ForeignKeyPropertyName} IN ({oneToManySql})";   
+                    }
+                }
+                
+                
+
+                switch ( relationship.Relation )
+                {
+                    case ForeignKeyRelation.OneToOne:
+
+                        // Determine the primary key of the foreign key table.
+                        fieldNames.Add($"{Resolvers.Table(includeType)}.{string.Join($", {Resolvers.Table(includeType)}.", Resolvers.Properties(includeType).Select(Resolvers.Column))}");
+                        splitIds.Add(relationship.SplitId);
+
+                        sqlArray[0] += $" {relationship.JoinType} join {Resolvers.Table(includeType)} ON {relationship.JoinClause}";
+                        
+                        break;
+
+                    case ForeignKeyRelation.OneToMany:
+                        // Determine the primary key of the source table.
+                        sqlArray.Add( $"SELECT {Resolvers.Table(includeType)}.{string.Join($", {Resolvers.Table(includeType)}.", Resolvers.Properties(includeType).Select(Resolvers.Column))} from {foreignKeyTableName} WHERE {relationship.JoinClause}" );
+
+                        break;
+
+                    case ForeignKeyRelation.ManyToMany:
+                        throw new NotImplementedException("Many-to-many relationships are not supported yet.");
+
+                    default:
+                        throw new NotImplementedException($"Foreign key relation type '{relationship.Relation}' is not implemented.");
+                }
+            }
+
+            sqlArray[0] = $"SELECT {string.Join(", ", fieldNames)} from {resultTableName} {sqlArray[0]}";
+            sqlArray[0] += whereCondition;
+
+            splitOn = string.Join(",", splitIds.ToArray());
+
+            return string.Join( "; ", sqlArray );
+        }
+
+        private static IRelationshipMapping ForeignRelationship(Type sourceType, Type relatedType)
+        {
+            ForeignKeyRelation relation;
+            var foreignKeyProperty = Resolvers.ForeignKeyProperty(sourceType, relatedType, out relation);
+            // If the foreign key property is nullable, use a left-join.
+            var relationship = new RelationshipMapping()
+            {
+                RelatedType = relatedType,
+                Relation = relation,
+                ForeignKeyPropertyName = Resolvers.Column(foreignKeyProperty)
+            };
+
+            if (relationship.Relation == ForeignKeyRelation.OneToOne)
+            {
+                relationship.SplitId = Resolvers.ForeignKeyColumn(sourceType, relatedType);
+                relationship.JoinType = Nullable.GetUnderlyingType(foreignKeyProperty.PropertyType) != null
+                           ? "left"
+                           : "inner";
+                relationship.JoinClause = $"{Resolvers.Table(sourceType)}.{relationship.ForeignKeyPropertyName} = {Resolvers.Table(relatedType)}.{Resolvers.Column(Resolvers.KeyProperty(relatedType))}";
+            }
+
+            return relationship;
         }
 
         /// <summary>
@@ -843,11 +974,11 @@ namespace Dommel
         /// A collection of entities of type <typeparamref name="TEntity"/> matching the specified
         /// <paramref name="predicate"/>.
         /// </returns>
-        public static Task<IEnumerable<TEntity>> SelectAsync<TEntity>(this IDbConnection connection, Expression<Func<TEntity, bool>> predicate)
+        public static Task<IEnumerable<TEntity>> SelectAsync<TEntity>(this IDbConnection connection, Expression<Func<TEntity, bool>> predicate, IDbTransaction transaction = null)
         {
             DynamicParameters parameters;
             var sql = BuildSelectSql(predicate, out parameters);
-            return connection.QueryAsync<TEntity>(sql, parameters);
+            return connection.QueryAsync<TEntity>(sql, parameters, transaction: transaction);
         }
 
         private static string BuildSelectSql<TEntity>(Expression<Func<TEntity, bool>> predicate, out DynamicParameters parameters)
@@ -902,317 +1033,156 @@ namespace Dommel
         }
 
         /// <summary>
-        /// Represents a typed SQL expression.
+        /// Count the entities matching the specified predicate.
         /// </summary>
         /// <typeparam name="TEntity">The type of the entity.</typeparam>
-        public class SqlExpression<TEntity>
+        /// <param name="connection">The connection to the database. This can either be open or closed.</param>
+        /// <param name="predicate">A predicate to filter the results.</param>
+        /// <returns>
+        /// Count of entities of type <typeparamref name="TEntity"/> matching the specified
+        /// <paramref name="predicate"/>.
+        /// </returns>
+        public static long Count<TEntity>(this IDbConnection connection, Expression<Func<TEntity, bool>> predicate)
         {
-            private readonly StringBuilder _whereBuilder = new StringBuilder();
-            private readonly DynamicParameters _parameters = new DynamicParameters();
-            private int _parameterIndex;
-
-            /// <summary>
-            /// Builds a SQL expression for the specified filter expression.
-            /// </summary>
-            /// <param name="expression">The filter expression on the entity.</param>
-            /// <returns>The current <see cref="DommelMapper.SqlExpression&lt;TEntity&gt;"/> instance.</returns>
-            public virtual SqlExpression<TEntity> Where(Expression<Func<TEntity, bool>> expression)
-            {
-                if (expression != null)
-                {
-                    AppendToWhere("and", expression);
-                }
-                return this;
-            }
-
-            private void AppendToWhere(string conditionOperator, Expression expression)
-            {
-                var sqlExpression = VisitExpression(expression).ToString();
-                AppendToWhere(conditionOperator, sqlExpression);
-            }
-
-            private void AppendToWhere(string conditionOperator, string sqlExpression)
-            {
-                if (_whereBuilder.Length == 0)
-                {
-                    _whereBuilder.Append(" where ");
-                }
-                else
-                {
-                    _whereBuilder.AppendFormat(" {0} ", conditionOperator);
-                }
-
-                _whereBuilder.Append(sqlExpression);
-            }
-
-            /// <summary>
-            /// Visits the expression.
-            /// </summary>
-            /// <param name="expression">The expression to visit.</param>
-            /// <returns>The result of the visit.</returns>
-            protected virtual object VisitExpression(Expression expression)
-            {
-                switch (expression.NodeType)
-                {
-                    case ExpressionType.Lambda:
-                        return VisitLambda(expression as LambdaExpression);
-
-                    case ExpressionType.LessThan:
-                    case ExpressionType.LessThanOrEqual:
-                    case ExpressionType.GreaterThan:
-                    case ExpressionType.GreaterThanOrEqual:
-                    case ExpressionType.Equal:
-                    case ExpressionType.NotEqual:
-                    case ExpressionType.And:
-                    case ExpressionType.AndAlso:
-                    case ExpressionType.Or:
-                    case ExpressionType.OrElse:
-                        return VisitBinary((BinaryExpression)expression);
-
-                    case ExpressionType.Convert:
-                    case ExpressionType.Not:
-                        return VisitUnary((UnaryExpression)expression);
-
-                    case ExpressionType.New:
-                        return VisitNew((NewExpression)expression);
-
-                    case ExpressionType.MemberAccess:
-                        return VisitMemberAccess((MemberExpression)expression);
-
-                    case ExpressionType.Constant:
-                        return VisitConstantExpression((ConstantExpression)expression);
-                }
-
-                return expression;
-            }
-
-            /// <summary>
-            /// Processes a lambda expression.
-            /// </summary>
-            /// <param name="epxression">The lambda expression.</param>
-            /// <returns>The result of the processing.</returns>
-            protected virtual object VisitLambda(LambdaExpression epxression)
-            {
-                if (epxression.Body.NodeType == ExpressionType.MemberAccess)
-                {
-                    var member = epxression.Body as MemberExpression;
-                    if (member?.Expression != null)
-                    {
-                        return $"{VisitMemberAccess(member)} = '1'";
-                    }
-                }
-
-                return VisitExpression(epxression.Body);
-            }
-
-            /// <summary>
-            /// Processes a binary expression.
-            /// </summary>
-            /// <param name="expression">The binary expression.</param>
-            /// <returns>The result of the processing.</returns>
-            protected virtual object VisitBinary(BinaryExpression expression)
-            {
-                object left, right;
-                var operand = BindOperant(expression.NodeType);
-                if (operand == "and" || operand == "or")
-                {
-                    // Left side.
-                    var member = expression.Left as MemberExpression;
-                    if (member != null &&
-                        member.Expression != null &&
-                        member.Expression.NodeType == ExpressionType.Parameter)
-                    {
-                        left = $"{VisitMemberAccess(member)} = '1'";
-                    }
-                    else
-                    {
-                        left = VisitExpression(expression.Left);
-                    }
-
-                    // Right side.
-                    member = expression.Right as MemberExpression;
-                    if (member != null &&
-                        member.Expression != null &&
-                        member.Expression.NodeType == ExpressionType.Parameter)
-                    {
-                        right = $"{VisitMemberAccess(member)} = '1'";
-                    }
-                    else
-                    {
-                        right = VisitExpression(expression.Right);
-                    }
-                }
-                else
-                {
-                    // It's a single expression.
-                    left = VisitExpression(expression.Left);
-                    right = VisitExpression(expression.Right);
-
-                    var paramName = "p" + _parameterIndex++;
-                    _parameters.Add(paramName, value: right);
-                    return $"{left} {operand} @{paramName}";
-                }
-
-                return $"{left} {operand} {right}";
-            }
-
-            /// <summary>
-            /// Processes a unary expression.
-            /// </summary>
-            /// <param name="expression">The unary expression.</param>
-            /// <returns>The result of the processing.</returns>
-            protected virtual object VisitUnary(UnaryExpression expression)
-            {
-                switch (expression.NodeType)
-                {
-                    case ExpressionType.Not:
-                        var o = VisitExpression(expression.Operand);
-                        if (!(o is string))
-                        {
-                            return !(bool)o;
-                        }
-
-                        var memberExpression = expression.Operand as MemberExpression;
-                        if (memberExpression != null &&
-                            Resolvers.Properties(memberExpression.Expression.Type).Any(p => p.Name == (string)o))
-                        {
-                            o = $"{o} = '1'";
-                        }
-
-                        return $"not ({o})";
-                    case ExpressionType.Convert:
-                        if (expression.Method != null)
-                        {
-                            return Expression.Lambda(expression).Compile().DynamicInvoke();
-                        }
-                        break;
-                }
-
-                return VisitExpression(expression.Operand);
-            }
-
-            /// <summary>
-            /// Processes a new expression.
-            /// </summary>
-            /// <param name="expression">The new expression.</param>
-            /// <returns>The result of the processing.</returns>
-            protected virtual object VisitNew(NewExpression expression)
-            {
-                var member = Expression.Convert(expression, typeof(object));
-                var lambda = Expression.Lambda<Func<object>>(member);
-                var getter = lambda.Compile();
-                return getter();
-            }
-
-            /// <summary>
-            /// Processes a member access expression.
-            /// </summary>
-            /// <param name="expression">The member access expression.</param>
-            /// <returns>The result of the processing.</returns>
-            protected virtual object VisitMemberAccess(MemberExpression expression)
-            {
-                if (expression.Expression != null && expression.Expression.NodeType == ExpressionType.Parameter)
-                {
-                    return MemberToColumn(expression);
-                }
-
-                var member = Expression.Convert(expression, typeof(object));
-                var lambda = Expression.Lambda<Func<object>>(member);
-                var getter = lambda.Compile();
-                return getter();
-            }
-
-            /// <summary>
-            /// Processes a constant expression.
-            /// </summary>
-            /// <param name="expression">The constant expression.</param>
-            /// <returns>The result of the processing.</returns>
-            protected virtual object VisitConstantExpression(ConstantExpression expression)
-            {
-                return expression.Value ?? "null";
-            }
-
-            /// <summary>
-            /// Proccesses a member expression.
-            /// </summary>
-            /// <param name="expression">The member expression.</param>
-            /// <returns>The result of the processing.</returns>
-            protected virtual string MemberToColumn(MemberExpression expression)
-            {
-                return Resolvers.Column((PropertyInfo)expression.Member);
-            }
-
-            /// <summary>
-            /// Returns the expression operand for the specified expression type.
-            /// </summary>
-            /// <param name="expressionType">The expression type for node of an expression tree.</param>
-            /// <returns>The expression operand equivalent of the <paramref name="expressionType"/>.</returns>
-            protected virtual string BindOperant(ExpressionType expressionType)
-            {
-                switch (expressionType)
-                {
-                    case ExpressionType.Equal:
-                        return "=";
-                    case ExpressionType.NotEqual:
-                        return "<>";
-                    case ExpressionType.GreaterThan:
-                        return ">";
-                    case ExpressionType.GreaterThanOrEqual:
-                        return ">=";
-                    case ExpressionType.LessThan:
-                        return "<";
-                    case ExpressionType.LessThanOrEqual:
-                        return "<=";
-                    case ExpressionType.AndAlso:
-                        return "and";
-                    case ExpressionType.OrElse:
-                        return "or";
-                    case ExpressionType.Add:
-                        return "+";
-                    case ExpressionType.Subtract:
-                        return "-";
-                    case ExpressionType.Multiply:
-                        return "*";
-                    case ExpressionType.Divide:
-                        return "/";
-                    case ExpressionType.Modulo:
-                        return "MOD";
-                    case ExpressionType.Coalesce:
-                        return "COALESCE";
-                    default:
-                        return expressionType.ToString();
-                }
-            }
-
-            /// <summary>
-            /// Returns the current SQL query.
-            /// </summary>
-            /// <returns>The current SQL query.</returns>
-            public string ToSql()
-            {
-                return _whereBuilder.ToString();
-            }
-
-            /// <summary>
-            /// Returns the current SQL query.
-            /// </summary>
-            /// <param name="parameters">When this method returns, contains the parameters for the query.</param>
-            /// <returns>The current SQL query.</returns>
-            public string ToSql(out DynamicParameters parameters)
-            {
-                parameters = _parameters;
-                return _whereBuilder.ToString();
-            }
-
-            /// <summary>
-            /// Returns the current SQL query.
-            /// </summary>
-            /// <returns>The current SQL query.</returns>
-            public override string ToString()
-            {
-                return _whereBuilder.ToString();
-            }
+            DynamicParameters parameters;
+            var sql = BuildCountSql(predicate, out parameters);
+            return connection.ExecuteScalar<long>(sql, parameters);
         }
+
+        /// <summary>
+        /// Selects all the entities matching the specified predicate.
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the entity.</typeparam>
+        /// <param name="connection">The connection to the database. This can either be open or closed.</param>
+        /// <param name="predicate">A predicate to filter the results.</param>
+        /// <returns>
+        /// A collection of entities of type <typeparamref name="TEntity"/> matching the specified
+        /// <paramref name="predicate"/>.
+        /// </returns>
+        public static Task<long> CountAsync<TEntity>(this IDbConnection connection, Expression<Func<TEntity, bool>> predicate)
+        {
+            DynamicParameters parameters;
+            var sql = BuildCountSql(predicate, out parameters);
+            return connection.ExecuteScalarAsync<long>(sql, parameters);
+        }
+
+        private static string BuildCountSql<TEntity>(Expression<Func<TEntity, bool>> predicate, out DynamicParameters parameters)
+        {
+            var type = typeof(TEntity);
+            string sql;
+            if (!_getCountCache.TryGetValue(type, out sql))
+            {
+                var tableName = Resolvers.Table(type);
+                sql = $"select count(*) from {tableName}";
+                _getCountCache.TryAdd(type, sql);
+            }
+
+            sql += new SqlExpression<TEntity>()
+                .Where(predicate)
+                .ToSql(out parameters);
+            return sql;
+        }
+
+        public static string BuildQueryMultiple<TEntity>(Expression<Func<TEntity, bool>> predicate,  out DynamicParameters parameters, out string splitOn)
+        {
+            return GenerateMultiMapQuery<TEntity, DontMap, DontMap, DontMap, DontMap, DontMap, DontMap, TEntity>(predicate, out parameters, out splitOn);
+        }
+
+        public static string BuildQueryMultiple< T1, T2, TReturn >( Expression<Func<TReturn, bool>> predicate, out DynamicParameters parameters, out string splitOn, IEnumerable<IRelationshipMapping> relationships = null)
+        {
+            // In this situation T1 is TReturn.
+            return GenerateMultiMapQuery<T1, T2, DontMap, DontMap, DontMap, DontMap, DontMap, TReturn>(predicate, out parameters, out splitOn, relationships);
+        }
+
+        /// <summary>
+        /// Builds Multiple query related to T1 into sql and parameters for QueryMultiple execution.
+        /// </summary>
+        /// <typeparam name="T1"></typeparam>
+        /// <typeparam name="T2"></typeparam>
+        /// <typeparam name="T3"></typeparam>
+        /// <typeparam name="TReturn"></typeparam>
+        /// <param name="predicate"></param>
+        /// <param name="parameters"></param>
+        /// <param name="splitOn"></param>
+        /// <returns></returns>
+        public static string BuildQueryMultiple<T1, T2, T3, TReturn>(Expression<Func<TReturn, bool>> predicate, out DynamicParameters parameters, out string splitOn, IEnumerable<IRelationshipMapping> relationships = null)
+        {
+            // In this situation T1 is TReturn.
+            return GenerateMultiMapQuery<T1, T2, T3, DontMap, DontMap, DontMap, DontMap, TReturn>(predicate, out parameters, out splitOn, relationships);
+        }
+
+        public static string BuildQueryMultiple<T1, T2, T3, T4, TReturn>(Expression<Func<TReturn, bool>> predicate, out DynamicParameters parameters, out string splitOn, IEnumerable<IRelationshipMapping> relationships = null)
+        {
+            // In this situation T1 is TReturn.
+            return GenerateMultiMapQuery<T1, T2, T3, T4, DontMap, DontMap, DontMap, TReturn>(predicate, out parameters, out splitOn, relationships);
+        }
+
+        public static string BuildQueryMultiple<T1, T2, T3, T4, T5, TReturn>(Expression<Func<TReturn, bool>> predicate, out DynamicParameters parameters, out string splitOn, IEnumerable<IRelationshipMapping> relationships = null)
+        {
+            // In this situation T1 is TReturn.
+            return GenerateMultiMapQuery<T1, T2, T3, T4, T5, DontMap, DontMap, TReturn>(predicate, out parameters, out splitOn, relationships);
+        }
+
+        public static string BuildQueryMultiple<T1, T2, T3, T4, T5, T6, TReturn>(Expression<Func<TReturn, bool>> predicate, out DynamicParameters parameters, out string splitOn, IEnumerable<IRelationshipMapping> relationships = null)
+        {
+            // In this situation T1 is TReturn.
+            return GenerateMultiMapQuery<T1, T2, T3, T4, T5, T6, DontMap, TReturn>(predicate, out parameters, out splitOn, relationships);
+        }
+
+        public static string BuildQueryMultiple<T1, T2, T3, T4, T5, T6, T7, TReturn>(Expression<Func<TReturn, bool>> predicate, out DynamicParameters parameters, out string splitOn, IEnumerable<IRelationshipMapping> relationships = null)
+        {
+            // In this situation T1 is TReturn.
+            return GenerateMultiMapQuery<T1, T2, T3, T4, T5, T6, T7, TReturn>(predicate, out parameters, out splitOn, relationships);
+        }
+
+        /// <summary>
+        /// Selects the paginated entities matching the specified predicate.
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the entity.</typeparam>
+        /// <param name="connection">The connection to the database. This can either be open or closed.</param>
+        /// <param name="predicate">A predicate to filter the results.</param>
+        /// <param name="sortFields">Array of fields to be used in sorting.</param>
+        /// <param name="pageNo">The page number of the results.</param>
+        /// <param name="pageSize">The page size of the results.</param>
+        /// <returns>
+        /// A collection of entities of type <typeparamref name="TEntity"/> matching the specified
+        /// <paramref name="predicate"/>.
+        /// </returns>
+        public static IEnumerable<TEntity> Query<TEntity>(this IDbConnection connection,
+            Expression<Func<TEntity, bool>> predicate,
+            IList<SortField> sortFields = null,
+            int? pageNo = null, int? pageSize = null)
+        {
+            var tableName = Resolvers.Table(typeof(TEntity));
+            var orderBySql = BuildOrderSql<TEntity>(sortFields);
+
+            var sql = BuildSelectSql(predicate, out DynamicParameters parameters);
+            if (pageNo == null || pageSize == null)
+            {
+                sql = $"{sql} {orderBySql}";
+            }
+            else
+            {
+                sql = BuildPaginationSql(connection, tableName, sql, orderBySql, true, pageNo.Value, pageSize.Value);
+            }
+
+            return connection.Query<TEntity>(sql, (object)parameters);
+        }
+
+        private static string BuildOrderSql<TEntity>(IList<SortField> sortFields = null)
+        {
+            new SqlExpression<TEntity>().BuildOrderSql(sortFields).ToSql(out var orderBy, out var paginationOffset);
+            return orderBy;
+        }
+
+        private static string BuildPaginationSql(IDbConnection connection, string tableName, string sql,
+            string orderBySql, bool orderByAsc, int pageNo, int pageSize)
+        {
+            var builder = GetBuilder(connection);
+            return builder.BuildPagination(tableName, sql, orderBySql, orderByAsc, pageNo, pageSize);
+        }
+
+        
 
         /// <summary>
         /// Inserts the specified entity into the database and returns the id.
@@ -1473,457 +1443,60 @@ namespace Dommel
             return sql;
         }
 
-        /// <summary>
-        /// Helper class for retrieving type metadata to build sql queries using configured resolvers.
-        /// </summary>
-        public static class Resolvers
-        {
-            private class KeyPropertyInfo
-            {
-                public KeyPropertyInfo(PropertyInfo propertyInfo, bool isIdentity)
-                {
-                    PropertyInfo = propertyInfo;
-                    IsIdentity = isIdentity;
-                }
-
-                public PropertyInfo PropertyInfo { get; }
-
-                public bool IsIdentity { get; }
-            }
-
-            private static readonly ConcurrentDictionary<Type, string> _typeTableNameCache = new ConcurrentDictionary<Type, string>();
-            private static readonly ConcurrentDictionary<string, string> _columnNameCache = new ConcurrentDictionary<string, string>();
-            private static readonly ConcurrentDictionary<Type, KeyPropertyInfo> _typeKeyPropertyCache = new ConcurrentDictionary<Type, KeyPropertyInfo>();
-            private static readonly ConcurrentDictionary<Type, PropertyInfo[]> _typePropertiesCache = new ConcurrentDictionary<Type, PropertyInfo[]>();
-            private static readonly ConcurrentDictionary<string, ForeignKeyInfo> _typeForeignKeyPropertyCache = new ConcurrentDictionary<string, ForeignKeyInfo>();
-
-            /// <summary>
-            /// Gets the key property for the specified type, using the configured <see cref="DommelMapper.IKeyPropertyResolver"/>.
-            /// </summary>
-            /// <param name="type">The <see cref="System.Type"/> to get the key property for.</param>
-            /// <returns>The key property for <paramref name="type"/>.</returns>
-            public static PropertyInfo KeyProperty(Type type)
-            {
-                bool isIdentity;
-                return KeyProperty(type, out isIdentity);
-            }
-
-            /// <summary>
-            /// Gets the key property for the specified type, using the configured <see cref="DommelMapper.IKeyPropertyResolver"/>.
-            /// </summary>
-            /// <param name="type">The <see cref="Type"/> to get the key property for.</param>
-            /// <param name="isIdentity">A value indicating whether the key is an identity.</param>
-            /// <returns>The key property for <paramref name="type"/>.</returns>
-            public static PropertyInfo KeyProperty(Type type, out bool isIdentity)
-            {
-                KeyPropertyInfo keyProperty;
-                if (!_typeKeyPropertyCache.TryGetValue(type, out keyProperty))
-                {
-                    var propertyInfo = _keyPropertyResolver.ResolveKeyProperty(type, out isIdentity);
-                    keyProperty = new KeyPropertyInfo(propertyInfo, isIdentity);
-                    _typeKeyPropertyCache.TryAdd(type, keyProperty);
-                }
-
-                isIdentity = keyProperty.IsIdentity;
-                return keyProperty.PropertyInfo;
-            }
-
-            /// <summary>
-            /// Gets the foreign key property for the specified source type and including type
-            /// using the configure d<see cref="IForeignKeyPropertyResolver"/>.
-            /// </summary>
-            /// <param name="sourceType">The source type which should contain the foreign key property.</param>
-            /// <param name="includingType">The type of the foreign key relation.</param>
-            /// <param name="foreignKeyRelation">The foreign key relationship type.</param>
-            /// <returns>The foreign key property for <paramref name="sourceType"/> and <paramref name="includingType"/>.</returns>
-            public static PropertyInfo ForeignKeyProperty(Type sourceType, Type includingType, out ForeignKeyRelation foreignKeyRelation)
-            {
-                var key = $"{sourceType.FullName};{includingType.FullName}";
-
-                ForeignKeyInfo foreignKeyInfo;
-                if (!_typeForeignKeyPropertyCache.TryGetValue(key, out foreignKeyInfo))
-                {
-                    // Resole the property and relation.
-                    var foreignKeyProperty = _foreignKeyPropertyResolver.ResolveForeignKeyProperty(sourceType, includingType, out foreignKeyRelation);
-
-                    // Cache the info.
-                    foreignKeyInfo = new ForeignKeyInfo(foreignKeyProperty, foreignKeyRelation);
-                    _typeForeignKeyPropertyCache.TryAdd(key, foreignKeyInfo);
-                }
-
-                foreignKeyRelation = foreignKeyInfo.Relation;
-                return foreignKeyInfo.PropertyInfo;
-            }
-
-            private class ForeignKeyInfo
-            {
-                public ForeignKeyInfo(PropertyInfo propertyInfo, ForeignKeyRelation relation)
-                {
-                    PropertyInfo = propertyInfo;
-                    Relation = relation;
-                }
-
-                public PropertyInfo PropertyInfo { get; private set; }
-
-                public ForeignKeyRelation Relation { get; private set; }
-            }
-
-            /// <summary>
-            /// Gets the properties to be mapped for the specified type, using the configured
-            /// <see cref="DommelMapper.IPropertyResolver"/>.
-            /// </summary>
-            /// <param name="type">The <see cref="System.Type"/> to get the properties from.</param>
-            /// <returns>>The collection of to be mapped properties of <paramref name="type"/>.</returns>
-            public static IEnumerable<PropertyInfo> Properties(Type type)
-            {
-                PropertyInfo[] properties;
-                if (!_typePropertiesCache.TryGetValue(type, out properties))
-                {
-                    properties = _propertyResolver.ResolveProperties(type).ToArray();
-                    _typePropertiesCache.TryAdd(type, properties);
-                }
-
-                return properties;
-            }
-
-            /// <summary>
-            /// Gets the name of the table in the database for the specified type,
-            /// using the configured <see cref="DommelMapper.ITableNameResolver"/>.
-            /// </summary>
-            /// <param name="type">The <see cref="System.Type"/> to get the table name for.</param>
-            /// <returns>The table name in the database for <paramref name="type"/>.</returns>
-            public static string Table(Type type)
-            {
-                string name;
-                if (!_typeTableNameCache.TryGetValue(type, out name))
-                {
-                    name = _tableNameResolver.ResolveTableName(type);
-                    _typeTableNameCache.TryAdd(type, name);
-                }
-                return name;
-            }
-
-            /// <summary>
-            /// Gets the name of the column in the database for the specified type,
-            /// using the configured <see cref="T:DommelMapper.IColumnNameResolver"/>.
-            /// </summary>
-            /// <param name="propertyInfo">The <see cref="System.Reflection.PropertyInfo"/> to get the column name for.</param>
-            /// <returns>The column name in the database for <paramref name="propertyInfo"/>.</returns>
-            public static string Column(PropertyInfo propertyInfo)
-            {
-                var key = $"{propertyInfo.DeclaringType}.{propertyInfo.Name}";
-
-                string columnName;
-                if (!_columnNameCache.TryGetValue(key, out columnName))
-                {
-                    columnName = _columnNameResolver.ResolveColumnName(propertyInfo);
-                    _columnNameCache.TryAdd(key, columnName);
-                }
-
-                return columnName;
-            }
-
-            /// <summary>
-            /// Provides access to default resolver implementations.
-            /// </summary>
-            public static class Default
-            {
-                /// <summary>
-                /// The default column name resolver.
-                /// </summary>
-                public static readonly IColumnNameResolver ColumnNameResolver = new DefaultColumnNameResolver();
-
-                /// <summary>
-                /// The default property resolver.
-                /// </summary>
-                public static readonly IPropertyResolver PropertyResolver = new DefaultPropertyResolver();
-
-                /// <summary>
-                /// The default key property resolver.
-                /// </summary>
-                public static readonly IKeyPropertyResolver KeyPropertyResolver = new DefaultKeyPropertyResolver();
-
-                /// <summary>
-                /// The default table name resolver.
-                /// </summary>
-                public static readonly ITableNameResolver TableNameResolver = new DefaultTableNameResolver();
-            }
-        }
+        
+        
 
         #region Property resolving
-        private static IPropertyResolver _propertyResolver = new DefaultPropertyResolver();
+        public static IPropertyResolver PropertyResolver { get; private set; } = new DefaultPropertyResolver();
+
+        
 
         /// <summary>
-        /// Defines methods for resolving the properties of entities.
-        /// Custom implementations can be registerd with <see cref="M:SetPropertyResolver()"/>.
+        /// Sets the <see cref="IPropertyResolver"/> implementation for resolving key of entities.
         /// </summary>
-        public interface IPropertyResolver
-        {
-            /// <summary>
-            /// Resolves the properties to be mapped for the specified type.
-            /// </summary>
-            /// <param name="type">The type to resolve the properties to be mapped for.</param>
-            /// <returns>A collection of <see cref="PropertyInfo"/>'s of the <paramref name="type"/>.</returns>
-            IEnumerable<PropertyInfo> ResolveProperties(Type type);
-        }
-
-        /// <summary>
-        /// Sets the <see cref="DommelMapper.IPropertyResolver"/> implementation for resolving key of entities.
-        /// </summary>
-        /// <param name="propertyResolver">An instance of <see cref="DommelMapper.IPropertyResolver"/>.</param>
+        /// <param name="propertyResolver">An instance of <see cref="IPropertyResolver"/>.</param>
         public static void SetPropertyResolver(IPropertyResolver propertyResolver)
         {
-            _propertyResolver = propertyResolver;
+            PropertyResolver = propertyResolver;
         }
 
-        /// <summary>
-        /// Represents the base class for property resolvers.
-        /// </summary>
-        public abstract class PropertyResolverBase : IPropertyResolver
-        {
-            private static readonly HashSet<Type> _primitiveTypes = new HashSet<Type>
-                                                                    {
-                                                                        typeof(object),
-                                                                        typeof(string),
-                                                                        typeof(Guid),
-                                                                        typeof(decimal),
-                                                                        typeof(double),
-                                                                        typeof(float),
-                                                                        typeof(DateTime),
-                                                                        typeof(DateTimeOffset),
-                                                                        typeof(TimeSpan),
-                                                                        typeof(byte[])
-                                                                    };
-
-            /// <summary>
-            /// Resolves the properties to be mapped for the specified type.
-            /// </summary>
-            /// <param name="type">The type to resolve the properties to be mapped for.</param>
-            /// <returns>A collection of <see cref="PropertyInfo"/>'s of the <paramref name="type"/>.</returns>
-            public abstract IEnumerable<PropertyInfo> ResolveProperties(Type type);
-
-            /// <summary>
-            /// Gets a collection of types that are considered 'primitive' for Dommel but are not for the CLR.
-            /// Override this if you need your own implementation of this.
-            /// </summary>
-            protected virtual HashSet<Type> PrimitiveTypes => _primitiveTypes;
-
-            /// <summary>
-            /// Filters the complex types from the specified collection of properties.
-            /// </summary>
-            /// <param name="properties">A collection of properties.</param>
-            /// <returns>The properties that are considered 'primitive' of <paramref name="properties"/>.</returns>
-            protected virtual IEnumerable<PropertyInfo> FilterComplexTypes(IEnumerable<PropertyInfo> properties)
-            {
-                foreach (var property in properties)
-                {
-                    var type = property.PropertyType;
-                    type = Nullable.GetUnderlyingType(type) ?? type;
-
-                    if (type.GetTypeInfo().IsPrimitive || type.GetTypeInfo().IsEnum || PrimitiveTypes.Contains(type))
-                    {
-                        yield return property;
-                    }
-                }
-            }
-        }
-
-        /// <summary>
-        /// Default implemenation of the <see cref="DommelMapper.IPropertyResolver"/> interface.
-        /// </summary>
-        public class DefaultPropertyResolver : PropertyResolverBase
-        {
-            /// <inheritdoc/>
-            public override IEnumerable<PropertyInfo> ResolveProperties(Type type)
-            {
-                return FilterComplexTypes(type.GetProperties());
-            }
-        }
         #endregion
 
         #region Key property resolving
-        private static IKeyPropertyResolver _keyPropertyResolver = new DefaultKeyPropertyResolver();
+        public static IKeyPropertyResolver KeyPropertyResolver { get; private set; } = new DefaultKeyPropertyResolver();
 
         /// <summary>
-        /// Sets the <see cref="DommelMapper.IKeyPropertyResolver"/> implementation for resolving key properties of entities.
+        /// Sets the <see cref="IKeyPropertyResolver"/> implementation for resolving key properties of entities.
         /// </summary>
         /// <param name="resolver">An instance of <see cref="DommelMapper.IKeyPropertyResolver"/>.</param>
         public static void SetKeyPropertyResolver(IKeyPropertyResolver resolver)
         {
-            _keyPropertyResolver = resolver;
+            KeyPropertyResolver = resolver;
         }
-
-        /// <summary>
-        /// Defines methods for resolving the key property of entities.
-        /// Custom implementations can be registerd with <see cref="M:SetKeyPropertyResolver()"/>.
-        /// </summary>
-        public interface IKeyPropertyResolver
-        {
-            /// <summary>
-            /// Resolves the key property for the specified type.
-            /// </summary>
-            /// <param name="type">The type to resolve the key property for.</param>
-            /// <returns>A <see cref="PropertyInfo"/> instance of the key property of <paramref name="type"/>.</returns>
-            PropertyInfo ResolveKeyProperty(Type type);
-
-            /// <summary>
-            /// Resolves the key property for the specified type.
-            /// </summary>
-            /// <param name="type">The type to resolve the key property for.</param>
-            /// <param name="isIdentity">Indicates whether the key property is an identity property.</param>
-            /// <returns>A <see cref="PropertyInfo"/> instance of the key property of <paramref name="type"/>.</returns>
-            PropertyInfo ResolveKeyProperty(Type type, out bool isIdentity);
-        }
-
-        /// <summary>
-        /// Implements the <see cref="DommelMapper.IKeyPropertyResolver"/> interface by resolving key properties
-        /// with the [Key] attribute or with the name 'Id'.
-        /// </summary>
-        public class DefaultKeyPropertyResolver : IKeyPropertyResolver
-        {
-            /// <summary>
-            /// Finds the key property by looking for a property with the [Key] attribute or with the name 'Id'.
-            /// </summary>
-            public virtual PropertyInfo ResolveKeyProperty(Type type)
-            {
-                bool isIdentity;
-                return ResolveKeyProperty(type, out isIdentity);
-            }
-
-            /// <summary>
-            /// Finds the key property by looking for a property with the [Key] attribute or with the name 'Id'.
-            /// </summary>
-            public PropertyInfo ResolveKeyProperty(Type type, out bool isIdentity)
-            {
-                var allProps = Resolvers.Properties(type).ToList();
-
-                // Look for properties with the [Key] attribute.
-                var keyProps = allProps.Where(p => p.GetCustomAttributes(true).Any(a => a is KeyAttribute)).ToList();
-
-                if (keyProps.Count == 0)
-                {
-                    // Search for properties named as 'Id' as fallback.
-                    keyProps = allProps.Where(p => p.Name.Equals("Id", StringComparison.OrdinalIgnoreCase)).ToList();
-                }
-
-                if (keyProps.Count == 0)
-                {
-                    throw new Exception($"Could not find the key property for type '{type.FullName}'.");
-                }
-
-                if (keyProps.Count > 1)
-                {
-                    throw new Exception($"Multiple key properties were found for type '{type.FullName}'.");
-                }
-
-                isIdentity = true;
-                return keyProps[0];
-            }
-        }
+        
         #endregion
 
         #region Foreign key property resolving
-        /// <summary>
-        /// Describes a foreign key relationship.
-        /// </summary>
-        public enum ForeignKeyRelation
-        {
-            /// <summary>
-            /// Specifies a one-to-one relationship.
-            /// </summary>
-            OneToOne,
+        
 
-            /// <summary>
-            /// Specifies a one-to-many relationship.
-            /// </summary>
-            OneToMany,
-
-            /// <summary>
-            /// Specifies a many-to-many relationship.
-            /// </summary>
-            ManyToMany
-        }
-
-        private static IForeignKeyPropertyResolver _foreignKeyPropertyResolver = new DefaultForeignKeyPropertyResolver();
+        public static IForeignKeyPropertyResolver ForeignKeyPropertyResolver { get; private set; } = new DefaultForeignKeyPropertyResolver();
 
         /// <summary>
         /// Sets the <see cref="T:DommelMapper.IForeignKeyPropertyResolver"/> implementation for resolving foreign key properties.
         /// </summary>
-        /// <param name="resolver">An instance of <see cref="T:DommelMapper.IForeignKeyPropertyResolver"/>.</param>
+        /// <param name="resolver">An instance of <see cref="T:IForeignKeyPropertyResolver"/>.</param>
         public static void SetForeignKeyPropertyResolver(IForeignKeyPropertyResolver resolver)
         {
-            _foreignKeyPropertyResolver = resolver;
+            ForeignKeyPropertyResolver = resolver;
         }
 
-        /// <summary>
-        /// Defines methods for resolving foreign key properties.
-        /// </summary>
-        public interface IForeignKeyPropertyResolver
-        {
-            /// <summary>
-            /// Resolves the foreign key property for the specified source type and including type.
-            /// </summary>
-            /// <param name="sourceType">The source type which should contain the foreign key property.</param>
-            /// <param name="includingType">The type of the foreign key relation.</param>
-            /// <param name="foreignKeyRelation">The foreign key relationship type.</param>
-            /// <returns>The foreign key property for <paramref name="sourceType"/> and <paramref name="includingType"/>.</returns>
-            PropertyInfo ResolveForeignKeyProperty(Type sourceType, Type includingType, out ForeignKeyRelation foreignKeyRelation);
-        }
+        
 
-        /// <summary>
-        /// Implements the <see cref="T:DommelMapper.IForeignKeyPropertyResolver"/> interface.
-        /// </summary>
-        public class DefaultForeignKeyPropertyResolver : IForeignKeyPropertyResolver
-        {
-            /// <summary>
-            /// Resolves the foreign key property for the specified source type and including type
-            /// by using <paramref name="includingType"/> + Id as property name.
-            /// </summary>
-            /// <param name="sourceType">The source type which should contain the foreign key property.</param>
-            /// <param name="includingType">The type of the foreign key relation.</param>
-            /// <param name="foreignKeyRelation">The foreign key relationship type.</param>
-            /// <returns>The foreign key property for <paramref name="sourceType"/> and <paramref name="includingType"/>.</returns>
-            public virtual PropertyInfo ResolveForeignKeyProperty(Type sourceType, Type includingType, out ForeignKeyRelation foreignKeyRelation)
-            {
-                var oneToOneFk = ResolveOneToOne(sourceType, includingType);
-                if (oneToOneFk != null)
-                {
-                    foreignKeyRelation = ForeignKeyRelation.OneToOne;
-                    return oneToOneFk;
-                }
-
-                var oneToManyFk = ResolveOneToMany(sourceType, includingType);
-                if (oneToManyFk != null)
-                {
-                    foreignKeyRelation = ForeignKeyRelation.OneToMany;
-                    return oneToManyFk;
-                }
-
-                var msg = $"Could not resolve foreign key property. Source type '{sourceType.FullName}'; including type: '{includingType.FullName}'.";
-                throw new Exception(msg);
-            }
-
-            private static PropertyInfo ResolveOneToOne(Type sourceType, Type includingType)
-            {
-                // Look for the foreign key on the source type.
-                var foreignKeyName = includingType.Name + "Id";
-                var foreignKeyProperty = sourceType.GetProperties().FirstOrDefault(p => p.Name == foreignKeyName);
-
-                return foreignKeyProperty;
-            }
-
-            private static PropertyInfo ResolveOneToMany(Type sourceType, Type includingType)
-            {
-                // Look for the foreign key on the including type.
-                var foreignKeyName = sourceType.Name + "Id";
-                var foreignKeyProperty = includingType.GetProperties().FirstOrDefault(p => p.Name == foreignKeyName);
-                return foreignKeyProperty;
-            }
-        }
+        
         #endregion
 
         #region Table name resolving
-        private static ITableNameResolver _tableNameResolver = new DefaultTableNameResolver();
+        public static ITableNameResolver TableNameResolver { get; private set; } = new DefaultTableNameResolver();
 
         /// <summary>
         /// Sets the <see cref="T:Dommel.ITableNameResolver"/> implementation for resolving table names for entities.
@@ -1931,49 +1504,16 @@ namespace Dommel
         /// <param name="resolver">An instance of <see cref="T:Dommel.ITableNameResolver"/>.</param>
         public static void SetTableNameResolver(ITableNameResolver resolver)
         {
-            _tableNameResolver = resolver;
+            TableNameResolver = resolver;
         }
 
-        /// <summary>
-        /// Defines methods for resolving table names of entities.
-        /// Custom implementations can be registerd with <see cref="M:SetTableNameResolver()"/>.
-        /// </summary>
-        public interface ITableNameResolver
-        {
-            /// <summary>
-            /// Resolves the table name for the specified type.
-            /// </summary>
-            /// <param name="type">The type to resolve the table name for.</param>
-            /// <returns>A string containing the resolved table name for for <paramref name="type"/>.</returns>
-            string ResolveTableName(Type type);
-        }
+        
 
-        /// <summary>
-        /// Implements the <see cref="T:Dommel.ITableNameResolver"/> interface by resolving table names
-        /// by making the type name plural and removing the 'I' prefix for interfaces.
-        /// </summary>
-        public class DefaultTableNameResolver : ITableNameResolver
-        {
-            /// <summary>
-            /// Resolves the table name by making the type plural (+ 's', Product -> Products)
-            /// and removing the 'I' prefix for interfaces.
-            /// </summary>
-            public virtual string ResolveTableName(Type type)
-            {
-                var name = type.Name + "s";
-                if (type.GetTypeInfo().IsInterface && name.StartsWith("I"))
-                {
-                    name = name.Substring(1);
-                }
-
-                // todo: add [Table] attribute support.
-                return name;
-            }
-        }
+        
         #endregion
 
         #region Column name resolving
-        private static IColumnNameResolver _columnNameResolver = new DefaultColumnNameResolver();
+        public static IColumnNameResolver ColumnNameResolver { get; private set; } = new DefaultColumnNameResolver();
 
         /// <summary>
         /// Sets the <see cref="T:Dommel.IColumnNameResolver"/> implementation for resolving column names.
@@ -1981,36 +1521,12 @@ namespace Dommel
         /// <param name="resolver">An instance of <see cref="T:Dommel.IColumnNameResolver"/>.</param>
         public static void SetColumnNameResolver(IColumnNameResolver resolver)
         {
-            _columnNameResolver = resolver;
+            ColumnNameResolver = resolver;
         }
 
-        /// <summary>
-        /// Defines methods for resolving column names for entities.
-        /// Custom implementations can be registerd with <see cref="M:SetColumnNameResolver()"/>.
-        /// </summary>
-        public interface IColumnNameResolver
-        {
-            /// <summary>
-            /// Resolves the column name for the specified property.
-            /// </summary>
-            /// <param name="propertyInfo">The property of the entity.</param>
-            /// <returns>The column name for the property.</returns>
-            string ResolveColumnName(PropertyInfo propertyInfo);
-        }
+        
 
-        /// <summary>
-        /// Implements the <see cref="DommelMapper.IKeyPropertyResolver"/>.
-        /// </summary>
-        public class DefaultColumnNameResolver : IColumnNameResolver
-        {
-            /// <summary>
-            /// Resolves the column name for the property. This is just the name of the property.
-            /// </summary>
-            public virtual string ResolveColumnName(PropertyInfo propertyInfo)
-            {
-                return propertyInfo.Name;
-            }
-        }
+        
         #endregion
 
         #region Sql builders
@@ -2035,79 +1551,11 @@ namespace Dommel
             return _sqlBuilders.TryGetValue(connectionName, out builder) ? builder : new SqlServerSqlBuilder();
         }
 
-        /// <summary>
-        /// Defines methods for building specialized SQL queries.
-        /// </summary>
-        public interface ISqlBuilder
-        {
-            /// <summary>
-            /// Builds an insert query using the specified table name, column names and parameter names.
-            /// A query to fetch the new id will be included as well.
-            /// </summary>
-            /// <param name="tableName">The name of the table to query.</param>
-            /// <param name="columnNames">The names of the columns in the table.</param>
-            /// <param name="paramNames">The names of the parameters in the database command.</param>
-            /// <param name="keyProperty">
-            /// The key property. This can be used to query a specific column for the new id. This is
-            /// optional.
-            /// </param>
-            /// <returns>An insert query including a query to fetch the new id.</returns>
-            string BuildInsert(string tableName, string[] columnNames, string[] paramNames, PropertyInfo keyProperty);
-        }
+        
 
-        private sealed class SqlServerSqlBuilder : ISqlBuilder
-        {
-            public string BuildInsert(string tableName, string[] columnNames, string[] paramNames, PropertyInfo keyProperty)
-            {
-                return $"set nocount on insert into {tableName} ({string.Join(", ", columnNames)}) values ({string.Join(", ", paramNames)}) select cast(scope_identity() as int)";
-            }
-        }
+        
 
-        private sealed class SqlServerCeSqlBuilder : ISqlBuilder
-        {
-            public string BuildInsert(string tableName, string[] columnNames, string[] paramNames, PropertyInfo keyProperty)
-            {
-                return $"insert into {tableName} ({string.Join(", ", columnNames)}) values ({string.Join(", ", paramNames)}) select cast(@@IDENTITY as int)";
-            }
-        }
-
-        private sealed class SqliteSqlBuilder : ISqlBuilder
-        {
-            public string BuildInsert(string tableName, string[] columnNames, string[] paramNames, PropertyInfo keyProperty)
-            {
-                return $"insert into {tableName} ({string.Join(", ", columnNames)}) values ({string.Join(", ", paramNames)}); select last_insert_rowid() id";
-            }
-        }
-
-        private sealed class MySqlSqlBuilder : ISqlBuilder
-        {
-            public string BuildInsert(string tableName, string[] columnNames, string[] paramNames, PropertyInfo keyProperty)
-            {
-                return $"insert into {tableName} (`{string.Join("`, `", columnNames)}`) values ({string.Join(", ", paramNames)}); select LAST_INSERT_ID() id";
-            }
-        }
-
-        private sealed class PostgresSqlBuilder : ISqlBuilder
-        {
-            public string BuildInsert(string tableName, string[] columnNames, string[] paramNames, PropertyInfo keyProperty)
-            {
-                var sql = $"insert into {tableName} ({string.Join(", ", columnNames)}) values ({string.Join(", ", paramNames)})";
-
-                if (keyProperty != null)
-                {
-                    var keyColumnName = Resolvers.Column(keyProperty);
-
-                    sql += " RETURNING " + keyColumnName;
-                }
-                else
-                {
-                    // todo: what behavior is desired here?
-                    throw new Exception("A key property is required for the PostgresSqlBuilder.");
-                }
-
-                return sql;
-            }
-        }
+        
         #endregion
     }
 }
