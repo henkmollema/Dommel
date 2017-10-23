@@ -487,6 +487,11 @@ namespace Dommel
             return MultiMap<T1, T2, T3, T4, DontMap, DontMap, DontMap, TReturn>(connection, map, buffered: buffered);
         }
 
+        public static Task<IQuery> GetAsync<TEntity>(this IDbConnection connection, Expression<Func<TEntity, bool>> expression)
+        {
+            return null; 
+        }
+
         /// <summary>
         /// Retrieves all the entities of type <typeparamref name="TReturn"/>
         /// joined with the types specified as type parameters.
@@ -1163,6 +1168,7 @@ namespace Dommel
 
             return connection.Query<TEntity>(sql, (object)parameters);
         }
+
         private static string BuildOrderSql<TEntity>(IList<SortField> sortFields = null)
         {
             new SqlExpression<TEntity>().BuildOrderSql(sortFields).ToSql(out var orderBy, out var paginationOffset);
@@ -1441,14 +1447,14 @@ namespace Dommel
         
 
         #region Property resolving
-        internal static IPropertyResolver PropertyResolver { get; private set; } = new DefaultPropertyResolver();
+        public static IPropertyResolver PropertyResolver { get; private set; } = new DefaultPropertyResolver();
 
         
 
         /// <summary>
-        /// Sets the <see cref="DommelMapper.IPropertyResolver"/> implementation for resolving key of entities.
+        /// Sets the <see cref="IPropertyResolver"/> implementation for resolving key of entities.
         /// </summary>
-        /// <param name="propertyResolver">An instance of <see cref="DommelMapper.IPropertyResolver"/>.</param>
+        /// <param name="propertyResolver">An instance of <see cref="IPropertyResolver"/>.</param>
         public static void SetPropertyResolver(IPropertyResolver propertyResolver)
         {
             PropertyResolver = propertyResolver;
@@ -1457,10 +1463,10 @@ namespace Dommel
         #endregion
 
         #region Key property resolving
-        internal static IKeyPropertyResolver KeyPropertyResolver { get; private set; } = new DefaultKeyPropertyResolver();
+        public static IKeyPropertyResolver KeyPropertyResolver { get; private set; } = new DefaultKeyPropertyResolver();
 
         /// <summary>
-        /// Sets the <see cref="DommelMapper.IKeyPropertyResolver"/> implementation for resolving key properties of entities.
+        /// Sets the <see cref="IKeyPropertyResolver"/> implementation for resolving key properties of entities.
         /// </summary>
         /// <param name="resolver">An instance of <see cref="DommelMapper.IKeyPropertyResolver"/>.</param>
         public static void SetKeyPropertyResolver(IKeyPropertyResolver resolver)
@@ -1473,12 +1479,12 @@ namespace Dommel
         #region Foreign key property resolving
         
 
-        internal static IForeignKeyPropertyResolver ForeignKeyPropertyResolver { get; private set; } = new DefaultForeignKeyPropertyResolver();
+        public static IForeignKeyPropertyResolver ForeignKeyPropertyResolver { get; private set; } = new DefaultForeignKeyPropertyResolver();
 
         /// <summary>
         /// Sets the <see cref="T:DommelMapper.IForeignKeyPropertyResolver"/> implementation for resolving foreign key properties.
         /// </summary>
-        /// <param name="resolver">An instance of <see cref="T:DommelMapper.IForeignKeyPropertyResolver"/>.</param>
+        /// <param name="resolver">An instance of <see cref="T:IForeignKeyPropertyResolver"/>.</param>
         public static void SetForeignKeyPropertyResolver(IForeignKeyPropertyResolver resolver)
         {
             ForeignKeyPropertyResolver = resolver;
@@ -1490,7 +1496,7 @@ namespace Dommel
         #endregion
 
         #region Table name resolving
-        internal static ITableNameResolver TableNameResolver { get; private set; } = new DefaultTableNameResolver();
+        public static ITableNameResolver TableNameResolver { get; private set; } = new DefaultTableNameResolver();
 
         /// <summary>
         /// Sets the <see cref="T:Dommel.ITableNameResolver"/> implementation for resolving table names for entities.
@@ -1507,7 +1513,7 @@ namespace Dommel
         #endregion
 
         #region Column name resolving
-        internal static IColumnNameResolver ColumnNameResolver { get; private set; } = new DefaultColumnNameResolver();
+        public static IColumnNameResolver ColumnNameResolver { get; private set; } = new DefaultColumnNameResolver();
 
         /// <summary>
         /// Sets the <see cref="T:Dommel.IColumnNameResolver"/> implementation for resolving column names.

@@ -21,6 +21,7 @@
     <PackageLicenseUrl>https://github.com/TroySchmidt/Dommel/blob/master/LICENSE</PackageLicenseUrl>
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/TroySchmidt/Dommel</RepositoryUrl>
+    <Version>2.0.1</Version>
   </PropertyGroup>  
   <ItemGroup>
     <PackageReference Include="Dapper" Version="1.50.2" />
