@@ -25,6 +25,9 @@ namespace Dommel
                                                                                     { "npgsqlconnection", new PostgresSqlBuilder() },
                                                                                     { "mysqlconnection", new MySqlSqlBuilder() }
                                                                                 };
+        private static readonly IDictionary<string, IUpdateBuilder> _updateBuilders = new Dictionary<string, IUpdateBuilder>
+                                                                                {
+                                                                                };
 
         private static readonly ConcurrentDictionary<Type, string> _getQueryCache = new ConcurrentDictionary<Type, string>();
         private static readonly ConcurrentDictionary<Type, string> _getAllQueryCache = new ConcurrentDictionary<Type, string>();
@@ -1298,7 +1301,7 @@ namespace Dommel
         /// <returns>A value indicating whether the update operation succeeded.</returns>
         public static bool Update<TEntity>(this IDbConnection connection, TEntity entity, IDbTransaction transaction = null)
         {
-            var sql = BuildUpdateQuery(typeof(TEntity));
+            var sql = BuildUpdateQuery(typeof(TEntity), connection);
             return connection.Execute(sql, entity, transaction) > 0;
         }
 
@@ -1313,11 +1316,11 @@ namespace Dommel
         /// <returns>A value indicating whether the update operation succeeded.</returns>
         public static async Task<bool> UpdateAsync<TEntity>(this IDbConnection connection, TEntity entity, IDbTransaction transaction = null)
         {
-            var sql = BuildUpdateQuery(typeof(TEntity));
+            var sql = BuildUpdateQuery(typeof(TEntity), connection);
             return await connection.ExecuteAsync(sql, entity, transaction) > 0;
         }
 
-        private static string BuildUpdateQuery(Type type)
+        private static string BuildUpdateQuery(Type type, IDbConnection connection)
         {
             string sql;
             if (!_updateQueryCache.TryGetValue(type, out sql))
@@ -1331,9 +1334,8 @@ namespace Dommel
                                               .Where(p => p.GetSetMethod() != null)
                                               .ToArray();
 
-                var columnNames = typeProperties.Select(p => $"{Resolvers.Column(p)} = @{p.Name}").ToArray();
-
-                sql = $"update {tableName} set {string.Join(", ", columnNames)} where {Resolvers.Column(keyProperty)} = @{keyProperty.Name}";
+                var builder = GetUpdateBuilder(connection);
+                sql = builder.BuildUpdate(tableName, typeProperties, keyProperty);
 
                 _updateQueryCache.TryAdd(type, sql);
             }
@@ -2028,6 +2030,23 @@ namespace Dommel
 
         #region Sql builders
         /// <summary>
+        /// Adds a custom implementations of SQL Query Builders
+        /// for the specified ADO.NET connection type.
+        /// </summary>
+        /// <param name="connectionType">
+        /// The ADO.NET conncetion type to use the <paramref name="sqlBuilder"/> and <paramref name="updateBuilder"/> with.
+        /// Example: <c>typeof(SqlConnection)</c>.
+        /// </param>
+        /// <param name="sqlBuilder">An implementation of the <see cref="T:DommelMapper.ISqlBuilder interface"/>.</param>
+        /// <param name="updateBuilder">An implementation of the <see cref="T:DommelMapper.IUpdateBuilder interface"/>.</param>
+        public static void AddBuilders(Type connectionType, ISqlBuilder sqlBuilder, IUpdateBuilder updateBuilder)
+        {
+            AddSqlBuilder(connectionType, sqlBuilder);
+            AddSqlUpdateBuilder(connectionType, updateBuilder);
+        }
+
+
+        /// <summary>
         /// Adds a custom implementation of <see cref="T:DommelMapper.ISqlBuilder"/>
         /// for the specified ADO.NET connection type.
         /// </summary>
@@ -2041,11 +2060,32 @@ namespace Dommel
             _sqlBuilders[connectionType.Name.ToLower()] = builder;
         }
 
+        /// <summary>
+        /// Adds a custom implementation of <see cref="T:DommelMapper.IUpdateBuilder"/>
+        /// for the specified ADO.NET connection type.
+        /// </summary>
+        /// <param name="connectionType">
+        /// The ADO.NET conncetion type to use the <paramref name="builder"/> with.
+        /// Example: <c>typeof(SqlConnection)</c>.
+        /// </param>
+        /// <param name="builder">An implementation of the <see cref="T:DommelMapper.IUpdateBuilder interface"/>.</param>
+        public static void AddSqlUpdateBuilder(Type connectionType, IUpdateBuilder builder)
+        {
+            _updateBuilders[connectionType.Name.ToLower()] = builder;
+        }
+
+
         private static ISqlBuilder GetBuilder(IDbConnection connection)
         {
             var connectionName = connection.GetType().Name.ToLower();
             ISqlBuilder builder;
             return _sqlBuilders.TryGetValue(connectionName, out builder) ? builder : new SqlServerSqlBuilder();
+        }
+        private static IUpdateBuilder GetUpdateBuilder(IDbConnection connection)
+        {
+            var connectionName = connection.GetType().Name.ToLower();
+            IUpdateBuilder builder;
+            return _updateBuilders.TryGetValue(connectionName, out builder) ? builder : new DefaultUpdateBuilder();
         }
 
         /// <summary>
@@ -2066,6 +2106,34 @@ namespace Dommel
             /// </param>
             /// <returns>An insert query including a query to fetch the new id.</returns>
             string BuildInsert(string tableName, string[] columnNames, string[] paramNames, PropertyInfo keyProperty);
+        }
+        /// <summary>
+        /// Defines methods for building specialized SQL Update queries.
+        /// </summary>
+        public interface IUpdateBuilder
+        {
+            /// <summary>
+            /// Builds an Update query using the specified table name, column names and parameter names.
+            /// A query to fetch the new id will be included as well.
+            /// </summary>
+            /// <param name="tableName">The name of the table to query.</param>
+            /// <param name="typeProperties">The names of the columns in the table.</param>
+            /// <param name="paramNames">The names of the parameters in the database command.</param>
+            /// <param name="keyProperty">
+            /// The key property. This can be used to query a specific column for the new id. This is
+            /// optional.
+            /// </param>
+            /// <returns>An insert query including a query to fetch the new id.</returns>
+            string BuildUpdate(string tableName, PropertyInfo[] typeProperties, PropertyInfo keyProperty);
+        }
+
+        private class DefaultUpdateBuilder : IUpdateBuilder
+        {
+            public string BuildUpdate(string tableName, PropertyInfo[] typeProperties, PropertyInfo keyProperty)
+            {
+                var columnNames = typeProperties.Select(p => $"{Resolvers.Column(p)} = @{p.Name}").ToArray();
+                return $"update {tableName} set {string.Join(", ", columnNames)} where {Resolvers.Column(keyProperty)} = @{keyProperty.Name}";
+            }
         }
 
         private sealed class SqlServerSqlBuilder : ISqlBuilder
@@ -2129,5 +2197,6 @@ namespace Dommel
             }
         }
         #endregion
+
     }
 }
