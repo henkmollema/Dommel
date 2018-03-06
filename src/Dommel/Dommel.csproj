@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <Description>Simple CRUD operations for Dapper.</Description>
-    <Copyright>Copyright © Henk Mollema 2017</Copyright>
+    <Copyright>Copyright © Henk Mollema 2018</Copyright>
     <AssemblyTitle>Dommel</AssemblyTitle>
     <VersionPrefix>1.10.0</VersionPrefix>
     <Authors>Henk Mollema</Authors>
