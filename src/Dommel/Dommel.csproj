@@ -3,18 +3,19 @@
     <Description>Simple CRUD operations for Dapper.</Description>
     <Copyright>Copyright © Henk Mollema 2017</Copyright>
     <AssemblyTitle>Dommel</AssemblyTitle>
-    <VersionPrefix>1.9.0</VersionPrefix>
+    <VersionPrefix>1.10.0</VersionPrefix>
     <Authors>Henk Mollema</Authors>
-    <TargetFrameworks>net45;net451;netstandard1.3</TargetFrameworks>
+    <TargetFrameworks>net451;netstandard1.3;netstandard2.0</TargetFrameworks>
+    <TargetFrameworks Condition=" '$(OS)' != 'Windows_NT' ">netstandard1.3;netstandard2.0</TargetFrameworks>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <PackageTags>dommel;crud;dapper;database;orm</PackageTags>
     <PackageProjectUrl>https://github.com/henkmollema/Dommel</PackageProjectUrl>
     <PackageLicenseUrl>https://github.com/henkmollema/Dommel/blob/master/LICENSE</PackageLicenseUrl>
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/henkmollema/Dommel</RepositoryUrl>
-  </PropertyGroup>  
+  </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Dapper" Version="1.50.2" />
+    <PackageReference Include="Dapper" Version="1.50.4" />
     <PackageReference Include="System.ComponentModel.Annotations" Version="4.4.0" />
   </ItemGroup>
 </Project>
