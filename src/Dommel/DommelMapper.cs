@@ -34,6 +34,11 @@ namespace Dommel
         private static readonly ConcurrentDictionary<Type, string> _deleteAllQueryCache = new ConcurrentDictionary<Type, string>();
 
         /// <summary>
+        /// The escape character to use for escaping column and table names in queries.
+        /// </summary>
+        public static char EscapeCharacter = char.MinValue;
+
+        /// <summary>
         /// Retrieves the entity of type <typeparamref name="TEntity"/> with the specified id.
         /// </summary>
         /// <typeparam name="TEntity">The type of the entity.</typeparam>
@@ -1598,6 +1603,10 @@ namespace Dommel
                 if (!_typeTableNameCache.TryGetValue(type, out name))
                 {
                     name = _tableNameResolver.ResolveTableName(type);
+                    if (EscapeCharacter != char.MinValue)
+                    {
+                        name = EscapeCharacter + name + EscapeCharacter;
+                    }
                     _typeTableNameCache.TryAdd(type, name);
                 }
                 return name;
@@ -1617,6 +1626,10 @@ namespace Dommel
                 if (!_columnNameCache.TryGetValue(key, out columnName))
                 {
                     columnName = _columnNameResolver.ResolveColumnName(propertyInfo);
+                    if (EscapeCharacter != char.MinValue)
+                    {
+                        columnName = EscapeCharacter + columnName + EscapeCharacter;
+                    }
                     _columnNameCache.TryAdd(key, columnName);
                 }
 
@@ -2083,7 +2096,14 @@ namespace Dommel
         {
             public string BuildInsert(string tableName, string[] columnNames, string[] paramNames, PropertyInfo keyProperty)
             {
-                return $"insert into {tableName} (`{string.Join("`, `", columnNames)}`) values ({string.Join(", ", paramNames)}); select LAST_INSERT_ID() id";
+                if (EscapeCharacter == char.MinValue)
+                {
+                    // Fall back to the default behavior.
+                    return $"insert into `{tableName}` (`{string.Join("`, `", columnNames)}`) values ({string.Join(", ", paramNames)}); select LAST_INSERT_ID() id";
+                }
+
+                // Table and column names are already escaped.
+                return $"insert into {tableName} ({string.Join(", ", columnNames)}) values ({string.Join(", ", paramNames)}); select LAST_INSERT_ID() id";
             }
         }
 
