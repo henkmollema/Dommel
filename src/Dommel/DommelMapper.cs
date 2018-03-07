@@ -34,9 +34,14 @@ namespace Dommel
         private static readonly ConcurrentDictionary<Type, string> _deleteAllQueryCache = new ConcurrentDictionary<Type, string>();
 
         /// <summary>
-        /// The escape character to use for escaping column and table names in queries.
+        /// The escape character to use for escaping the start of column and table names in queries.
         /// </summary>
-        public static char EscapeCharacter = char.MinValue;
+        public static char EscapeCharacterStart;
+
+        /// <summary>
+        /// The escape character to use for escaping the end of column and table names in queries.
+        /// </summary>
+        public static char EscapeCharacterEnd;
 
         /// <summary>
         /// Retrieves the entity of type <typeparamref name="TEntity"/> with the specified id.
@@ -1603,9 +1608,9 @@ namespace Dommel
                 if (!_typeTableNameCache.TryGetValue(type, out name))
                 {
                     name = _tableNameResolver.ResolveTableName(type);
-                    if (EscapeCharacter != char.MinValue)
+                    if (EscapeCharacterStart != char.MinValue || EscapeCharacterEnd != char.MinValue)
                     {
-                        name = EscapeCharacter + name + EscapeCharacter;
+                        name = EscapeCharacterStart + name + EscapeCharacterEnd;
                     }
                     _typeTableNameCache.TryAdd(type, name);
                 }
@@ -1626,9 +1631,9 @@ namespace Dommel
                 if (!_columnNameCache.TryGetValue(key, out columnName))
                 {
                     columnName = _columnNameResolver.ResolveColumnName(propertyInfo);
-                    if (EscapeCharacter != char.MinValue)
+                    if (EscapeCharacterStart != char.MinValue || EscapeCharacterEnd != char.MinValue)
                     {
-                        columnName = EscapeCharacter + columnName + EscapeCharacter;
+                        columnName = EscapeCharacterStart + columnName + EscapeCharacterEnd;
                     }
                     _columnNameCache.TryAdd(key, columnName);
                 }
@@ -2096,7 +2101,7 @@ namespace Dommel
         {
             public string BuildInsert(string tableName, string[] columnNames, string[] paramNames, PropertyInfo keyProperty)
             {
-                if (EscapeCharacter == char.MinValue)
+                if (EscapeCharacterStart == char.MinValue && EscapeCharacterEnd == char.MinValue)
                 {
                     // Fall back to the default behavior.
                     return $"insert into `{tableName}` (`{string.Join("`, `", columnNames)}`) values ({string.Join(", ", paramNames)}); select LAST_INSERT_ID() id";
