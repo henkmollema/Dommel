@@ -3,7 +3,7 @@
     <Description>Simple CRUD operations for Dapper.</Description>
     <Copyright>Copyright © Henk Mollema 2018</Copyright>
     <AssemblyTitle>Dommel</AssemblyTitle>
-    <VersionPrefix>1.10.0</VersionPrefix>
+    <VersionPrefix>1.10.1</VersionPrefix>
     <Authors>Henk Mollema</Authors>
     <TargetFrameworks>net451;netstandard1.3;netstandard2.0</TargetFrameworks>
     <TargetFrameworks Condition=" '$(OS)' != 'Windows_NT' ">netstandard1.3;netstandard2.0</TargetFrameworks>
