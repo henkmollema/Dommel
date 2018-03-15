@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Dapper;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -8,7 +9,6 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
-using Dapper;
 
 namespace Dommel
 {
@@ -850,6 +850,29 @@ namespace Dommel
         /// <typeparam name="TEntity">The type of the entity.</typeparam>
         /// <param name="connection">The connection to the database. This can either be open or closed.</param>
         /// <param name="predicate">A predicate to filter the results.</param>
+        /// <param name="page">Page number paramter.</param>
+        /// <param name="pagesize">Page size parameter.</param>
+        /// <param name="buffered">
+        /// A value indicating whether the result of the query should be executed directly,
+        /// or when the query is materialized (using <c>ToList()</c> for example).
+        /// </param>
+        /// <returns>
+        /// A collection of entities of type <typeparamref name="TEntity"/> matching the specified
+        /// <paramref name="predicate"/>.
+        /// </returns>
+        public static IEnumerable<TEntity> Select<TEntity>(this IDbConnection connection, Expression<Func<TEntity, bool>> predicate, int page, int pagesize, bool buffered = true)
+        {
+            DynamicParameters parameters;
+            var sql = BuildSelectSql(predicate, page, pagesize, out parameters);
+            return connection.Query<TEntity>(sql, parameters, buffered: buffered);
+        }
+
+        /// <summary>
+        /// Selects all the entities matching the specified predicate.
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the entity.</typeparam>
+        /// <param name="connection">The connection to the database. This can either be open or closed.</param>
+        /// <param name="predicate">A predicate to filter the results.</param>
         /// <returns>
         /// A collection of entities of type <typeparamref name="TEntity"/> matching the specified
         /// <paramref name="predicate"/>.
@@ -859,6 +882,43 @@ namespace Dommel
             DynamicParameters parameters;
             var sql = BuildSelectSql(predicate, out parameters);
             return connection.QueryAsync<TEntity>(sql, parameters);
+        }
+
+        /// <summary>
+        /// Selects all the entities matching the specified predicate.
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the entity.</typeparam>
+        /// <param name="connection">The connection to the database. This can either be open or closed.</param>
+        /// <param name="predicate">A predicate to filter the results.</param>
+        /// <param name="page">Page number paramter.</param>
+        /// <param name="pagesize">Page size parameter.</param>
+        /// <returns>
+        /// A collection of entities of type <typeparamref name="TEntity"/> matching the specified
+        /// <paramref name="predicate"/>.
+        /// </returns>
+        public static Task<IEnumerable<TEntity>> SelectAsync<TEntity>(this IDbConnection connection, Expression<Func<TEntity, bool>> predicate, int page, int pagesize)
+        {
+            DynamicParameters parameters;
+            var sql = BuildSelectSql(predicate, page, pagesize, out parameters);
+            return connection.QueryAsync<TEntity>(sql, parameters);
+        }
+
+        private static string BuildSelectSql<TEntity>(Expression<Func<TEntity, bool>> predicate, int page, int pagesize, out DynamicParameters parameters)
+        {
+            var type = typeof(TEntity);
+            string sql;
+            if (!_getAllQueryCache.TryGetValue(type, out sql))
+            {
+                var tableName = Resolvers.Table(type);
+                sql = $"select * from {tableName}";
+                _getAllQueryCache.TryAdd(type, sql);
+            }
+
+            sql += new SqlExpression<TEntity>()
+                .Where(predicate)
+                .Paging(page, pagesize)
+                .ToSql(out parameters);
+            return sql;
         }
 
         private static string BuildSelectSql<TEntity>(Expression<Func<TEntity, bool>> predicate, out DynamicParameters parameters)
@@ -932,11 +992,43 @@ namespace Dommel
         /// <typeparam name="TEntity">The type of the entity.</typeparam>
         /// <param name="connection">The connection to the database. This can either be open or closed.</param>
         /// <param name="predicate">A predicate to filter the results.</param>
+        /// <param name="page">Page number paramter.</param>
+        /// <param name="pagesize">Page size parameter.</param>
+        /// <returns>The number of entities matching the specified predicate.</returns>
+        public static long Count<TEntity>(this IDbConnection connection, Expression<Func<TEntity, bool>> predicate, int page, int pagesize)
+        {
+            DynamicParameters parameters;
+            var sql = BuildCountSql(predicate, page, pagesize, out parameters);
+            return connection.ExecuteScalar<long>(sql, parameters);
+        }
+
+        /// <summary>
+        /// Returns the number of entities matching the specified predicate.
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the entity.</typeparam>
+        /// <param name="connection">The connection to the database. This can either be open or closed.</param>
+        /// <param name="predicate">A predicate to filter the results.</param>
         /// <returns>The number of entities matching the specified predicate.</returns>
         public static Task<long> CountAsync<TEntity>(this IDbConnection connection, Expression<Func<TEntity, bool>> predicate)
         {
             DynamicParameters parameters;
             var sql = BuildCountSql(predicate, out parameters);
+            return connection.ExecuteScalarAsync<long>(sql, parameters);
+        }
+
+        /// <summary>
+        /// Returns the number of entities matching the specified predicate.
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the entity.</typeparam>
+        /// <param name="connection">The connection to the database. This can either be open or closed.</param>
+        /// <param name="predicate">A predicate to filter the results.</param>
+        /// <param name="page">Page number paramter.</param>
+        /// <param name="pagesize">Page size parameter.</param>
+        /// <returns>The number of entities matching the specified predicate.</returns>
+        public static Task<long> CountAsync<TEntity>(this IDbConnection connection, Expression<Func<TEntity, bool>> predicate, int page, int pagesize)
+        {
+            DynamicParameters parameters;
+            var sql = BuildCountSql(predicate, page, pagesize, out parameters);
             return connection.ExecuteScalarAsync<long>(sql, parameters);
         }
 
@@ -953,6 +1045,24 @@ namespace Dommel
 
             sql += new SqlExpression<TEntity>()
                 .Where(predicate)
+                .ToSql(out parameters);
+            return sql;
+        }
+
+        private static string BuildCountSql<TEntity>(Expression<Func<TEntity, bool>> predicate, int page, int pagesize, out DynamicParameters parameters)
+        {
+            var type = typeof(TEntity);
+            string sql;
+            if (!_getCountCache.TryGetValue(type, out sql))
+            {
+                var tableName = Resolvers.Table(type);
+                sql = $"select count(*) from {tableName}";
+                _getCountCache.TryAdd(type, sql);
+            }
+
+            sql += new SqlExpression<TEntity>()
+                .Where(predicate)
+                .Paging(page, pagesize)
                 .ToSql(out parameters);
             return sql;
         }
@@ -1267,6 +1377,22 @@ namespace Dommel
             public override string ToString()
             {
                 return _whereBuilder.ToString();
+            }
+
+            /// <summary>
+            /// Includes paging paramteres in the current SQL query
+            /// </summary>
+            /// <param name="page">page number parameter</param>
+            /// <param name="pagesize">page size parameter</param>
+            /// <returns></returns>
+            public virtual SqlExpression<TEntity> Paging(int page, int pagesize)
+            {
+                int offset = page * pagesize;
+
+                _whereBuilder.Append(" offset ").Append(offset).Append(" rows ");
+                _whereBuilder.Append(" fetch next ").Append(pagesize).Append(" rows only ");
+
+                return this;
             }
         }
 
