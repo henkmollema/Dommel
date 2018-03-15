@@ -1,18 +1,22 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Description>Simple CRUD operations for Dapper.</Description>
-    <Copyright>Copyright © Henk Mollema 2018</Copyright>
+    <Description>Simple CRUD operations for Dapper. Fork including pagination</Description>
+    <Copyright></Copyright>
     <AssemblyTitle>Dommel</AssemblyTitle>
     <VersionPrefix>1.11.0</VersionPrefix>
-    <Authors>Henk Mollema</Authors>
+    <Authors>Henk Mollema, Felipe Silva Pereira</Authors>
     <TargetFrameworks>net451;netstandard1.3;netstandard2.0</TargetFrameworks>
     <TargetFrameworks Condition=" '$(OS)' != 'Windows_NT' ">netstandard1.3;netstandard2.0</TargetFrameworks>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <PackageTags>dommel;crud;dapper;database;orm</PackageTags>
-    <PackageProjectUrl>https://github.com/henkmollema/Dommel</PackageProjectUrl>
-    <PackageLicenseUrl>https://github.com/henkmollema/Dommel/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/fspcons/Dommel</PackageProjectUrl>
+    <PackageLicenseUrl>https://github.com/fspcons/Dommel/blob/master/LICENSE</PackageLicenseUrl>
     <RepositoryType>git</RepositoryType>
-    <RepositoryUrl>https://github.com/henkmollema/Dommel</RepositoryUrl>
+    <RepositoryUrl>https://github.com/fspcons/Dommel</RepositoryUrl>
+    <PackageId>Dommel.Pag</PackageId>
+    <Version>1.0</Version>
+    <Company>Henk Mollema, Felipe Silva Pereira</Company>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Dapper" Version="1.50.4" />
