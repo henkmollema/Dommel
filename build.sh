@@ -1,1 +1,2 @@
-dotnet build --framework netstandard1.3
+dotnet build
+dotnet test test/Dommel.Tests
