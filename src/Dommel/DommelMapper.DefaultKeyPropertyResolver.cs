@@ -17,36 +17,26 @@ namespace Dommel
             /// <summary>
             /// Finds the key property by looking for a property with the [Key] attribute or with the name 'Id'.
             /// </summary>
-            public virtual PropertyInfo ResolveKeyProperty(Type type)
-            {
-                bool isIdentity;
-                return ResolveKeyProperty(type, out isIdentity);
-            }
+            public virtual PropertyInfo ResolveKeyProperty(Type type) => ResolveKeyProperty(type, out _);
 
             /// <summary>
             /// Finds the key property by looking for a property with the [Key] attribute or with the name 'Id'.
             /// </summary>
             public PropertyInfo ResolveKeyProperty(Type type, out bool isIdentity)
             {
-                var allProps = Resolvers.Properties(type).ToList();
+                var keyProps = Resolvers
+                        .Properties(type)
+                        .Where(p => p.GetCustomAttribute<KeyAttribute>() != null || p.Name.Equals("Id", StringComparison.OrdinalIgnoreCase))
+                        .ToArray();
 
-                // Look for properties with the [Key] attribute.
-                var keyProps = allProps.Where(p => p.GetCustomAttributes(true).Any(a => a is KeyAttribute)).ToList();
-
-                if (keyProps.Count == 0)
+                if (keyProps.Length == 0)
                 {
-                    // Search for properties named as 'Id' as fallback.
-                    keyProps = allProps.Where(p => p.Name.Equals("Id", StringComparison.OrdinalIgnoreCase)).ToList();
+                    throw new InvalidOperationException($"Could not find the key property for type '{type.FullName}'.");
                 }
 
-                if (keyProps.Count == 0)
+                if (keyProps.Length > 1)
                 {
-                    throw new Exception($"Could not find the key property for type '{type.FullName}'.");
-                }
-
-                if (keyProps.Count > 1)
-                {
-                    throw new Exception($"Multiple key properties were found for type '{type.FullName}'.");
+                    throw new InvalidOperationException($"Multiple key properties were found for type '{type.FullName}'.");
                 }
 
                 isIdentity = true;
