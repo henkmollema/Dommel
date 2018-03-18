@@ -3,7 +3,6 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Reflection;
 using System.Threading.Tasks;
 using Dapper;
@@ -25,6 +24,7 @@ namespace Dommel
         public static object Insert<TEntity>(this IDbConnection connection, TEntity entity, IDbTransaction transaction = null) where TEntity : class
         {
             var sql = BuildInsertQuery(connection, typeof(TEntity));
+            LogQuery<TEntity>(sql);
             return connection.ExecuteScalar(sql, entity, transaction);
         }
 
@@ -39,18 +39,16 @@ namespace Dommel
         public static Task<object> InsertAsync<TEntity>(this IDbConnection connection, TEntity entity, IDbTransaction transaction = null) where TEntity : class
         {
             var sql = BuildInsertQuery(connection, typeof(TEntity));
+            LogQuery<TEntity>(sql);
             return connection.ExecuteScalarAsync(sql, entity, transaction);
         }
 
         private static string BuildInsertQuery(IDbConnection connection, Type type)
         {
-            string sql;
-            if (!_insertQueryCache.TryGetValue(type, out sql))
+            if (!_insertQueryCache.TryGetValue(type, out var sql))
             {
                 var tableName = Resolvers.Table(type);
-
-                bool isIdentity;
-                var keyProperty = Resolvers.KeyProperty(type, out isIdentity);
+                var keyProperty = Resolvers.KeyProperty(type, out var isIdentity);
 
                 var typeProperties = new List<PropertyInfo>();
                 foreach (var typeProperty in Resolvers.Properties(type))
@@ -73,7 +71,7 @@ namespace Dommel
                 var columnNames = typeProperties.Select(Resolvers.Column).ToArray();
                 var paramNames = typeProperties.Select(p => "@" + p.Name).ToArray();
 
-                var builder = GetBuilder(connection);
+                var builder = GetSqlBuilder(connection);
                 sql = builder.BuildInsert(tableName, columnNames, paramNames, keyProperty);
 
                 _insertQueryCache.TryAdd(type, sql);

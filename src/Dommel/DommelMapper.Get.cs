@@ -2,9 +2,6 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Reflection;
 using System.Threading.Tasks;
 using Dapper;
 
@@ -24,8 +21,8 @@ namespace Dommel
         /// <returns>The entity with the corresponding id.</returns>
         public static TEntity Get<TEntity>(this IDbConnection connection, object id) where TEntity : class
         {
-            DynamicParameters parameters;
-            var sql = BuildGetById(typeof(TEntity), id, out parameters);
+            var sql = BuildGetById(typeof(TEntity), id, out var parameters);
+            LogQuery<TEntity>(sql);
             return connection.QueryFirstOrDefault<TEntity>(sql, parameters);
         }
 
@@ -38,15 +35,14 @@ namespace Dommel
         /// <returns>The entity with the corresponding id.</returns>
         public static Task<TEntity> GetAsync<TEntity>(this IDbConnection connection, object id) where TEntity : class
         {
-            DynamicParameters parameters;
-            var sql = BuildGetById(typeof(TEntity), id, out parameters);
+            var sql = BuildGetById(typeof(TEntity), id, out var parameters);
+            LogQuery<TEntity>(sql);
             return connection.QueryFirstOrDefaultAsync<TEntity>(sql, parameters);
         }
 
         private static string BuildGetById(Type type, object id, out DynamicParameters parameters)
         {
-            string sql;
-            if (!_getQueryCache.TryGetValue(type, out sql))
+            if (!_getQueryCache.TryGetValue(type, out var sql))
             {
                 var tableName = Resolvers.Table(type);
                 var keyProperty = Resolvers.KeyProperty(type);
@@ -75,6 +71,7 @@ namespace Dommel
         public static IEnumerable<TEntity> GetAll<TEntity>(this IDbConnection connection, bool buffered = true) where TEntity : class
         {
             var sql = BuildGetAllQuery(typeof(TEntity));
+            LogQuery<TEntity>(sql);
             return connection.Query<TEntity>(sql, buffered: buffered);
         }
 
@@ -87,13 +84,13 @@ namespace Dommel
         public static Task<IEnumerable<TEntity>> GetAllAsync<TEntity>(this IDbConnection connection) where TEntity : class
         {
             var sql = BuildGetAllQuery(typeof(TEntity));
+            LogQuery<TEntity>(sql);
             return connection.QueryAsync<TEntity>(sql);
         }
 
         private static string BuildGetAllQuery(Type type)
         {
-            string sql;
-            if (!_getAllQueryCache.TryGetValue(type, out sql))
+            if (!_getAllQueryCache.TryGetValue(type, out var sql))
             {
                 var tableName = Resolvers.Table(type);
                 sql = $"select * from {tableName}";

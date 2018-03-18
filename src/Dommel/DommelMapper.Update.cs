@@ -26,6 +26,7 @@ namespace Dommel
         public static bool Update<TEntity>(this IDbConnection connection, TEntity entity, IDbTransaction transaction = null)
         {
             var sql = BuildUpdateQuery(typeof(TEntity));
+            LogQuery<TEntity>(sql);
             return connection.Execute(sql, entity, transaction) > 0;
         }
 
@@ -41,6 +42,7 @@ namespace Dommel
         public static async Task<bool> UpdateAsync<TEntity>(this IDbConnection connection, TEntity entity, IDbTransaction transaction = null)
         {
             var sql = BuildUpdateQuery(typeof(TEntity));
+            LogQuery<TEntity>(sql);
             return await connection.ExecuteAsync(sql, entity, transaction) > 0;
         }
 
