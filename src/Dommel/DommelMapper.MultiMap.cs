@@ -562,8 +562,8 @@ namespace Dommel
                     .Where(t => t != typeof(DontMap))
                     .ToArray();
 
-            DynamicParameters parameters;
-            var sql = BuildMultiMapQuery(resultType, includeTypes, id, out parameters);
+            var sql = BuildMultiMapQuery(resultType, includeTypes, id, out var parameters);
+            LogQuery<TReturn>(sql);
 
             switch (includeTypes.Length)
             {
@@ -601,8 +601,8 @@ namespace Dommel
                     .Where(t => t != typeof(DontMap))
                     .ToArray();
 
-            DynamicParameters parameters;
-            var sql = BuildMultiMapQuery(resultType, includeTypes, id, out parameters);
+            var sql = BuildMultiMapQuery(resultType, includeTypes, id, out var parameters);
+            LogQuery<TReturn>(sql);
 
             switch (includeTypes.Length)
             {
@@ -641,8 +641,7 @@ namespace Dommel
                 var foreignKeyTableName = Resolvers.Table(includeType);
 
                 // Determine the foreign key and the relationship type.
-                ForeignKeyRelation relation;
-                var foreignKeyProperty = Resolvers.ForeignKeyProperty(sourceType, includeType, out relation);
+                var foreignKeyProperty = Resolvers.ForeignKeyProperty(sourceType, includeType, out var relation);
                 var foreignKeyPropertyName = Resolvers.Column(foreignKeyProperty);
 
                 // If the foreign key property is nullable, use a left-join.

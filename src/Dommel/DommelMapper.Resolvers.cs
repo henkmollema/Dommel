@@ -8,7 +8,6 @@ namespace Dommel
 {
     public static partial class DommelMapper
     {
-
         private static IPropertyResolver _propertyResolver = new DefaultPropertyResolver();
         private static IKeyPropertyResolver _keyPropertyResolver = new DefaultKeyPropertyResolver();
         private static IForeignKeyPropertyResolver _foreignKeyPropertyResolver = new DefaultForeignKeyPropertyResolver();
@@ -19,46 +18,31 @@ namespace Dommel
         /// Sets the <see cref="IPropertyResolver"/> implementation for resolving key of entities.
         /// </summary>
         /// <param name="propertyResolver">An instance of <see cref="IPropertyResolver"/>.</param>
-        public static void SetPropertyResolver(IPropertyResolver propertyResolver)
-        {
-            _propertyResolver = propertyResolver;
-        }
+        public static void SetPropertyResolver(IPropertyResolver propertyResolver) => _propertyResolver = propertyResolver;
 
         /// <summary>
         /// Sets the <see cref="IKeyPropertyResolver"/> implementation for resolving key properties of entities.
         /// </summary>
         /// <param name="resolver">An instance of <see cref="IKeyPropertyResolver"/>.</param>
-        public static void SetKeyPropertyResolver(IKeyPropertyResolver resolver)
-        {
-            _keyPropertyResolver = resolver;
-        }
+        public static void SetKeyPropertyResolver(IKeyPropertyResolver resolver) => _keyPropertyResolver = resolver;
 
         /// <summary>
         /// Sets the <see cref="IForeignKeyPropertyResolver"/> implementation for resolving foreign key properties.
         /// </summary>
         /// <param name="resolver">An instance of <see cref="IForeignKeyPropertyResolver"/>.</param>
-        public static void SetForeignKeyPropertyResolver(IForeignKeyPropertyResolver resolver)
-        {
-            _foreignKeyPropertyResolver = resolver;
-        }
+        public static void SetForeignKeyPropertyResolver(IForeignKeyPropertyResolver resolver) => _foreignKeyPropertyResolver = resolver;
 
         /// <summary>
         /// Sets the <see cref="ITableNameResolver"/> implementation for resolving table names for entities.
         /// </summary>
         /// <param name="resolver">An instance of <see cref="ITableNameResolver"/>.</param>
-        public static void SetTableNameResolver(ITableNameResolver resolver)
-        {
-            _tableNameResolver = resolver;
-        }
+        public static void SetTableNameResolver(ITableNameResolver resolver) => _tableNameResolver = resolver;
 
         /// <summary>
         /// Sets the <see cref="IColumnNameResolver"/> implementation for resolving column names.
         /// </summary>
         /// <param name="resolver">An instance of <see cref="IColumnNameResolver"/>.</param>
-        public static void SetColumnNameResolver(IColumnNameResolver resolver)
-        {
-            _columnNameResolver = resolver;
-        }
+        public static void SetColumnNameResolver(IColumnNameResolver resolver) => _columnNameResolver = resolver;
 
         /// <summary>
         /// Helper class for retrieving type metadata to build sql queries using configured resolvers.
@@ -76,10 +60,7 @@ namespace Dommel
             /// </summary>
             /// <param name="type">The <see cref="Type"/> to get the key property for.</param>
             /// <returns>The key property for <paramref name="type"/>.</returns>
-            public static PropertyInfo KeyProperty(Type type)
-            {
-                return KeyProperty(type, out var _);
-            }
+            public static PropertyInfo KeyProperty(Type type) => KeyProperty(type, out _);
 
             /// <summary>
             /// Gets the key property for the specified type, using the configured <see cref="IKeyPropertyResolver"/>.
@@ -97,6 +78,8 @@ namespace Dommel
                 }
 
                 isIdentity = keyProperty.IsIdentity;
+
+                LogReceived?.Invoke($"Resolved property '{keyProperty.PropertyInfo}' (Identity: {isIdentity}) as key property for '{type.Name}'");
                 return keyProperty.PropertyInfo;
             }
 
@@ -113,7 +96,7 @@ namespace Dommel
                 var key = $"{sourceType.FullName};{includingType.FullName}";
                 if (!_typeForeignKeyPropertyCache.TryGetValue(key, out var foreignKeyInfo))
                 {
-                    // Resole the property and relation.
+                    // Resolve the property and relation.
                     var foreignKeyProperty = _foreignKeyPropertyResolver.ResolveForeignKeyProperty(sourceType, includingType, out foreignKeyRelation);
 
                     // Cache the info.
@@ -122,6 +105,8 @@ namespace Dommel
                 }
 
                 foreignKeyRelation = foreignKeyInfo.Relation;
+
+                LogReceived?.Invoke($"Resolved property '{foreignKeyInfo.PropertyInfo.Name}' ({foreignKeyInfo.Relation.ToString()}) as foreign key between '{sourceType.Name}' and '{includingType.Name}'");
                 return foreignKeyInfo.PropertyInfo;
             }
 
@@ -159,6 +144,8 @@ namespace Dommel
                     }
                     _typeTableNameCache.TryAdd(type, name);
                 }
+
+                LogReceived?.Invoke($"Resolved table name '{name}' for '{type.Name}'");
                 return name;
             }
 
@@ -181,6 +168,7 @@ namespace Dommel
                     _columnNameCache.TryAdd(key, columnName);
                 }
 
+                LogReceived?.Invoke($"Resolved column name '{columnName}' for '{propertyInfo.Name}'");
                 return columnName;
             }
 
@@ -205,35 +193,9 @@ namespace Dommel
                     Relation = relation;
                 }
 
-                public PropertyInfo PropertyInfo { get; private set; }
+                public PropertyInfo PropertyInfo { get; set; }
 
-                public ForeignKeyRelation Relation { get; private set; }
-            }
-
-            /// <summary>
-            /// Provides access to default resolver implementations.
-            /// </summary>
-            public static class Default
-            {
-                /// <summary>
-                /// The default column name resolver.
-                /// </summary>
-                public static readonly IColumnNameResolver ColumnNameResolver = new DefaultColumnNameResolver();
-
-                /// <summary>
-                /// The default property resolver.
-                /// </summary>
-                public static readonly IPropertyResolver PropertyResolver = new DefaultPropertyResolver();
-
-                /// <summary>
-                /// The default key property resolver.
-                /// </summary>
-                public static readonly IKeyPropertyResolver KeyPropertyResolver = new DefaultKeyPropertyResolver();
-
-                /// <summary>
-                /// The default table name resolver.
-                /// </summary>
-                public static readonly ITableNameResolver TableNameResolver = new DefaultTableNameResolver();
+                public ForeignKeyRelation Relation { get; set; }
             }
         }
     }

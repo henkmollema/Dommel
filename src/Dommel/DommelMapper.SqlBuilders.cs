@@ -30,10 +30,17 @@ namespace Dommel
             _sqlBuilders[connectionType.Name.ToLower()] = builder;
         }
 
-        private static ISqlBuilder GetBuilder(IDbConnection connection)
+        /// <summary>
+        /// Gets the configured <see cref="ISqlBuilder"/> for the specified <see cref="IDbConnection"/> instance.
+        /// </summary>
+        /// <param name="connection">The database connection instance.</param>
+        /// <returns>The <see cref="ISqlBuilder"/> interface for the specified <see cref="IDbConnection"/> instance.</returns>
+        public static ISqlBuilder GetSqlBuilder(IDbConnection connection)
         {
-            var connectionName = connection.GetType().Name.ToLower();
-            return _sqlBuilders.TryGetValue(connectionName, out var builder) ? builder : new SqlServerSqlBuilder();
+            var connectionTypeName = connection.GetType().Name;
+            var builder =_sqlBuilders.TryGetValue(connectionTypeName.ToLower(), out var b) ? b : new SqlServerSqlBuilder();
+            LogReceived?.Invoke($"Selected SQL Builder '{builder.GetType().Name}' for connection type '{connectionTypeName}'");
+            return builder;
         }
 
         /// <summary>

@@ -1,10 +1,7 @@
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Data;
-using System.Linq;
 using System.Linq.Expressions;
-using System.Reflection;
 using System.Threading.Tasks;
 using Dapper;
 
@@ -23,8 +20,8 @@ namespace Dommel
         /// <returns>The number of entities matching the specified predicate.</returns>
         public static long Count<TEntity>(this IDbConnection connection, Expression<Func<TEntity, bool>> predicate)
         {
-            DynamicParameters parameters;
-            var sql = BuildCountSql(predicate, out parameters);
+            var sql = BuildCountSql(predicate, out var parameters);
+            LogQuery<TEntity>(sql);
             return connection.ExecuteScalar<long>(sql, parameters);
         }
 
@@ -37,16 +34,15 @@ namespace Dommel
         /// <returns>The number of entities matching the specified predicate.</returns>
         public static Task<long> CountAsync<TEntity>(this IDbConnection connection, Expression<Func<TEntity, bool>> predicate)
         {
-            DynamicParameters parameters;
-            var sql = BuildCountSql(predicate, out parameters);
+            var sql = BuildCountSql(predicate, out var parameters);
+            LogQuery<TEntity>(sql);
             return connection.ExecuteScalarAsync<long>(sql, parameters);
         }
 
         private static string BuildCountSql<TEntity>(Expression<Func<TEntity, bool>> predicate, out DynamicParameters parameters)
         {
             var type = typeof(TEntity);
-            string sql;
-            if (!_getCountCache.TryGetValue(type, out sql))
+            if (!_getCountCache.TryGetValue(type, out var sql))
             {
                 var tableName = Resolvers.Table(type);
                 sql = $"select count(*) from {tableName}";

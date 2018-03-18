@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Dapper;
@@ -27,6 +26,7 @@ namespace Dommel
         public static IEnumerable<TEntity> Select<TEntity>(this IDbConnection connection, Expression<Func<TEntity, bool>> predicate, bool buffered = true)
         {
             var sql = BuildSelectSql(predicate, out var parameters);
+            LogQuery<TEntity>(sql);
             return connection.Query<TEntity>(sql, parameters, buffered: buffered);
         }
 
@@ -43,6 +43,7 @@ namespace Dommel
         public static Task<IEnumerable<TEntity>> SelectAsync<TEntity>(this IDbConnection connection, Expression<Func<TEntity, bool>> predicate)
         {
             var sql = BuildSelectSql(predicate, out var parameters);
+            LogQuery<TEntity>(sql);
             return connection.QueryAsync<TEntity>(sql, parameters);
         }
 
@@ -75,6 +76,7 @@ namespace Dommel
         public static TEntity FirstOrDefault<TEntity>(this IDbConnection connection, Expression<Func<TEntity, bool>> predicate)
         {
             var sql = BuildSelectSql(predicate, out var parameters);
+            LogQuery<TEntity>(sql);
             return connection.QueryFirstOrDefault<TEntity>(sql, parameters);
         }
 
@@ -91,6 +93,7 @@ namespace Dommel
         public static Task<TEntity> FirstOrDefaultAsync<TEntity>(this IDbConnection connection, Expression<Func<TEntity, bool>> predicate)
         {
             var sql = BuildSelectSql(predicate, out var parameters);
+            LogQuery<TEntity>(sql);
             return connection.QueryFirstOrDefaultAsync<TEntity>(sql, parameters);
         }
     }

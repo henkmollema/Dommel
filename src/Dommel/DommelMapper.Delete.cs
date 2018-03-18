@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Data;
-using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Dapper;
@@ -26,6 +24,7 @@ namespace Dommel
         public static bool Delete<TEntity>(this IDbConnection connection, TEntity entity, IDbTransaction transaction = null)
         {
             var sql = BuildDeleteQuery(typeof(TEntity));
+            LogQuery<TEntity>(sql);
             return connection.Execute(sql, entity, transaction) > 0;
         }
 
@@ -41,6 +40,7 @@ namespace Dommel
         public static async Task<bool> DeleteAsync<TEntity>(this IDbConnection connection, TEntity entity, IDbTransaction transaction = null)
         {
             var sql = BuildDeleteQuery(typeof(TEntity));
+            LogQuery<TEntity>(sql);
             return await connection.ExecuteAsync(sql, entity, transaction) > 0;
         }
 
@@ -72,6 +72,7 @@ namespace Dommel
         public static bool DeleteMultiple<TEntity>(this IDbConnection connection, Expression<Func<TEntity, bool>> predicate, IDbTransaction transaction = null)
         {
             var sql = BuildDeleteMultipleQuery(predicate, out var parameters);
+            LogQuery<TEntity>(sql);
             return connection.Execute(sql, parameters, transaction) > 0;
         }
 
@@ -87,6 +88,7 @@ namespace Dommel
         public static async Task<bool> DeleteMultipleAsync<TEntity>(this IDbConnection connection, Expression<Func<TEntity, bool>> predicate, IDbTransaction transaction = null)
         {
             var sql = BuildDeleteMultipleQuery(predicate, out var parameters);
+            LogQuery<TEntity>(sql);
             return await connection.ExecuteAsync(sql, parameters, transaction) > 0;
         }
 
@@ -117,6 +119,7 @@ namespace Dommel
         public static bool DeleteAll<TEntity>(this IDbConnection connection, IDbTransaction transaction = null)
         {
             var sql = BuildDeleteAllQuery(typeof(TEntity));
+            LogQuery<TEntity>(sql);
             return connection.Execute(sql, transaction: transaction) > 0;
         }
 
@@ -131,6 +134,7 @@ namespace Dommel
         public static async Task<bool> DeleteAllAsync<TEntity>(this IDbConnection connection, IDbTransaction transaction = null)
         {
             var sql = BuildDeleteAllQuery(typeof(TEntity));
+            LogQuery<TEntity>(sql);
             return await connection.ExecuteAsync(sql, transaction: transaction) > 0;
         }
 
