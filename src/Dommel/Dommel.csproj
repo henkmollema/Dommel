@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Description>Simple CRUD operations for Dapper. Fork including pagination</Description>
+    <Description>Simple CRUD operations for Dapper. Fork including pagination and support for NO SYNC</Description>
     <Copyright></Copyright>
     <AssemblyTitle>Dommel</AssemblyTitle>
     <VersionPrefix>1.11.0</VersionPrefix>
@@ -14,7 +14,7 @@
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/fspcons/Dommel</RepositoryUrl>
     <PackageId>Dommel.Pag</PackageId>
-    <Version>1.1</Version>
+    <Version>1.2</Version>
     <Company>Henk Mollema, Felipe Silva Pereira</Company>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>

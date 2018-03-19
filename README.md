@@ -1,5 +1,5 @@
 # Fork
-Added paging support for Select/SelectAsync and Count/CountAsync
+Added paging support for Select/SelectAsync and Count/CountAsync and NO SYNC
 # Dommel
 Simple CRUD operations for Dapper.
 
