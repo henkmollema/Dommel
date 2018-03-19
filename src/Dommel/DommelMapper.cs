@@ -83,7 +83,7 @@ namespace Dommel
                 var keyProperty = Resolvers.KeyProperty(type);
                 var keyColumnName = Resolvers.Column(keyProperty);
 
-                sql = $"select * from {tableName}  " + (nolock ? " WITH (NOLOCK) " : "") + " where {keyColumnName} = @Id";
+                sql = $"select * from {tableName}  " + (nolock ? " WITH (NOLOCK) " : "") + " where " + keyColumnName + " = @Id";
                 _getQueryCache.TryAdd(type, sql);
             }
 
