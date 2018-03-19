@@ -14,7 +14,7 @@
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/fspcons/Dommel</RepositoryUrl>
     <PackageId>Dommel.Pag</PackageId>
-    <Version>1.0</Version>
+    <Version>1.1</Version>
     <Company>Henk Mollema, Felipe Silva Pereira</Company>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
