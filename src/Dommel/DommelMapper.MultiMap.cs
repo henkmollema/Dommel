@@ -548,19 +548,18 @@ namespace Dommel
         private static IEnumerable<TReturn> MultiMap<T1, T2, T3, T4, T5, T6, T7, TReturn>(IDbConnection connection, Delegate map, object id = null, bool buffered = true)
         {
             var resultType = typeof(TReturn);
-            var
-                includeTypes = new[]
-                               {
-                                   typeof(T1),
-                                   typeof(T2),
-                                   typeof(T3),
-                                   typeof(T4),
-                                   typeof(T5),
-                                   typeof(T6),
-                                   typeof(T7)
-                               }
-                    .Where(t => t != typeof(DontMap))
-                    .ToArray();
+            var includeTypes = new[]
+            {
+                typeof(T1),
+                typeof(T2),
+                typeof(T3),
+                typeof(T4),
+                typeof(T5),
+                typeof(T6),
+                typeof(T7)
+            }
+            .Where(t => t != typeof(DontMap))
+            .ToArray();
 
             var sql = BuildMultiMapQuery(resultType, includeTypes, id, out var parameters);
             LogQuery<TReturn>(sql);
@@ -587,19 +586,18 @@ namespace Dommel
         private static Task<IEnumerable<TReturn>> MultiMapAsync<T1, T2, T3, T4, T5, T6, T7, TReturn>(IDbConnection connection, Delegate map, object id = null, bool buffered = true)
         {
             var resultType = typeof(TReturn);
-            var
-                includeTypes = new[]
-                               {
-                                   typeof(T1),
-                                   typeof(T2),
-                                   typeof(T3),
-                                   typeof(T4),
-                                   typeof(T5),
-                                   typeof(T6),
-                                   typeof(T7)
-                               }
-                    .Where(t => t != typeof(DontMap))
-                    .ToArray();
+            var includeTypes = new[]
+            {
+                typeof(T1),
+                typeof(T2),
+                typeof(T3),
+                typeof(T4),
+                typeof(T5),
+                typeof(T6),
+                typeof(T7)
+            }
+            .Where(t => t != typeof(DontMap))
+            .ToArray();
 
             var sql = BuildMultiMapQuery(resultType, includeTypes, id, out var parameters);
             LogQuery<TReturn>(sql);
@@ -645,41 +643,23 @@ namespace Dommel
                 var foreignKeyPropertyName = Resolvers.Column(foreignKeyProperty);
 
                 // If the foreign key property is nullable, use a left-join.
-                var joinType = Nullable.GetUnderlyingType(foreignKeyProperty.PropertyType) != null
-                                   ? "left"
-                                   : "inner";
+                var joinType = Nullable.GetUnderlyingType(foreignKeyProperty.PropertyType) != null ? "left" : "inner";
 
-                switch (relation)
+                if (relation == ForeignKeyRelation.OneToOne)
                 {
-                    case ForeignKeyRelation.OneToOne:
-                        // Determine the primary key of the foreign key table.
-                        var foreignKeyTableKeyColumName = Resolvers.Column(Resolvers.KeyProperty(includeType));
-
-                        sql += string.Format(" {0} join {1} on {2}.{3} = {1}.{4}",
-                                             joinType,
-                                             foreignKeyTableName,
-                                             sourceTableName,
-                                             foreignKeyPropertyName,
-                                             foreignKeyTableKeyColumName);
-                        break;
-
-                    case ForeignKeyRelation.OneToMany:
-                        // Determine the primary key of the source table.
-                        var sourceKeyColumnName = Resolvers.Column(Resolvers.KeyProperty(sourceType));
-
-                        sql += string.Format(" {0} join {1} on {2}.{3} = {1}.{4}",
-                                             joinType,
-                                             foreignKeyTableName,
-                                             sourceTableName,
-                                             sourceKeyColumnName,
-                                             foreignKeyPropertyName);
-                        break;
-
-                    case ForeignKeyRelation.ManyToMany:
-                        throw new NotImplementedException("Many-to-many relationships are not supported yet.");
-
-                    default:
-                        throw new NotImplementedException($"Foreign key relation type '{relation}' is not implemented.");
+                    // Determine the primary key of the foreign key table.
+                    var foreignKeyTableKeyColumName = Resolvers.Column(Resolvers.KeyProperty(includeType));
+                    sql += $" {joinType} join {foreignKeyTableName} on {sourceTableName}.{foreignKeyPropertyName} = {foreignKeyTableName}.{foreignKeyTableKeyColumName}";
+                }
+                else if (relation == ForeignKeyRelation.OneToMany)
+                {
+                    // Determine the primary key of the source table.
+                    var sourceKeyColumnName = Resolvers.Column(Resolvers.KeyProperty(sourceType));
+                    sql += $" {joinType} join {foreignKeyTableName} on {sourceTableName}.{sourceKeyColumnName} = {foreignKeyTableName}.{foreignKeyPropertyName}";
+                }
+                else
+                {
+                    throw new NotImplementedException($"Foreign key relation type '{relation}' is not implemented.");
                 }
             }
 

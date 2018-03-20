@@ -15,12 +15,7 @@
             /// <summary>
             /// Specifies a one-to-many relationship.
             /// </summary>
-            OneToMany,
-
-            /// <summary>
-            /// Specifies a many-to-many relationship.
-            /// </summary>
-            ManyToMany
+            OneToMany
         }
     }
 }
