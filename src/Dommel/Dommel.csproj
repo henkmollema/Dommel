@@ -9,12 +9,12 @@
     <TargetFrameworks Condition=" '$(OS)' != 'Windows_NT' ">netstandard1.3;netstandard2.0</TargetFrameworks>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <PackageTags>dommel;crud;dapper;database;orm</PackageTags>
-    <PackageProjectUrl>https://github.com/fspcons/Dommel</PackageProjectUrl>
-    <PackageLicenseUrl>https://github.com/fspcons/Dommel/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/dotzlabs/Dommel</PackageProjectUrl>
+    <PackageLicenseUrl>https://github.com/dotzlabs/Dommel/blob/master/LICENSE</PackageLicenseUrl>
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/fspcons/Dommel</RepositoryUrl>
     <PackageId>Dommel.Pag</PackageId>
-    <Version>1.2.1</Version>
+    <Version>1.2.2</Version>
     <Company>Henk Mollema, Felipe Silva Pereira</Company>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
