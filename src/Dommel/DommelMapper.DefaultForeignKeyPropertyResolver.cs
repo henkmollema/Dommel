@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Reflection;
 
@@ -41,19 +43,52 @@ namespace Dommel
 
             private static PropertyInfo ResolveOneToOne(Type sourceType, Type includingType)
             {
-                // Look for the foreign key on the source type.
+                // Look for the foreign key on the source type by making an educated guess about the property name.
                 var foreignKeyName = includingType.Name + "Id";
-                var foreignKeyProperty = sourceType.GetProperties().FirstOrDefault(p => p.Name == foreignKeyName);
+                var foreignKeyProperty = sourceType.GetProperty(foreignKeyName);
+                if (foreignKeyProperty != null)
+                {
+                    return foreignKeyProperty;
+                }
 
-                return foreignKeyProperty;
+                // Determine if the source type contains a navigation property to the including type.
+                var navigationProperty = sourceType.GetProperties().FirstOrDefault(p => p.PropertyType == includingType);
+                if (navigationProperty != null)
+                {
+                    // Resolve the foreign key property from the attribute.
+                    var fkAttr = navigationProperty.GetCustomAttribute<ForeignKeyAttribute>();
+                    if (fkAttr != null)
+                    {
+                        return sourceType.GetProperty(fkAttr.Name);
+                    }
+                }
+
+                return null;
             }
 
             private static PropertyInfo ResolveOneToMany(Type sourceType, Type includingType)
             {
-                // Look for the foreign key on the including type.
+                // Look for the foreign key on the including type by making an educated guess about the property name.
                 var foreignKeyName = sourceType.Name + "Id";
-                var foreignKeyProperty = includingType.GetProperties().FirstOrDefault(p => p.Name == foreignKeyName);
-                return foreignKeyProperty;
+                var foreignKeyProperty = includingType.GetProperty(foreignKeyName);
+                if (foreignKeyProperty != null)
+                {
+                    return foreignKeyProperty;
+                }
+
+                var collectionType = typeof(IEnumerable<>).MakeGenericType(includingType);
+                var navigationProperty = sourceType.GetProperties().FirstOrDefault(p => collectionType.IsAssignableFrom(p.PropertyType));
+                if (navigationProperty != null)
+                {
+                    // Resolve the foreign key property from the attribute.
+                    var fkAttr = navigationProperty.GetCustomAttribute<ForeignKeyAttribute>();
+                    if (fkAttr != null)
+                    {
+                        return includingType.GetProperty(fkAttr.Name);
+                    }
+                }
+
+                return null;
             }
         }
     }
