@@ -687,7 +687,7 @@ namespace Dommel
             parameters = null;
             if (id != null)
             {
-                sql += string.Format(" where {0}.{1} = @{1}", resultTableName, resultTableKeyColumnName);
+                sql += $" where {resultTableName}.{resultTableKeyColumnName} = @Id";
 
                 parameters = new DynamicParameters();
                 parameters.Add("Id", id);
