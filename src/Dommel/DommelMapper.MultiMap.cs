@@ -628,12 +628,11 @@ namespace Dommel
 
             var sql = $"select * from {resultTableName}";
 
+            // Determine the table to join with.
+            var sourceType = includeTypes[0];
+            var sourceTableName = Resolvers.Table(sourceType);
             for (var i = 1; i < includeTypes.Length; i++)
             {
-                // Determine the table to join with.
-                var sourceType = includeTypes[i - 1];
-                var sourceTableName = Resolvers.Table(sourceType);
-
                 // Determine the table name of the joined table.
                 var includeType = includeTypes[i];
                 var foreignKeyTableName = Resolvers.Table(includeType);
