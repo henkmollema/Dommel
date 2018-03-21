@@ -545,7 +545,7 @@ namespace Dommel
             return MultiMapAsync<T1, T2, T3, T4, T5, T6, T7, TReturn>(connection, map, buffered: buffered);
         }
 
-        private static IEnumerable<TReturn> MultiMap<T1, T2, T3, T4, T5, T6, T7, TReturn>(IDbConnection connection, Delegate map, object id = null, bool buffered = true)
+        private static IEnumerable<TReturn> MultiMap<T1, T2, T3, T4, T5, T6, T7, TReturn>(IDbConnection connection, Delegate map, object id = null, IDbTransaction transaction = null, bool buffered = true)
         {
             var resultType = typeof(TReturn);
             var includeTypes = new[]
@@ -567,23 +567,23 @@ namespace Dommel
             switch (includeTypes.Length)
             {
                 case 2:
-                    return connection.Query(sql, (Func<T1, T2, TReturn>)map, parameters, buffered: buffered);
+                    return connection.Query(sql, (Func<T1, T2, TReturn>)map, parameters, transaction, buffered);
                 case 3:
-                    return connection.Query(sql, (Func<T1, T2, T3, TReturn>)map, parameters, buffered: buffered);
+                    return connection.Query(sql, (Func<T1, T2, T3, TReturn>)map, parameters, transaction, buffered);
                 case 4:
-                    return connection.Query(sql, (Func<T1, T2, T3, T4, TReturn>)map, parameters, buffered: buffered);
+                    return connection.Query(sql, (Func<T1, T2, T3, T4, TReturn>)map, parameters, transaction, buffered);
                 case 5:
-                    return connection.Query(sql, (Func<T1, T2, T3, T4, T5, TReturn>)map, parameters, buffered: buffered);
+                    return connection.Query(sql, (Func<T1, T2, T3, T4, T5, TReturn>)map, parameters, transaction, buffered);
                 case 6:
-                    return connection.Query(sql, (Func<T1, T2, T3, T4, T5, T6, TReturn>)map, parameters, buffered: buffered);
+                    return connection.Query(sql, (Func<T1, T2, T3, T4, T5, T6, TReturn>)map, parameters, transaction, buffered);
                 case 7:
-                    return connection.Query(sql, (Func<T1, T2, T3, T4, T5, T6, T7, TReturn>)map, parameters, buffered: buffered);
+                    return connection.Query(sql, (Func<T1, T2, T3, T4, T5, T6, T7, TReturn>)map, parameters, transaction, buffered);
             }
 
             throw new InvalidOperationException($"Invalid amount of include types: {includeTypes.Length}.");
         }
 
-        private static Task<IEnumerable<TReturn>> MultiMapAsync<T1, T2, T3, T4, T5, T6, T7, TReturn>(IDbConnection connection, Delegate map, object id = null, bool buffered = true)
+        private static Task<IEnumerable<TReturn>> MultiMapAsync<T1, T2, T3, T4, T5, T6, T7, TReturn>(IDbConnection connection, Delegate map, object id = null, IDbTransaction transaction = null, bool buffered = true)
         {
             var resultType = typeof(TReturn);
             var includeTypes = new[]
@@ -605,17 +605,17 @@ namespace Dommel
             switch (includeTypes.Length)
             {
                 case 2:
-                    return connection.QueryAsync(sql, (Func<T1, T2, TReturn>)map, parameters, buffered: buffered);
+                    return connection.QueryAsync(sql, (Func<T1, T2, TReturn>)map, parameters, transaction, buffered);
                 case 3:
-                    return connection.QueryAsync(sql, (Func<T1, T2, T3, TReturn>)map, parameters, buffered: buffered);
+                    return connection.QueryAsync(sql, (Func<T1, T2, T3, TReturn>)map, parameters, transaction, buffered);
                 case 4:
-                    return connection.QueryAsync(sql, (Func<T1, T2, T3, T4, TReturn>)map, parameters, buffered: buffered);
+                    return connection.QueryAsync(sql, (Func<T1, T2, T3, T4, TReturn>)map, parameters, transaction, buffered);
                 case 5:
-                    return connection.QueryAsync(sql, (Func<T1, T2, T3, T4, T5, TReturn>)map, parameters, buffered: buffered);
+                    return connection.QueryAsync(sql, (Func<T1, T2, T3, T4, T5, TReturn>)map, parameters, transaction, buffered);
                 case 6:
-                    return connection.QueryAsync(sql, (Func<T1, T2, T3, T4, T5, T6, TReturn>)map, parameters, buffered: buffered);
+                    return connection.QueryAsync(sql, (Func<T1, T2, T3, T4, T5, T6, TReturn>)map, parameters, transaction, buffered);
                 case 7:
-                    return connection.QueryAsync(sql, (Func<T1, T2, T3, T4, T5, T6, T7, TReturn>)map, parameters, buffered: buffered);
+                    return connection.QueryAsync(sql, (Func<T1, T2, T3, T4, T5, T6, T7, TReturn>)map, parameters, transaction, buffered);
             }
 
             throw new InvalidOperationException($"Invalid amount of include types: {includeTypes.Length}.");
