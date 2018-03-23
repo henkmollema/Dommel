@@ -4,8 +4,12 @@ namespace Dommel
 {
     public static partial class DommelMapper
     {
-        private sealed class MySqlSqlBuilder : ISqlBuilder
+        /// <summary>
+        /// <see cref="ISqlBuilder"/> implementation for MySQL.
+        /// </summary>
+        public sealed class MySqlSqlBuilder : ISqlBuilder
         {
+            /// <inheritdoc/>
             public string BuildInsert(string tableName, string[] columnNames, string[] paramNames, PropertyInfo keyProperty)
             {
                 if (EscapeCharacterStart == char.MinValue && EscapeCharacterEnd == char.MinValue)
