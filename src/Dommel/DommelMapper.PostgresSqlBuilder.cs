@@ -5,8 +5,12 @@ namespace Dommel
 {
     public static partial class DommelMapper
     {
-        private sealed class PostgresSqlBuilder : ISqlBuilder
+        /// <summary>
+        /// <see cref="ISqlBuilder"/> implementation for Postgres.
+        /// </summary>
+        public sealed class PostgresSqlBuilder : ISqlBuilder
         {
+            /// <inheritdoc/>
             public string BuildInsert(string tableName, string[] columnNames, string[] paramNames, PropertyInfo keyProperty)
             {
                 var sql = $"insert into {tableName} ({string.Join(", ", columnNames)}) values ({string.Join(", ", paramNames)})";
