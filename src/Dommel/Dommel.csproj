@@ -7,6 +7,7 @@
     <Authors>Henk Mollema</Authors>
     <TargetFrameworks>net451;netstandard1.3;netstandard2.0</TargetFrameworks>
     <TargetFrameworks Condition=" '$(OS)' != 'Windows_NT' ">netstandard1.3;netstandard2.0</TargetFrameworks>
+    <LangVersion>latest</LangVersion>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <PackageTags>dommel;crud;dapper;database;orm</PackageTags>
     <PackageProjectUrl>https://github.com/henkmollema/Dommel</PackageProjectUrl>
