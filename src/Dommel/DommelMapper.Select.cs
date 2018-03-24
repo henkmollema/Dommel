@@ -15,6 +15,7 @@ namespace Dommel
         /// <typeparam name="TEntity">The type of the entity.</typeparam>
         /// <param name="connection">The connection to the database. This can either be open or closed.</param>
         /// <param name="predicate">A predicate to filter the results.</param>
+        /// <param name="transaction">Optional transaction for the command.</param>
         /// <param name="buffered">
         /// A value indicating whether the result of the query should be executed directly,
         /// or when the query is materialized (using <c>ToList()</c> for example).
@@ -23,11 +24,11 @@ namespace Dommel
         /// A collection of entities of type <typeparamref name="TEntity"/> matching the specified
         /// <paramref name="predicate"/>.
         /// </returns>
-        public static IEnumerable<TEntity> Select<TEntity>(this IDbConnection connection, Expression<Func<TEntity, bool>> predicate, bool buffered = true)
+        public static IEnumerable<TEntity> Select<TEntity>(this IDbConnection connection, Expression<Func<TEntity, bool>> predicate, IDbTransaction transaction = null, bool buffered = true)
         {
             var sql = BuildSelectSql(predicate, out var parameters);
             LogQuery<TEntity>(sql);
-            return connection.Query<TEntity>(sql, parameters, buffered: buffered);
+            return connection.Query<TEntity>(sql, parameters, transaction, buffered);
         }
 
         /// <summary>
@@ -36,15 +37,52 @@ namespace Dommel
         /// <typeparam name="TEntity">The type of the entity.</typeparam>
         /// <param name="connection">The connection to the database. This can either be open or closed.</param>
         /// <param name="predicate">A predicate to filter the results.</param>
+        /// <param name="transaction">Optional transaction for the command.</param>
         /// <returns>
         /// A collection of entities of type <typeparamref name="TEntity"/> matching the specified
         /// <paramref name="predicate"/>.
         /// </returns>
-        public static Task<IEnumerable<TEntity>> SelectAsync<TEntity>(this IDbConnection connection, Expression<Func<TEntity, bool>> predicate)
+        public static Task<IEnumerable<TEntity>> SelectAsync<TEntity>(this IDbConnection connection, Expression<Func<TEntity, bool>> predicate, IDbTransaction transaction = null)
         {
             var sql = BuildSelectSql(predicate, out var parameters);
             LogQuery<TEntity>(sql);
-            return connection.QueryAsync<TEntity>(sql, parameters);
+            return connection.QueryAsync<TEntity>(sql, parameters, transaction);
+        }
+
+        /// <summary>
+        /// Selects the first entity matching the specified predicate, or a default value if no entity matched.
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the entity.</typeparam>
+        /// <param name="connection">The connection to the database. This can either be open or closed.</param>
+        /// <param name="predicate">A predicate to filter the results.</param>
+        /// <param name="transaction">Optional transaction for the command.</param>
+        /// <returns>
+        /// A instance of type <typeparamref name="TEntity"/> matching the specified
+        /// <paramref name="predicate"/>.
+        /// </returns>
+        public static TEntity FirstOrDefault<TEntity>(this IDbConnection connection, Expression<Func<TEntity, bool>> predicate, IDbTransaction transaction = null)
+        {
+            var sql = BuildSelectSql(predicate, out var parameters);
+            LogQuery<TEntity>(sql);
+            return connection.QueryFirstOrDefault<TEntity>(sql, parameters, transaction);
+        }
+
+        /// <summary>
+        /// Selects the first entity matching the specified predicate, or a default value if no entity matched.
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the entity.</typeparam>
+        /// <param name="connection">The connection to the database. This can either be open or closed.</param>
+        /// <param name="predicate">A predicate to filter the results.</param>
+        /// <param name="transaction">Optional transaction for the command.</param>
+        /// <returns>
+        /// A instance of type <typeparamref name="TEntity"/> matching the specified
+        /// <paramref name="predicate"/>.
+        /// </returns>
+        public static Task<TEntity> FirstOrDefaultAsync<TEntity>(this IDbConnection connection, Expression<Func<TEntity, bool>> predicate, IDbTransaction transaction = null)
+        {
+            var sql = BuildSelectSql(predicate, out var parameters);
+            LogQuery<TEntity>(sql);
+            return connection.QueryFirstOrDefaultAsync<TEntity>(sql, parameters, transaction);
         }
 
         private static string BuildSelectSql<TEntity>(Expression<Func<TEntity, bool>> predicate, out DynamicParameters parameters)
@@ -61,40 +99,6 @@ namespace Dommel
                 .Where(predicate)
                 .ToSql(out parameters);
             return sql;
-        }
-
-        /// <summary>
-        /// Selects the first entity matching the specified predicate, or a default value if no entity matched.
-        /// </summary>
-        /// <typeparam name="TEntity">The type of the entity.</typeparam>
-        /// <param name="connection">The connection to the database. This can either be open or closed.</param>
-        /// <param name="predicate">A predicate to filter the results.</param>
-        /// <returns>
-        /// A instance of type <typeparamref name="TEntity"/> matching the specified
-        /// <paramref name="predicate"/>.
-        /// </returns>
-        public static TEntity FirstOrDefault<TEntity>(this IDbConnection connection, Expression<Func<TEntity, bool>> predicate)
-        {
-            var sql = BuildSelectSql(predicate, out var parameters);
-            LogQuery<TEntity>(sql);
-            return connection.QueryFirstOrDefault<TEntity>(sql, parameters);
-        }
-
-        /// <summary>
-        /// Selects the first entity matching the specified predicate, or a default value if no entity matched.
-        /// </summary>
-        /// <typeparam name="TEntity">The type of the entity.</typeparam>
-        /// <param name="connection">The connection to the database. This can either be open or closed.</param>
-        /// <param name="predicate">A predicate to filter the results.</param>
-        /// <returns>
-        /// A instance of type <typeparamref name="TEntity"/> matching the specified
-        /// <paramref name="predicate"/>.
-        /// </returns>
-        public static Task<TEntity> FirstOrDefaultAsync<TEntity>(this IDbConnection connection, Expression<Func<TEntity, bool>> predicate)
-        {
-            var sql = BuildSelectSql(predicate, out var parameters);
-            LogQuery<TEntity>(sql);
-            return connection.QueryFirstOrDefaultAsync<TEntity>(sql, parameters);
         }
     }
 }
