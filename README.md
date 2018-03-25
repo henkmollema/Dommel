@@ -3,7 +3,7 @@ Simple CRUD operations for Dapper.
 
 | Windows | Linux | NuGet | MyGet |
 | ------- | ----- | ----- | ----- |
-| ![AppVeyor](https://img.shields.io/appveyor/ci/henkmollema/dommel.svg?style=flat-square) | ![Travis](https://img.shields.io/travis/henkmollema/Dommel.svg?style=flat-square) | ![NuGet](https://img.shields.io/nuget/vpre/Dommel.svg?style=flat-square) | ![MyGet Pre Release](https://img.shields.io/myget/dommel-ci/vpre/Dommel.svg?style=flat-square) |
+| [![AppVeyor](https://img.shields.io/appveyor/ci/henkmollema/dommel.svg?style=flat-square)](https://ci.appveyor.com/project/henkmollema/dommel) | [![Travis](https://img.shields.io/travis/henkmollema/Dommel.svg?style=flat-square)](https://travis-ci.org/henkmollema/Dommel) | [![NuGet](https://img.shields.io/nuget/vpre/Dommel.svg?style=flat-square)](https://www.nuget.org/packages/Dommel) | [![MyGet Pre Release](https://img.shields.io/myget/dommel-ci/vpre/Dommel.svg?style=flat-square)](https://www.myget.org/feed/dommel-ci/package/nuget/Dommel) |
 
 <hr>
 
