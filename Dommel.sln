@@ -8,7 +8,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dommel", "src\Dommel\Dommel
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{2AA4F2B7-9A15-4246-B7B8-084F75FAF208}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dommel.Tests", "test\Dommel.Tests\Dommel.Tests.csproj", "{DCB22D61-25D3-4C39-BB4C-D29E8EFFB88A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dommel.Tests", "test\Dommel.Tests\Dommel.Tests.csproj", "{DCB22D61-25D3-4C39-BB4C-D29E8EFFB88A}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dommel.IntegrationTests", "test\Dommel.IntegrationTests\Dommel.IntegrationTests.csproj", "{305C1E12-1F6D-4510-BD42-0C3F1BD838A1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -24,6 +26,10 @@ Global
 		{DCB22D61-25D3-4C39-BB4C-D29E8EFFB88A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DCB22D61-25D3-4C39-BB4C-D29E8EFFB88A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DCB22D61-25D3-4C39-BB4C-D29E8EFFB88A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{305C1E12-1F6D-4510-BD42-0C3F1BD838A1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{305C1E12-1F6D-4510-BD42-0C3F1BD838A1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{305C1E12-1F6D-4510-BD42-0C3F1BD838A1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{305C1E12-1F6D-4510-BD42-0C3F1BD838A1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -31,6 +37,7 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{9D3463BE-F1A3-4B31-A63F-6A84F36E3108} = {52003D59-962F-488A-A712-85CB866D6ADF}
 		{DCB22D61-25D3-4C39-BB4C-D29E8EFFB88A} = {2AA4F2B7-9A15-4246-B7B8-084F75FAF208}
+		{305C1E12-1F6D-4510-BD42-0C3F1BD838A1} = {2AA4F2B7-9A15-4246-B7B8-084F75FAF208}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {E763489D-74B8-4006-91E1-47F75B5D5E80}
