@@ -21,6 +21,13 @@ namespace Dommel
                 // Table and column names are already escaped.
                 return $"insert into {tableName} ({string.Join(", ", columnNames)}) values ({string.Join(", ", paramNames)}); select LAST_INSERT_ID() id";
             }
+
+            /// <inheritdoc/>
+            public string BuildPaging(string orderBy, int pageNumber, int pageSize)
+            {
+                var start = pageNumber >= 1 ? (pageNumber - 1) * pageSize : 0;
+                return $" {orderBy} LIMIT {start}, {pageSize}";
+            }
         }
     }
 }

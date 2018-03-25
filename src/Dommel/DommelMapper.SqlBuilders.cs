@@ -61,6 +61,15 @@ namespace Dommel
             /// </param>
             /// <returns>An insert query including a query to fetch the new id.</returns>
             string BuildInsert(string tableName, string[] columnNames, string[] paramNames, PropertyInfo keyProperty);
+
+            /// <summary>
+            /// Builds the paging part to be appended to an existing select query.
+            /// </summary>
+            /// <param name="orderBy">The order by part of the query.</param>
+            /// <param name="pageNumber">The number of the page to fetch, starting at 1.</param>
+            /// <param name="pageSize">The page size.</param>
+            /// <returns>The paging part of a query.</returns>
+            string BuildPaging(string orderBy, int pageNumber, int pageSize);
         }
     }
 }
