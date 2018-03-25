@@ -18,3 +18,4 @@ nuget.exe
 .settings
 *.sln.ide
 .build/
+*.ldf
