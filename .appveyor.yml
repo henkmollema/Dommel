@@ -1,11 +1,23 @@
-init:
-  - git config --global core.autocrlf true
+version: '{build}'
+pull_requests:
+  do_not_increment_build_number: true
+image: Visual Studio 2017
+nuget:
+  disable_publish_on_pr: true
 build_script:
   - ps: .\build.ps1
-clone_depth: 1
 test: off
-deploy: off
 environment:
   DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
-  DOTNET_CLI_TELEMETRY_OPTOUT: 1
-os: Visual Studio 2017
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+artifacts:
+- path: .\src\Dommel\artifacts\**\*.nupkg
+  name: NuGet
+deploy:
+- provider: NuGet
+  server: https://www.myget.org/F/dommel-ci/api/v3/index.json
+  api_key:
+    secure: Ybv0BFFOnHJGoMHW85oav//wa7wExj2QRP7KV1Zegn7SMzNYPyv/DFF1IdzeonJA
+  symbol_server: https://www.myget.org/F/dommel-ci/symbols/api/v2/package
+  on:
+    branch: master
