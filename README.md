@@ -1,9 +1,9 @@
 # Dommel
 Simple CRUD operations for Dapper.
 
-| Windows | Linux |
-| --- | --- |
-| [![Build status](https://ci.appveyor.com/api/projects/status/kynsbfu97f9s5bj7?svg=true)](https://ci.appveyor.com/project/henkmollema/dommel) | [![Build Status](https://travis-ci.org/henkmollema/Dommel.svg)](https://travis-ci.org/henkmollema/Dommel)
+| Windows | Linux | NuGet | MyGet |
+| ------- | ----- | ----- | ----- |
+| ![AppVeyor](https://img.shields.io/appveyor/ci/henkmollema/dommel.svg?style=flat-square) | ![Travis](https://img.shields.io/travis/henkmollema/Dommel.svg?style=flat-square) | ![NuGet](https://img.shields.io/nuget/vpre/Dommel.svg?style=flat-square) | ![MyGet Pre Release](https://img.shields.io/myget/dommel-ci/vpre/Dommel.svg?style=flat-square) |
 
 <hr>
 
