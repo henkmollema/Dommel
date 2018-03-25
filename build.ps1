@@ -16,6 +16,10 @@ if(Test-Path .\src\Dommel\artifacts) { Remove-Item .\src\Dommel\artifacts -Force
 exec { & dotnet restore }
 
 $versionSuffix = $(git rev-parse --short HEAD)
+if ($env:APPVEYOR_BUILD_NUMBER) {
+    $versionSuffix = $env:APPVEYOR_BUILD_NUMBER
+}
+
 echo "build: Package version suffix is $versionSuffix"
 
 exec { & dotnet build Dommel.sln -c Release --version-suffix=$versionSuffix }
