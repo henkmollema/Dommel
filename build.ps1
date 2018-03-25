@@ -30,4 +30,4 @@ exec { & dotnet test -c Release --no-build }
 Pop-Location
 
 echo "Creating NuGet package"
-exec { & dotnet pack .\src\Dommel\Dommel.csproj -c Release -o .\artifacts --include-symbols --no-build --version-suffix=$versionSuffix }
+exec { & dotnet pack .\src\Dommel\Dommel.csproj -c Release -o .\artifacts --no-build --version-suffix=$versionSuffix }

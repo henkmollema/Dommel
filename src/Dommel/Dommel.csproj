@@ -19,4 +19,8 @@
     <PackageReference Include="Dapper" Version="1.50.4" />
     <PackageReference Include="System.ComponentModel.Annotations" Version="4.4.0" />
   </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="SourceLink.Create.CommandLine" Version="2.8.0" PrivateAssets="All" /> 
+    <DotNetCliToolReference Include="dotnet-sourcelink" Version="2.8.0" />
+  </ItemGroup>
 </Project>
