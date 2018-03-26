@@ -51,6 +51,16 @@ namespace Dommel.IntegrationTests
                 Assert.Equal(3, paged.Length);
             }
         }
+
+        [Fact]
+        public async Task SelectPaged_FetchesFirstPage()
+        {
+            using (var con = new SqlConnection(GetConnectionString()))
+            {
+                var paged = (await con.SelectPagedAsync<Product>(p => p.Name == "Chai", 1, 5)).ToArray();
+                Assert.Single(paged);
+            }
+        }
     }
 
     public class Product
