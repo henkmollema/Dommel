@@ -15,19 +15,26 @@ if(Test-Path .\src\Dommel\artifacts) { Remove-Item .\src\Dommel\artifacts -Force
 
 exec { & dotnet restore }
 
-$versionSuffix = $(git rev-parse --short HEAD)
-if ($env:APPVEYOR_BUILD_NUMBER) {
-    $versionSuffix = $env:APPVEYOR_BUILD_NUMBER
-}
+$branch = @{ $true = $env:APPVEYOR_REPO_BRANCH; $false = $(git symbolic-ref --short -q HEAD) }[$env:APPVEYOR_REPO_BRANCH -ne $NULL];
+$revision = @{ $true = "{0:00000}" -f [convert]::ToInt32("0" + $env:APPVEYOR_BUILD_NUMBER, 10); $false = "local" }[$env:APPVEYOR_BUILD_NUMBER -ne $NULL];
+$suffix = @{ $true = ""; $false = "$($branch.Substring(0, [math]::Min(10,$branch.Length)))-$revision"}[$branch -eq "master" -and $revision -ne "local"]
+$commitHash = $(git rev-parse --short HEAD)
+$buildSuffix = @{ $true = "$($suffix)-$($commitHash)"; $false = "$($branch)-$($commitHash)" }[$suffix -ne ""]
+echo "build: Build version suffix is $buildSuffix"
 
-echo "build: Package version suffix is $versionSuffix"
+exec { & dotnet build Dommel.sln -c Release --version-suffix=$buildSuffix }
 
-exec { & dotnet build Dommel.sln -c Release --version-suffix=$versionSuffix }
-
-echo "Executing tests"
+echo "build: Executing tests"
 Push-Location -Path .\test\Dommel.Tests
 exec { & dotnet test -c Release --no-build }
 Pop-Location
 
-echo "Creating NuGet package"
+if ($env:APPVEYOR_BUILD_NUMBER) {
+    $versionSuffix = "{0:00000}" -f [convert]::ToInt32("0" + $env:APPVEYOR_BUILD_NUMBER, 10)
+}
+else {
+    $versionSuffix = $suffix
+}
+
+echo "build: Creating NuGet package with suffix $versionSuffix"
 exec { & dotnet pack .\src\Dommel\Dommel.csproj -c Release -o .\artifacts --no-build --version-suffix=$versionSuffix }
