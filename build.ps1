@@ -22,7 +22,7 @@ $commitHash = $(git rev-parse --short HEAD)
 $buildSuffix = @{ $true = "$($suffix)-$($commitHash)"; $false = "$($branch)-$($commitHash)" }[$suffix -ne ""]
 echo "build: Build version suffix is $buildSuffix"
 
-exec { & dotnet build Dommel.sln -c Release --version-suffix=$buildSuffix }
+exec { & dotnet build Dommel.sln -c Release --version-suffix=$buildSuffix /p:CI=true }
 
 echo "build: Executing tests"
 Push-Location -Path .\test\Dommel.Tests
