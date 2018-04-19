@@ -3,6 +3,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
@@ -1450,14 +1451,15 @@ namespace Dommel
                 var tableName = Resolvers.Table(type);
 
                 bool isIdentity;
-                var keyProperty = Resolvers.KeyProperty(type, out isIdentity);
+                DatabaseGeneratedOption databaseGenerated;
+                var keyProperty = Resolvers.KeyProperty(type, out isIdentity, out databaseGenerated);
 
                 var typeProperties = new List<PropertyInfo>();
                 foreach (var typeProperty in Resolvers.Properties(type))
                 {
                     if (typeProperty == keyProperty)
                     {
-                        if (isIdentity)
+                        if (isIdentity && databaseGenerated == DatabaseGeneratedOption.Identity)
                         {
                             // Skip key properties marked as an identity column.
                             continue;
@@ -1680,15 +1682,18 @@ namespace Dommel
         {
             private class KeyPropertyInfo
             {
-                public KeyPropertyInfo(PropertyInfo propertyInfo, bool isIdentity)
+                public KeyPropertyInfo(PropertyInfo propertyInfo, bool isIdentity, DatabaseGeneratedOption databaseGenerated)
                 {
                     PropertyInfo = propertyInfo;
                     IsIdentity = isIdentity;
+                    DatabaseGenerated = databaseGenerated;
                 }
 
                 public PropertyInfo PropertyInfo { get; }
 
                 public bool IsIdentity { get; }
+
+                public DatabaseGeneratedOption DatabaseGenerated { get; }
             }
 
             private static readonly ConcurrentDictionary<Type, string> _typeTableNameCache = new ConcurrentDictionary<Type, string>();
@@ -1705,7 +1710,8 @@ namespace Dommel
             public static PropertyInfo KeyProperty(Type type)
             {
                 bool isIdentity;
-                return KeyProperty(type, out isIdentity);
+                DatabaseGeneratedOption databaseGenerated;
+                return KeyProperty(type, out isIdentity, out databaseGenerated);
             }
 
             /// <summary>
@@ -1713,18 +1719,20 @@ namespace Dommel
             /// </summary>
             /// <param name="type">The <see cref="Type"/> to get the key property for.</param>
             /// <param name="isIdentity">A value indicating whether the key is an identity.</param>
+            /// <param name="databaseGenerated">Key properties DatabaseGenerationOption configuration or Default value.</param>
             /// <returns>The key property for <paramref name="type"/>.</returns>
-            public static PropertyInfo KeyProperty(Type type, out bool isIdentity)
+            public static PropertyInfo KeyProperty(Type type, out bool isIdentity, out DatabaseGeneratedOption databaseGenerated)
             {
                 KeyPropertyInfo keyProperty;
                 if (!_typeKeyPropertyCache.TryGetValue(type, out keyProperty))
                 {
-                    var propertyInfo = _keyPropertyResolver.ResolveKeyProperty(type, out isIdentity);
-                    keyProperty = new KeyPropertyInfo(propertyInfo, isIdentity);
+                    var propertyInfo = _keyPropertyResolver.ResolveKeyProperty(type, out isIdentity, out databaseGenerated);
+                    keyProperty = new KeyPropertyInfo(propertyInfo, isIdentity, databaseGenerated);
                     _typeKeyPropertyCache.TryAdd(type, keyProperty);
                 }
 
                 isIdentity = keyProperty.IsIdentity;
+                databaseGenerated = keyProperty.DatabaseGenerated;
                 return keyProperty.PropertyInfo;
             }
 
@@ -1979,8 +1987,9 @@ namespace Dommel
             /// </summary>
             /// <param name="type">The type to resolve the key property for.</param>
             /// <param name="isIdentity">Indicates whether the key property is an identity property.</param>
+            /// <param name="databaseGenerated">Key properties DatabaseGenerationOption configuration or Default value.</param>
             /// <returns>A <see cref="PropertyInfo"/> instance of the key property of <paramref name="type"/>.</returns>
-            PropertyInfo ResolveKeyProperty(Type type, out bool isIdentity);
+            PropertyInfo ResolveKeyProperty(Type type, out bool isIdentity, out DatabaseGeneratedOption databaseGenerated);
         }
 
         /// <summary>
@@ -1995,13 +2004,14 @@ namespace Dommel
             public virtual PropertyInfo ResolveKeyProperty(Type type)
             {
                 bool isIdentity;
-                return ResolveKeyProperty(type, out isIdentity);
+                DatabaseGeneratedOption databaseGenerated;
+                return ResolveKeyProperty(type, out isIdentity, out databaseGenerated);
             }
 
             /// <summary>
             /// Finds the key property by looking for a property with the [Key] attribute or with the name 'Id'.
             /// </summary>
-            public PropertyInfo ResolveKeyProperty(Type type, out bool isIdentity)
+            public PropertyInfo ResolveKeyProperty(Type type, out bool isIdentity, out DatabaseGeneratedOption databaseGenerated)
             {
                 var allProps = Resolvers.Properties(type).ToList();
 
@@ -2025,7 +2035,22 @@ namespace Dommel
                 }
 
                 isIdentity = true;
-                return keyProps[0];
+
+                var keyProp = keyProps[0];
+
+                var dbGeneratedAttribute = keyProp.GetCustomAttributes().Where(x => x is DatabaseGeneratedAttribute).FirstOrDefault();
+
+                if (dbGeneratedAttribute != null)
+                {
+                    var converted = (DatabaseGeneratedAttribute)dbGeneratedAttribute;
+                    databaseGenerated = converted.DatabaseGeneratedOption;
+                }
+                else
+                {
+                    databaseGenerated = DatabaseGeneratedOption.Identity;
+                }
+
+                return keyProp;
             }
         }
         #endregion

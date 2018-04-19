@@ -1,5 +1,8 @@
 # Fork
 Added paging support for Select/SelectAsync and Count/CountAsync and NO SYNC
+
+Added support to provide the Primary Key value on Create with DatabaseGeneratedAttribute (DatabaseGeneratedOption.None) on Key mapping for Entities.
+
 # Dommel
 Simple CRUD operations for Dapper.
 
