@@ -52,11 +52,32 @@ namespace Dommel
         /// <param name="connection">The connection to the database. This can either be open or closed.</param>
         /// <param name="id">The id of the entity in the database.</param>
         /// <param name="nolock">If should add with no lock on query string.</param>
-        /// <returns>The entity with the corresponding id.</returns>
+        /// <returns>The entity with the corresponding id.</returns> 
         public static TEntity Get<TEntity>(this IDbConnection connection, object id, bool nolock = false) where TEntity : class
         {
-            DynamicParameters parameters;
-            var sql = BuildGetById(typeof(TEntity), id, nolock, out parameters);
+            var query = BuildGetById(typeof(TEntity), id, nolock, out DynamicParameters parameters);
+            return connection.QueryFirstOrDefault<TEntity>(query, parameters);
+        }
+
+        /// <summary>
+        /// Retrieves the entity of type <typeparamref name="TEntity"/> with the specified id.
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the entity.</typeparam>
+        /// <param name="connection">The connection to the database. This can either be open or closed.</param>
+        /// <param name="id">The id of the entity in the database.</param>
+        /// <param name="queryLog">Returns query string/params for logs/audit.</param>
+        /// <param name="nolock">If should add with no lock on query string.</param>
+        /// <returns>The entity with the corresponding id.</returns>
+        public static TEntity Get<TEntity>(this IDbConnection connection, object id, out QueryLog queryLog, bool nolock = false) where TEntity : class
+        {
+            var sql = BuildGetById(typeof(TEntity), id, nolock, out DynamicParameters parameters);
+
+            queryLog = new QueryLog()
+            {
+                Query = sql,
+                Parameters = parameters
+            };
+
             return connection.QueryFirstOrDefault<TEntity>(sql, parameters);
         }
 
@@ -70,15 +91,35 @@ namespace Dommel
         /// <returns>The entity with the corresponding id.</returns>
         public static Task<TEntity> GetAsync<TEntity>(this IDbConnection connection, object id, bool nolock = false) where TEntity : class
         {
-            DynamicParameters parameters;
-            var sql = BuildGetById(typeof(TEntity), id, nolock, out parameters);
+            var query = BuildGetById(typeof(TEntity), id, nolock, out DynamicParameters parameters);
+            return connection.QueryFirstOrDefaultAsync<TEntity>(query, parameters);
+        }
+
+        /// <summary>
+        /// Retrieves the entity of type <typeparamref name="TEntity"/> with the specified id.
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the entity.</typeparam>
+        /// <param name="connection">The connection to the database. This can either be open or closed.</param>
+        /// <param name="id">The id of the entity in the database.</param>
+        /// <param name="queryLog">Returns query string/params for logs/audit.</param>
+        /// <param name="nolock">If should add with no lock on query string.</param>
+        /// <returns>The entity with the corresponding id.</returns>
+        public static Task<TEntity> GetAsync<TEntity>(this IDbConnection connection, object id, out QueryLog queryLog, bool nolock = false) where TEntity : class
+        {
+            var sql = BuildGetById(typeof(TEntity), id, nolock, out DynamicParameters parameters);
+
+            queryLog = new QueryLog()
+            {
+                Query = sql,
+                Parameters = parameters
+            };
+
             return connection.QueryFirstOrDefaultAsync<TEntity>(sql, parameters);
         }
 
         private static string BuildGetById(Type type, object id, bool nolock, out DynamicParameters parameters)
         {
-            string sql;
-            if (!_getQueryCache.TryGetValue(type, out sql))
+            if (!_getQueryCache.TryGetValue(type, out string sql))
             {
                 var tableName = Resolvers.Table(type);
                 var keyProperty = Resolvers.KeyProperty(type);
@@ -843,10 +884,40 @@ namespace Dommel
         /// A collection of entities of type <typeparamref name="TEntity"/> matching the specified
         /// <paramref name="predicate"/>.
         /// </returns>
-        public static IEnumerable<TEntity> Select<TEntity>(this IDbConnection connection, Expression<Func<TEntity, bool>> predicate, bool nolock = false, bool buffered = true)
+        public static IEnumerable<TEntity> Select<TEntity>(this IDbConnection connection, Expression<Func<TEntity, bool>> predicate,
+            bool nolock = false, bool buffered = true)
         {
-            DynamicParameters parameters;
-            var sql = BuildSelectSql(predicate, out parameters, nolock);
+            var sql = BuildSelectSql(predicate, out DynamicParameters parameters, nolock);
+            return connection.Query<TEntity>(sql, parameters, buffered: buffered);
+        }
+
+        /// <summary>
+        /// Selects all the entities matching the specified predicate.
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the entity.</typeparam>
+        /// <param name="connection">The connection to the database. This can either be open or closed.</param>
+        /// <param name="predicate">A predicate to filter the results.</param>
+        /// <param name="queryLog">Returns query string/params for logs/audit.</param>
+        /// <param name="nolock">If should add with no lock on query string.</param>
+        /// <param name="buffered">
+        /// A value indicating whether the result of the query should be executed directly,
+        /// or when the query is materialized (using <c>ToList()</c> for example).
+        /// </param>
+        /// <returns>
+        /// A collection of entities of type <typeparamref name="TEntity"/> matching the specified
+        /// <paramref name="predicate"/>.
+        /// </returns>
+        public static IEnumerable<TEntity> Select<TEntity>(this IDbConnection connection, Expression<Func<TEntity, bool>> predicate,
+            out QueryLog queryLog, bool nolock = false, bool buffered = true)
+        {
+            var sql = BuildSelectSql(predicate, out DynamicParameters parameters, nolock);
+
+            queryLog = new QueryLog()
+            {
+                Query = sql,
+                Parameters = parameters
+            };
+
             return connection.Query<TEntity>(sql, parameters, buffered: buffered);
         }
 
@@ -867,10 +938,42 @@ namespace Dommel
         /// A collection of entities of type <typeparamref name="TEntity"/> matching the specified
         /// <paramref name="predicate"/>.
         /// </returns>
-        public static IEnumerable<TEntity> Select<TEntity>(this IDbConnection connection, Expression<Func<TEntity, bool>> predicate, int page, int pagesize, bool nolock = false, bool buffered = true)
+        public static IEnumerable<TEntity> Select<TEntity>(this IDbConnection connection, Expression<Func<TEntity, bool>> predicate,
+            int page, int pagesize, bool nolock = false, bool buffered = true)
         {
-            DynamicParameters parameters;
-            var sql = BuildSelectSql(predicate, page, pagesize, out parameters, nolock);
+            var sql = BuildSelectSql(predicate, page, pagesize, out DynamicParameters parameters, nolock);
+            return connection.Query<TEntity>(sql, parameters, buffered: buffered);
+        }
+
+        /// <summary>
+        /// Selects all the entities matching the specified predicate.
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the entity.</typeparam>
+        /// <param name="connection">The connection to the database. This can either be open or closed.</param>
+        /// <param name="predicate">A predicate to filter the results.</param>
+        /// <param name="page">Page number paramter.</param>
+        /// <param name="pagesize">Page size parameter.</param>
+        /// <param name="queryLog">Returns query string/params for logs/audit.</param>
+        /// <param name="nolock">If should add with no lock on query string.</param>
+        /// <param name="buffered">
+        /// A value indicating whether the result of the query should be executed directly,
+        /// or when the query is materialized (using <c>ToList()</c> for example).
+        /// </param>
+        /// <returns>
+        /// A collection of entities of type <typeparamref name="TEntity"/> matching the specified
+        /// <paramref name="predicate"/>.
+        /// </returns>
+        public static IEnumerable<TEntity> Select<TEntity>(this IDbConnection connection, Expression<Func<TEntity, bool>> predicate,
+            int page, int pagesize, out QueryLog queryLog, bool nolock = false, bool buffered = true)
+        {
+            var sql = BuildSelectSql(predicate, page, pagesize, out DynamicParameters parameters, nolock);
+
+            queryLog = new QueryLog()
+            {
+                Query = sql,
+                Parameters = parameters
+            };
+
             return connection.Query<TEntity>(sql, parameters, buffered: buffered);
         }
 
@@ -885,10 +988,36 @@ namespace Dommel
         /// A collection of entities of type <typeparamref name="TEntity"/> matching the specified
         /// <paramref name="predicate"/>.
         /// </returns>
-        public static Task<IEnumerable<TEntity>> SelectAsync<TEntity>(this IDbConnection connection, Expression<Func<TEntity, bool>> predicate, bool nolock = false)
+        public static Task<IEnumerable<TEntity>> SelectAsync<TEntity>(this IDbConnection connection, Expression<Func<TEntity, bool>> predicate,
+            bool nolock = false)
         {
-            DynamicParameters parameters;
-            var sql = BuildSelectSql(predicate, out parameters, nolock);
+            var sql = BuildSelectSql(predicate, out DynamicParameters parameters, nolock);
+            return connection.QueryAsync<TEntity>(sql, parameters);
+        }
+
+        /// <summary>
+        /// Selects all the entities matching the specified predicate.
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the entity.</typeparam>
+        /// <param name="connection">The connection to the database. This can either be open or closed.</param>
+        /// <param name="predicate">A predicate to filter the results.</param>
+        /// <param name="queryLog">Returns query string/params for logs/audit.</param>
+        /// <param name="nolock">If should add with no lock on query string.</param>
+        /// <returns>
+        /// A collection of entities of type <typeparamref name="TEntity"/> matching the specified
+        /// <paramref name="predicate"/>.
+        /// </returns>
+        public static Task<IEnumerable<TEntity>> SelectAsync<TEntity>(this IDbConnection connection, Expression<Func<TEntity, bool>> predicate,
+            out QueryLog queryLog, bool nolock = false)
+        {
+            var sql = BuildSelectSql(predicate, out DynamicParameters parameters, nolock);
+
+            queryLog = new QueryLog()
+            {
+                Query = sql,
+                Parameters = parameters
+            };
+
             return connection.QueryAsync<TEntity>(sql, parameters);
         }
 
@@ -905,18 +1034,45 @@ namespace Dommel
         /// A collection of entities of type <typeparamref name="TEntity"/> matching the specified
         /// <paramref name="predicate"/>.
         /// </returns>
-        public static Task<IEnumerable<TEntity>> SelectAsync<TEntity>(this IDbConnection connection, Expression<Func<TEntity, bool>> predicate, int page, int pagesize, bool nolock = false)
+        public static Task<IEnumerable<TEntity>> SelectAsync<TEntity>(this IDbConnection connection, Expression<Func<TEntity, bool>> predicate,
+            int page, int pagesize, bool nolock = false)
         {
-            DynamicParameters parameters;
-            var sql = BuildSelectSql(predicate, page, pagesize, out parameters, nolock);
+            var sql = BuildSelectSql(predicate, page, pagesize, out DynamicParameters parameters, nolock);
+            return connection.QueryAsync<TEntity>(sql, parameters);
+        }
+
+        /// <summary>
+        /// Selects all the entities matching the specified predicate.
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the entity.</typeparam>
+        /// <param name="connection">The connection to the database. This can either be open or closed.</param>
+        /// <param name="predicate">A predicate to filter the results.</param>
+        /// <param name="page">Page number paramter.</param>
+        /// <param name="pagesize">Page size parameter.</param>
+        /// <param name="queryLog">Returns query string/params for logs/audit.</param>
+        /// <param name="nolock">If should add with no lock on query string.</param>
+        /// <returns>
+        /// A collection of entities of type <typeparamref name="TEntity"/> matching the specified
+        /// <paramref name="predicate"/>.
+        /// </returns>
+        public static Task<IEnumerable<TEntity>> SelectAsync<TEntity>(this IDbConnection connection, Expression<Func<TEntity, bool>> predicate,
+            int page, int pagesize, out QueryLog queryLog, bool nolock = false)
+        {
+            var sql = BuildSelectSql(predicate, page, pagesize, out DynamicParameters parameters, nolock);
+
+            queryLog = new QueryLog()
+            {
+                Query = sql,
+                Parameters = parameters
+            };
+
             return connection.QueryAsync<TEntity>(sql, parameters);
         }
 
         private static string BuildSelectSql<TEntity>(Expression<Func<TEntity, bool>> predicate, int page, int pagesize, out DynamicParameters parameters, bool nolock = false)
         {
             var type = typeof(TEntity);
-            string sql;
-            if (!_getAllQueryCache.TryGetValue(type, out sql))
+            if (!_getAllQueryCache.TryGetValue(type, out string sql))
             {
                 var tableName = Resolvers.Table(type);
                 sql = $"select * from {tableName}" + (nolock ? " WITH (NOLOCK) " : "");
@@ -933,8 +1089,7 @@ namespace Dommel
         private static string BuildSelectSql<TEntity>(Expression<Func<TEntity, bool>> predicate, out DynamicParameters parameters, bool nolock = false)
         {
             var type = typeof(TEntity);
-            string sql;
-            if (!_getAllQueryCache.TryGetValue(type, out sql))
+            if (!_getAllQueryCache.TryGetValue(type, out string sql))
             {
                 var tableName = Resolvers.Table(type);
                 sql = $"select * from {tableName}" + (nolock ? " WITH (NOLOCK) " : "");
@@ -960,8 +1115,33 @@ namespace Dommel
         /// </returns>
         public static TEntity FirstOrDefault<TEntity>(this IDbConnection connection, Expression<Func<TEntity, bool>> predicate, bool nolock = false)
         {
-            DynamicParameters parameters;
-            var sql = BuildSelectSql(predicate, out parameters, nolock);
+            var sql = BuildSelectSql(predicate, out DynamicParameters parameters, nolock);
+            return connection.QueryFirstOrDefault<TEntity>(sql, parameters);
+        }
+
+        /// <summary>
+        /// Selects the first entity matching the specified predicate, or a default value if no entity matched.
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the entity.</typeparam>
+        /// <param name="connection">The connection to the database. This can either be open or closed.</param>
+        /// <param name="predicate">A predicate to filter the results.</param>
+        /// <param name="queryLog">Returns query string/params for logs/audit.</param>
+        /// <param name="nolock">If should add with no lock on query string.</param>
+        /// <returns>
+        /// A instance of type <typeparamref name="TEntity"/> matching the specified
+        /// <paramref name="predicate"/>.
+        /// </returns>
+        public static TEntity FirstOrDefault<TEntity>(this IDbConnection connection, Expression<Func<TEntity, bool>> predicate,
+            out QueryLog queryLog, bool nolock = false)
+        {
+            var sql = BuildSelectSql(predicate, out DynamicParameters parameters, nolock);
+
+            queryLog = new QueryLog()
+            {
+                Query = sql,
+                Parameters = parameters
+            };
+
             return connection.QueryFirstOrDefault<TEntity>(sql, parameters);
         }
 
@@ -978,8 +1158,33 @@ namespace Dommel
         /// </returns>
         public static Task<TEntity> FirstOrDefaultAsync<TEntity>(this IDbConnection connection, Expression<Func<TEntity, bool>> predicate, bool nolock = false)
         {
-            DynamicParameters parameters;
-            var sql = BuildSelectSql(predicate, out parameters, nolock);
+            var sql = BuildSelectSql(predicate, out DynamicParameters parameters, nolock);
+            return connection.QueryFirstOrDefaultAsync<TEntity>(sql, parameters);
+        }
+
+        /// <summary>
+        /// Selects the first entity matching the specified predicate, or a default value if no entity matched.
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the entity.</typeparam>
+        /// <param name="connection">The connection to the database. This can either be open or closed.</param>
+        /// <param name="predicate">A predicate to filter the results.</param>
+        /// <param name="queryLog">Returns query string/params for logs/audit.</param>
+        /// <param name="nolock">If should add with no lock on query string.</param>
+        /// <returns>
+        /// A instance of type <typeparamref name="TEntity"/> matching the specified
+        /// <paramref name="predicate"/>.
+        /// </returns>
+        public static Task<TEntity> FirstOrDefaultAsync<TEntity>(this IDbConnection connection, Expression<Func<TEntity, bool>> predicate,
+            out QueryLog queryLog, bool nolock = false)
+        {
+            var sql = BuildSelectSql(predicate, out DynamicParameters parameters, nolock);
+
+            queryLog = new QueryLog()
+            {
+                Query = sql,
+                Parameters = parameters
+            };
+
             return connection.QueryFirstOrDefaultAsync<TEntity>(sql, parameters);
         }
 
@@ -993,8 +1198,7 @@ namespace Dommel
         /// <returns>The number of entities matching the specified predicate.</returns>
         public static long Count<TEntity>(this IDbConnection connection, Expression<Func<TEntity, bool>> predicate, bool nolock = false)
         {
-            DynamicParameters parameters;
-            var sql = BuildCountSql(predicate, out parameters, nolock);
+            var sql = BuildCountSql(predicate, out DynamicParameters parameters, nolock);
             return connection.ExecuteScalar<long>(sql, parameters);
         }
 
@@ -1004,14 +1208,20 @@ namespace Dommel
         /// <typeparam name="TEntity">The type of the entity.</typeparam>
         /// <param name="connection">The connection to the database. This can either be open or closed.</param>
         /// <param name="predicate">A predicate to filter the results.</param>
-        /// <param name="page">Page number paramter.</param>
-        /// <param name="pagesize">Page size parameter.</param>
+        /// <param name="queryLog">Returns query string/params for logs/audit.</param>
         /// <param name="nolock">If should add with no lock on query string.</param>
         /// <returns>The number of entities matching the specified predicate.</returns>
-        public static long Count<TEntity>(this IDbConnection connection, Expression<Func<TEntity, bool>> predicate, int page, int pagesize, bool nolock = false)
+        public static long Count<TEntity>(this IDbConnection connection, Expression<Func<TEntity, bool>> predicate,
+            out QueryLog queryLog, bool nolock = false)
         {
-            DynamicParameters parameters;
-            var sql = BuildCountSql(predicate, page, pagesize, out parameters, nolock);
+            var sql = BuildCountSql(predicate, out DynamicParameters parameters, nolock);
+
+            queryLog = new QueryLog()
+            {
+                Query = sql,
+                Parameters = parameters
+            };
+
             return connection.ExecuteScalar<long>(sql, parameters);
         }
 
@@ -1025,8 +1235,7 @@ namespace Dommel
         /// <returns>The number of entities matching the specified predicate.</returns>
         public static Task<long> CountAsync<TEntity>(this IDbConnection connection, Expression<Func<TEntity, bool>> predicate, bool nolock = false)
         {
-            DynamicParameters parameters;
-            var sql = BuildCountSql(predicate, out parameters, nolock);
+            var sql = BuildCountSql(predicate, out DynamicParameters parameters, nolock);
             return connection.ExecuteScalarAsync<long>(sql, parameters);
         }
 
@@ -1036,22 +1245,27 @@ namespace Dommel
         /// <typeparam name="TEntity">The type of the entity.</typeparam>
         /// <param name="connection">The connection to the database. This can either be open or closed.</param>
         /// <param name="predicate">A predicate to filter the results.</param>
-        /// <param name="page">Page number paramter.</param>
-        /// <param name="pagesize">Page size parameter.</param>
+        /// <param name="queryLog">Returns query string/params for logs/audit.</param>
         /// <param name="nolock">If should add with no lock on query string.</param>
         /// <returns>The number of entities matching the specified predicate.</returns>
-        public static Task<long> CountAsync<TEntity>(this IDbConnection connection, Expression<Func<TEntity, bool>> predicate, int page, int pagesize, bool nolock = false)
+        public static Task<long> CountAsync<TEntity>(this IDbConnection connection, Expression<Func<TEntity, bool>> predicate,
+             out QueryLog queryLog, bool nolock = false)
         {
-            DynamicParameters parameters;
-            var sql = BuildCountSql(predicate, page, pagesize, out parameters, nolock);
+            var sql = BuildCountSql(predicate, out DynamicParameters parameters, nolock);
+
+            queryLog = new QueryLog()
+            {
+                Query = sql,
+                Parameters = parameters
+            };
+
             return connection.ExecuteScalarAsync<long>(sql, parameters);
         }
 
         private static string BuildCountSql<TEntity>(Expression<Func<TEntity, bool>> predicate, out DynamicParameters parameters, bool nolock = false)
         {
             var type = typeof(TEntity);
-            string sql;
-            if (!_getCountCache.TryGetValue(type, out sql))
+            if (!_getCountCache.TryGetValue(type, out string sql))
             {
                 var tableName = Resolvers.Table(type);
                 sql = $"select count(*) from {tableName}" + (nolock ? " WITH (NOLOCK) " : "");
@@ -1064,23 +1278,6 @@ namespace Dommel
             return sql;
         }
 
-        private static string BuildCountSql<TEntity>(Expression<Func<TEntity, bool>> predicate, int page, int pagesize, out DynamicParameters parameters, bool nolock = false)
-        {
-            var type = typeof(TEntity);
-            string sql;
-            if (!_getCountCache.TryGetValue(type, out sql))
-            {
-                var tableName = Resolvers.Table(type);
-                sql = $"select count(*) from {tableName}" + (nolock ? " WITH (NOLOCK) " : "");
-                _getCountCache.TryAdd(type, sql);
-            }
-
-            sql += new SqlExpression<TEntity>()
-                .Where(predicate)
-                .Paging(page, pagesize)
-                .ToSql(out parameters);
-            return sql;
-        }
 
         /// <summary>
         /// Represents a typed SQL expression.
@@ -1435,6 +1632,29 @@ namespace Dommel
         /// <typeparam name="TEntity">The type of the entity.</typeparam>
         /// <param name="connection">The connection to the database. This can either be open or closed.</param>
         /// <param name="entity">The entity to be inserted.</param>
+        /// <param name="queryLog">Returns query string/params for logs/audit.</param>
+        /// <param name="transaction">Optional transaction for the command.</param>
+        /// <returns>The id of the inserted entity.</returns>
+        public static object Insert<TEntity>(this IDbConnection connection, TEntity entity, out QueryLog queryLog,
+            IDbTransaction transaction = null) where TEntity : class
+        {
+            var sql = BuildInsertQuery(connection, typeof(TEntity));
+
+            queryLog = new QueryLog()
+            {
+                Query = sql,
+                EntityParameter = entity
+            };
+
+            return connection.ExecuteScalar(sql, entity, transaction);
+        }
+
+        /// <summary>
+        /// Inserts the specified entity into the database and returns the id.
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the entity.</typeparam>
+        /// <param name="connection">The connection to the database. This can either be open or closed.</param>
+        /// <param name="entity">The entity to be inserted.</param>
         /// <param name="transaction">Optional transaction for the command.</param>
         /// <returns>The id of the inserted entity.</returns>
         public static Task<object> InsertAsync<TEntity>(this IDbConnection connection, TEntity entity, IDbTransaction transaction = null) where TEntity : class
@@ -1443,16 +1663,36 @@ namespace Dommel
             return connection.ExecuteScalarAsync(sql, entity, transaction);
         }
 
+        /// <summary>
+        /// Inserts the specified entity into the database and returns the id.
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the entity.</typeparam>
+        /// <param name="connection">The connection to the database. This can either be open or closed.</param>
+        /// <param name="entity">The entity to be inserted.</param>
+        /// <param name="queryLog">Returns query string/params for logs/audit.</param>
+        /// <param name="transaction">Optional transaction for the command.</param>
+        /// <returns>The id of the inserted entity.</returns>
+        public static Task<object> InsertAsync<TEntity>(this IDbConnection connection, TEntity entity,
+            out QueryLog queryLog, IDbTransaction transaction = null) where TEntity : class
+        {
+            var sql = BuildInsertQuery(connection, typeof(TEntity));
+
+            queryLog = new QueryLog()
+            {
+                Query = sql,
+                EntityParameter = entity
+            };
+
+            return connection.ExecuteScalarAsync(sql, entity, transaction);
+        }
+
         private static string BuildInsertQuery(IDbConnection connection, Type type)
         {
-            string sql;
-            if (!_insertQueryCache.TryGetValue(type, out sql))
+            if (!_insertQueryCache.TryGetValue(type, out string sql))
             {
                 var tableName = Resolvers.Table(type);
 
-                bool isIdentity;
-                DatabaseGeneratedOption databaseGenerated;
-                var keyProperty = Resolvers.KeyProperty(type, out isIdentity, out databaseGenerated);
+                var keyProperty = Resolvers.KeyProperty(type, out bool isIdentity, out DatabaseGeneratedOption databaseGenerated);
 
                 var typeProperties = new List<PropertyInfo>();
                 foreach (var typeProperty in Resolvers.Properties(type))
@@ -1506,6 +1746,30 @@ namespace Dommel
         /// <typeparam name="TEntity">The type of the entity.</typeparam>
         /// <param name="connection">The connection to the database. This can either be open or closed.</param>
         /// <param name="entity">The entity in the database.</param>
+        /// <param name="queryLog">Returns query string/params for logs/audit.</param>
+        /// <param name="transaction">Optional transaction for the command.</param>
+        /// <returns>A value indicating whether the update operation succeeded.</returns>
+        public static bool Update<TEntity>(this IDbConnection connection, TEntity entity, out QueryLog queryLog,
+            IDbTransaction transaction = null)
+        {
+            var sql = BuildUpdateQuery(typeof(TEntity));
+
+            queryLog = new QueryLog()
+            {
+                Query = sql,
+                EntityParameter = entity
+            };
+
+            return connection.Execute(sql, entity, transaction) > 0;
+        }
+
+        /// <summary>
+        /// Updates the values of the specified entity in the database.
+        /// The return value indicates whether the operation succeeded.
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the entity.</typeparam>
+        /// <param name="connection">The connection to the database. This can either be open or closed.</param>
+        /// <param name="entity">The entity in the database.</param>
         /// <param name="transaction">Optional transaction for the command.</param>
         /// <returns>A value indicating whether the update operation succeeded.</returns>
         public static async Task<bool> UpdateAsync<TEntity>(this IDbConnection connection, TEntity entity, IDbTransaction transaction = null)
@@ -1514,10 +1778,32 @@ namespace Dommel
             return await connection.ExecuteAsync(sql, entity, transaction) > 0;
         }
 
+        /// <summary>
+        /// Updates the values of the specified entity in the database.
+        /// The return value indicates whether the operation succeeded.
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the entity.</typeparam>
+        /// <param name="connection">The connection to the database. This can either be open or closed.</param>
+        /// <param name="entity">The entity in the database.</param>
+        /// <param name="transaction">Optional transaction for the command.</param>
+        /// <returns>Returns query string/params for logs/audit.</returns>
+        public static async Task<QueryLog> UpdateAsyncLog<TEntity>(this IDbConnection connection, TEntity entity, IDbTransaction transaction = null)
+        {
+            var sql = BuildUpdateQuery(typeof(TEntity));
+
+            var queryLog = new QueryLog()
+            {
+                Query = sql,
+                EntityParameter = entity,
+                Success = await connection.ExecuteAsync(sql, entity, transaction) > 0
+            };
+
+            return queryLog;
+        }
+
         private static string BuildUpdateQuery(Type type)
         {
-            string sql;
-            if (!_updateQueryCache.TryGetValue(type, out sql))
+            if (!_updateQueryCache.TryGetValue(type, out string sql))
             {
                 var tableName = Resolvers.Table(type);
                 var keyProperty = Resolvers.KeyProperty(type);
@@ -1560,6 +1846,30 @@ namespace Dommel
         /// <typeparam name="TEntity">The type of the entity.</typeparam>
         /// <param name="connection">The connection to the database. This can either be open or closed.</param>
         /// <param name="entity">The entity to be deleted.</param>
+        /// <param name="queryLog">Returns query string/params for logs/audit.</param>
+        /// <param name="transaction">Optional transaction for the command.</param>
+        /// <returns>A value indicating whether the delete operation succeeded.</returns>
+        public static bool Delete<TEntity>(this IDbConnection connection, TEntity entity, out QueryLog queryLog,
+            IDbTransaction transaction = null)
+        {
+            var sql = BuildDeleteQuery(typeof(TEntity));
+
+            queryLog = new QueryLog()
+            {
+                Query = sql,
+                EntityParameter = entity
+            };
+
+            return connection.Execute(sql, entity, transaction) > 0;
+        }
+
+        /// <summary>
+        /// Deletes the specified entity from the database.
+        /// Returns a value indicating whether the operation succeeded.
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the entity.</typeparam>
+        /// <param name="connection">The connection to the database. This can either be open or closed.</param>
+        /// <param name="entity">The entity to be deleted.</param>
         /// <param name="transaction">Optional transaction for the command.</param>
         /// <returns>A value indicating whether the delete operation succeeded.</returns>
         public static async Task<bool> DeleteAsync<TEntity>(this IDbConnection connection, TEntity entity, IDbTransaction transaction = null)
@@ -1568,10 +1878,32 @@ namespace Dommel
             return await connection.ExecuteAsync(sql, entity, transaction) > 0;
         }
 
+        /// <summary>
+        /// Deletes the specified entity from the database.
+        /// Returns a value indicating whether the operation succeeded.
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the entity.</typeparam>
+        /// <param name="connection">The connection to the database. This can either be open or closed.</param>
+        /// <param name="entity">The entity to be deleted.</param>
+        /// <param name="transaction">Optional transaction for the command.</param>
+        /// <returns>Returns query string/params for logs/audit.</returns>
+        public static async Task<QueryLog> DeleteAsyncLog<TEntity>(this IDbConnection connection, TEntity entity, IDbTransaction transaction = null)
+        {
+            var sql = BuildDeleteQuery(typeof(TEntity));
+
+            var queryLog = new QueryLog()
+            {
+                Query = sql,
+                EntityParameter = entity,
+                Success = await connection.ExecuteAsync(sql, entity, transaction) > 0
+            };
+
+            return queryLog;
+        }
+
         private static string BuildDeleteQuery(Type type)
         {
-            string sql;
-            if (!_deleteQueryCache.TryGetValue(type, out sql))
+            if (!_deleteQueryCache.TryGetValue(type, out string sql))
             {
                 var tableName = Resolvers.Table(type);
                 var keyProperty = Resolvers.KeyProperty(type);
@@ -1596,8 +1928,7 @@ namespace Dommel
         /// <returns>A value indicating whether the delete operation succeeded.</returns>
         public static bool DeleteMultiple<TEntity>(this IDbConnection connection, Expression<Func<TEntity, bool>> predicate, IDbTransaction transaction = null)
         {
-            DynamicParameters parameters;
-            var sql = BuildDeleteMultipleQuery(predicate, out parameters);
+            var sql = BuildDeleteMultipleQuery(predicate, out DynamicParameters parameters);
             return connection.Execute(sql, parameters, transaction) > 0;
         }
 
@@ -1612,16 +1943,14 @@ namespace Dommel
         /// <returns>A value indicating whether the delete operation succeeded.</returns>
         public static async Task<bool> DeleteMultipleAsync<TEntity>(this IDbConnection connection, Expression<Func<TEntity, bool>> predicate, IDbTransaction transaction = null)
         {
-            DynamicParameters parameters;
-            var sql = BuildDeleteMultipleQuery(predicate, out parameters);
+            var sql = BuildDeleteMultipleQuery(predicate, out DynamicParameters parameters);
             return await connection.ExecuteAsync(sql, parameters, transaction) > 0;
         }
 
         private static string BuildDeleteMultipleQuery<TEntity>(Expression<Func<TEntity, bool>> predicate, out DynamicParameters parameters)
         {
             var type = typeof(TEntity);
-            string sql;
-            if (!_deleteAllQueryCache.TryGetValue(type, out sql))
+            if (!_deleteAllQueryCache.TryGetValue(type, out string sql))
             {
                 var tableName = Resolvers.Table(type);
                 sql = $"delete from {tableName}";
@@ -1664,8 +1993,7 @@ namespace Dommel
 
         private static string BuildDeleteAllQuery(Type type)
         {
-            string sql;
-            if (!_deleteAllQueryCache.TryGetValue(type, out sql))
+            if (!_deleteAllQueryCache.TryGetValue(type, out string sql))
             {
                 var tableName = Resolvers.Table(type);
                 sql = $"delete from {tableName}";
@@ -1709,9 +2037,7 @@ namespace Dommel
             /// <returns>The key property for <paramref name="type"/>.</returns>
             public static PropertyInfo KeyProperty(Type type)
             {
-                bool isIdentity;
-                DatabaseGeneratedOption databaseGenerated;
-                return KeyProperty(type, out isIdentity, out databaseGenerated);
+                return KeyProperty(type, out bool isIdentity, out DatabaseGeneratedOption databaseGenerated);
             }
 
             /// <summary>
@@ -1723,8 +2049,7 @@ namespace Dommel
             /// <returns>The key property for <paramref name="type"/>.</returns>
             public static PropertyInfo KeyProperty(Type type, out bool isIdentity, out DatabaseGeneratedOption databaseGenerated)
             {
-                KeyPropertyInfo keyProperty;
-                if (!_typeKeyPropertyCache.TryGetValue(type, out keyProperty))
+                if (!_typeKeyPropertyCache.TryGetValue(type, out KeyPropertyInfo keyProperty))
                 {
                     var propertyInfo = _keyPropertyResolver.ResolveKeyProperty(type, out isIdentity, out databaseGenerated);
                     keyProperty = new KeyPropertyInfo(propertyInfo, isIdentity, databaseGenerated);
@@ -1748,8 +2073,7 @@ namespace Dommel
             {
                 var key = $"{sourceType.FullName};{includingType.FullName}";
 
-                ForeignKeyInfo foreignKeyInfo;
-                if (!_typeForeignKeyPropertyCache.TryGetValue(key, out foreignKeyInfo))
+                if (!_typeForeignKeyPropertyCache.TryGetValue(key, out ForeignKeyInfo foreignKeyInfo))
                 {
                     // Resole the property and relation.
                     var foreignKeyProperty = _foreignKeyPropertyResolver.ResolveForeignKeyProperty(sourceType, includingType, out foreignKeyRelation);
@@ -1784,8 +2108,7 @@ namespace Dommel
             /// <returns>>The collection of to be mapped properties of <paramref name="type"/>.</returns>
             public static IEnumerable<PropertyInfo> Properties(Type type)
             {
-                PropertyInfo[] properties;
-                if (!_typePropertiesCache.TryGetValue(type, out properties))
+                if (!_typePropertiesCache.TryGetValue(type, out PropertyInfo[] properties))
                 {
                     properties = _propertyResolver.ResolveProperties(type).ToArray();
                     _typePropertiesCache.TryAdd(type, properties);
@@ -1825,8 +2148,7 @@ namespace Dommel
             {
                 var key = $"{propertyInfo.DeclaringType}.{propertyInfo.Name}";
 
-                string columnName;
-                if (!_columnNameCache.TryGetValue(key, out columnName))
+                if (!_columnNameCache.TryGetValue(key, out string columnName))
                 {
                     columnName = _columnNameResolver.ResolveColumnName(propertyInfo);
                     if (EscapeCharacterStart != char.MinValue || EscapeCharacterEnd != char.MinValue)
@@ -2003,9 +2325,7 @@ namespace Dommel
             /// </summary>
             public virtual PropertyInfo ResolveKeyProperty(Type type)
             {
-                bool isIdentity;
-                DatabaseGeneratedOption databaseGenerated;
-                return ResolveKeyProperty(type, out isIdentity, out databaseGenerated);
+                return ResolveKeyProperty(type, out bool isIdentity, out DatabaseGeneratedOption databaseGenerated);
             }
 
             /// <summary>
@@ -2264,8 +2584,7 @@ namespace Dommel
         private static ISqlBuilder GetBuilder(IDbConnection connection)
         {
             var connectionName = connection.GetType().Name.ToLower();
-            ISqlBuilder builder;
-            return _sqlBuilders.TryGetValue(connectionName, out builder) ? builder : new SqlServerSqlBuilder();
+            return _sqlBuilders.TryGetValue(connectionName, out ISqlBuilder builder) ? builder : new SqlServerSqlBuilder();
         }
 
         /// <summary>
@@ -2348,6 +2667,38 @@ namespace Dommel
                 return sql;
             }
         }
+        #endregion
+
+        #region QueryLog
+
+        /// <summary>
+        /// Object containing the executed query and it's parameters.
+        /// </summary>
+        public class QueryLog
+        {
+            /// <summary>
+            /// Executed query.
+            /// </summary>
+            public string Query { get; set; }
+
+            /// <summary>
+            /// Query's parameters.
+            /// </summary>
+            public DynamicParameters Parameters { get; set; }
+
+
+            /// <summary>
+            /// Entity that contains the parameters.
+            /// </summary>
+            public object EntityParameter { get; set; }
+
+
+            /// <summary>
+            /// Indicates whether the operation was executed or not.
+            /// </summary>
+            public bool Success = true;
+        }
+
         #endregion
     }
 }

@@ -3,6 +3,8 @@ Added paging support for Select/SelectAsync and Count/CountAsync and NO SYNC
 
 Added support to provide the Primary Key value on Create with DatabaseGeneratedAttribute (DatabaseGeneratedOption.None) on Key mapping for Entities.
 
+Added support for logs/audit with methods that return the executed query and its params.
+
 # Dommel
 Simple CRUD operations for Dapper.
 
