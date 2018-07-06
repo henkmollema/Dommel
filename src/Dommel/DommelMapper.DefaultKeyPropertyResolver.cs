@@ -15,32 +15,27 @@ namespace Dommel
         public class DefaultKeyPropertyResolver : IKeyPropertyResolver
         {
             /// <summary>
-            /// Finds the key property by looking for a property with the [Key] attribute or with the name 'Id'.
+            /// Finds the key properties by looking for properties with the [Key] attribute.
             /// </summary>
-            public virtual PropertyInfo ResolveKeyProperty(Type type) => ResolveKeyProperty(type, out _);
+            public PropertyInfo[] ResolveKeyProperties(Type type) => ResolveKeyProperties(type, out _);
 
             /// <summary>
-            /// Finds the key property by looking for a property with the [Key] attribute or with the name 'Id'.
+            /// Finds the key properties by looking for properties with the [Key] attribute.
             /// </summary>
-            public PropertyInfo ResolveKeyProperty(Type type, out bool isIdentity)
+            public PropertyInfo[] ResolveKeyProperties(Type type, out bool isIdentity)
             {
                 var keyProps = Resolvers
                         .Properties(type)
-                        .Where(p => p.GetCustomAttribute<KeyAttribute>() != null || p.Name.Equals("Id", StringComparison.OrdinalIgnoreCase))
+                        .Where(p => string.Equals(p.Name, "Id", StringComparison.OrdinalIgnoreCase) || p.GetCustomAttribute<KeyAttribute>() != null)
                         .ToArray();
 
                 if (keyProps.Length == 0)
                 {
-                    throw new InvalidOperationException($"Could not find the key property for type '{type.FullName}'.");
-                }
-
-                if (keyProps.Length > 1)
-                {
-                    throw new InvalidOperationException($"Multiple key properties were found for type '{type.FullName}'.");
+                    throw new InvalidOperationException($"Could not find the key properties for type '{type.FullName}'.");
                 }
 
                 isIdentity = true;
-                return keyProps[0];
+                return keyProps;
             }
         }
     }

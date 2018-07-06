@@ -51,7 +51,7 @@ namespace Dommel
         {
             private static readonly ConcurrentDictionary<Type, string> _typeTableNameCache = new ConcurrentDictionary<Type, string>();
             private static readonly ConcurrentDictionary<string, string> _columnNameCache = new ConcurrentDictionary<string, string>();
-            private static readonly ConcurrentDictionary<Type, KeyPropertyInfo> _typeKeyPropertyCache = new ConcurrentDictionary<Type, KeyPropertyInfo>();
+            private static readonly ConcurrentDictionary<Type, KeyPropertyInfo> _typeKeyPropertiesCache = new ConcurrentDictionary<Type, KeyPropertyInfo>();
             private static readonly ConcurrentDictionary<Type, PropertyInfo[]> _typePropertiesCache = new ConcurrentDictionary<Type, PropertyInfo[]>();
             private static readonly ConcurrentDictionary<string, ForeignKeyInfo> _typeForeignKeyPropertyCache = new ConcurrentDictionary<string, ForeignKeyInfo>();
 
@@ -66,21 +66,50 @@ namespace Dommel
             /// Gets the key property for the specified type, using the configured <see cref="IKeyPropertyResolver"/>.
             /// </summary>
             /// <param name="type">The <see cref="Type"/> to get the key property for.</param>
-            /// <param name="isIdentity">A value indicating whether the key is an identity.</param>
+            /// <param name="isIdentity">A value indicating whether the key represents an identity.</param>
             /// <returns>The key property for <paramref name="type"/>.</returns>
             public static PropertyInfo KeyProperty(Type type, out bool isIdentity)
             {
-                if (!_typeKeyPropertyCache.TryGetValue(type, out var keyProperty))
+                if (!_typeKeyPropertiesCache.TryGetValue(type, out var keyPropertyInfo))
                 {
-                    var propertyInfo = _keyPropertyResolver.ResolveKeyProperty(type, out isIdentity);
-                    keyProperty = new KeyPropertyInfo(propertyInfo, isIdentity);
-                    _typeKeyPropertyCache.TryAdd(type, keyProperty);
+                    var propertyInfos = _keyPropertyResolver.ResolveKeyProperties(type, out isIdentity);
+                    keyPropertyInfo = new KeyPropertyInfo(propertyInfos, isIdentity);
+                    _typeKeyPropertiesCache.TryAdd(type, keyPropertyInfo);
                 }
 
-                isIdentity = keyProperty.IsIdentity;
+                isIdentity = keyPropertyInfo.IsIdentity;
 
-                LogReceived?.Invoke($"Resolved property '{keyProperty.PropertyInfo}' (Identity: {isIdentity}) as key property for '{type.Name}'");
-                return keyProperty.PropertyInfo;
+                var propertyInfo = keyPropertyInfo.PropertyInfos[0];
+                LogReceived?.Invoke($"Resolved property '{propertyInfo}' (Identity: {isIdentity}) as key property for '{type.Name}'");
+                return propertyInfo;
+            }
+
+            /// <summary>
+            /// Gets the key properties for the specified type, using the configured <see cref="IKeyPropertyResolver"/>.
+            /// </summary>
+            /// <param name="type">The <see cref="Type"/> to get the key properties for.</param>
+            /// <returns>The key properties for <paramref name="type"/>.</returns>
+            public static PropertyInfo[] KeyProperties(Type type) => KeyProperties(type, out _);
+
+            /// <summary>
+            /// Gets the key properties for the specified type, using the configured <see cref="IKeyPropertyResolver"/>.
+            /// </summary>
+            /// <param name="type">The <see cref="Type"/> to get the key properties for.</param>
+            /// <param name="isIdentity">A value indicating whether the keys represent an identity.</param>
+            /// <returns>The key properties for <paramref name="type"/>.</returns>
+            public static PropertyInfo[] KeyProperties(Type type, out bool isIdentity)
+            {
+                if (!_typeKeyPropertiesCache.TryGetValue(type, out var keyPropertyInfo))
+                {
+                    var propertyInfos = _keyPropertyResolver.ResolveKeyProperties(type, out isIdentity);
+                    keyPropertyInfo = new KeyPropertyInfo(propertyInfos, isIdentity);
+                    _typeKeyPropertiesCache.TryAdd(type, keyPropertyInfo);
+                }
+
+                isIdentity = keyPropertyInfo.IsIdentity;
+
+                LogReceived?.Invoke($"Resolved property '{string.Join<PropertyInfo>(", ", keyPropertyInfo.PropertyInfos)}' (Identity: {isIdentity}) as key property for '{type.Name}'");
+                return keyPropertyInfo.PropertyInfos;
             }
 
             /// <summary>
@@ -172,20 +201,20 @@ namespace Dommel
                 return columnName;
             }
 
-            private class KeyPropertyInfo
+            private struct KeyPropertyInfo
             {
-                public KeyPropertyInfo(PropertyInfo propertyInfo, bool isIdentity)
+                public KeyPropertyInfo(PropertyInfo[] propertyInfos, bool isIdentity)
                 {
-                    PropertyInfo = propertyInfo;
+                    PropertyInfos = propertyInfos;
                     IsIdentity = isIdentity;
                 }
 
-                public PropertyInfo PropertyInfo { get; }
+                public PropertyInfo[] PropertyInfos { get; }
 
                 public bool IsIdentity { get; }
             }
 
-            private class ForeignKeyInfo
+            private struct ForeignKeyInfo
             {
                 public ForeignKeyInfo(PropertyInfo propertyInfo, ForeignKeyRelation relation)
                 {

@@ -6,34 +6,35 @@ namespace Dommel.Tests
 {
     public class DefaultKeyPropertyResolverTests
     {
-        private static DommelMapper.DefaultKeyPropertyResolver Resolver = new DommelMapper.DefaultKeyPropertyResolver();
+        private static DommelMapper.IKeyPropertyResolver Resolver = new DommelMapper.DefaultKeyPropertyResolver();
 
         [Fact]
         public void MapsIdProperty()
         {
-            var prop = Resolver.ResolveKeyProperty(typeof(Foo));
+            var prop = Resolver.ResolveKeyProperties(typeof(Foo))[0];
             Assert.Equal(typeof(Foo).GetProperty("Id"), prop);
         }
 
         [Fact]
         public void MapsWithAttribute()
         {
-            var prop = Resolver.ResolveKeyProperty(typeof(Bar));
+            var prop = Resolver.ResolveKeyProperties(typeof(Bar))[0];
             Assert.Equal(typeof(Bar).GetProperty("BarId"), prop);
         }
 
         [Fact]
         public void NoKeyProperties_ThrowsException()
         {
-            var ex = Assert.Throws<InvalidOperationException>(() => Resolver.ResolveKeyProperty(typeof(Nope)));
-            Assert.Equal($"Could not find the key property for type '{typeof(Nope).FullName}'.", ex.Message);
+            var ex = Assert.Throws<InvalidOperationException>(() => Resolver.ResolveKeyProperties(typeof(Nope))[0]);
+            Assert.Equal($"Could not find the key properties for type '{typeof(Nope).FullName}'.", ex.Message);
         }
 
         [Fact]
-        public void MultipleKeyProperties_ThrowsException()
+        public void MapsMultipleKeyProperties()
         {
-            var ex = Assert.Throws<InvalidOperationException>(() => Resolver.ResolveKeyProperty(typeof(FooBar)));
-            Assert.Equal($"Multiple key properties were found for type '{typeof(FooBar).FullName}'.", ex.Message);
+            var keyProperties = Resolver.ResolveKeyProperties(typeof(FooBar));
+            Assert.Equal(typeof(FooBar).GetProperty("Id"), keyProperties[0]);
+            Assert.Equal(typeof(FooBar).GetProperty("BarId"), keyProperties[1]);
         }
 
         private class Foo
