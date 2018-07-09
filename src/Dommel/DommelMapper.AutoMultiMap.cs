@@ -276,9 +276,9 @@ namespace Dommel
                     var list = new List<T> { instance };
                     prop.SetValue(target, list);
                 }
-                else if (value is ICollection<T> collection)
+                else if (value is ICollection<T> collection && !collection.Contains(instance))
                 {
-                    collection.Add(instance);
+                    collection.Add(instance);                    
                 }
             }
         }
