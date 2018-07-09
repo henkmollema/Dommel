@@ -14,7 +14,7 @@
     <PackageLicenseUrl>https://github.com/henkmollema/Dommel/blob/master/LICENSE</PackageLicenseUrl>
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/henkmollema/Dommel</RepositoryUrl>
-    <DebugType>embedded</DebugType>
+    <DebugType>full</DebugType>
     <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
   </PropertyGroup>
   <ItemGroup>
