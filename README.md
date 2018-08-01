@@ -1,4 +1,6 @@
 # Fork
+Added column resolvers to work on Select/Get methods
+
 Added paging support for Select/SelectAsync and Count/CountAsync and NO SYNC
 
 Added support to provide the Primary Key value on Create with DatabaseGeneratedAttribute (DatabaseGeneratedOption.None) on Key mapping for Entities.

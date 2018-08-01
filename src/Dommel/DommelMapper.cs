@@ -125,7 +125,9 @@ namespace Dommel
                 var keyProperty = Resolvers.KeyProperty(type);
                 var keyColumnName = Resolvers.Column(keyProperty);
 
-                sql = $"select * from {tableName}  " + (nolock ? " WITH (NOLOCK) " : "") + " where " + keyColumnName + " = @Id";
+                var projection = BuildSelectColumnsSql(type);
+
+                sql = $"select {projection} from {tableName}  " + (nolock ? " WITH (NOLOCK) " : "") + " where " + keyColumnName + " = @Id";
                 _getQueryCache.TryAdd(type, sql);
             }
 
@@ -171,7 +173,10 @@ namespace Dommel
             if (!_getAllQueryCache.TryGetValue(type, out sql))
             {
                 var tableName = Resolvers.Table(type);
-                sql = $"select * from {tableName}" + (nolock ? " WITH (NOLOCK) " : "");
+
+                var projection = BuildSelectColumnsSql(type);
+
+                sql = $"select {projection} from {tableName}" + (nolock ? " WITH (NOLOCK) " : "");
                 _getAllQueryCache.TryAdd(type, sql);
             }
 
@@ -1086,13 +1091,31 @@ namespace Dommel
             return sql;
         }
 
+        private static string BuildSelectColumnsSql(Type type)
+        {
+            var typeProperties = new List<PropertyInfo>();
+            foreach (var typeProperty in Resolvers.Properties(type))
+            {
+                if (typeProperty.GetSetMethod() != null)
+                {
+                    typeProperties.Add(typeProperty);
+                }
+            }
+
+            var columnNames = typeProperties.Select(Resolvers.Column).ToArray();
+            return string.Join(",", columnNames);
+        }
+
         private static string BuildSelectSql<TEntity>(Expression<Func<TEntity, bool>> predicate, out DynamicParameters parameters, bool nolock = false)
         {
             var type = typeof(TEntity);
             if (!_getAllQueryCache.TryGetValue(type, out string sql))
             {
                 var tableName = Resolvers.Table(type);
-                sql = $"select * from {tableName}" + (nolock ? " WITH (NOLOCK) " : "");
+
+                var projection = BuildSelectColumnsSql(type);
+
+                sql = $"select {projection} from {tableName}" + (nolock ? " WITH (NOLOCK) " : "");
                 _getAllQueryCache.TryAdd(type, sql);
             }
 
