@@ -1102,7 +1102,7 @@ namespace Dommel
                 }
             }
 
-            var columnNames = typeProperties.Select(Resolvers.Column).ToArray();
+            var columnNames = typeProperties.Select(Resolvers.ColumnProjection).ToArray();
             return string.Join(",", columnNames);
         }
 
@@ -1390,20 +1390,20 @@ namespace Dommel
             /// <summary>
             /// Processes a lambda expression.
             /// </summary>
-            /// <param name="epxression">The lambda expression.</param>
+            /// <param name="expression">The lambda expression.</param>
             /// <returns>The result of the processing.</returns>
-            protected virtual object VisitLambda(LambdaExpression epxression)
+            protected virtual object VisitLambda(LambdaExpression expression)
             {
-                if (epxression.Body.NodeType == ExpressionType.MemberAccess)
+                if (expression.Body.NodeType == ExpressionType.MemberAccess)
                 {
-                    var member = epxression.Body as MemberExpression;
+                    var member = expression.Body as MemberExpression;
                     if (member?.Expression != null)
                     {
                         return $"{VisitMemberAccess(member)} = '1'";
                     }
                 }
 
-                return VisitExpression(epxression.Body);
+                return VisitExpression(expression.Body);
             }
 
             /// <summary>
@@ -2049,6 +2049,7 @@ namespace Dommel
 
             private static readonly ConcurrentDictionary<Type, string> _typeTableNameCache = new ConcurrentDictionary<Type, string>();
             private static readonly ConcurrentDictionary<string, string> _columnNameCache = new ConcurrentDictionary<string, string>();
+            private static readonly ConcurrentDictionary<string, string> _projectionColumnNameCache = new ConcurrentDictionary<string, string>();
             private static readonly ConcurrentDictionary<Type, KeyPropertyInfo> _typeKeyPropertyCache = new ConcurrentDictionary<Type, KeyPropertyInfo>();
             private static readonly ConcurrentDictionary<Type, PropertyInfo[]> _typePropertiesCache = new ConcurrentDictionary<Type, PropertyInfo[]>();
             private static readonly ConcurrentDictionary<string, ForeignKeyInfo> _typeForeignKeyPropertyCache = new ConcurrentDictionary<string, ForeignKeyInfo>();
@@ -2179,6 +2180,29 @@ namespace Dommel
                         columnName = EscapeCharacterStart + columnName + EscapeCharacterEnd;
                     }
                     _columnNameCache.TryAdd(key, columnName);
+                }
+
+                return columnName;
+            }
+
+            /// <summary>
+            /// Gets the name of the column in the database for the specified type,
+            /// using the configured <see cref="T:DommelMapper.IColumnNameResolver"/>.
+            /// </summary>
+            /// <param name="propertyInfo">The <see cref="System.Reflection.PropertyInfo"/> to get the column name for.</param>
+            /// <returns>The column name in the database for <paramref name="propertyInfo"/>.</returns>
+            public static string ColumnProjection(PropertyInfo propertyInfo)
+            {
+                var key = $"{propertyInfo.DeclaringType}.{propertyInfo.Name}";
+
+                if (!_projectionColumnNameCache.TryGetValue(key, out string columnName))
+                {
+                    columnName = _columnNameResolver.ResolveColumnName(propertyInfo) + " AS " + propertyInfo.Name;
+                    if (EscapeCharacterStart != char.MinValue || EscapeCharacterEnd != char.MinValue)
+                    {
+                        columnName = EscapeCharacterStart + columnName + " AS " + propertyInfo.Name + EscapeCharacterEnd;
+                    }
+                    _projectionColumnNameCache.TryAdd(key, columnName);
                 }
 
                 return columnName;
