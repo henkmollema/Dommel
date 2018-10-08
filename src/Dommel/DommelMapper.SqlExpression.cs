@@ -156,8 +156,7 @@ namespace Dommel
                     left = VisitExpression(expression.Left);
                     right = VisitExpression(expression.Right);
 
-                    var paramName = "p" + _parameterIndex++;
-                    _parameters.Add(paramName, value: right);
+                    AddParameter(right, out var paramName);
                     return $"{left} {operand} @{paramName}";
                 }
 
@@ -319,6 +318,18 @@ namespace Dommel
             public override string ToString()
             {
                 return _whereBuilder.ToString();
+            }
+
+            /// <summary>
+            /// Add Parameter to the list
+            /// </summary>
+            /// <param name="value">Value of the parameter</param>
+            /// <param name="paramName">Out of the parameter name</param>
+            public virtual void AddParameter(object value, out string paramName)
+            {
+                _parameterIndex++;
+                paramName = $"p{_parameterIndex}";
+                _parameters.Add(paramName, value: value);
             }
         }
     }
