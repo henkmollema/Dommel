@@ -19,6 +19,13 @@ namespace Dommel
             private readonly DynamicParameters _parameters = new DynamicParameters();
             private int _parameterIndex;
 
+            public enum TextSearch
+            {
+                Contains,
+                StartsWith,
+                EndsWith
+            }
+
             /// <summary>
             /// Builds a SQL expression for the specified filter expression.
             /// </summary>
@@ -89,9 +96,65 @@ namespace Dommel
 
                     case ExpressionType.Constant:
                         return VisitConstantExpression((ConstantExpression)expression);
+                    case ExpressionType.Call:
+                        return VisitCallExpression((MethodCallExpression)expression);
                 }
 
                 return expression;
+            }
+
+            /// <summary>
+            /// Process a Method Call Expression to determine where it is a Contains, StartsWith or EndsWith method.
+            /// </summary>
+            /// <param name="expression">Method Call Expression.</param>
+            /// <returns>The resulta of the processing.</returns>
+            protected virtual object VisitCallExpression(MethodCallExpression expression)
+            {
+                var method = expression.Method.Name.ToLower();
+
+                switch (method)
+                {
+                    case "contains":
+                        return VisitContainsExpression(expression, TextSearch.Contains);
+                    case "startswith":
+                        return VisitContainsExpression(expression, TextSearch.StartsWith);
+                    case "endswith":
+                        return VisitContainsExpression(expression, TextSearch.EndsWith);
+                    default:
+                        break;
+                }
+
+                return expression;
+            }
+
+            /// <summary>
+            /// Process a Contains expression for string.
+            /// </summary>
+            /// <param name="expression">Method Call Expression.</param>
+            /// <param name="textSearch">Type of search.</param>
+            /// <returns>The result of the processing.</returns>
+            protected virtual object VisitContainsExpression(MethodCallExpression expression, TextSearch textSearch)
+            {
+                var column = MemberToColumn((MemberExpression)expression.Object);
+
+                var value = VisitConstantExpression((ConstantExpression)expression.Arguments.FirstOrDefault());
+                var textLike = "";
+
+                switch (textSearch)
+                {
+                    case TextSearch.Contains:
+                        textLike = $"%{value}%";
+                        break;
+                    case TextSearch.StartsWith:
+                        textLike = $"{value}%";
+                        break;
+                    case TextSearch.EndsWith:
+                        textLike = $"%{value}";
+                        break;
+                }
+
+                AddParameter(textLike, out var paramName);
+                return $"{column} like {paramName}";
             }
 
             /// <summary>
