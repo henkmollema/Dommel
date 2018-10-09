@@ -1,22 +1,23 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using Xunit;
 
-namespace Dommel.Tests
+namespace Dommel.IntegrationTests
 {
     public class LikeTests
     {
-        private readonly DommelMapper.SqlExpression<User> sqlExpression = new DommelMapper.SqlExpression<User>();
+        private readonly DommelMapper.SqlExpression<Foo> sqlExpression = new DommelMapper.SqlExpression<Foo>();
 
         [Fact]
         public void LikeOperandContains()
         {
-            var expressao = sqlExpression.Where(p => p.Name.Contains("teste"));
+            var expressao = sqlExpression.Where(p => p.String.Contains("teste"));
             var sql = expressao.ToSql(out var dynamicParameters);
 
-            Assert.Equal("where Name like p1", sql.Trim());
+            Assert.Equal("where String like p1", sql.Trim());
             Assert.Single(dynamicParameters.ParameterNames);
             Assert.Equal("%teste%", dynamicParameters.Get<string>("p1"));
         }
@@ -24,10 +25,10 @@ namespace Dommel.Tests
         [Fact]
         public void LikeOperandStartsWith()
         {
-            var expressao = sqlExpression.Where(p => p.Name.StartsWith("teste"));
+            var expressao = sqlExpression.Where(p => p.String.StartsWith("teste"));
             var sql = expressao.ToSql(out var dynamicParameters);
 
-            Assert.Equal("where Name like p1", sql.Trim());
+            Assert.Equal("where String like p1", sql.Trim());
             Assert.Single(dynamicParameters.ParameterNames);
             Assert.Equal("teste%", dynamicParameters.Get<string>("p1"));
         }
@@ -35,19 +36,18 @@ namespace Dommel.Tests
         [Fact]
         public void LikeOperandEndsWith()
         {
-            var expressao = sqlExpression.Where(p => p.Name.EndsWith("teste"));
+            var expressao = sqlExpression.Where(p => p.String.EndsWith("teste"));
             var sql = expressao.ToSql(out var dynamicParameters);
 
-            Assert.Equal("where Name like p1", sql.Trim());
+            Assert.Equal("where String like p1", sql.Trim());
             Assert.Single(dynamicParameters.ParameterNames);
             Assert.Equal("%teste", dynamicParameters.Get<string>("p1"));
         }
 
-        public class User
+        [Table("tblFoo")]
+        public class Foo
         {
-            public int UserId { get; set; }
-
-            public string Name { get; set; }
+            public string String { get; set; }
         }
     }
 }
