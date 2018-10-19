@@ -47,7 +47,7 @@ namespace Dommel.IntegrationTests
         [Table("tblFoo")]
         public class Foo
         {
-            public string String { get; set; }
+            public string Bar { get; set; }
         }
     }
 }
