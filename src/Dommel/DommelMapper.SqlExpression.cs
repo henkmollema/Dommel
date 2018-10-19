@@ -104,7 +104,7 @@ namespace Dommel
             }
 
             /// <summary>
-            /// Process a Method Call Expression to determine where it is a Contains, StartsWith or EndsWith method.
+            /// Process a method call expression.
             /// </summary>
             /// <param name="expression">Method Call Expression.</param>
             /// <returns>The resulta of the processing.</returns>
