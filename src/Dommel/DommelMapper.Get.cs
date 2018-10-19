@@ -2,6 +2,8 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using Dapper;
 
@@ -10,6 +12,7 @@ namespace Dommel
     public static partial class DommelMapper
     {
         private static readonly ConcurrentDictionary<Type, string> _getQueryCache = new ConcurrentDictionary<Type, string>();
+        private static readonly ConcurrentDictionary<Type, string> _getByIdsQueryCache = new ConcurrentDictionary<Type, string>();
         private static readonly ConcurrentDictionary<Type, string> _getAllQueryCache = new ConcurrentDictionary<Type, string>();
 
         /// <summary>
@@ -56,6 +59,104 @@ namespace Dommel
 
             parameters = new DynamicParameters();
             parameters.Add("Id", id);
+
+            return sql;
+        }
+
+        /// <summary>
+        /// Retrieves the entity of type <typeparamref name="TEntity"/> with the specified id.
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the entity.</typeparam>
+        /// <param name="connection">The connection to the database. This can either be open or closed.</param>
+        /// <param name="ids">The id of the entity in the database.</param>
+        /// <returns>The entity with the corresponding id.</returns>
+        public static TEntity Get<TEntity>(this IDbConnection connection, params object[] ids) where TEntity : class
+            => Get<TEntity>(connection, ids, transaction: null);
+
+        /// <summary>
+        /// Retrieves the entity of type <typeparamref name="TEntity"/> with the specified id.
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the entity.</typeparam>
+        /// <param name="connection">The connection to the database. This can either be open or closed.</param>
+        /// <param name="ids">The id of the entity in the database.</param>
+        /// <param name="transaction">Optional transaction for the command.</param>
+        /// <returns>The entity with the corresponding id.</returns>
+        public static TEntity Get<TEntity>(this IDbConnection connection, object[] ids, IDbTransaction transaction = null) where TEntity : class
+        {
+            if (ids.Length == 1)
+            {
+                return Get<TEntity>(connection, ids[0], transaction);
+            }
+
+            var sql = BuildGetByIds(typeof(TEntity), ids, out var parameters);
+            LogQuery<TEntity>(sql);
+            return connection.QueryFirstOrDefault<TEntity>(sql, parameters);
+        }
+
+        /// <summary>
+        /// Retrieves the entity of type <typeparamref name="TEntity"/> with the specified id.
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the entity.</typeparam>
+        /// <param name="connection">The connection to the database. This can either be open or closed.</param>
+        /// <param name="ids">The id of the entity in the database.</param>
+        /// <returns>The entity with the corresponding id.</returns>
+        public static Task<TEntity> GetAsync<TEntity>(this IDbConnection connection, params object[] ids) where TEntity : class
+            => GetAsync<TEntity>(connection, ids, transaction: null);
+
+        /// <summary>
+        /// Retrieves the entity of type <typeparamref name="TEntity"/> with the specified id.
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the entity.</typeparam>
+        /// <param name="connection">The connection to the database. This can either be open or closed.</param>
+        /// <param name="ids">The id of the entity in the database.</param>
+        /// <param name="transaction">Optional transaction for the command.</param>
+        /// <returns>The entity with the corresponding id.</returns>
+        public static Task<TEntity> GetAsync<TEntity>(this IDbConnection connection, object[] ids, IDbTransaction transaction = null) where TEntity : class
+        {
+            if (ids.Length == 1)
+            {
+                return GetAsync<TEntity>(connection, ids[0], transaction);
+            }
+
+            var sql = BuildGetByIds(typeof(TEntity), ids, out var parameters);
+            LogQuery<TEntity>(sql);
+            return connection.QueryFirstOrDefaultAsync<TEntity>(sql, parameters);
+        }
+
+        private static string BuildGetByIds(Type type, object[] ids, out DynamicParameters parameters)
+        {
+            if (!_getByIdsQueryCache.TryGetValue(type, out var sql))
+            {
+                var tableName = Resolvers.Table(type);
+                var keyProperties = Resolvers.KeyProperties(type);
+                var keyColumnsNames = keyProperties.Select(Resolvers.Column).ToArray();
+                if (keyColumnsNames.Length != ids.Length)
+                {
+                    throw new InvalidOperationException($"Number of key columns ({keyColumnsNames.Length}) of type {type.Name} does not match with the number of specified IDs ({ids.Length}).");
+                }
+
+                var sb = new StringBuilder("select * from ").Append(tableName).Append(" where");
+                var i = 0;
+                foreach (var keyColumnName in keyColumnsNames)
+                {
+                    if (i != 0)
+                    {
+                        sb.Append(" and");
+                    }
+
+                    sb.Append(" ").Append(keyColumnName).Append(" = @Id").Append(i);
+                    i++;
+                }
+
+                sql = sb.ToString();
+                _getByIdsQueryCache.TryAdd(type, sql);
+            }
+
+            parameters = new DynamicParameters();
+            for (var i = 0; i < ids.Length; i++)
+            {
+                parameters.Add("Id" + i, ids[i]);
+            }
 
             return sql;
         }
