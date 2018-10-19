@@ -130,7 +130,7 @@ namespace Dommel
             /// <summary>
             /// Processes a contains expression for string.
             /// </summary>
-            /// <param name="expression">Method Call Expression.</param>
+            /// <param name="expression">The method call expression.</param>
             /// <param name="textSearch">Type of search.</param>
             /// <returns>The result of the processing.</returns>
             protected virtual object VisitContainsExpression(MethodCallExpression expression, TextSearch textSearch)
