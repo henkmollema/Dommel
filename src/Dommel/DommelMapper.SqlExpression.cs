@@ -386,7 +386,7 @@ namespace Dommel
             /// <summary>
             /// Adds a parameter with the specified value to this SQL expression.
             /// </summary>
-            /// <param name="value">Value of the parameter</param>
+            /// <param name="value">The value of the parameter.</param>
             /// <param name="paramName">Out of the parameter name</param>
             public virtual void AddParameter(object value, out string paramName)
             {
