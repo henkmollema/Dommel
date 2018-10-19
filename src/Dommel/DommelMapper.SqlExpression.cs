@@ -106,7 +106,7 @@ namespace Dommel
             /// <summary>
             /// Process a method call expression.
             /// </summary>
-            /// <param name="expression">Method Call Expression.</param>
+            /// <param name="expression">The method call expression.</param>
             /// <returns>The resulta of the processing.</returns>
             protected virtual object VisitCallExpression(MethodCallExpression expression)
             {
