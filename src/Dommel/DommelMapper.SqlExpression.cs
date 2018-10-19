@@ -128,7 +128,7 @@ namespace Dommel
             }
 
             /// <summary>
-            /// Process a Contains expression for string.
+            /// Processes a contains expression for string.
             /// </summary>
             /// <param name="expression">Method Call Expression.</param>
             /// <param name="textSearch">Type of search.</param>
