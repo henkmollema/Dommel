@@ -19,7 +19,7 @@ namespace Dommel.IntegrationTests
 
             Assert.Equal("where String like p1", sql.Trim());
             Assert.Single(dynamicParameters.ParameterNames);
-            Assert.Equal("%teste%", dynamicParameters.Get<string>("p1"));
+            Assert.Equal("%test%", dynamicParameters.Get<string>("p1"));
         }
 
         [Fact]
