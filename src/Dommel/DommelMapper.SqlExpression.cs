@@ -107,7 +107,7 @@ namespace Dommel
             /// Process a method call expression.
             /// </summary>
             /// <param name="expression">The method call expression.</param>
-            /// <returns>The resulta of the processing.</returns>
+            /// <returns>The result of the processing.</returns>
             protected virtual object VisitCallExpression(MethodCallExpression expression)
             {
                 var method = expression.Method.Name.ToLower();
