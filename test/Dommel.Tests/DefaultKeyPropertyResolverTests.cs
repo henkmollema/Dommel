@@ -16,6 +16,23 @@ namespace Dommel.Tests
         }
 
         [Fact]
+        public void MapsIdPropertyInheritance()
+        {
+            var prop = Resolver.ResolveKeyProperty(typeof(FooInheritance));
+            Assert.Equal(typeof(FooInheritance).GetProperty("Id"), prop);
+        }
+
+
+        [Fact]
+        public void MapsIdPropertyGenericInheritance()
+        {
+            var prop = Resolver.ResolveKeyProperty(typeof(FooGenericInheritance));
+            Assert.Equal(typeof(FooGenericInheritance).GetProperty("Id"), prop);
+        }
+
+
+
+        [Fact]
         public void MapsWithAttribute()
         {
             var prop = Resolver.ResolveKeyProperty(typeof(Bar));
@@ -35,6 +52,23 @@ namespace Dommel.Tests
             var ex = Assert.Throws<InvalidOperationException>(() => Resolver.ResolveKeyProperty(typeof(FooBar)));
             Assert.Equal($"Multiple key properties were found for type '{typeof(FooBar).FullName}'.", ex.Message);
         }
+
+
+        private class FooGeneric<T>
+        {
+            public T Id { get; set; }
+        }
+
+
+        private class FooGenericInheritance : FooGeneric<int>
+        {
+
+        }
+
+        private class FooInheritance : Foo
+        {
+        }
+
 
         private class Foo
         {
