@@ -278,7 +278,7 @@ namespace Dommel
                 }
                 else if (value is ICollection<T> collection && !collection.Contains(instance))
                 {
-                    collection.Add(instance);                    
+                    collection.Add(instance);
                 }
             }
         }

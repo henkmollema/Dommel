@@ -741,20 +741,17 @@ namespace Dommel
                 var foreignKeyProperty = Resolvers.ForeignKeyProperty(sourceType, includeType, out var relation);
                 var foreignKeyPropertyName = Resolvers.Column(foreignKeyProperty);
 
-                // If the foreign key property is nullable, use a left-join.
-                var joinType = Nullable.GetUnderlyingType(foreignKeyProperty.PropertyType) != null ? "left" : "inner";
-
                 if (relation == ForeignKeyRelation.OneToOne)
                 {
                     // Determine the primary key of the foreign key table.
                     var foreignKeyTableKeyColumName = Resolvers.Column(Resolvers.KeyProperty(includeType));
-                    sql += $" {joinType} join {foreignKeyTableName} on {sourceTableName}.{foreignKeyPropertyName} = {foreignKeyTableName}.{foreignKeyTableKeyColumName}";
+                    sql += $" left join {foreignKeyTableName} on {sourceTableName}.{foreignKeyPropertyName} = {foreignKeyTableName}.{foreignKeyTableKeyColumName}";
                 }
                 else if (relation == ForeignKeyRelation.OneToMany)
                 {
                     // Determine the primary key of the source table.
                     var sourceKeyColumnName = Resolvers.Column(Resolvers.KeyProperty(sourceType));
-                    sql += $" {joinType} join {foreignKeyTableName} on {sourceTableName}.{sourceKeyColumnName} = {foreignKeyTableName}.{foreignKeyPropertyName}";
+                    sql += $" left join {foreignKeyTableName} on {sourceTableName}.{sourceKeyColumnName} = {foreignKeyTableName}.{foreignKeyPropertyName}";
                 }
                 else
                 {
