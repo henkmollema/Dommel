@@ -384,7 +384,7 @@ namespace Dommel
             }
 
             /// <summary>
-            /// Add Parameter to the list
+            /// Adds a parameter with the specified value to this SQL expression.
             /// </summary>
             /// <param name="value">Value of the parameter</param>
             /// <param name="paramName">Out of the parameter name</param>
