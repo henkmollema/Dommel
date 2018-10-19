@@ -14,7 +14,7 @@ namespace Dommel.IntegrationTests
         [Fact]
         public void LikeOperandContains()
         {
-            var expressao = sqlExpression.Where(p => p.String.Contains("teste"));
+            var expression = sqlExpression.Where(p => p.String.Contains("test"));
             var sql = expressao.ToSql(out var dynamicParameters);
 
             Assert.Equal("where String like p1", sql.Trim());
