@@ -19,6 +19,13 @@ namespace Dommel
             private readonly DynamicParameters _parameters = new DynamicParameters();
             private int _parameterIndex;
 
+            protected enum TextSearch
+            {
+                Contains,
+                StartsWith,
+                EndsWith
+            }
+
             /// <summary>
             /// Builds a SQL expression for the specified filter expression.
             /// </summary>
@@ -89,9 +96,65 @@ namespace Dommel
 
                     case ExpressionType.Constant:
                         return VisitConstantExpression((ConstantExpression)expression);
+                    case ExpressionType.Call:
+                        return VisitCallExpression((MethodCallExpression)expression);
                 }
 
                 return expression;
+            }
+
+            /// <summary>
+            /// Process a method call expression.
+            /// </summary>
+            /// <param name="expression">The method call expression.</param>
+            /// <returns>The result of the processing.</returns>
+            protected virtual object VisitCallExpression(MethodCallExpression expression)
+            {
+                var method = expression.Method.Name.ToLower();
+
+                switch (method)
+                {
+                    case "contains":
+                        return VisitContainsExpression(expression, TextSearch.Contains);
+                    case "startswith":
+                        return VisitContainsExpression(expression, TextSearch.StartsWith);
+                    case "endswith":
+                        return VisitContainsExpression(expression, TextSearch.EndsWith);
+                    default:
+                        break;
+                }
+
+                return expression;
+            }
+
+            /// <summary>
+            /// Processes a contains expression for string.
+            /// </summary>
+            /// <param name="expression">The method call expression.</param>
+            /// <param name="textSearch">Type of search.</param>
+            /// <returns>The result of the processing.</returns>
+            protected virtual object VisitContainsExpression(MethodCallExpression expression, TextSearch textSearch)
+            {
+                var column = MemberToColumn((MemberExpression)expression.Object);
+
+                var value = VisitConstantExpression((ConstantExpression)expression.Arguments.FirstOrDefault());
+                var textLike = "";
+
+                switch (textSearch)
+                {
+                    case TextSearch.Contains:
+                        textLike = $"%{value}%";
+                        break;
+                    case TextSearch.StartsWith:
+                        textLike = $"{value}%";
+                        break;
+                    case TextSearch.EndsWith:
+                        textLike = $"%{value}";
+                        break;
+                }
+
+                AddParameter(textLike, out var paramName);
+                return $"{column} like {paramName}";
             }
 
             /// <summary>
@@ -156,8 +219,7 @@ namespace Dommel
                     left = VisitExpression(expression.Left);
                     right = VisitExpression(expression.Right);
 
-                    var paramName = "p" + _parameterIndex++;
-                    _parameters.Add(paramName, value: right);
+                    AddParameter(right, out var paramName);
                     return $"{left} {operand} @{paramName}";
                 }
 
@@ -319,6 +381,18 @@ namespace Dommel
             public override string ToString()
             {
                 return _whereBuilder.ToString();
+            }
+
+            /// <summary>
+            /// Adds a parameter with the specified value to this SQL expression.
+            /// </summary>
+            /// <param name="value">The value of the parameter.</param>
+            /// <param name="paramName">When this method returns, contains the generated parameter name.</param>
+            public virtual void AddParameter(object value, out string paramName)
+            {
+                _parameterIndex++;
+                paramName = $"p{_parameterIndex}";
+                _parameters.Add(paramName, value: value);
             }
         }
     }
