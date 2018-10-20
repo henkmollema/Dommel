@@ -1,4 +1,6 @@
-﻿using Moq;
+﻿using Dapper;
+using Moq;
+using Moq.Dapper;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -12,11 +14,13 @@ namespace Dommel.Tests
     public class LikeTests
     {
         private readonly DommelMapper.SqlExpression<Foo> sqlExpression = new DommelMapper.SqlExpression<Foo>();
+        private readonly List<string> logs = new List<string>();
+        private readonly Mock<IDbConnection> mock = new Mock<IDbConnection>();
 
         public LikeTests()
         {
-            var mock = new Mock<IDbConnection>();
-            DommelMapper.GetSqlBuilder(mock.Object);
+            mock.SetupDapper(x => x.QueryFirstOrDefault<Foo>(It.IsAny<string>(), It.IsAny<object>(), null, null, null))
+                .Returns(new Foo());
         }
 
         [Fact]
@@ -55,6 +59,8 @@ namespace Dommel.Tests
         [Table("tblFoo")]
         public class Foo
         {
+            public int Id { get; set; }
+
             public string Bar { get; set; }
         }
     }
