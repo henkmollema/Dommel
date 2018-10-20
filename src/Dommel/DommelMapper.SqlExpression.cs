@@ -19,13 +19,6 @@ namespace Dommel
             private readonly DynamicParameters _parameters = new DynamicParameters();
             private int _parameterIndex;
 
-            protected enum TextSearch
-            {
-                Contains,
-                StartsWith,
-                EndsWith
-            }
-
             /// <summary>
             /// Builds a SQL expression for the specified filter expression.
             /// </summary>
@@ -101,6 +94,27 @@ namespace Dommel
                 }
 
                 return expression;
+            }
+
+            /// <summary>
+            /// Specifies the type of text search to use.
+            /// </summary>
+            protected enum TextSearch
+            {
+                /// <summary>
+                /// Matches anywhere in a string.
+                /// </summary>
+                Contains,
+
+                /// <summary>
+                /// Matches the start of a string.
+                /// </summary>
+                StartsWith,
+
+                /// <summary>
+                /// Matches the end of a string.
+                /// </summary>
+                EndsWith
             }
 
             /// <summary>
@@ -188,8 +202,7 @@ namespace Dommel
                 if (operand == "and" || operand == "or")
                 {
                     // Left side.
-                    var member = expression.Left as MemberExpression;
-                    if (member != null &&
+                    if (expression.Left is MemberExpression member &&
                         member.Expression != null &&
                         member.Expression.NodeType == ExpressionType.Parameter)
                     {
@@ -297,20 +310,14 @@ namespace Dommel
             /// </summary>
             /// <param name="expression">The constant expression.</param>
             /// <returns>The result of the processing.</returns>
-            protected virtual object VisitConstantExpression(ConstantExpression expression)
-            {
-                return expression.Value ?? "null";
-            }
+            protected virtual object VisitConstantExpression(ConstantExpression expression) => expression.Value ?? "null";
 
             /// <summary>
             /// Proccesses a member expression.
             /// </summary>
             /// <param name="expression">The member expression.</param>
             /// <returns>The result of the processing.</returns>
-            protected virtual string MemberToColumn(MemberExpression expression)
-            {
-                return Resolvers.Column((PropertyInfo)expression.Member);
-            }
+            protected virtual string MemberToColumn(MemberExpression expression) => Resolvers.Column((PropertyInfo)expression.Member);
 
             /// <summary>
             /// Returns the expression operand for the specified expression type.
@@ -358,10 +365,7 @@ namespace Dommel
             /// Returns the current SQL query.
             /// </summary>
             /// <returns>The current SQL query.</returns>
-            public string ToSql()
-            {
-                return _whereBuilder.ToString();
-            }
+            public string ToSql() => _whereBuilder.ToString();
 
             /// <summary>
             /// Returns the current SQL query.
@@ -378,10 +382,7 @@ namespace Dommel
             /// Returns the current SQL query.
             /// </summary>
             /// <returns>The current SQL query.</returns>
-            public override string ToString()
-            {
-                return _whereBuilder.ToString();
-            }
+            public override string ToString() => _whereBuilder.ToString();
 
             /// <summary>
             /// Adds a parameter with the specified value to this SQL expression.

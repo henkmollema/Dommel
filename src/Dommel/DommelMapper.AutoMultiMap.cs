@@ -271,7 +271,7 @@ namespace Dommel
             if (prop != null)
             {
                 var value = prop.GetValue(target);
-                if (value == null)
+                if (value is null)
                 {
                     var list = new List<T> { instance };
                     prop.SetValue(target, list);

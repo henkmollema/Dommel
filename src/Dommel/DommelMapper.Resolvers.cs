@@ -17,8 +17,8 @@ namespace Dommel
         /// <summary>
         /// Sets the <see cref="IPropertyResolver"/> implementation for resolving key of entities.
         /// </summary>
-        /// <param name="propertyResolver">An instance of <see cref="IPropertyResolver"/>.</param>
-        public static void SetPropertyResolver(IPropertyResolver propertyResolver) => _propertyResolver = propertyResolver;
+        /// <param name="resolver">An instance of <see cref="IPropertyResolver"/>.</param>
+        public static void SetPropertyResolver(IPropertyResolver resolver) => _propertyResolver = resolver;
 
         /// <summary>
         /// Sets the <see cref="IKeyPropertyResolver"/> implementation for resolving key properties of entities.
@@ -45,7 +45,7 @@ namespace Dommel
         public static void SetColumnNameResolver(IColumnNameResolver resolver) => _columnNameResolver = resolver;
 
         /// <summary>
-        /// Helper class for retrieving type metadata to build sql queries using configured resolvers.
+        /// Helper class for retrieving type metadata to build SQL queries using the configured resolvers.
         /// </summary>
         public static class Resolvers
         {
