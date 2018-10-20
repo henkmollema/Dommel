@@ -19,7 +19,7 @@ namespace Dommel
             private readonly DynamicParameters _parameters = new DynamicParameters();
             private int _parameterIndex;
 
-            private enum TextSearch
+            protected enum TextSearch
             {
                 Contains,
                 StartsWith,
