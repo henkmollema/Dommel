@@ -258,14 +258,23 @@ namespace Dommel
 
         private static void MapValueToTarget<T>(PropertyInfo[] props, object target, T instance)
         {
+            if (instance == null)
+            {
+                // Nothing to add
+                return;
+            }
+
+            // Find a property with the same type as the current instance
             var instanceType = typeof(T);
             var prop = props.FirstOrDefault(p => p.PropertyType == instanceType);
             if (prop != null)
             {
+                // Assign the instance to the property of the target object
                 prop.SetValue(target, instance);
                 return;
             }
 
+            // Find a collection type of current instance
             var collectionType = typeof(ICollection<T>);
             prop = props.FirstOrDefault(p => collectionType.IsAssignableFrom(p.PropertyType));
             if (prop != null)
@@ -273,11 +282,13 @@ namespace Dommel
                 var value = prop.GetValue(target);
                 if (value is null)
                 {
+                    // Create a new list of the type of the instance
                     var list = new List<T> { instance };
                     prop.SetValue(target, list);
                 }
                 else if (value is ICollection<T> collection && !collection.Contains(instance))
                 {
+                    // Add the instance type to the existing list
                     collection.Add(instance);
                 }
             }
