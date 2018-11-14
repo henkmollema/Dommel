@@ -1,21 +1,13 @@
-﻿using System.Data.SqlClient;
-using System.IO;
+﻿using System.Collections.Generic;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
 
 namespace Dommel.IntegrationTests
 {
-    public class PagingTests
+    public class PagingTests : DommelTestBase
     {
-        private static string GetConnectionString()
-        {
-            var currentDir = new DirectoryInfo(Directory.GetCurrentDirectory());
-            var fileName = Path.Combine(currentDir.Parent.Parent.Parent.FullName, "App_Data", "Dommel.mdf");
-            var conStr = "Data Source=(localdb)\\MSSQLLocalDB;Integrated Security=True;AttachDBFilename=" + fileName;
-            return conStr;
-        }
-
         [Fact]
         public void Fetches_FirstPage()
         {

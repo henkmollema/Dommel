@@ -12,6 +12,18 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dommel.Tests", "test\Dommel
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dommel.IntegrationTests", "test\Dommel.IntegrationTests\Dommel.IntegrationTests.csproj", "{305C1E12-1F6D-4510-BD42-0C3F1BD838A1}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{B850D48C-10D3-4EF7-AE61-873068211FD2}"
+	ProjectSection(SolutionItems) = preProject
+		.appveyor.yml = .appveyor.yml
+		.gitignore = .gitignore
+		.travis.yml = .travis.yml
+		build.cmd = build.cmd
+		build.ps1 = build.ps1
+		build.sh = build.sh
+		NuGet.Config = NuGet.Config
+		README.md = README.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
