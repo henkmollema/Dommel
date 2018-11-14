@@ -168,7 +168,7 @@ namespace Dommel
                 }
 
                 AddParameter(textLike, out var paramName);
-                return $"{column} like {paramName}";
+                return $"{column} like @{paramName}";
             }
 
             /// <summary>
