@@ -25,5 +25,22 @@ namespace Dommel
 
         private static void LogQuery<T>(string query, [CallerMemberName]string method = null)
             => LogReceived?.Invoke(method != null ? $"{method}<{typeof(T).Name}>: {query}" : query);
+
+        /// <summary>
+        /// Clears the query caches.
+        /// </summary>
+        public static void ClearQueryCache()
+        {
+            // Keep this in sync with all query caches
+            _columnNameCache.Clear();
+            _countQueryCache.Clear();
+            _deleteAllQueryCache.Clear();
+            _deleteQueryCache.Clear();
+            _getAllQueryCache.Clear();
+            _getByIdsQueryCache.Clear();
+            _getQueryCache.Clear();
+            _insertQueryCache.Clear();
+            _updateQueryCache.Clear();
+        }
     }
 }

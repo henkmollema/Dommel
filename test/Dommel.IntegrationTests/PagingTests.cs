@@ -1,17 +1,33 @@
-﻿using System.Collections.Generic;
-using System.Data.SqlClient;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
 
 namespace Dommel.IntegrationTests
 {
-    public class PagingTests : DommelTestBase
+    public class PagingTestsSqlServer : PagingTests, IClassFixture<SqlServerDatabase>
     {
+        public PagingTestsSqlServer(SqlServerDatabase database) : base(database)
+        {
+        }
+    }
+
+    public class PagingTestsMySql : PagingTests, IClassFixture<MySqlDatabase>
+    {
+        public PagingTestsMySql(MySqlDatabase database) : base(database)
+        {
+        }
+    }
+
+    public abstract class PagingTests : DommelTestBase
+    {
+        public PagingTests(Database database) : base(database)
+        {
+        }
+
         [Fact]
         public void Fetches_FirstPage()
         {
-            using (var con = new SqlConnection(GetConnectionString()))
+            using (var con = GetConnection())
             {
                 var paged = con.GetPaged<Product>(1, 5).ToArray();
                 Assert.Equal(5, paged.Length);
@@ -27,7 +43,7 @@ namespace Dommel.IntegrationTests
         [Fact]
         public void Fetches_SecondPage()
         {
-            using (var con = new SqlConnection(GetConnectionString()))
+            using (var con = GetConnection())
             {
                 var paged = con.GetPaged<Product>(2, 5).ToArray();
                 Assert.Equal(5, paged.Length);
@@ -37,7 +53,7 @@ namespace Dommel.IntegrationTests
         [Fact]
         public async Task Fetches_ThirdPartialPage()
         {
-            using (var con = new SqlConnection(GetConnectionString()))
+            using (var con = GetConnection())
             {
                 var paged = (await con.GetPagedAsync<Product>(3, 5)).ToArray();
                 Assert.Equal(3, paged.Length);
@@ -47,18 +63,11 @@ namespace Dommel.IntegrationTests
         [Fact]
         public async Task SelectPaged_FetchesFirstPage()
         {
-            using (var con = new SqlConnection(GetConnectionString()))
+            using (var con = GetConnection())
             {
                 var paged = (await con.SelectPagedAsync<Product>(p => p.Name == "Chai", 1, 5)).ToArray();
                 Assert.Single(paged);
             }
         }
-    }
-
-    public class Product
-    {
-        public int Id { get; set; }
-
-        public string Name { get; set; }
     }
 }

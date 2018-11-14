@@ -1,18 +1,35 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data.SqlClient;
 using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
 
 namespace Dommel.IntegrationTests
 {
-    public class InsertTests : DommelTestBase
+    public class InsertTestsSqlServer : InsertTests, IClassFixture<SqlServerDatabase>
     {
+        public InsertTestsSqlServer(SqlServerDatabase database) : base(database)
+        {
+        }
+    }
+
+    public class InsertTestsMySql : InsertTests, IClassFixture<MySqlDatabase>
+    {
+        public InsertTestsMySql(MySqlDatabase database) : base(database)
+        {
+        }
+    }
+
+    public abstract class InsertTests : DommelTestBase
+    {
+        public InsertTests(Database database) : base(database)
+        {
+        }
+
         [Fact]
         public void Insert()
         {
-            using (var con = new SqlConnection(GetConnectionString()))
+            using (var con = GetConnection())
             {
                 var id = Convert.ToInt32(con.Insert(new Product { Name = "blah" }));
                 var product = con.Get<Product>(id);
@@ -25,7 +42,7 @@ namespace Dommel.IntegrationTests
         [Fact]
         public async Task InsertAsync()
         {
-            using (var con = new SqlConnection(GetConnectionString()))
+            using (var con = GetConnection())
             {
                 var id = Convert.ToInt32(await con.InsertAsync(new Product { Name = "blah" }));
                 var product = await con.GetAsync<Product>(id);
@@ -38,7 +55,7 @@ namespace Dommel.IntegrationTests
         [Fact]
         public void InsertAll()
         {
-            using (var con = new SqlConnection(GetConnectionString()))
+            using (var con = GetConnection())
             {
                 var ps = new List<Product>
                 {
@@ -57,7 +74,7 @@ namespace Dommel.IntegrationTests
         [Fact]
         public async Task InsertAllAsync()
         {
-            using (var con = new SqlConnection(GetConnectionString()))
+            using (var con = GetConnection())
             {
                 var ps = new List<Product>
                 {
@@ -76,7 +93,7 @@ namespace Dommel.IntegrationTests
         [Fact]
         public void InsertAllEmtyList()
         {
-            using (var con = new SqlConnection(GetConnectionString()))
+            using (var con = GetConnection())
             {
                 var ps = new List<Product>();
                 con.InsertAll(ps);
@@ -86,7 +103,7 @@ namespace Dommel.IntegrationTests
         [Fact]
         public async Task InsertAllAsyncEmtyList()
         {
-            using (var con = new SqlConnection(GetConnectionString()))
+            using (var con = GetConnection())
             {
                 var ps = new List<Product>();
                 await con.InsertAsyncAll(ps);

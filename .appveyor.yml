@@ -16,6 +16,7 @@ environment:
   AppVeyor: true
 services:
   - mssql2016
+  - mysql
 artifacts:
 - path: .\src\Dommel\artifacts\**\*.nupkg
   name: NuGet
