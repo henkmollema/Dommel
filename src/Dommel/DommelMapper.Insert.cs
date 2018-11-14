@@ -53,12 +53,6 @@ namespace Dommel
         /// <returns>The id of the inserted entity.</returns>
         public static void InsertAll<TEntity>(this IDbConnection connection, IEnumerable<TEntity> entities, IDbTransaction transaction = null) where TEntity : class
         {
-            var entity = entities.FirstOrDefault();
-            if (entity == null)
-            {
-                return;
-            }
-
             var sql = BuildInsertQuery(connection, typeof(TEntity));
             LogQuery<TEntity>(sql);
             connection.Execute(sql, entities, transaction);
@@ -74,12 +68,6 @@ namespace Dommel
         /// <returns>The id of the inserted entity.</returns>
         public static async Task InsertAsyncAll<TEntity>(this IDbConnection connection, IEnumerable<TEntity> entities, IDbTransaction transaction = null) where TEntity : class
         {
-            var entity = entities.FirstOrDefault();
-            if (entity == null)
-            {
-                return;
-            }
-
             var sql = BuildInsertQuery(connection, typeof(TEntity));
             LogQuery<TEntity>(sql);
             await connection.ExecuteAsync(sql, entities);
