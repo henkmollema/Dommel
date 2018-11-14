@@ -13,7 +13,6 @@ function Exec
 
 if(Test-Path .\src\Dommel\artifacts) { Remove-Item .\src\Dommel\artifacts -Force -Recurse }
 
-exec { & dotnet --info }
 exec { & dotnet restore }
 
 $branch = @{ $true = $env:APPVEYOR_REPO_BRANCH; $false = $(git symbolic-ref --short -q HEAD) }[$env:APPVEYOR_REPO_BRANCH -ne $NULL];
