@@ -14,7 +14,7 @@ namespace Dommel
         private static readonly ConcurrentDictionary<Type, string> _insertQueryCache = new ConcurrentDictionary<Type, string>();
 
         /// <summary>
-        /// Inserts the specified entity into the database and returns the id.
+        /// Inserts the specified entity into the database and returns the ID.
         /// </summary>
         /// <typeparam name="TEntity">The type of the entity.</typeparam>
         /// <param name="connection">The connection to the database. This can either be open or closed.</param>
@@ -29,18 +29,60 @@ namespace Dommel
         }
 
         /// <summary>
-        /// Inserts the specified entity into the database and returns the id.
+        /// Inserts the specified entity into the database and returns the ID.
         /// </summary>
         /// <typeparam name="TEntity">The type of the entity.</typeparam>
         /// <param name="connection">The connection to the database. This can either be open or closed.</param>
         /// <param name="entity">The entity to be inserted.</param>
         /// <param name="transaction">Optional transaction for the command.</param>
-        /// <returns>The id of the inserted entity.</returns>
+        /// <returns>The ID of the inserted entity.</returns>
         public static Task<object> InsertAsync<TEntity>(this IDbConnection connection, TEntity entity, IDbTransaction transaction = null) where TEntity : class
         {
             var sql = BuildInsertQuery(connection, typeof(TEntity));
             LogQuery<TEntity>(sql);
             return connection.ExecuteScalarAsync(sql, entity, transaction);
+        }
+
+        /// <summary>
+        /// Inserts the specified collection of entities into the database.
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the entity.</typeparam>
+        /// <param name="connection">The connection to the database. This can either be open or closed.</param>
+        /// <param name="entities">The entities to be inserted.</param>
+        /// <param name="transaction">Optional transaction for the command.</param>
+        /// <returns>The id of the inserted entity.</returns>
+        public static void InsertAll<TEntity>(this IDbConnection connection, IEnumerable<TEntity> entities, IDbTransaction transaction = null) where TEntity : class
+        {
+            var entity = entities.FirstOrDefault();
+            if (entity == null)
+            {
+                return;
+            }
+
+            var sql = BuildInsertQuery(connection, typeof(TEntity));
+            LogQuery<TEntity>(sql);
+            connection.Execute(sql, entities, transaction);
+        }
+
+        /// <summary>
+        /// Inserts the specified collection of entities into the database.
+        /// </summary>
+        /// <typeparam name="TEntity">The type of the entity.</typeparam>
+        /// <param name="connection">The connection to the database. This can either be open or closed.</param>
+        /// <param name="entities">The entities to be inserted.</param>
+        /// <param name="transaction">Optional transaction for the command.</param>
+        /// <returns>The id of the inserted entity.</returns>
+        public static async Task InsertAsyncAll<TEntity>(this IDbConnection connection, IEnumerable<TEntity> entities, IDbTransaction transaction = null) where TEntity : class
+        {
+            var entity = entities.FirstOrDefault();
+            if (entity == null)
+            {
+                return;
+            }
+
+            var sql = BuildInsertQuery(connection, typeof(TEntity));
+            LogQuery<TEntity>(sql);
+            await connection.ExecuteAsync(sql, entities);
         }
 
         private static string BuildInsertQuery(IDbConnection connection, Type type)
