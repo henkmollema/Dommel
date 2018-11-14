@@ -30,7 +30,7 @@ namespace Dommel.Tests
             Assert.Single(logs);
             Assert.Equal("Get<Foo>: select * from Foos where Id = @Id", logs[0]);
         }
-        
+
         [Fact]
         public void GetByIdsLogsSql()
         {
@@ -87,8 +87,8 @@ namespace Dommel.Tests
             DommelMapper.GetSqlBuilder(mock.Object);
 
             // Assert
-            Assert.Single(logs);
-            Assert.Equal("Selected SQL Builder 'SqlServerSqlBuilder' for connection type 'IDbConnectionProxy'", logs[0]);
+            Assert.True(logs.Count > 0);
+            Assert.Contains("Selected SQL Builder 'SqlServerSqlBuilder' for connection type 'IDbConnectionProxy'", logs);
         }
     }
 

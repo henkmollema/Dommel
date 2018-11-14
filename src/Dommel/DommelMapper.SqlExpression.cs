@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -18,6 +19,21 @@ namespace Dommel
             private readonly StringBuilder _whereBuilder = new StringBuilder();
             private readonly DynamicParameters _parameters = new DynamicParameters();
             private int _parameterIndex;
+
+            /// <summary>
+            /// Initializes a new instance of the <see cref="SqlExpression{TEntity}"/>
+            /// class using the specified <see cref="ISqlBuilder"/>.
+            /// </summary>
+            /// <param name="sqlBuilder">The <see cref="ISqlBuilder"/> instance.</param>
+            public SqlExpression(ISqlBuilder sqlBuilder)
+            {
+                SqlBuilder = sqlBuilder;
+            }
+
+            /// <summary>
+            /// Gets the <see cref="ISqlBuilder"/> instance used to build queries with.
+            /// </summary>
+            public ISqlBuilder SqlBuilder { get; }
 
             /// <summary>
             /// Builds a SQL expression for the specified filter expression.
@@ -317,7 +333,8 @@ namespace Dommel
             /// </summary>
             /// <param name="expression">The member expression.</param>
             /// <returns>The result of the processing.</returns>
-            protected virtual string MemberToColumn(MemberExpression expression) => Resolvers.Column((PropertyInfo)expression.Member);
+            protected virtual string MemberToColumn(MemberExpression expression) =>
+                Resolvers.Column((PropertyInfo)expression.Member, SqlBuilder);
 
             /// <summary>
             /// Returns the expression operand for the specified expression type.

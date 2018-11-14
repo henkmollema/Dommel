@@ -25,10 +25,7 @@ namespace Dommel
         /// Example: <c>typeof(SqlConnection)</c>.
         /// </param>
         /// <param name="builder">An implementation of the <see cref="ISqlBuilder"/> interface.</param>
-        public static void AddSqlBuilder(Type connectionType, ISqlBuilder builder)
-        {
-            _sqlBuilders[connectionType.Name.ToLower()] = builder;
-        }
+        public static void AddSqlBuilder(Type connectionType, ISqlBuilder builder) => _sqlBuilders[connectionType.Name.ToLower()] = builder;
 
         /// <summary>
         /// Gets the configured <see cref="ISqlBuilder"/> for the specified <see cref="IDbConnection"/> instance.
@@ -38,7 +35,7 @@ namespace Dommel
         public static ISqlBuilder GetSqlBuilder(IDbConnection connection)
         {
             var connectionTypeName = connection.GetType().Name;
-            var builder =_sqlBuilders.TryGetValue(connectionTypeName.ToLower(), out var b) ? b : new SqlServerSqlBuilder();
+            var builder = _sqlBuilders.TryGetValue(connectionTypeName.ToLower(), out var b) ? b : new SqlServerSqlBuilder();
             LogReceived?.Invoke($"Selected SQL Builder '{builder.GetType().Name}' for connection type '{connectionTypeName}'");
             return builder;
         }
@@ -70,6 +67,13 @@ namespace Dommel
             /// <param name="pageSize">The page size.</param>
             /// <returns>The paging part of a query.</returns>
             string BuildPaging(string orderBy, int pageNumber, int pageSize);
+
+            /// <summary>
+            /// Adds quotes around (or at the start) of an identifier such as a table or column name.
+            /// </summary>
+            /// <param name="identifier">The identifier add quotes around. E.g. a table or column name.</param>
+            /// <returns>The quoted <paramref name="identifier"/>.</returns>
+            string QuoteIdentifier(string identifier);
         }
     }
 }

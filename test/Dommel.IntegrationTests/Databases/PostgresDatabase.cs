@@ -23,7 +23,6 @@ namespace Dommel.IntegrationTests
 
         public override async Task CreateDatabase()
         {
-            DommelMapper.EscapeCharacterStart = DommelMapper.EscapeCharacterEnd = '"';
             using (var con = GetConnection(TempDbDatabaseName))
             {
                 try
@@ -67,8 +66,6 @@ DROP TABLE ""Orders"";
 DROP TABLE ""OrderLines"";");
                 con.Close();
             }
-
-            DommelMapper.EscapeCharacterStart = DommelMapper.EscapeCharacterEnd = default;
         }
     }
 }

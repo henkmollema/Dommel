@@ -17,8 +17,8 @@ namespace Dommel
 
                 if (keyProperty != null)
                 {
-                    var keyColumnName = Resolvers.Column(keyProperty);
-
+                    // We know it's Postgres here
+                    var keyColumnName = Resolvers.Column(keyProperty, new PostgresSqlBuilder());
                     sql += " RETURNING " + keyColumnName;
                 }
                 else
@@ -36,6 +36,9 @@ namespace Dommel
                 var start = pageNumber >= 1 ? (pageNumber - 1) * pageSize : 0;
                 return $" {orderBy} OFFSET {start} LIMIT {pageSize}";
             }
+
+            /// <inheritdoc/>
+            public string QuoteIdentifier(string identifier) => $"\"{identifier}\"";
         }
     }
 }

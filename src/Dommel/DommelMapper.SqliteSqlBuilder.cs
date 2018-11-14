@@ -21,6 +21,9 @@ namespace Dommel
                 var start = pageNumber >= 1 ? (pageNumber - 1) * pageSize : 0;
                 return $" {orderBy} LIMIT {start}, {pageSize}";
             }
+
+            /// <inheritdoc/>
+            public string QuoteIdentifier(string identifier) => identifier;
         }
     }
 }

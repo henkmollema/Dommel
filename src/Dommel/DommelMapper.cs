@@ -11,13 +11,14 @@ namespace Dommel
         /// <summary>
         /// The escape character to use for escaping the start of column and table names in queries.
         /// </summary>
+        [Obsolete("Escape chars are obsolete and set by default in the ISqlBuilder. They will be removed in the 2.0 release.")]
         public static char EscapeCharacterStart;
 
         /// <summary>
         /// The escape character to use for escaping the end of column and table names in queries.
         /// </summary>
+        [Obsolete("Escape chars are obsolete and set by default in the ISqlBuilder. They will be removed in the 2.0 release.")]
         public static char EscapeCharacterEnd;
-
         /// <summary>
         /// A callback which gets invoked when queries and other information are logged.
         /// </summary>

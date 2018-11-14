@@ -78,7 +78,7 @@ namespace Dommel
             var cacheKey = $"{connection.GetType().Name}.{type.Name}";
             if (!_insertQueryCache.TryGetValue(cacheKey, out var sql))
             {
-                var tableName = Resolvers.Table(type);
+                var tableName = Resolvers.Table(type, connection);
                 var keyProperty = Resolvers.KeyProperty(type, out var isIdentity);
 
                 var typeProperties = new List<PropertyInfo>();
@@ -99,7 +99,7 @@ namespace Dommel
                     }
                 }
 
-                var columnNames = typeProperties.Select(Resolvers.Column).ToArray();
+                var columnNames = typeProperties.Select(p => Resolvers.Column(p, connection)).ToArray();
                 var paramNames = typeProperties.Select(p => "@" + p.Name).ToArray();
 
                 var builder = GetSqlBuilder(connection);

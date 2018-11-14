@@ -10,10 +10,8 @@ namespace Dommel
         public sealed class SqlServerCeSqlBuilder : ISqlBuilder
         {
             /// <inheritdoc/>
-            public string BuildInsert(string tableName, string[] columnNames, string[] paramNames, PropertyInfo keyProperty)
-            {
-                return $"insert into {tableName} ({string.Join(", ", columnNames)}) values ({string.Join(", ", paramNames)}) select cast(@@IDENTITY as int)";
-            }
+            public string BuildInsert(string tableName, string[] columnNames, string[] paramNames, PropertyInfo keyProperty) =>
+                $"insert into {tableName} ({string.Join(", ", columnNames)}) values ({string.Join(", ", paramNames)}) select cast(@@IDENTITY as int)";
 
             /// <inheritdoc/>
             public string BuildPaging(string orderBy, int pageNumber, int pageSize)
@@ -21,6 +19,9 @@ namespace Dommel
                 var start = pageNumber >= 1 ? (pageNumber - 1) * pageSize : 0;
                 return $" {orderBy} offset {start} rows fetch next {pageSize} rows only";
             }
+
+            /// <inheritdoc/>
+            public string QuoteIdentifier(string identifier) => identifier;
         }
     }
 }
