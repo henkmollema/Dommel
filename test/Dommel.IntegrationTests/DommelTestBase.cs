@@ -51,13 +51,14 @@ namespace Dommel.IntegrationTests
                         new Product { CategoryId = categoryId, Name = "Chef Anton's Cajun Seasoning 2" },
                         new Product { CategoryId = categoryId, Name = "Chef Anton's Gumbo Mix 2" },
 
-                        new Product { CategoryId = categoryId, Name = "Chai 3" },
-                        new Product { CategoryId = categoryId, Name = "Chang 3" },
-                        new Product { CategoryId = categoryId, Name = "Aniseed Syrup 3" },
+                        new Product { Name = "Foo" }, // 11
+                        new Product { Name = "Bar" }, // 12
+                        new Product { Name = "Baz" }, // 13
                     };
 
-                    await connection.InsertAsyncAll(products);
+                    await connection.InsertAllAsync(products);
 
+                    // Order 1
                     var orderId = Convert.ToInt32(await connection.InsertAsync(new Order()));
                     var orderLines = new List<OrderLine>
                     {
@@ -65,7 +66,10 @@ namespace Dommel.IntegrationTests
                         new OrderLine { OrderId = orderId, Line = "Line 2"},
                         new OrderLine { OrderId = orderId, Line = "Line 3"},
                     };
-                    await connection.InsertAsyncAll(orderLines);
+                    await connection.InsertAllAsync(orderLines);
+
+                    // Order 2
+                    _ = await connection.InsertAsync(new Order());
                 }
             }
         }
