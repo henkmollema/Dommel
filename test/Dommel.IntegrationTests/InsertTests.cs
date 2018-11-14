@@ -83,7 +83,7 @@ namespace Dommel.IntegrationTests
                     new Product { Name = "blah"},
                 };
 
-                await con.InsertAsyncAll(ps);
+                await con.InsertAllAsync(ps);
 
                 var blahs = await con.SelectAsync<Product>(p => p.Name == "blah");
                 Assert.Equal(3, blahs.Count());
@@ -106,7 +106,7 @@ namespace Dommel.IntegrationTests
             using (var con = GetConnection())
             {
                 var ps = new List<Product>();
-                await con.InsertAsyncAll(ps);
+                await con.InsertAllAsync(ps);
             }
         }
     }
