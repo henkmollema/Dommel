@@ -11,7 +11,7 @@ namespace Dommel
 {
     public static partial class DommelMapper
     {
-        private static readonly ConcurrentDictionary<Type, string> _insertQueryCache = new ConcurrentDictionary<Type, string>();
+        private static readonly ConcurrentDictionary<string, string> _insertQueryCache = new ConcurrentDictionary<string, string>();
 
         /// <summary>
         /// Inserts the specified entity into the database and returns the ID.
@@ -75,7 +75,8 @@ namespace Dommel
 
         private static string BuildInsertQuery(IDbConnection connection, Type type)
         {
-            if (!_insertQueryCache.TryGetValue(type, out var sql))
+            var cacheKey = $"{connection.GetType().Name}.{type.Name}";
+            if (!_insertQueryCache.TryGetValue(cacheKey, out var sql))
             {
                 var tableName = Resolvers.Table(type);
                 var keyProperty = Resolvers.KeyProperty(type, out var isIdentity);
@@ -104,7 +105,7 @@ namespace Dommel
                 var builder = GetSqlBuilder(connection);
                 sql = builder.BuildInsert(tableName, columnNames, paramNames, keyProperty);
 
-                _insertQueryCache.TryAdd(type, sql);
+                _insertQueryCache.TryAdd(cacheKey, sql);
             }
 
             return sql;
