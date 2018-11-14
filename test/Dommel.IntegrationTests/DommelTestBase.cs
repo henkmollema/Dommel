@@ -4,11 +4,10 @@ using System.Data.Common;
 using System.Threading.Tasks;
 using Xunit;
 
-[assembly: CollectionBehavior(DisableTestParallelization = true)]
+[assembly: CollectionBehavior(CollectionBehavior.CollectionPerAssembly, DisableTestParallelization = true)]
 
 namespace Dommel.IntegrationTests
 {
-    [Collection("IntegrationTests")]
     public abstract class DommelTestBase : IAsyncLifetime
     {
         public DommelTestBase(Database database)
