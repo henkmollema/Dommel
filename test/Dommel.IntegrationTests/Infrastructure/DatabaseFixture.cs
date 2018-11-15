@@ -7,15 +7,15 @@ namespace Dommel.IntegrationTests
 {
     public class DatabaseFixture : IAsyncLifetime
     {
-        private readonly Database[] _databases;
+        private readonly DatabaseDriver[] _databases;
 
         public DatabaseFixture()
         {
             // Extract the
             _databases = new DatabaseTestData()
                 .Select(x => x[0])
-                .OfType<Database>()
-                .OfType<Database>()
+                .OfType<DatabaseDriver>()
+                .OfType<DatabaseDriver>()
                 .ToArray();
 
             if (_databases.Length == 0)

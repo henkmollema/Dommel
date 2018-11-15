@@ -8,7 +8,7 @@ namespace Dommel.IntegrationTests
     {
         [Theory]
         [ClassData(typeof(DatabaseTestData))]
-        public void OneToOne(Database database)
+        public void OneToOne(DatabaseDriver database)
         {
             using (var con = database.GetConnection())
             {
@@ -22,7 +22,7 @@ namespace Dommel.IntegrationTests
 
         [Theory]
         [ClassData(typeof(DatabaseTestData))]
-        public void OneToOneNotExisting(Database database)
+        public void OneToOneNotExisting(DatabaseDriver database)
         {
             using (var con = database.GetConnection())
             {
@@ -34,7 +34,7 @@ namespace Dommel.IntegrationTests
 
         [Theory]
         [ClassData(typeof(DatabaseTestData))]
-        public void OneToMany(Database database)
+        public void OneToMany(DatabaseDriver database)
         {
             using (var con = database.GetConnection())
             {
@@ -47,7 +47,7 @@ namespace Dommel.IntegrationTests
 
         [Theory]
         [ClassData(typeof(DatabaseTestData))]
-        public void OneToManyNonExsting(Database database)
+        public void OneToManyNonExsting(DatabaseDriver database)
         {
             using (var con = database.GetConnection())
             {
@@ -59,7 +59,7 @@ namespace Dommel.IntegrationTests
 
         [Theory]
         [ClassData(typeof(DatabaseTestData))]
-        public async Task OneToOneAsync(Database database)
+        public async Task OneToOneAsync(DatabaseDriver database)
         {
             using (var con = database.GetConnection())
             {
@@ -73,7 +73,7 @@ namespace Dommel.IntegrationTests
 
         [Theory]
         [ClassData(typeof(DatabaseTestData))]
-        public async Task OneToOneNotExistingAsync(Database database)
+        public async Task OneToOneNotExistingAsync(DatabaseDriver database)
         {
             using (var con = database.GetConnection())
             {
@@ -85,7 +85,7 @@ namespace Dommel.IntegrationTests
 
         [Theory]
         [ClassData(typeof(DatabaseTestData))]
-        public async Task OneToManyAsync(Database database)
+        public async Task OneToManyAsync(DatabaseDriver database)
         {
             using (var con = database.GetConnection())
             {
@@ -98,7 +98,7 @@ namespace Dommel.IntegrationTests
 
         [Theory]
         [ClassData(typeof(DatabaseTestData))]
-        public async Task OneToManyNonExstingAsync(Database database)
+        public async Task OneToManyNonExstingAsync(DatabaseDriver database)
         {
             using (var con = database.GetConnection())
             {

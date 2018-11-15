@@ -8,7 +8,7 @@ namespace Dommel.IntegrationTests
     {
         [Theory]
         [ClassData(typeof(DatabaseTestData))]
-        public void SelectEqual(Database database)
+        public void SelectEqual(DatabaseDriver database)
         {
             using (var con = database.GetConnection())
             {
@@ -19,7 +19,7 @@ namespace Dommel.IntegrationTests
 
         [Theory]
         [ClassData(typeof(DatabaseTestData))]
-        public async Task SelectAsyncEqual(Database database)
+        public async Task SelectAsyncEqual(DatabaseDriver database)
         {
             using (var con = database.GetConnection())
             {
@@ -30,7 +30,7 @@ namespace Dommel.IntegrationTests
 
         [Theory]
         [ClassData(typeof(DatabaseTestData))]
-        public void SelectContains(Database database)
+        public void SelectContains(DatabaseDriver database)
         {
             using (var con = database.GetConnection())
             {
@@ -41,7 +41,7 @@ namespace Dommel.IntegrationTests
 
         [Theory]
         [ClassData(typeof(DatabaseTestData))]
-        public async Task SelectAsyncContains(Database database)
+        public async Task SelectAsyncContains(DatabaseDriver database)
         {
             using (var con = database.GetConnection())
             {

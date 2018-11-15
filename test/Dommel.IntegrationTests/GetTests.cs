@@ -8,7 +8,7 @@ namespace Dommel.IntegrationTests
     {
         [Theory]
         [ClassData(typeof(DatabaseTestData))]
-        public void Get(Database database)
+        public void Get(DatabaseDriver database)
         {
             using (var con = database.GetConnection())
             {
@@ -20,7 +20,7 @@ namespace Dommel.IntegrationTests
 
         [Theory]
         [ClassData(typeof(DatabaseTestData))]
-        public async Task GetAsync(Database database)
+        public async Task GetAsync(DatabaseDriver database)
         {
             using (var con = database.GetConnection())
             {

@@ -5,7 +5,7 @@ using MySql.Data.MySqlClient;
 
 namespace Dommel.IntegrationTests
 {
-    public class MySqlDatabase : Database
+    public class MySqlDatabaseDriver : DatabaseDriver
     {
         public override DbConnection GetConnection(string databaseName)
         {

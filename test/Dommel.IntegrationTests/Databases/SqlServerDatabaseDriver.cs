@@ -5,7 +5,7 @@ using Dapper;
 
 namespace Dommel.IntegrationTests
 {
-    public class SqlServerDatabase : Database
+    public class SqlServerDatabaseDriver : DatabaseDriver
     {
         public override DbConnection GetConnection(string databaseName)
         {

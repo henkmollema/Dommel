@@ -9,7 +9,7 @@ namespace Dommel.IntegrationTests
     {
         [Theory]
         [ClassData(typeof(DatabaseTestData))]
-        public void Fetches_FirstPage(Database database)
+        public void Fetches_FirstPage(DatabaseDriver database)
         {
             using (var con = database.GetConnection())
             {
@@ -26,7 +26,7 @@ namespace Dommel.IntegrationTests
 
         [Theory]
         [ClassData(typeof(DatabaseTestData))]
-        public void Fetches_SecondPage(Database database)
+        public void Fetches_SecondPage(DatabaseDriver database)
         {
             using (var con = database.GetConnection())
             {
@@ -37,7 +37,7 @@ namespace Dommel.IntegrationTests
 
         [Theory]
         [ClassData(typeof(DatabaseTestData))]
-        public async Task Fetches_ThirdPartialPage(Database database)
+        public async Task Fetches_ThirdPartialPage(DatabaseDriver database)
         {
             using (var con = database.GetConnection())
             {
@@ -48,7 +48,7 @@ namespace Dommel.IntegrationTests
 
         [Theory]
         [ClassData(typeof(DatabaseTestData))]
-        public async Task SelectPaged_FetchesFirstPage(Database database)
+        public async Task SelectPaged_FetchesFirstPage(DatabaseDriver database)
         {
             using (var con = database.GetConnection())
             {

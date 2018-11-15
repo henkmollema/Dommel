@@ -7,7 +7,10 @@ using Dapper;
 
 namespace Dommel.IntegrationTests
 {
-    public abstract class Database
+    /// <summary>
+    /// Provides a driver to interact with a specific database system.
+    /// </summary>
+    public abstract class DatabaseDriver
     {
         protected static readonly bool IsAppVeyor = bool.TryParse(Environment.GetEnvironmentVariable("AppVeyor"), out var appVeyor) ? appVeyor : false;
 

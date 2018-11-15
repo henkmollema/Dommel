@@ -11,7 +11,7 @@ namespace Dommel.IntegrationTests
     {
         [Theory]
         [ClassData(typeof(DatabaseTestData))]
-        public void Delete(Database database)
+        public void Delete(DatabaseDriver database)
         {
             using (var con = database.GetConnection())
             {
@@ -28,7 +28,7 @@ namespace Dommel.IntegrationTests
 
         [Theory]
         [ClassData(typeof(DatabaseTestData))]
-        public async Task DeleteAsync(Database database)
+        public async Task DeleteAsync(DatabaseDriver database)
         {
             using (var con = database.GetConnection())
             {
@@ -45,7 +45,7 @@ namespace Dommel.IntegrationTests
 
         [Theory]
         [ClassData(typeof(DatabaseTestData))]
-        public void DeleteAll(Database database)
+        public void DeleteAll(DatabaseDriver database)
         {
             using (var con = database.GetConnection())
             {
@@ -56,7 +56,7 @@ namespace Dommel.IntegrationTests
 
         [Theory]
         [ClassData(typeof(DatabaseTestData))]
-        public async Task DeleteAllAsync(Database database)
+        public async Task DeleteAllAsync(DatabaseDriver database)
         {
             using (var con = database.GetConnection())
             {
@@ -67,7 +67,7 @@ namespace Dommel.IntegrationTests
 
         [Theory]
         [ClassData(typeof(DatabaseTestData))]
-        public void DeleteMultiple(Database database)
+        public void DeleteMultiple(DatabaseDriver database)
         {
             using (var con = database.GetConnection())
             {
@@ -88,7 +88,7 @@ namespace Dommel.IntegrationTests
 
         [Theory]
         [ClassData(typeof(DatabaseTestData))]
-        public async Task DeleteMultipleAsync(Database database)
+        public async Task DeleteMultipleAsync(DatabaseDriver database)
         {
             using (var con = database.GetConnection())
             {
@@ -109,7 +109,7 @@ namespace Dommel.IntegrationTests
 
         [Theory]
         [ClassData(typeof(DatabaseTestData))]
-        public void DeleteMultipleLike(Database database)
+        public void DeleteMultipleLike(DatabaseDriver database)
         {
             using (var con = database.GetConnection())
             {
@@ -130,7 +130,7 @@ namespace Dommel.IntegrationTests
 
         [Theory]
         [ClassData(typeof(DatabaseTestData))]
-        public async Task DeleteMultipleAsyncLike(Database database)
+        public async Task DeleteMultipleAsyncLike(DatabaseDriver database)
         {
             using (var con = database.GetConnection())
             {

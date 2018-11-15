@@ -6,7 +6,7 @@ using Npgsql;
 
 namespace Dommel.IntegrationTests
 {
-    public class PostgresDatabase : Database
+    public class PostgresDatabaseDriver : DatabaseDriver
     {
         public override DbConnection GetConnection(string databaseName)
         {

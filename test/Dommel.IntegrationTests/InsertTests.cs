@@ -11,7 +11,7 @@ namespace Dommel.IntegrationTests
     {
         [Theory]
         [ClassData(typeof(DatabaseTestData))]
-        public void Insert(Database database)
+        public void Insert(DatabaseDriver database)
         {
             using (var con = database.GetConnection())
             {
@@ -25,7 +25,7 @@ namespace Dommel.IntegrationTests
 
         [Theory]
         [ClassData(typeof(DatabaseTestData))]
-        public async Task InsertAsync(Database database)
+        public async Task InsertAsync(DatabaseDriver database)
         {
             using (var con = database.GetConnection())
             {
@@ -39,7 +39,7 @@ namespace Dommel.IntegrationTests
 
         [Theory]
         [ClassData(typeof(DatabaseTestData))]
-        public void InsertAll(Database database)
+        public void InsertAll(DatabaseDriver database)
         {
             using (var con = database.GetConnection())
             {
@@ -59,7 +59,7 @@ namespace Dommel.IntegrationTests
 
         [Theory]
         [ClassData(typeof(DatabaseTestData))]
-        public async Task InsertAllAsync(Database database)
+        public async Task InsertAllAsync(DatabaseDriver database)
         {
             using (var con = database.GetConnection())
             {
@@ -79,7 +79,7 @@ namespace Dommel.IntegrationTests
 
         [Theory]
         [ClassData(typeof(DatabaseTestData))]
-        public void InsertAllEmtyList(Database database)
+        public void InsertAllEmtyList(DatabaseDriver database)
         {
             using (var con = database.GetConnection())
             {
@@ -90,7 +90,7 @@ namespace Dommel.IntegrationTests
 
         [Theory]
         [ClassData(typeof(DatabaseTestData))]
-        public async Task InsertAllAsyncEmtyList(Database database)
+        public async Task InsertAllAsyncEmtyList(DatabaseDriver database)
         {
             using (var con = database.GetConnection())
             {
