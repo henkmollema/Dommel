@@ -3,30 +3,14 @@ using Xunit;
 
 namespace Dommel.IntegrationTests
 {
-    public class AutoMultiMapTestsSqlServer : AutoMultiMapTests, IClassFixture<SqlServerDatabase>
+    [Collection("Database")]
+    public class AutoMultiMapTests
     {
-        public AutoMultiMapTestsSqlServer(SqlServerDatabase database) : base(database)
+        [Theory]
+        [ClassData(typeof(DatabaseTestData))]
+        public void OneToOne(Database database)
         {
-        }
-    }
-
-    public class AutoMultiMapTestsMySql : AutoMultiMapTests, IClassFixture<MySqlDatabase>
-    {
-        public AutoMultiMapTestsMySql(MySqlDatabase database) : base(database)
-        {
-        }
-    }
-
-    public abstract class AutoMultiMapTests : DommelTestBase
-    {
-        public AutoMultiMapTests(Database database) : base(database)
-        {
-        }
-
-        [Fact]
-        public void OneToOne()
-        {
-            using (var con = GetConnection())
+            using (var con = database.GetConnection())
             {
                 var product = con.Get<Product, Category, Product>(1);
                 Assert.NotNull(product);
@@ -36,10 +20,11 @@ namespace Dommel.IntegrationTests
             }
         }
 
-        [Fact]
-        public void OneToOneNotExisting()
+        [Theory]
+        [ClassData(typeof(DatabaseTestData))]
+        public void OneToOneNotExisting(Database database)
         {
-            using (var con = GetConnection())
+            using (var con = database.GetConnection())
             {
                 var product = con.Get<Product, Category, Product>(11);
                 Assert.NotNull(product);
@@ -47,10 +32,11 @@ namespace Dommel.IntegrationTests
             }
         }
 
-        [Fact]
-        public void OneToMany()
+        [Theory]
+        [ClassData(typeof(DatabaseTestData))]
+        public void OneToMany(Database database)
         {
-            using (var con = GetConnection())
+            using (var con = database.GetConnection())
             {
                 var order = con.Get<Order, OrderLine, Order>(1);
                 Assert.NotNull(order);
@@ -59,10 +45,11 @@ namespace Dommel.IntegrationTests
             }
         }
 
-        [Fact]
-        public void OneToManyNonExsting()
+        [Theory]
+        [ClassData(typeof(DatabaseTestData))]
+        public void OneToManyNonExsting(Database database)
         {
-            using (var con = GetConnection())
+            using (var con = database.GetConnection())
             {
                 var order = con.Get<Order, OrderLine, Order>(2);
                 Assert.NotNull(order);
@@ -70,10 +57,11 @@ namespace Dommel.IntegrationTests
             }
         }
 
-        [Fact]
-        public async Task OneToOneAsync()
+        [Theory]
+        [ClassData(typeof(DatabaseTestData))]
+        public async Task OneToOneAsync(Database database)
         {
-            using (var con = GetConnection())
+            using (var con = database.GetConnection())
             {
                 var product = await con.GetAsync<Product, Category, Product>(1);
                 Assert.NotNull(product);
@@ -83,10 +71,11 @@ namespace Dommel.IntegrationTests
             }
         }
 
-        [Fact]
-        public async Task OneToOneNotExistingAsync()
+        [Theory]
+        [ClassData(typeof(DatabaseTestData))]
+        public async Task OneToOneNotExistingAsync(Database database)
         {
-            using (var con = GetConnection())
+            using (var con = database.GetConnection())
             {
                 var product = await con.GetAsync<Product, Category, Product>(11);
                 Assert.NotNull(product);
@@ -94,10 +83,11 @@ namespace Dommel.IntegrationTests
             }
         }
 
-        [Fact]
-        public async Task OneToManyAsync()
+        [Theory]
+        [ClassData(typeof(DatabaseTestData))]
+        public async Task OneToManyAsync(Database database)
         {
-            using (var con = GetConnection())
+            using (var con = database.GetConnection())
             {
                 var order = await con.GetAsync<Order, OrderLine, Order>(1);
                 Assert.NotNull(order);
@@ -106,10 +96,11 @@ namespace Dommel.IntegrationTests
             }
         }
 
-        [Fact]
-        public async Task OneToManyNonExstingAsync()
+        [Theory]
+        [ClassData(typeof(DatabaseTestData))]
+        public async Task OneToManyNonExstingAsync(Database database)
         {
-            using (var con = GetConnection())
+            using (var con = database.GetConnection())
             {
                 var order = await con.GetAsync<Order, OrderLine, Order>(2);
                 Assert.NotNull(order);

@@ -21,7 +21,7 @@ namespace Dommel.IntegrationTests
 
         private static readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1);
 
-        public override async Task CreateDatabase()
+        protected override async Task CreateDatabase()
         {
             using (var con = GetConnection(TempDbDatabaseName))
             {
@@ -38,7 +38,7 @@ namespace Dommel.IntegrationTests
             }
         }
 
-        public override async Task<bool> CreateTables()
+        protected override async Task<bool> CreateTables()
         {
             using (var con = GetConnection(DefaultDatabaseName))
             {
@@ -47,7 +47,9 @@ SELECT * FROM information_schema.tables where table_name = 'Products' LIMIT 1;
 CREATE TABLE IF NOT EXISTS ""Categories"" (""Id"" serial primary key, ""Name"" VARCHAR(255));
 CREATE TABLE IF NOT EXISTS ""Products"" (""Id"" serial primary key, ""CategoryId"" int, ""Name"" VARCHAR(255));
 CREATE TABLE IF NOT EXISTS ""Orders"" (""Id"" serial primary key, ""Created"" TIMESTAMP NOT NULL);
-CREATE TABLE IF NOT EXISTS ""OrderLines"" (""Id"" serial primary key, ""OrderId"" int, ""Line"" VARCHAR(255));";
+CREATE TABLE IF NOT EXISTS ""OrderLines"" (""Id"" serial primary key, ""OrderId"" int, ""Line"" VARCHAR(255));
+CREATE TABLE IF NOT EXISTS ""Foos"" (""Id"" serial primary key, ""Name"" VARCHAR(255));
+CREATE TABLE IF NOT EXISTS ""Bars"" (""Id"" serial primary key, ""Name"" VARCHAR(255));";
                 var created = await con.ExecuteScalarAsync(sql);
 
                 // No result means the tables were just created
@@ -55,7 +57,7 @@ CREATE TABLE IF NOT EXISTS ""OrderLines"" (""Id"" serial primary key, ""OrderId"
             }
         }
 
-        public override async Task DropTables()
+        protected override async Task DropTables()
         {
             using (var con = GetConnection(DefaultDatabaseName))
             {

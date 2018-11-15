@@ -6,30 +6,14 @@ using Xunit;
 
 namespace Dommel.IntegrationTests
 {
-    public class InsertTestsSqlServer : InsertTests, IClassFixture<SqlServerDatabase>
+    [Collection("Database")]
+    public class InsertTests
     {
-        public InsertTestsSqlServer(SqlServerDatabase database) : base(database)
+        [Theory]
+        [ClassData(typeof(DatabaseTestData))]
+        public void Insert(Database database)
         {
-        }
-    }
-
-    public class InsertTestsMySql : InsertTests, IClassFixture<MySqlDatabase>
-    {
-        public InsertTestsMySql(MySqlDatabase database) : base(database)
-        {
-        }
-    }
-
-    public abstract class InsertTests : DommelTestBase
-    {
-        public InsertTests(Database database) : base(database)
-        {
-        }
-
-        [Fact]
-        public void Insert()
-        {
-            using (var con = GetConnection())
+            using (var con = database.GetConnection())
             {
                 var id = Convert.ToInt32(con.Insert(new Product { Name = "blah" }));
                 var product = con.Get<Product>(id);
@@ -39,10 +23,11 @@ namespace Dommel.IntegrationTests
             }
         }
 
-        [Fact]
-        public async Task InsertAsync()
+        [Theory]
+        [ClassData(typeof(DatabaseTestData))]
+        public async Task InsertAsync(Database database)
         {
-            using (var con = GetConnection())
+            using (var con = database.GetConnection())
             {
                 var id = Convert.ToInt32(await con.InsertAsync(new Product { Name = "blah" }));
                 var product = await con.GetAsync<Product>(id);
@@ -52,58 +37,62 @@ namespace Dommel.IntegrationTests
             }
         }
 
-        [Fact]
-        public void InsertAll()
+        [Theory]
+        [ClassData(typeof(DatabaseTestData))]
+        public void InsertAll(Database database)
         {
-            using (var con = GetConnection())
+            using (var con = database.GetConnection())
             {
-                var ps = new List<Product>
+                var ps = new List<Foo>
                 {
-                    new Product { Name = "blah"},
-                    new Product { Name = "blah"},
-                    new Product { Name = "blah"},
+                    new Foo { Name = "blah" },
+                    new Foo { Name = "blah" },
+                    new Foo { Name = "blah" },
                 };
 
                 con.InsertAll(ps);
 
-                var blahs = con.Select<Product>(p => p.Name == "blah");
+                var blahs = con.Select<Foo>(p => p.Name == "blah");
                 Assert.Equal(3, blahs.Count());
             }
         }
 
-        [Fact]
-        public async Task InsertAllAsync()
+        [Theory]
+        [ClassData(typeof(DatabaseTestData))]
+        public async Task InsertAllAsync(Database database)
         {
-            using (var con = GetConnection())
+            using (var con = database.GetConnection())
             {
-                var ps = new List<Product>
+                var ps = new List<Bar>
                 {
-                    new Product { Name = "blah"},
-                    new Product { Name = "blah"},
-                    new Product { Name = "blah"},
+                    new Bar { Name = "blah" },
+                    new Bar { Name = "blah" },
+                    new Bar { Name = "blah" },
                 };
 
                 await con.InsertAllAsync(ps);
 
-                var blahs = await con.SelectAsync<Product>(p => p.Name == "blah");
+                var blahs = await con.SelectAsync<Bar>(p => p.Name == "blah");
                 Assert.Equal(3, blahs.Count());
             }
         }
 
-        [Fact]
-        public void InsertAllEmtyList()
+        [Theory]
+        [ClassData(typeof(DatabaseTestData))]
+        public void InsertAllEmtyList(Database database)
         {
-            using (var con = GetConnection())
+            using (var con = database.GetConnection())
             {
                 var ps = new List<Product>();
                 con.InsertAll(ps);
             }
         }
 
-        [Fact]
-        public async Task InsertAllAsyncEmtyList()
+        [Theory]
+        [ClassData(typeof(DatabaseTestData))]
+        public async Task InsertAllAsyncEmtyList(Database database)
         {
-            using (var con = GetConnection())
+            using (var con = database.GetConnection())
             {
                 var ps = new List<Product>();
                 await con.InsertAllAsync(ps);

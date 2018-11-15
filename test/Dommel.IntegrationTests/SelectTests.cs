@@ -3,60 +3,47 @@ using Xunit;
 
 namespace Dommel.IntegrationTests
 {
-    public class SelectTestsSqlServer : SelectTests, IClassFixture<SqlServerDatabase>
+    [Collection("Database")]
+    public class SelectTests
     {
-        public SelectTestsSqlServer(SqlServerDatabase database) : base(database)
+        [Theory]
+        [ClassData(typeof(DatabaseTestData))]
+        public void SelectEqual(Database database)
         {
-        }
-    }
-
-    public class SelectTestsMySql : SelectTests, IClassFixture<MySqlDatabase>
-    {
-        public SelectTestsMySql(MySqlDatabase database) : base(database)
-        {
-        }
-    }
-
-    public abstract class SelectTests : DommelTestBase
-    {
-        public SelectTests(Database database) : base(database)
-        {
-        }
-
-        [Fact]
-        public void SelectEqual()
-        {
-            using (var con = GetConnection())
+            using (var con = database.GetConnection())
             {
                 var products = con.Select<Product>(p => p.CategoryId == 1);
                 Assert.NotEmpty(products);
             }
         }
 
-        [Fact]
-        public async Task SelectAsyncEqual()
+        [Theory]
+        [ClassData(typeof(DatabaseTestData))]
+        public async Task SelectAsyncEqual(Database database)
         {
-            using (var con = GetConnection())
+            using (var con = database.GetConnection())
             {
                 var products = await con.SelectAsync<Product>(p => p.CategoryId == 1);
                 Assert.NotEmpty(products);
             }
         }
 
-        [Fact]
-        public void SelectContains()
+        [Theory]
+        [ClassData(typeof(DatabaseTestData))]
+        public void SelectContains(Database database)
         {
-            using (var con = GetConnection())
+            using (var con = database.GetConnection())
             {
                 var products = con.Select<Product>(p => p.Name.Contains("Chai"));
                 Assert.NotEmpty(products);
             }
         }
 
-        [Fact]
-        public async Task SelectAsyncContains()
+        [Theory]
+        [ClassData(typeof(DatabaseTestData))]
+        public async Task SelectAsyncContains(Database database)
         {
-            using (var con = GetConnection())
+            using (var con = database.GetConnection())
             {
                 var products = await con.SelectAsync<Product>(p => p.Name.Contains("Chai"));
                 Assert.NotEmpty(products);

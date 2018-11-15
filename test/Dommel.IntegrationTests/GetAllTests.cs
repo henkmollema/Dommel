@@ -3,30 +3,14 @@ using Xunit;
 
 namespace Dommel.IntegrationTests
 {
-    public class GetAllTestsSqlServer : GetAllTests, IClassFixture<SqlServerDatabase>
+    [Collection("Database")]
+    public class GetAllTests
     {
-        public GetAllTestsSqlServer(SqlServerDatabase database) : base(database)
+        [Theory]
+        [ClassData(typeof(DatabaseTestData))]
+        public void GetAll(Database database)
         {
-        }
-    }
-
-    public class GetAllTestsMySql : GetAllTests, IClassFixture<MySqlDatabase>
-    {
-        public GetAllTestsMySql(MySqlDatabase database) : base(database)
-        {
-        }
-    }
-
-    public abstract class GetAllTests : DommelTestBase
-    {
-        public GetAllTests(Database database) : base(database)
-        {
-        }
-
-        [Fact]
-        public void GetAll()
-        {
-            using (var con = GetConnection())
+            using (var con = database.GetConnection())
             {
                 var products = con.GetAll<Product>();
                 Assert.NotEmpty(products);
@@ -34,10 +18,11 @@ namespace Dommel.IntegrationTests
             }
         }
 
-        [Fact]
-        public async Task GetAllAsync()
+        [Theory]
+        [ClassData(typeof(DatabaseTestData))]
+        public async Task GetAllAsync(Database database)
         {
-            using (var con = GetConnection())
+            using (var con = database.GetConnection())
             {
                 var products = await con.GetAllAsync<Product>();
                 Assert.NotEmpty(products);

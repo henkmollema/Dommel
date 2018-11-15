@@ -3,39 +3,24 @@ using Xunit;
 
 namespace Dommel.IntegrationTests
 {
-    public class SampleTestsSqlServer : SampleTests, IClassFixture<SqlServerDatabase>
+    [Collection("Database")]
+    public class SampleTests
     {
-        public SampleTestsSqlServer(SqlServerDatabase database) : base(database)
+        [Theory]
+        [ClassData(typeof(DatabaseTestData))]
+        public void Sample(Database database)
         {
-        }
-    }
-
-    public class SampleTestsMySql : SampleTests, IClassFixture<MySqlDatabase>
-    {
-        public SampleTestsMySql(MySqlDatabase database) : base(database)
-        {
-        }
-    }
-
-    public abstract class SampleTests : DommelTestBase
-    {
-        public SampleTests(Database database) : base(database)
-        {
-        }
-
-        [Fact]
-        public void Sample()
-        {
-            using (var con = GetConnection())
+            using (var con = database.GetConnection())
             {
                 _ = con.GetAll<Product>();
             }
         }
 
-        [Fact]
-        public async Task SampleAsync()
+        [Theory]
+        [ClassData(typeof(DatabaseTestData))]
+        public async Task SampleAsync(Database database)
         {
-            using (var con = GetConnection())
+            using (var con = database.GetConnection())
             {
                 _ = await con.GetAllAsync<Product>();
             }

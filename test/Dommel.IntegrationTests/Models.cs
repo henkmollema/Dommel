@@ -42,4 +42,18 @@ namespace Dommel.IntegrationTests
 
         public string Line { get; set; }
     }
+
+    public class Foo
+    {
+        public int Id { get; set; }
+
+        public string Name { get; set; } = nameof(Foo);
+    }
+
+    public class Bar
+    {
+        public int Id { get; set; }
+
+        public string Name { get; set; } = nameof(Bar);
+    }
 }

@@ -6,30 +6,14 @@ using Xunit;
 
 namespace Dommel.IntegrationTests
 {
-    public class DeleteTestsSqlServer : DeleteTests, IClassFixture<SqlServerDatabase>
+    [Collection("Database")]
+    public class DeleteTests
     {
-        public DeleteTestsSqlServer(SqlServerDatabase database) : base(database)
+        [Theory]
+        [ClassData(typeof(DatabaseTestData))]
+        public void Delete(Database database)
         {
-        }
-    }
-
-    public class DeleteTestsMySql : DeleteTests, IClassFixture<MySqlDatabase>
-    {
-        public DeleteTestsMySql(MySqlDatabase database) : base(database)
-        {
-        }
-    }
-
-    public abstract class DeleteTests : DommelTestBase
-    {
-        public DeleteTests(Database database) : base(database)
-        {
-        }
-
-        [Fact]
-        public void Delete()
-        {
-            using (var con = GetConnection())
+            using (var con = database.GetConnection())
             {
                 var id = Convert.ToInt32(con.Insert(new Product { Name = "blah" }));
                 var product = con.Get<Product>(id);
@@ -42,10 +26,11 @@ namespace Dommel.IntegrationTests
             }
         }
 
-        [Fact]
-        public async Task DeleteAsync()
+        [Theory]
+        [ClassData(typeof(DatabaseTestData))]
+        public async Task DeleteAsync(Database database)
         {
-            using (var con = GetConnection())
+            using (var con = database.GetConnection())
             {
                 var id = Convert.ToInt32(await con.InsertAsync(new Product { Name = "blah" }));
                 var product = await con.GetAsync<Product>(id);
@@ -58,30 +43,33 @@ namespace Dommel.IntegrationTests
             }
         }
 
-        [Fact]
-        public void DeleteAll()
+        [Theory]
+        [ClassData(typeof(DatabaseTestData))]
+        public void DeleteAll(Database database)
         {
-            using (var con = GetConnection())
+            using (var con = database.GetConnection())
             {
-                Assert.True(con.DeleteAll<Product>());
-                Assert.Empty(con.GetAll<Product>());
+                Assert.True(con.DeleteAll<Foo>());
+                Assert.Empty(con.GetAll<Foo>());
             }
         }
 
-        [Fact]
-        public async Task DeleteAllAsync()
+        [Theory]
+        [ClassData(typeof(DatabaseTestData))]
+        public async Task DeleteAllAsync(Database database)
         {
-            using (var con = GetConnection())
+            using (var con = database.GetConnection())
             {
-                Assert.True(await con.DeleteAllAsync<Product>());
-                Assert.Empty(await con.GetAllAsync<Product>());
+                Assert.True(await con.DeleteAllAsync<Bar>());
+                Assert.Empty(await con.GetAllAsync<Bar>());
             }
         }
 
-        [Fact]
-        public void DeleteMultiple()
+        [Theory]
+        [ClassData(typeof(DatabaseTestData))]
+        public void DeleteMultiple(Database database)
         {
-            using (var con = GetConnection())
+            using (var con = database.GetConnection())
             {
                 var ps = new List<Product>
                 {
@@ -98,10 +86,11 @@ namespace Dommel.IntegrationTests
             }
         }
 
-        [Fact]
-        public async Task DeleteMultipleAsync()
+        [Theory]
+        [ClassData(typeof(DatabaseTestData))]
+        public async Task DeleteMultipleAsync(Database database)
         {
-            using (var con = GetConnection())
+            using (var con = database.GetConnection())
             {
                 var ps = new List<Product>
                 {
@@ -118,10 +107,11 @@ namespace Dommel.IntegrationTests
             }
         }
 
-        [Fact]
-        public void DeleteMultipleLike()
+        [Theory]
+        [ClassData(typeof(DatabaseTestData))]
+        public void DeleteMultipleLike(Database database)
         {
-            using (var con = GetConnection())
+            using (var con = database.GetConnection())
             {
                 var ps = new List<Product>
                 {
@@ -138,10 +128,11 @@ namespace Dommel.IntegrationTests
             }
         }
 
-        [Fact]
-        public async Task DeleteMultipleAsyncLike()
+        [Theory]
+        [ClassData(typeof(DatabaseTestData))]
+        public async Task DeleteMultipleAsyncLike(Database database)
         {
-            using (var con = GetConnection())
+            using (var con = database.GetConnection())
             {
                 var ps = new List<Product>
                 {

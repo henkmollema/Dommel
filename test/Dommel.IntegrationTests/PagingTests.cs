@@ -4,30 +4,14 @@ using Xunit;
 
 namespace Dommel.IntegrationTests
 {
-    public class PagingTestsSqlServer : PagingTests, IClassFixture<SqlServerDatabase>
+    [Collection("Database")]
+    public class PagingTests
     {
-        public PagingTestsSqlServer(SqlServerDatabase database) : base(database)
+        [Theory]
+        [ClassData(typeof(DatabaseTestData))]
+        public void Fetches_FirstPage(Database database)
         {
-        }
-    }
-
-    public class PagingTestsMySql : PagingTests, IClassFixture<MySqlDatabase>
-    {
-        public PagingTestsMySql(MySqlDatabase database) : base(database)
-        {
-        }
-    }
-
-    public abstract class PagingTests : DommelTestBase
-    {
-        public PagingTests(Database database) : base(database)
-        {
-        }
-
-        [Fact]
-        public void Fetches_FirstPage()
-        {
-            using (var con = GetConnection())
+            using (var con = database.GetConnection())
             {
                 var paged = con.GetPaged<Product>(1, 5).ToArray();
                 Assert.Equal(5, paged.Length);
@@ -40,30 +24,33 @@ namespace Dommel.IntegrationTests
             }
         }
 
-        [Fact]
-        public void Fetches_SecondPage()
+        [Theory]
+        [ClassData(typeof(DatabaseTestData))]
+        public void Fetches_SecondPage(Database database)
         {
-            using (var con = GetConnection())
+            using (var con = database.GetConnection())
             {
                 var paged = con.GetPaged<Product>(2, 5).ToArray();
                 Assert.Equal(5, paged.Length);
             }
         }
 
-        [Fact]
-        public async Task Fetches_ThirdPartialPage()
+        [Theory]
+        [ClassData(typeof(DatabaseTestData))]
+        public async Task Fetches_ThirdPartialPage(Database database)
         {
-            using (var con = GetConnection())
+            using (var con = database.GetConnection())
             {
                 var paged = (await con.GetPagedAsync<Product>(3, 5)).ToArray();
-                Assert.Equal(3, paged.Length);
+                Assert.True(paged.Length >= 3, "Should contain at least 3 items");
             }
         }
 
-        [Fact]
-        public async Task SelectPaged_FetchesFirstPage()
+        [Theory]
+        [ClassData(typeof(DatabaseTestData))]
+        public async Task SelectPaged_FetchesFirstPage(Database database)
         {
-            using (var con = GetConnection())
+            using (var con = database.GetConnection())
             {
                 var paged = (await con.SelectPagedAsync<Product>(p => p.Name == "Chai", 1, 5)).ToArray();
                 Assert.Single(paged);

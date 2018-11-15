@@ -3,30 +3,14 @@ using Xunit;
 
 namespace Dommel.IntegrationTests
 {
-    public class GetTestsSqlServer : GetTests, IClassFixture<SqlServerDatabase>
+    [Collection("Database")]
+    public class GetTests
     {
-        public GetTestsSqlServer(SqlServerDatabase database) : base(database)
+        [Theory]
+        [ClassData(typeof(DatabaseTestData))]
+        public void Get(Database database)
         {
-        }
-    }
-
-    public class GetTestsMySql : GetTests, IClassFixture<MySqlDatabase>
-    {
-        public GetTestsMySql(MySqlDatabase database) : base(database)
-        {
-        }
-    }
-
-    public abstract class GetTests : DommelTestBase
-    {
-        public GetTests(Database database) : base(database)
-        {
-        }
-
-        [Fact]
-        public void Get()
-        {
-            using (var con = GetConnection())
+            using (var con = database.GetConnection())
             {
                 var product = con.Get<Product>(1);
                 Assert.NotNull(product);
@@ -34,10 +18,11 @@ namespace Dommel.IntegrationTests
             }
         }
 
-        [Fact]
-        public async Task GetAsync()
+        [Theory]
+        [ClassData(typeof(DatabaseTestData))]
+        public async Task GetAsync(Database database)
         {
-            using (var con = GetConnection())
+            using (var con = database.GetConnection())
             {
                 var product = await con.GetAsync<Product>(1);
                 Assert.NotNull(product);
