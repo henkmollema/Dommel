@@ -10,9 +10,15 @@ namespace Dommel.IntegrationTests
     {
         public override DbConnection GetConnection(string databaseName)
         {
-            var connectionString = IsAppVeyor
-                ? $"Server=localhost;Port=5432;Database={databaseName};Uid=postgres;Pwd=Password12!;"
-                : $"Server=localhost;Port=5432;Database={databaseName};Uid=postgres;Pwd=root;";
+            var connectionString = $"Server=localhost;Port=5432;Database={databaseName};Uid=postgres;Pwd=root;";
+            if (CI.IsAppVeyor)
+            {
+                connectionString = $"Server=localhost;Port=5432;Database={databaseName};Uid=postgres;Pwd=Password12!;";
+            }
+            else if (CI.IsTravis)
+            {
+                connectionString = $"Server=localhost;Port=5432;Database={databaseName};Uid=postgres;Pwd=;";
+            }
 
             return new NpgsqlConnection(connectionString);
         }

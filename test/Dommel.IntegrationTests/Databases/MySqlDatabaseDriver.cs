@@ -9,9 +9,15 @@ namespace Dommel.IntegrationTests
     {
         public override DbConnection GetConnection(string databaseName)
         {
-            var connectionString = IsAppVeyor
-                ? $"Server=localhost;Database={databaseName};Uid=root;Pwd=Password12!;"
-                : $"Server=localhost;Database={databaseName};Uid=dommeltest;Pwd=test;";
+            var connectionString = $"Server=localhost;Database={databaseName};Uid=dommeltest;Pwd=test;";
+            if (CI.IsAppVeyor)
+            {
+                connectionString = $"Server=localhost;Database={databaseName};Uid=root;Pwd=Password12!;";
+            }
+            else if (CI.IsTravis)
+            {
+                connectionString = $"Server=localhost;Database={databaseName};Uid=root;Pwd=;";
+            }
 
             return new MySqlConnection(connectionString);
         }

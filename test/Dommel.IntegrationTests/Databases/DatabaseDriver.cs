@@ -12,8 +12,6 @@ namespace Dommel.IntegrationTests
     /// </summary>
     public abstract class DatabaseDriver
     {
-        protected static readonly bool IsAppVeyor = bool.TryParse(Environment.GetEnvironmentVariable("AppVeyor"), out var appVeyor) ? appVeyor : false;
-
         public abstract string TempDbDatabaseName { get; }
 
         public virtual string DefaultDatabaseName => "dommeltests";

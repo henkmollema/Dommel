@@ -9,7 +9,7 @@ namespace Dommel.IntegrationTests
     {
         public override DbConnection GetConnection(string databaseName)
         {
-            var connectionString = IsAppVeyor
+            var connectionString = CI.IsAppVeyor
                 ? $"Server=(local)\\SQL2016;Database={databaseName};User ID=sa;Password=Password12!"
                 : $"Server=(LocalDb)\\mssqllocaldb;Database={databaseName};Integrated Security=True";
 
