@@ -661,7 +661,7 @@ namespace Dommel
             .Where(t => t != typeof(DontMap))
             .ToArray();
 
-            var sql = BuildMultiMapQuery(resultType, includeTypes, id, out var parameters);
+            var sql = BuildMultiMapQuery(connection, resultType, includeTypes, id, out var parameters);
             LogQuery<TReturn>(sql);
 
             switch (includeTypes.Length)
@@ -699,7 +699,7 @@ namespace Dommel
             .Where(t => t != typeof(DontMap))
             .ToArray();
 
-            var sql = BuildMultiMapQuery(resultType, includeTypes, id, out var parameters);
+            var sql = BuildMultiMapQuery(connection, resultType, includeTypes, id, out var parameters);
             LogQuery<TReturn>(sql);
 
             switch (includeTypes.Length)
@@ -721,36 +721,36 @@ namespace Dommel
             throw new InvalidOperationException($"Invalid amount of include types: {includeTypes.Length}.");
         }
 
-        private static string BuildMultiMapQuery(Type resultType, Type[] includeTypes, object id, out DynamicParameters parameters)
+        private static string BuildMultiMapQuery(IDbConnection connection, Type resultType, Type[] includeTypes, object id, out DynamicParameters parameters)
         {
-            var resultTableName = Resolvers.Table(resultType);
-            var resultTableKeyColumnName = Resolvers.Column(Resolvers.KeyProperty(resultType));
+            var resultTableName = Resolvers.Table(resultType, connection);
+            var resultTableKeyColumnName = Resolvers.Column(Resolvers.KeyProperty(resultType), connection);
 
             var sql = $"select * from {resultTableName}";
 
             // Determine the table to join with.
             var sourceType = includeTypes[0];
-            var sourceTableName = Resolvers.Table(sourceType);
+            var sourceTableName = Resolvers.Table(sourceType, connection);
             for (var i = 1; i < includeTypes.Length; i++)
             {
                 // Determine the table name of the joined table.
                 var includeType = includeTypes[i];
-                var foreignKeyTableName = Resolvers.Table(includeType);
+                var foreignKeyTableName = Resolvers.Table(includeType, connection);
 
                 // Determine the foreign key and the relationship type.
                 var foreignKeyProperty = Resolvers.ForeignKeyProperty(sourceType, includeType, out var relation);
-                var foreignKeyPropertyName = Resolvers.Column(foreignKeyProperty);
+                var foreignKeyPropertyName = Resolvers.Column(foreignKeyProperty, connection);
 
                 if (relation == ForeignKeyRelation.OneToOne)
                 {
                     // Determine the primary key of the foreign key table.
-                    var foreignKeyTableKeyColumName = Resolvers.Column(Resolvers.KeyProperty(includeType));
+                    var foreignKeyTableKeyColumName = Resolvers.Column(Resolvers.KeyProperty(includeType), connection);
                     sql += $" left join {foreignKeyTableName} on {sourceTableName}.{foreignKeyPropertyName} = {foreignKeyTableName}.{foreignKeyTableKeyColumName}";
                 }
                 else if (relation == ForeignKeyRelation.OneToMany)
                 {
                     // Determine the primary key of the source table.
-                    var sourceKeyColumnName = Resolvers.Column(Resolvers.KeyProperty(sourceType));
+                    var sourceKeyColumnName = Resolvers.Column(Resolvers.KeyProperty(sourceType), connection);
                     sql += $" left join {foreignKeyTableName} on {sourceTableName}.{sourceKeyColumnName} = {foreignKeyTableName}.{foreignKeyPropertyName}";
                 }
                 else

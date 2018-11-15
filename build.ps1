@@ -13,7 +13,6 @@ function Exec
 
 if(Test-Path .\src\Dommel\artifacts) { Remove-Item .\src\Dommel\artifacts -Force -Recurse }
 
-exec { & dotnet --info }
 exec { & dotnet restore }
 
 $branch = @{ $true = $env:APPVEYOR_REPO_BRANCH; $false = $(git symbolic-ref --short -q HEAD) }[$env:APPVEYOR_REPO_BRANCH -ne $NULL];
@@ -27,6 +26,9 @@ exec { & dotnet build Dommel.sln -c Release --version-suffix=$buildSuffix /p:CI=
 
 echo "build: Executing tests"
 Push-Location -Path .\test\Dommel.Tests
+exec { & dotnet test -c Release --no-build }
+Pop-Location
+Push-Location -Path .\test\Dommel.IntegrationTests
 exec { & dotnet test -c Release --no-build }
 Pop-Location
 

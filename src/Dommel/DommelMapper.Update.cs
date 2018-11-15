@@ -1,9 +1,6 @@
 using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Reflection;
 using System.Threading.Tasks;
 using Dapper;
@@ -12,8 +9,6 @@ namespace Dommel
 {
     public static partial class DommelMapper
     {
-        private static readonly ConcurrentDictionary<Type, string> _updateQueryCache = new ConcurrentDictionary<Type, string>();
-
         /// <summary>
         /// Updates the values of the specified entity in the database.
         /// The return value indicates whether the operation succeeded.
@@ -25,7 +20,7 @@ namespace Dommel
         /// <returns>A value indicating whether the update operation succeeded.</returns>
         public static bool Update<TEntity>(this IDbConnection connection, TEntity entity, IDbTransaction transaction = null)
         {
-            var sql = BuildUpdateQuery(typeof(TEntity));
+            var sql = BuildUpdateQuery(connection, typeof(TEntity));
             LogQuery<TEntity>(sql);
             return connection.Execute(sql, entity, transaction) > 0;
         }
@@ -41,16 +36,17 @@ namespace Dommel
         /// <returns>A value indicating whether the update operation succeeded.</returns>
         public static async Task<bool> UpdateAsync<TEntity>(this IDbConnection connection, TEntity entity, IDbTransaction transaction = null)
         {
-            var sql = BuildUpdateQuery(typeof(TEntity));
+            var sql = BuildUpdateQuery(connection, typeof(TEntity));
             LogQuery<TEntity>(sql);
             return await connection.ExecuteAsync(sql, entity, transaction) > 0;
         }
 
-        private static string BuildUpdateQuery(Type type)
+        private static string BuildUpdateQuery(IDbConnection connection, Type type)
         {
-            if (!_updateQueryCache.TryGetValue(type, out var sql))
+            var cacheKey = new QueryCacheKey(QueryCacheType.Update, connection, type);
+            if (!QueryCache.TryGetValue(cacheKey, out var sql))
             {
-                var tableName = Resolvers.Table(type);
+                var tableName = Resolvers.Table(type, connection);
                 var keyProperty = Resolvers.KeyProperty(type);
 
                 // Use all properties which are settable.
@@ -59,11 +55,10 @@ namespace Dommel
                                               .Where(p => p.GetSetMethod() != null)
                                               .ToArray();
 
-                var columnNames = typeProperties.Select(p => $"{Resolvers.Column(p)} = @{p.Name}").ToArray();
+                var columnNames = typeProperties.Select(p => $"{Resolvers.Column(p, connection)} = @{p.Name}").ToArray();
+                sql = $"update {tableName} set {string.Join(", ", columnNames)} where {Resolvers.Column(keyProperty, connection)} = @{keyProperty.Name}";
 
-                sql = $"update {tableName} set {string.Join(", ", columnNames)} where {Resolvers.Column(keyProperty)} = @{keyProperty.Name}";
-
-                _updateQueryCache.TryAdd(type, sql);
+                QueryCache.TryAdd(cacheKey, sql);
             }
 
             return sql;

@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -11,8 +10,6 @@ namespace Dommel
 {
     public static partial class DommelMapper
     {
-        private static readonly ConcurrentDictionary<Type, string> _insertQueryCache = new ConcurrentDictionary<Type, string>();
-
         /// <summary>
         /// Inserts the specified entity into the database and returns the ID.
         /// </summary>
@@ -66,7 +63,7 @@ namespace Dommel
         /// <param name="entities">The entities to be inserted.</param>
         /// <param name="transaction">Optional transaction for the command.</param>
         /// <returns>The id of the inserted entity.</returns>
-        public static async Task InsertAsyncAll<TEntity>(this IDbConnection connection, IEnumerable<TEntity> entities, IDbTransaction transaction = null) where TEntity : class
+        public static async Task InsertAllAsync<TEntity>(this IDbConnection connection, IEnumerable<TEntity> entities, IDbTransaction transaction = null) where TEntity : class
         {
             var sql = BuildInsertQuery(connection, typeof(TEntity));
             LogQuery<TEntity>(sql);
@@ -75,9 +72,10 @@ namespace Dommel
 
         private static string BuildInsertQuery(IDbConnection connection, Type type)
         {
-            if (!_insertQueryCache.TryGetValue(type, out var sql))
+            var cacheKey = new QueryCacheKey(QueryCacheType.Insert, connection, type);
+            if (!QueryCache.TryGetValue(cacheKey, out var sql))
             {
-                var tableName = Resolvers.Table(type);
+                var tableName = Resolvers.Table(type, connection);
                 var keyProperty = Resolvers.KeyProperty(type, out var isIdentity);
 
                 var typeProperties = new List<PropertyInfo>();
@@ -98,13 +96,13 @@ namespace Dommel
                     }
                 }
 
-                var columnNames = typeProperties.Select(Resolvers.Column).ToArray();
+                var columnNames = typeProperties.Select(p => Resolvers.Column(p, connection)).ToArray();
                 var paramNames = typeProperties.Select(p => "@" + p.Name).ToArray();
 
                 var builder = GetSqlBuilder(connection);
                 sql = builder.BuildInsert(tableName, columnNames, paramNames, keyProperty);
 
-                _insertQueryCache.TryAdd(type, sql);
+                QueryCache.TryAdd(cacheKey, sql);
             }
 
             return sql;

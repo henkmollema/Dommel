@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Reflection;
 
@@ -49,7 +50,7 @@ namespace Dommel
         /// </summary>
         public static class Resolvers
         {
-            private static readonly ConcurrentDictionary<Type, string> _typeTableNameCache = new ConcurrentDictionary<Type, string>();
+            private static readonly ConcurrentDictionary<string, string> _typeTableNameCache = new ConcurrentDictionary<string, string>();
             private static readonly ConcurrentDictionary<string, string> _columnNameCache = new ConcurrentDictionary<string, string>();
             private static readonly ConcurrentDictionary<Type, KeyPropertyInfo> _typeKeyPropertiesCache = new ConcurrentDictionary<Type, KeyPropertyInfo>();
             private static readonly ConcurrentDictionary<Type, PropertyInfo[]> _typePropertiesCache = new ConcurrentDictionary<Type, PropertyInfo[]>();
@@ -155,23 +156,30 @@ namespace Dommel
 
                 return properties;
             }
+            /// <summary>
+            /// Gets the name of the table in the database for the specified type,
+            /// using the configured <see cref="ITableNameResolver"/>.
+            /// </summary>
+            /// <param name="type">The <see cref="Type"/> to get the table name for.</param>
+            /// <param name="connection">The database connection instance.</param>
+            /// <returns>The table name in the database for <paramref name="type"/>.</returns>
+            public static string Table(Type type, IDbConnection connection) =>
+                Table(type, GetSqlBuilder(connection));
 
             /// <summary>
             /// Gets the name of the table in the database for the specified type,
             /// using the configured <see cref="ITableNameResolver"/>.
             /// </summary>
             /// <param name="type">The <see cref="Type"/> to get the table name for.</param>
+            /// <param name="sqlBuilder">The SQL builder instance.</param>
             /// <returns>The table name in the database for <paramref name="type"/>.</returns>
-            public static string Table(Type type)
+            public static string Table(Type type, ISqlBuilder sqlBuilder)
             {
-                if (!_typeTableNameCache.TryGetValue(type, out var name))
+                var key = $"{sqlBuilder.GetType().Name}.{type.Name}";
+                if (!_typeTableNameCache.TryGetValue(key, out var name))
                 {
-                    name = _tableNameResolver.ResolveTableName(type);
-                    if (EscapeCharacterStart != char.MinValue || EscapeCharacterEnd != char.MinValue)
-                    {
-                        name = EscapeCharacterStart + name + EscapeCharacterEnd;
-                    }
-                    _typeTableNameCache.TryAdd(type, name);
+                    name =  sqlBuilder.QuoteIdentifier(_tableNameResolver.ResolveTableName(type));
+                    _typeTableNameCache.TryAdd(key, name);
                 }
 
                 LogReceived?.Invoke($"Resolved table name '{name}' for '{type.Name}'");
@@ -183,17 +191,24 @@ namespace Dommel
             /// using the configured <see cref="IColumnNameResolver"/>.
             /// </summary>
             /// <param name="propertyInfo">The <see cref="PropertyInfo"/> to get the column name for.</param>
+            /// <param name="connection">The database connection instance.</param>
             /// <returns>The column name in the database for <paramref name="propertyInfo"/>.</returns>
-            public static string Column(PropertyInfo propertyInfo)
+            public static string Column(PropertyInfo propertyInfo, IDbConnection connection)
+                => Column(propertyInfo, GetSqlBuilder(connection));
+
+            /// <summary>
+            /// Gets the name of the column in the database for the specified type,
+            /// using the configured <see cref="IColumnNameResolver"/>.
+            /// </summary>
+            /// <param name="propertyInfo">The <see cref="PropertyInfo"/> to get the column name for.</param>
+            /// <param name="sqlBuilder">The SQL builder instance.</param>
+            /// <returns>The column name in the database for <paramref name="propertyInfo"/>.</returns>
+            public static string Column(PropertyInfo propertyInfo, ISqlBuilder sqlBuilder)
             {
-                var key = $"{propertyInfo.DeclaringType}.{propertyInfo.Name}";
+                var key = $"{sqlBuilder.GetType().Name}.{propertyInfo.DeclaringType}.{propertyInfo.Name}";
                 if (!_columnNameCache.TryGetValue(key, out var columnName))
                 {
-                    columnName = _columnNameResolver.ResolveColumnName(propertyInfo);
-                    if (EscapeCharacterStart != char.MinValue || EscapeCharacterEnd != char.MinValue)
-                    {
-                        columnName = EscapeCharacterStart + columnName + EscapeCharacterEnd;
-                    }
+                    columnName = sqlBuilder.QuoteIdentifier(_columnNameResolver.ResolveColumnName(propertyInfo));
                     _columnNameCache.TryAdd(key, columnName);
                 }
 

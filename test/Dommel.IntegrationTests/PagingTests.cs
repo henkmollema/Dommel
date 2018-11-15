@@ -1,25 +1,17 @@
-﻿using System.Data.SqlClient;
-using System.IO;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
 
 namespace Dommel.IntegrationTests
 {
+    [Collection("Database")]
     public class PagingTests
     {
-        private static string GetConnectionString()
+        [Theory]
+        [ClassData(typeof(DatabaseTestData))]
+        public void Fetches_FirstPage(DatabaseDriver database)
         {
-            var currentDir = new DirectoryInfo(Directory.GetCurrentDirectory());
-            var fileName = Path.Combine(currentDir.Parent.Parent.Parent.FullName, "App_Data", "Dommel.mdf");
-            var conStr = "Data Source=(localdb)\\MSSQLLocalDB;Integrated Security=True;AttachDBFilename=" + fileName;
-            return conStr;
-        }
-
-        [Fact]
-        public void Fetches_FirstPage()
-        {
-            using (var con = new SqlConnection(GetConnectionString()))
+            using (var con = database.GetConnection())
             {
                 var paged = con.GetPaged<Product>(1, 5).ToArray();
                 Assert.Equal(5, paged.Length);
@@ -32,41 +24,37 @@ namespace Dommel.IntegrationTests
             }
         }
 
-        [Fact]
-        public void Fetches_SecondPage()
+        [Theory]
+        [ClassData(typeof(DatabaseTestData))]
+        public void Fetches_SecondPage(DatabaseDriver database)
         {
-            using (var con = new SqlConnection(GetConnectionString()))
+            using (var con = database.GetConnection())
             {
                 var paged = con.GetPaged<Product>(2, 5).ToArray();
                 Assert.Equal(5, paged.Length);
             }
         }
 
-        [Fact]
-        public async Task Fetches_ThirdPartialPage()
+        [Theory]
+        [ClassData(typeof(DatabaseTestData))]
+        public async Task Fetches_ThirdPartialPage(DatabaseDriver database)
         {
-            using (var con = new SqlConnection(GetConnectionString()))
+            using (var con = database.GetConnection())
             {
                 var paged = (await con.GetPagedAsync<Product>(3, 5)).ToArray();
-                Assert.Equal(3, paged.Length);
+                Assert.True(paged.Length >= 3, "Should contain at least 3 items");
             }
         }
 
-        [Fact]
-        public async Task SelectPaged_FetchesFirstPage()
+        [Theory]
+        [ClassData(typeof(DatabaseTestData))]
+        public async Task SelectPaged_FetchesFirstPage(DatabaseDriver database)
         {
-            using (var con = new SqlConnection(GetConnectionString()))
+            using (var con = database.GetConnection())
             {
                 var paged = (await con.SelectPagedAsync<Product>(p => p.Name == "Chai", 1, 5)).ToArray();
                 Assert.Single(paged);
             }
         }
-    }
-
-    public class Product
-    {
-        public int Id { get; set; }
-
-        public string Name { get; set; }
     }
 }
