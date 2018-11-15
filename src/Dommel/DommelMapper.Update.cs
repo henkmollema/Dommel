@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Concurrent;
 using System.Data;
 using System.Linq;
 using System.Reflection;
@@ -10,8 +9,6 @@ namespace Dommel
 {
     public static partial class DommelMapper
     {
-        private static readonly ConcurrentDictionary<Type, string> _updateQueryCache = new ConcurrentDictionary<Type, string>();
-
         /// <summary>
         /// Updates the values of the specified entity in the database.
         /// The return value indicates whether the operation succeeded.
@@ -46,7 +43,8 @@ namespace Dommel
 
         private static string BuildUpdateQuery(IDbConnection connection, Type type)
         {
-            if (!_updateQueryCache.TryGetValue(type, out var sql))
+            var cacheKey = new QueryCacheKey(QueryCacheType.Update, connection, type);
+            if (!QueryCache.TryGetValue(cacheKey, out var sql))
             {
                 var tableName = Resolvers.Table(type, connection);
                 var keyProperty = Resolvers.KeyProperty(type);
@@ -58,10 +56,9 @@ namespace Dommel
                                               .ToArray();
 
                 var columnNames = typeProperties.Select(p => $"{Resolvers.Column(p, connection)} = @{p.Name}").ToArray();
-
                 sql = $"update {tableName} set {string.Join(", ", columnNames)} where {Resolvers.Column(keyProperty, connection)} = @{keyProperty.Name}";
 
-                _updateQueryCache.TryAdd(type, sql);
+                QueryCache.TryAdd(cacheKey, sql);
             }
 
             return sql;

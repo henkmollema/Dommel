@@ -88,13 +88,11 @@ namespace Dommel
         private static string BuildSelectSql<TEntity>(IDbConnection connection, Expression<Func<TEntity, bool>> predicate, out DynamicParameters parameters)
         {
             var type = typeof(TEntity);
-            if (!_getAllQueryCache.TryGetValue(type, out var sql))
-            {
-                var tableName = Resolvers.Table(type, connection);
-                sql = $"select * from {tableName}";
-                _getAllQueryCache.TryAdd(type, sql);
-            }
 
+            // Build the select all part
+            var sql = BuildGetAllQuery(connection, type);
+
+            // Append the where statement
             sql += new SqlExpression<TEntity>(GetSqlBuilder(connection))
                 .Where(predicate)
                 .ToSql(out parameters);

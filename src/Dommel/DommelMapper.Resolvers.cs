@@ -50,7 +50,7 @@ namespace Dommel
         /// </summary>
         public static class Resolvers
         {
-            private static readonly ConcurrentDictionary<Type, string> _typeTableNameCache = new ConcurrentDictionary<Type, string>();
+            private static readonly ConcurrentDictionary<string, string> _typeTableNameCache = new ConcurrentDictionary<string, string>();
             private static readonly ConcurrentDictionary<string, string> _columnNameCache = new ConcurrentDictionary<string, string>();
             private static readonly ConcurrentDictionary<Type, KeyPropertyInfo> _typeKeyPropertiesCache = new ConcurrentDictionary<Type, KeyPropertyInfo>();
             private static readonly ConcurrentDictionary<Type, PropertyInfo[]> _typePropertiesCache = new ConcurrentDictionary<Type, PropertyInfo[]>();
@@ -175,10 +175,11 @@ namespace Dommel
             /// <returns>The table name in the database for <paramref name="type"/>.</returns>
             public static string Table(Type type, ISqlBuilder sqlBuilder)
             {
-                if (!_typeTableNameCache.TryGetValue(type, out var name))
+                var key = $"{sqlBuilder.GetType().Name}.{type.Name}";
+                if (!_typeTableNameCache.TryGetValue(key, out var name))
                 {
                     name =  sqlBuilder.QuoteIdentifier(_tableNameResolver.ResolveTableName(type));
-                    _typeTableNameCache.TryAdd(type, name);
+                    _typeTableNameCache.TryAdd(key, name);
                 }
 
                 LogReceived?.Invoke($"Resolved table name '{name}' for '{type.Name}'");
@@ -204,7 +205,7 @@ namespace Dommel
             /// <returns>The column name in the database for <paramref name="propertyInfo"/>.</returns>
             public static string Column(PropertyInfo propertyInfo, ISqlBuilder sqlBuilder)
             {
-                var key = $"{propertyInfo.DeclaringType}.{propertyInfo.Name}";
+                var key = $"{sqlBuilder.GetType().Name}.{propertyInfo.DeclaringType}.{propertyInfo.Name}";
                 if (!_columnNameCache.TryGetValue(key, out var columnName))
                 {
                     columnName = sqlBuilder.QuoteIdentifier(_columnNameResolver.ResolveColumnName(propertyInfo));

@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Concurrent;
 using System.Data;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
@@ -9,9 +8,6 @@ namespace Dommel
 {
     public static partial class DommelMapper
     {
-        private static readonly ConcurrentDictionary<Type, string> _deleteQueryCache = new ConcurrentDictionary<Type, string>();
-        private static readonly ConcurrentDictionary<Type, string> _deleteAllQueryCache = new ConcurrentDictionary<Type, string>();
-
         /// <summary>
         /// Deletes the specified entity from the database.
         /// Returns a value indicating whether the operation succeeded.
@@ -44,9 +40,10 @@ namespace Dommel
             return await connection.ExecuteAsync(sql, entity, transaction) > 0;
         }
 
-        private static string BuildDeleteQuery(IDbConnection connection,Type type)
+        private static string BuildDeleteQuery(IDbConnection connection, Type type)
         {
-            if (!_deleteQueryCache.TryGetValue(type, out var sql))
+            var cacheKey = new QueryCacheKey(QueryCacheType.Delete, connection, type);
+            if (!QueryCache.TryGetValue(cacheKey, out var sql))
             {
                 var tableName = Resolvers.Table(type, connection);
                 var keyProperty = Resolvers.KeyProperty(type);
@@ -54,7 +51,7 @@ namespace Dommel
 
                 sql = $"delete from {tableName} where {keyColumnName} = @{keyProperty.Name}";
 
-                _deleteQueryCache.TryAdd(type, sql);
+                QueryCache.TryAdd(cacheKey, sql);
             }
 
             return sql;
@@ -94,14 +91,11 @@ namespace Dommel
 
         private static string BuildDeleteMultipleQuery<TEntity>(IDbConnection connection, Expression<Func<TEntity, bool>> predicate, out DynamicParameters parameters)
         {
+            // Build the delete all query
             var type = typeof(TEntity);
-            if (!_deleteAllQueryCache.TryGetValue(type, out var sql))
-            {
-                var tableName = Resolvers.Table(type, connection);
-                sql = $"delete from {tableName}";
-                _deleteAllQueryCache.TryAdd(type, sql);
-            }
+            var sql = BuildDeleteAllQuery(connection, type);
 
+            // Append the where statement
             sql += new SqlExpression<TEntity>(GetSqlBuilder(connection))
                 .Where(predicate)
                 .ToSql(out parameters);
@@ -140,11 +134,12 @@ namespace Dommel
 
         private static string BuildDeleteAllQuery(IDbConnection connection, Type type)
         {
-            if (!_deleteAllQueryCache.TryGetValue(type, out var sql))
+            var cacheKey = new QueryCacheKey(QueryCacheType.DeleteAll, connection, type);
+            if (!QueryCache.TryGetValue(cacheKey, out var sql))
             {
                 var tableName = Resolvers.Table(type, connection);
                 sql = $"delete from {tableName}";
-                _deleteAllQueryCache.TryAdd(type, sql);
+                QueryCache.TryAdd(cacheKey, sql);
             }
 
             return sql;

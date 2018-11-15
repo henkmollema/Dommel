@@ -1,8 +1,8 @@
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using Dapper;
@@ -11,10 +11,6 @@ namespace Dommel
 {
     public static partial class DommelMapper
     {
-        private static readonly ConcurrentDictionary<Type, string> _getQueryCache = new ConcurrentDictionary<Type, string>();
-        private static readonly ConcurrentDictionary<Type, string> _getByIdsQueryCache = new ConcurrentDictionary<Type, string>();
-        private static readonly ConcurrentDictionary<Type, string> _getAllQueryCache = new ConcurrentDictionary<Type, string>();
-
         /// <summary>
         /// Retrieves the entity of type <typeparamref name="TEntity"/> with the specified id.
         /// </summary>
@@ -47,14 +43,15 @@ namespace Dommel
 
         private static string BuildGetById(IDbConnection connection, Type type, object id, out DynamicParameters parameters)
         {
-            if (!_getQueryCache.TryGetValue(type, out var sql))
+            var cacheKey = new QueryCacheKey(QueryCacheType.Get, connection, type);
+            if (!QueryCache.TryGetValue(cacheKey, out var sql))
             {
                 var tableName = Resolvers.Table(type, connection);
                 var keyProperty = Resolvers.KeyProperty(type);
                 var keyColumnName = Resolvers.Column(keyProperty, connection);
 
                 sql = $"select * from {tableName} where {keyColumnName} = @Id";
-                _getQueryCache.TryAdd(type, sql);
+                QueryCache.TryAdd(cacheKey, sql);
             }
 
             parameters = new DynamicParameters();
@@ -125,7 +122,8 @@ namespace Dommel
 
         private static string BuildGetByIds(IDbConnection connection, Type type, object[] ids, out DynamicParameters parameters)
         {
-            if (!_getByIdsQueryCache.TryGetValue(type, out var sql))
+            var cacheKey = new QueryCacheKey(QueryCacheType.GetByMultipleIds, connection, type);
+            if (!QueryCache.TryGetValue(cacheKey, out var sql))
             {
                 var tableName = Resolvers.Table(type, connection);
                 var keyProperties = Resolvers.KeyProperties(type);
@@ -149,7 +147,7 @@ namespace Dommel
                 }
 
                 sql = sb.ToString();
-                _getByIdsQueryCache.TryAdd(type, sql);
+                QueryCache.TryAdd(cacheKey, sql);
             }
 
             parameters = new DynamicParameters();
@@ -195,10 +193,11 @@ namespace Dommel
 
         private static string BuildGetAllQuery(IDbConnection connection, Type type)
         {
-            if (!_getAllQueryCache.TryGetValue(type, out var sql))
+            var cacheKey = new QueryCacheKey(QueryCacheType.GetAll, connection, type);
+            if (!QueryCache.TryGetValue(cacheKey, out var sql))
             {
                 sql = "select * from " + Resolvers.Table(type, connection);
-                _getAllQueryCache.TryAdd(type, sql);
+                QueryCache.TryAdd(cacheKey, sql);
             }
 
             return sql;

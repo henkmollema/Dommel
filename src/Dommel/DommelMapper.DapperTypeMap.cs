@@ -16,6 +16,7 @@ namespace Dommel
 
         static DommelMapper()
         {
+            // Type mapper for [Column] attribute
             SqlMapper.TypeMapProvider = type => CreateMap(type);
 
             SqlMapper.ITypeMap CreateMap(Type t) => new CustomPropertyTypeMap(t,

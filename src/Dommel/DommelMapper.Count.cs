@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Concurrent;
 using System.Data;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
@@ -9,8 +8,6 @@ namespace Dommel
 {
     public static partial class DommelMapper
     {
-        private static readonly ConcurrentDictionary<Type, string> _countQueryCache = new ConcurrentDictionary<Type, string>();
-
         /// <summary>
         /// Returns the number of entities matching the specified predicate.
         /// </summary>
@@ -44,11 +41,12 @@ namespace Dommel
         private static string BuildCountSql<TEntity>(IDbConnection connection, Expression<Func<TEntity, bool>> predicate, out DynamicParameters parameters)
         {
             var type = typeof(TEntity);
-            if (!_countQueryCache.TryGetValue(type, out var sql))
+            var cacheKey = new QueryCacheKey(QueryCacheType.Count, connection, type);
+            if (!QueryCache.TryGetValue(cacheKey, out var sql))
             {
                 var tableName = Resolvers.Table(type, connection);
                 sql = $"select count(*) from {tableName}";
-                _countQueryCache.TryAdd(type, sql);
+                QueryCache.TryAdd(cacheKey, sql);
             }
 
             sql += new SqlExpression<TEntity>(GetSqlBuilder(connection))
