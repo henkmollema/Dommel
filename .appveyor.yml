@@ -17,6 +17,7 @@ environment:
 services:
   - mssql2016
   - mysql
+  - postgresql101
 artifacts:
 - path: .\src\Dommel\artifacts\**\*.nupkg
   name: NuGet
