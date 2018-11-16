@@ -48,6 +48,7 @@ namespace Dommel
             {
                 var tableName = Resolvers.Table(type, connection);
                 var keyProperty = Resolvers.KeyProperty(type);
+                var builder = GetSqlBuilder(connection);
 
                 // Use all properties which are settable.
                 var typeProperties = Resolvers.Properties(type)
@@ -55,8 +56,8 @@ namespace Dommel
                                               .Where(p => p.GetSetMethod() != null)
                                               .ToArray();
 
-                var columnNames = typeProperties.Select(p => $"{Resolvers.Column(p, connection)} = @{p.Name}").ToArray();
-                sql = $"update {tableName} set {string.Join(", ", columnNames)} where {Resolvers.Column(keyProperty, connection)} = @{keyProperty.Name}";
+                var columnNames = typeProperties.Select(p => $"{Resolvers.Column(p, connection)} = {builder.PrefixParameter(p.Name)}").ToArray();
+                sql = $"update {tableName} set {string.Join(", ", columnNames)} where {Resolvers.Column(keyProperty, connection)} = {builder.PrefixParameter(keyProperty.Name)}";
 
                 QueryCache.TryAdd(cacheKey, sql);
             }

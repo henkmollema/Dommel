@@ -20,6 +20,12 @@ namespace Dommel
                 return $" {orderBy} LIMIT {start}, {pageSize}";
             }
 
+            /// <inheritdoc/>s
+            public string PrefixParameter(string paramName)
+            {
+                return $"@{paramName}";
+            }
+
             /// <inheritdoc/>
             public string QuoteIdentifier(string identifier) => $"`{identifier}`";
         }

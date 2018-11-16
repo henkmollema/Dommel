@@ -46,6 +46,13 @@ namespace Dommel
         public interface ISqlBuilder
         {
             /// <summary>
+            /// Parameter prefix to named parameters.
+            /// </summary>
+            /// <param name="paramName"></param>
+            /// <returns>Prefix like @</returns>
+            string PrefixParameter(string paramName);
+
+            /// <summary>
             /// Builds an insert query using the specified table name, column names and parameter names.
             /// A query to fetch the new id will be included as well.
             /// </summary>
