@@ -86,23 +86,20 @@ namespace Dommel.Tests
         public Expression<Func<T, bool>> And<T>(Expression<Func<T, bool>> left, Expression<Func<T, bool>> right)
         {
             if (left == null)
+            {
                 return right;
+            }
 
             var invokeExpression = Expression.Invoke(right, left.Parameters.Cast<Expression>());
             return (Expression.Lambda<Func<T, bool>>(Expression.AndAlso(left.Body, invokeExpression), left.Parameters));
         }
 
-        /// <summary>
-        /// Create a unique expression with OR.
-        /// </summary>
-        /// <typeparam name="T">Expression Type</typeparam>
-        /// <param name="left">Left side of the expression</param>
-        /// <param name="right">Right side of the expression.</param>
-        /// <returns>Combined expression</returns>
         public Expression<Func<T, bool>> Or<T>(Expression<Func<T, bool>> left, Expression<Func<T, bool>> right)
         {
             if (left == null)
+            {
                 return right;
+            }
 
             var invokeExpression = Expression.Invoke(right, left.Parameters.Cast<Expression>());
             return (Expression.Lambda<Func<T, bool>>(Expression.OrElse(left.Body, invokeExpression), left.Parameters));
