@@ -46,7 +46,7 @@ namespace Dommel
         public interface ISqlBuilder
         {
             /// <summary>
-            /// Parameter prefix to named parameters.
+            /// Adds a prefix to the specified parameter.
             /// </summary>
             /// <param name="paramName"></param>
             /// <returns>Prefix like @</returns>
