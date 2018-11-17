@@ -48,7 +48,7 @@ namespace Dommel
             /// <summary>
             /// Adds a prefix to the specified parameter.
             /// </summary>
-            /// <param name="paramName"></param>
+            /// <param name="paramName">The name of the parameter to prefix.</param>
             string PrefixParameter(string paramName);
 
             /// <summary>
