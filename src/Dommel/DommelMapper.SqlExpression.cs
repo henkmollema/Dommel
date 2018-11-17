@@ -107,6 +107,8 @@ namespace Dommel
                         return VisitConstantExpression((ConstantExpression)expression);
                     case ExpressionType.Call:
                         return VisitCallExpression((MethodCallExpression)expression);
+                    case ExpressionType.Invoke:
+                        return VisitExpression(((InvocationExpression)expression).Expression);
                 }
 
                 return expression;
