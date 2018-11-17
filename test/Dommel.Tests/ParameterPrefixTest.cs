@@ -91,7 +91,7 @@ namespace Dommel.Tests
         [Fact]
         public void TestUpdate()
         {
-            List<string> logs = new List<string>();
+            var logs = new List<string>();
             // Initialize resolver caches so these messages are not logged
             mock.Object.Update<FooParameterPrefix>(new FooParameterPrefix { Id = 1, Bar = "test" });
             DommelMapper.LogReceived = s => logs.Add(s);
