@@ -34,7 +34,7 @@ namespace Dommel.Tests
         public void SqlExpressionDirectAccess()
         {
             var builder = new ExampleBuilderBuilder();
-            DommelMapper.SqlExpression<FooParameterPrefix> sqlExpression = new DommelMapper.SqlExpression<FooParameterPrefix>(builder);
+            var sqlExpression = new DommelMapper.SqlExpression<FooParameterPrefix>(builder);
 
             var expression = sqlExpression.Where(p => p.Bar.Contains("test"));
             var sql = expression.ToSql(out var dynamicParameters);
