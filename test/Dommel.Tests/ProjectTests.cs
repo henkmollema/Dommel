@@ -16,7 +16,7 @@ namespace Dommel.Tests
         {
             // Arrange
             var queries = new List<string>();
-            var expectedQuery = "Project<ProjectedFoo>: select (Name, DateUpdated) from ProjectedFoos where Id = @Id";
+            var expectedQuery = "Project<ProjectedFoo>: select Id, Name, DateUpdated from ProjectedFoos where Id = @Id";
             var mock = new Mock<IDbConnection>();
             mock.SetupDapper(x => x.QueryFirstOrDefault<ProjectedFoo>(It.Is<string>(s => s == expectedQuery), It.IsAny<object>(), null, null, null))
                 .Returns(new ProjectedFoo())
@@ -39,7 +39,7 @@ namespace Dommel.Tests
         {
             // Arrange
             var queries = new List<string>();
-            var expectedQuery = "ProjectAll<ProjectedFoo>: select (Name, DateUpdated) from ProjectedFoos";
+            var expectedQuery = "ProjectAll<ProjectedFoo>: select Id, Name, DateUpdated from ProjectedFoos";
             var mock = new Mock<IDbConnection>();
             mock.SetupDapper(x => x.Query<ProjectedFoo>(It.Is<string>(s => s == expectedQuery), It.IsAny<object>(), null, true, null, null))
                 .Returns(new[] { new ProjectedFoo() })
@@ -62,7 +62,7 @@ namespace Dommel.Tests
         {
             // Arrange
             var queries = new List<string>();
-            var expectedQuery = "ProjectPaged<ProjectedFoo>: select (Name, DateUpdated) from ProjectedFoos order by Id offset 0 rows fetch next 5 rows only"; ;
+            var expectedQuery = "ProjectPaged<ProjectedFoo>: select Id, Name, DateUpdated from ProjectedFoos order by Id offset 0 rows fetch next 5 rows only"; ;
             var mock = new Mock<IDbConnection>();
             mock.SetupDapper(x => x.Query<ProjectedFoo>(It.Is<string>(s => s == expectedQuery), It.IsAny<object>(), null, true, null, null))
                 .Returns(new[] { new ProjectedFoo() })

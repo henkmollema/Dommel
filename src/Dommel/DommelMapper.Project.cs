@@ -42,7 +42,7 @@ namespace Dommel
 
         private static string BuildProjectById(IDbConnection connection, Type type, object id, out DynamicParameters parameters)
         {
-            var cacheKey = new QueryCacheKey(QueryCacheType.Get, connection, type);
+            var cacheKey = new QueryCacheKey(QueryCacheType.Project, connection, type);
             if (!QueryCache.TryGetValue(cacheKey, out var sql))
             {
                 var keyProperty = Resolvers.KeyProperty(type);
@@ -93,19 +93,16 @@ namespace Dommel
 
         private static string BuildProjectAllQuery(IDbConnection connection, Type type)
         {
-            var cacheKey = new QueryCacheKey(QueryCacheType.GetAll, connection, type);
+            var cacheKey = new QueryCacheKey(QueryCacheType.ProjectAll, connection, type);
             if (!QueryCache.TryGetValue(cacheKey, out var sql))
             {
                 var tableName = Resolvers.Table(type, connection);
                 var keyProperty = Resolvers.KeyProperty(type);
                 var properties = Resolvers.Properties(type)
-                                              .Where(p => p != keyProperty)
                                               .Where(p => p.GetSetMethod() != null)
-                                              .ToArray();
+                                              .Select(p => Resolvers.Column(p, connection));
 
-                var projectedCols = string.Join(", ", properties.Select(p => Resolvers.Column(p, connection)));
-
-                sql = $"select ({projectedCols}) from {tableName}";
+                sql = $"select {string.Join(", ", properties)} from {tableName}";
                 QueryCache.TryAdd(cacheKey, sql);
             }
 
