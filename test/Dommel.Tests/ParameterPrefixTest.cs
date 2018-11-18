@@ -47,7 +47,7 @@ namespace Dommel.Tests
         [Fact]
         public void TestGet()
         {
-            List<string> logs = new List<string>();
+            var logs = new List<string>();
             // Initialize resolver caches so these messages are not logged
             mock.Object.Get<FooParameterPrefix>(1);
 
