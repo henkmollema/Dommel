@@ -12,6 +12,8 @@ namespace Dommel
             Get,
             GetByMultipleIds,
             GetAll,
+            Project,
+            ProjectAll,
             Count,
             Insert,
             Update,
@@ -19,10 +21,7 @@ namespace Dommel
             DeleteAll,
         }
 
-#pragma warning disable IDE1006 // Naming Styles
-        internal static ConcurrentDictionary<QueryCacheKey, string> QueryCache = new ConcurrentDictionary<QueryCacheKey, string>();
-        internal static ConcurrentDictionary<QueryCacheKey, string> ResolverCache = new ConcurrentDictionary<QueryCacheKey, string>();
-#pragma warning restore IDE1006 // Naming Styles
+        internal static ConcurrentDictionary<QueryCacheKey, string> QueryCache { get; } = new ConcurrentDictionary<QueryCacheKey, string>();
 
         internal struct QueryCacheKey : IEquatable<QueryCacheKey>
         {
