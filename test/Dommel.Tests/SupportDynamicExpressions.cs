@@ -16,7 +16,6 @@ namespace Dommel.Tests
     public class SupportDynamicExpressions
     {
         private readonly DommelMapper.SqlExpression<Foo> sqlExpression = new DommelMapper.SqlExpression<Foo>(new SqlServerSqlBuilder());
-        private readonly List<string> logs = new List<string>();
         private readonly Mock<IDbConnection> mock = new Mock<IDbConnection>();
 
         public SupportDynamicExpressions()
