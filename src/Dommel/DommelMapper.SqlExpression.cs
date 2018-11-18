@@ -107,6 +107,8 @@ namespace Dommel
                         return VisitConstantExpression((ConstantExpression)expression);
                     case ExpressionType.Call:
                         return VisitCallExpression((MethodCallExpression)expression);
+                    case ExpressionType.Invoke:
+                        return VisitExpression(((InvocationExpression)expression).Expression);
                 }
 
                 return expression;
@@ -184,7 +186,7 @@ namespace Dommel
                 }
 
                 AddParameter(textLike, out var paramName);
-                return $"{column} like @{paramName}";
+                return $"{column} like {paramName}";
             }
 
             /// <summary>
@@ -249,7 +251,7 @@ namespace Dommel
                     right = VisitExpression(expression.Right);
 
                     AddParameter(right, out var paramName);
-                    return $"{left} {operand} @{paramName}";
+                    return $"{left} {operand} {paramName}";
                 }
 
                 return $"{left} {operand} {right}";
@@ -409,7 +411,7 @@ namespace Dommel
             public virtual void AddParameter(object value, out string paramName)
             {
                 _parameterIndex++;
-                paramName = $"p{_parameterIndex}";
+                paramName = SqlBuilder.PrefixParameter($"p{_parameterIndex}");
                 _parameters.Add(paramName, value: value);
             }
         }

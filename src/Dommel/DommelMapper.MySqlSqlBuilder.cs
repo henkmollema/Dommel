@@ -21,6 +21,12 @@ namespace Dommel
             }
 
             /// <inheritdoc/>
+            public string PrefixParameter(string paramName)
+            {
+                return $"@{paramName}";
+            }
+
+            /// <inheritdoc/>
             public string QuoteIdentifier(string identifier) => $"`{identifier}`";
         }
     }

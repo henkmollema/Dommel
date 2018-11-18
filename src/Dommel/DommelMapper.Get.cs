@@ -49,8 +49,9 @@ namespace Dommel
                 var tableName = Resolvers.Table(type, connection);
                 var keyProperty = Resolvers.KeyProperty(type);
                 var keyColumnName = Resolvers.Column(keyProperty, connection);
+                var builder = GetSqlBuilder(connection);
 
-                sql = $"select * from {tableName} where {keyColumnName} = @Id";
+                sql = $"select * from {tableName} where {keyColumnName} = {builder.PrefixParameter("Id")}";
                 QueryCache.TryAdd(cacheKey, sql);
             }
 
@@ -125,6 +126,7 @@ namespace Dommel
             var cacheKey = new QueryCacheKey(QueryCacheType.GetByMultipleIds, connection, type);
             if (!QueryCache.TryGetValue(cacheKey, out var sql))
             {
+                var builder = GetSqlBuilder(connection);
                 var tableName = Resolvers.Table(type, connection);
                 var keyProperties = Resolvers.KeyProperties(type);
                 var keyColumnsNames = keyProperties.Select(p => Resolvers.Column(p, connection)).ToArray();
@@ -142,7 +144,7 @@ namespace Dommel
                         sb.Append(" and");
                     }
 
-                    sb.Append(" ").Append(keyColumnName).Append(" = @Id").Append(i);
+                    sb.Append(" ").Append(keyColumnName).Append($" = { builder.PrefixParameter("Id") }").Append(i);
                     i++;
                 }
 

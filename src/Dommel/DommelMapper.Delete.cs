@@ -48,8 +48,9 @@ namespace Dommel
                 var tableName = Resolvers.Table(type, connection);
                 var keyProperty = Resolvers.KeyProperty(type);
                 var keyColumnName = Resolvers.Column(keyProperty, connection);
+                var builder = GetSqlBuilder(connection);
 
-                sql = $"delete from {tableName} where {keyColumnName} = @{keyProperty.Name}";
+                sql = $"delete from {tableName} where {keyColumnName} = {builder.PrefixParameter(keyProperty.Name)}";
 
                 QueryCache.TryAdd(cacheKey, sql);
             }
