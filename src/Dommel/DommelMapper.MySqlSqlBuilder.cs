@@ -20,7 +20,7 @@ namespace Dommel
                 return $" {orderBy} LIMIT {start}, {pageSize}";
             }
 
-            /// <inheritdoc/>s
+            /// <inheritdoc/>
             public string PrefixParameter(string paramName)
             {
                 return $"@{paramName}";
