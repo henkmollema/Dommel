@@ -13,8 +13,7 @@ using System.Data.SqlClient;
 using System.ComponentModel.DataAnnotations;
 
 namespace Dommel.Tests
-{
-    [Collection("Use Dommel Log to check on results")]
+{    
     public class ParameterPrefixTest
     {
         private readonly Mock<IDataBaseParameterPrefix> mock = new Mock<IDataBaseParameterPrefix>();

@@ -8,7 +8,6 @@ using Xunit;
 
 namespace Dommel.Tests
 {
-    [Collection("Use Dommel Log to check on results")]
     public class LoggingTests
     {
         [Fact]
