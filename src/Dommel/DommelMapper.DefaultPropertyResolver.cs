@@ -30,7 +30,7 @@ namespace Dommel
             /// </summary>
             /// <param name="type">The type to resolve the properties to be mapped for.</param>
             /// <returns>A collection of <see cref="PropertyInfo"/>'s of the <paramref name="type"/>.</returns>
-            public IEnumerable<PropertyInfo> ResolveProperties(Type type) => FilterComplexTypes(type.GetRuntimeProperties());
+            public virtual IEnumerable<PropertyInfo> ResolveProperties(Type type) => FilterComplexTypes(type.GetRuntimeProperties());
 
             /// <summary>
             /// Gets a collection of types that are considered 'primitive' for Dommel but are not for the CLR.
