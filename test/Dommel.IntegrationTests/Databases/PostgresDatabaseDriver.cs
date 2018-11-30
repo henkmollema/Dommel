@@ -71,7 +71,9 @@ CREATE TABLE IF NOT EXISTS ""Bars"" (""Id"" serial primary key, ""Name"" VARCHAR
 DROP TABLE ""Categories"";
 DROP TABLE ""Products"";
 DROP TABLE ""Orders"";
-DROP TABLE ""OrderLines"";");
+DROP TABLE ""OrderLines"";
+DROP TABLE ""Foos"";
+DROP TABLE ""Bars"";");
                 con.Close();
             }
         }
