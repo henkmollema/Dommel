@@ -8,10 +8,10 @@ namespace Dommel
         /// <summary>
         /// <see cref="ISqlBuilder"/> implementation for Postgres.
         /// </summary>
-        public sealed class PostgresSqlBuilder : ISqlBuilder
+        public class PostgresSqlBuilder : ISqlBuilder
         {
             /// <inheritdoc/>
-            public string BuildInsert(string tableName, string[] columnNames, string[] paramNames, PropertyInfo keyProperty)
+            public virtual string BuildInsert(string tableName, string[] columnNames, string[] paramNames, PropertyInfo keyProperty)
             {
                 var sql = $"insert into {tableName} ({string.Join(", ", columnNames)}) values ({string.Join(", ", paramNames)})";
 
@@ -31,7 +31,7 @@ namespace Dommel
             }
 
             /// <inheritdoc/>
-            public string BuildPaging(string orderBy, int pageNumber, int pageSize)
+            public virtual string BuildPaging(string orderBy, int pageNumber, int pageSize)
             {
                 var start = pageNumber >= 1 ? (pageNumber - 1) * pageSize : 0;
                 return $" {orderBy} OFFSET {start} LIMIT {pageSize}";

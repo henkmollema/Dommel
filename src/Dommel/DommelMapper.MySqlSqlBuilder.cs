@@ -7,14 +7,14 @@ namespace Dommel
         /// <summary>
         /// <see cref="ISqlBuilder"/> implementation for MySQL.
         /// </summary>
-        public sealed class MySqlSqlBuilder : ISqlBuilder
+        public class MySqlSqlBuilder : ISqlBuilder
         {
             /// <inheritdoc/>
-            public string BuildInsert(string tableName, string[] columnNames, string[] paramNames, PropertyInfo keyProperty) =>
+            public virtual string BuildInsert(string tableName, string[] columnNames, string[] paramNames, PropertyInfo keyProperty) =>
                 $"insert into {tableName} ({string.Join(", ", columnNames)}) values ({string.Join(", ", paramNames)}); select LAST_INSERT_ID() id";
 
             /// <inheritdoc/>
-            public string BuildPaging(string orderBy, int pageNumber, int pageSize)
+            public virtual string BuildPaging(string orderBy, int pageNumber, int pageSize)
             {
                 var start = pageNumber >= 1 ? (pageNumber - 1) * pageSize : 0;
                 return $" {orderBy} LIMIT {start}, {pageSize}";

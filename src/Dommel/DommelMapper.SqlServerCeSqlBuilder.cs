@@ -7,14 +7,14 @@ namespace Dommel
         /// <summary>
         /// <see cref="ISqlBuilder"/> implementation for SQL Server Compact Edition.
         /// </summary>
-        public sealed class SqlServerCeSqlBuilder : ISqlBuilder
+        public class SqlServerCeSqlBuilder : ISqlBuilder
         {
             /// <inheritdoc/>
-            public string BuildInsert(string tableName, string[] columnNames, string[] paramNames, PropertyInfo keyProperty) =>
-                $"insert into {tableName} ({string.Join(", ", columnNames)}) values ({string.Join(", ", paramNames)}) select cast(@@IDENTITY as int)";
+            public virtual string BuildInsert(string tableName, string[] columnNames, string[] paramNames, PropertyInfo keyProperty) =>
+                $"insert into {tableName} ({string.Join(", ", columnNames)}) values ({string.Join(", ", paramNames)}); select @@IDENTITY";
 
             /// <inheritdoc/>
-            public string BuildPaging(string orderBy, int pageNumber, int pageSize)
+            public virtual string BuildPaging(string orderBy, int pageNumber, int pageSize)
             {
                 var start = pageNumber >= 1 ? (pageNumber - 1) * pageSize : 0;
                 return $" {orderBy} offset {start} rows fetch next {pageSize} rows only";

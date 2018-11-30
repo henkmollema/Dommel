@@ -37,7 +37,7 @@ BEGIN
     CREATE TABLE dbo.Orders (Id int IDENTITY(1,1) PRIMARY KEY, Created DATETIME NOT NULL);
     CREATE TABLE dbo.OrderLines (Id int IDENTITY(1,1) PRIMARY KEY, OrderId int, Line VARCHAR(255));
     CREATE TABLE dbo.Foos (Id int IDENTITY(1,1) PRIMARY KEY, Name VARCHAR(255));
-    CREATE TABLE dbo.Bars (Id int IDENTITY(1,1) PRIMARY KEY, Name VARCHAR(255));
+    CREATE TABLE dbo.Bars (Id int IDENTITY(1,1) PRIMARY KEY, Name VARCHAR(255));    
     SELECT 1;
 END";
                 var created = await con.ExecuteScalarAsync(sql);

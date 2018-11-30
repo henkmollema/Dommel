@@ -7,14 +7,14 @@ namespace Dommel
         /// <summary>
         /// <see cref="ISqlBuilder"/> implementation for SQL Server.
         /// </summary>
-        public sealed class SqlServerSqlBuilder : ISqlBuilder
+        public class SqlServerSqlBuilder : ISqlBuilder
         {
             /// <inheritdoc/>
-            public string BuildInsert(string tableName, string[] columnNames, string[] paramNames, PropertyInfo keyProperty) =>
-                $"set nocount on insert into {tableName} ({string.Join(", ", columnNames)}) values ({string.Join(", ", paramNames)}) select cast(scope_identity() as int)";
+            public virtual string BuildInsert(string tableName, string[] columnNames, string[] paramNames, PropertyInfo keyProperty) =>
+                $"set nocount on insert into {tableName} ({string.Join(", ", columnNames)}) values ({string.Join(", ", paramNames)}); select scope_identity()";
 
             /// <inheritdoc/>
-            public string BuildPaging(string orderBy, int pageNumber, int pageSize)
+            public virtual string BuildPaging(string orderBy, int pageNumber, int pageSize)
             {
                 var start = pageNumber >= 1 ? (pageNumber - 1) * pageSize : 0;
                 return $" {orderBy} offset {start} rows fetch next {pageSize} rows only";
