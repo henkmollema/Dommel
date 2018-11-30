@@ -25,6 +25,12 @@ namespace Dommel.IntegrationTests
         [Fact]
         public void InsertGuidPrimaryKey()
         {
+            if (CI.IsTravis)
+            {
+                // Don't run SQL Server test on Linux
+                return;
+            }
+
             using (var con = new SqlServerDatabaseDriver().GetConnection())
             {
                 con.Execute("CREATE TABLE dbo.Bazs (Id UNIQUEIDENTIFIER NOT NULL DEFAULT NEWID(), Name VARCHAR(255));");
