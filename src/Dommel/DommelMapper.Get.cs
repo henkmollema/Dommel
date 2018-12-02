@@ -1,11 +1,10 @@
+using Dapper;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
-using Dapper;
 
 namespace Dommel
 {
@@ -88,7 +87,7 @@ namespace Dommel
 
             var sql = BuildGetByIds(connection, typeof(TEntity), ids, out var parameters);
             LogQuery<TEntity>(sql);
-            return connection.QueryFirstOrDefault<TEntity>(sql, parameters);
+            return connection.QueryFirstOrDefault<TEntity>(sql, parameters, transaction);
         }
 
         /// <summary>
@@ -118,7 +117,7 @@ namespace Dommel
 
             var sql = BuildGetByIds(connection, typeof(TEntity), ids, out var parameters);
             LogQuery<TEntity>(sql);
-            return connection.QueryFirstOrDefaultAsync<TEntity>(sql, parameters);
+            return connection.QueryFirstOrDefaultAsync<TEntity>(sql, parameters, transaction);
         }
 
         private static string BuildGetByIds(IDbConnection connection, Type type, object[] ids, out DynamicParameters parameters)
