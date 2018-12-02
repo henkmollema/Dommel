@@ -1,11 +1,10 @@
+using Dapper;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
-using Dapper;
 
 namespace Dommel
 {
@@ -18,12 +17,13 @@ namespace Dommel
         /// <param name="connection">The connection to the database. This can either be open or closed.</param>
         /// <param name="id">The id of the entity in the database.</param>
         /// <param name="transaction">Optional transaction for the command.</param>
+        /// <param name="commandTimeout">The command timeout (in seconds).</param>
         /// <returns>The entity with the corresponding id.</returns>
-        public static TEntity Get<TEntity>(this IDbConnection connection, object id, IDbTransaction transaction = null) where TEntity : class
+        public static TEntity Get<TEntity>(this IDbConnection connection, object id, IDbTransaction transaction = null, int? commandTimeout = null) where TEntity : class
         {
             var sql = BuildGetById(connection, typeof(TEntity), id, out var parameters);
             LogQuery<TEntity>(sql);
-            return connection.QueryFirstOrDefault<TEntity>(sql, parameters, transaction);
+            return connection.QueryFirstOrDefault<TEntity>(sql, parameters, transaction, commandTimeout);
         }
 
         /// <summary>
@@ -33,12 +33,13 @@ namespace Dommel
         /// <param name="connection">The connection to the database. This can either be open or closed.</param>
         /// <param name="id">The id of the entity in the database.</param>
         /// <param name="transaction">Optional transaction for the command.</param>
+        /// <param name="commandTimeout">The command timeout (in seconds).</param>
         /// <returns>The entity with the corresponding id.</returns>
-        public static Task<TEntity> GetAsync<TEntity>(this IDbConnection connection, object id, IDbTransaction transaction = null) where TEntity : class
+        public static Task<TEntity> GetAsync<TEntity>(this IDbConnection connection, object id, IDbTransaction transaction = null, int? commandTimeout = null) where TEntity : class
         {
             var sql = BuildGetById(connection, typeof(TEntity), id, out var parameters);
             LogQuery<TEntity>(sql);
-            return connection.QueryFirstOrDefaultAsync<TEntity>(sql, parameters, transaction);
+            return connection.QueryFirstOrDefaultAsync<TEntity>(sql, parameters, transaction, commandTimeout);
         }
 
         private static string BuildGetById(IDbConnection connection, Type type, object id, out DynamicParameters parameters)
@@ -78,17 +79,18 @@ namespace Dommel
         /// <param name="connection">The connection to the database. This can either be open or closed.</param>
         /// <param name="ids">The id of the entity in the database.</param>
         /// <param name="transaction">Optional transaction for the command.</param>
+        /// <param name="commandTimeout">The command timeout (in seconds).</param>
         /// <returns>The entity with the corresponding id.</returns>
-        public static TEntity Get<TEntity>(this IDbConnection connection, object[] ids, IDbTransaction transaction = null) where TEntity : class
+        public static TEntity Get<TEntity>(this IDbConnection connection, object[] ids, IDbTransaction transaction = null, int? commandTimeout = null) where TEntity : class
         {
             if (ids.Length == 1)
             {
-                return Get<TEntity>(connection, ids[0], transaction);
+                return Get<TEntity>(connection, ids[0], transaction, commandTimeout);
             }
 
             var sql = BuildGetByIds(connection, typeof(TEntity), ids, out var parameters);
             LogQuery<TEntity>(sql);
-            return connection.QueryFirstOrDefault<TEntity>(sql, parameters);
+            return connection.QueryFirstOrDefault<TEntity>(sql, parameters, transaction, commandTimeout);
         }
 
         /// <summary>
@@ -108,17 +110,18 @@ namespace Dommel
         /// <param name="connection">The connection to the database. This can either be open or closed.</param>
         /// <param name="ids">The id of the entity in the database.</param>
         /// <param name="transaction">Optional transaction for the command.</param>
+        /// <param name="commandTimeout">The command timeout (in seconds).</param>
         /// <returns>The entity with the corresponding id.</returns>
-        public static Task<TEntity> GetAsync<TEntity>(this IDbConnection connection, object[] ids, IDbTransaction transaction = null) where TEntity : class
+        public static Task<TEntity> GetAsync<TEntity>(this IDbConnection connection, object[] ids, IDbTransaction transaction = null, int? commandTimeout = null) where TEntity : class
         {
             if (ids.Length == 1)
             {
-                return GetAsync<TEntity>(connection, ids[0], transaction);
+                return GetAsync<TEntity>(connection, ids[0], transaction, commandTimeout);
             }
 
             var sql = BuildGetByIds(connection, typeof(TEntity), ids, out var parameters);
             LogQuery<TEntity>(sql);
-            return connection.QueryFirstOrDefaultAsync<TEntity>(sql, parameters);
+            return connection.QueryFirstOrDefaultAsync<TEntity>(sql, parameters, transaction, commandTimeout);
         }
 
         private static string BuildGetByIds(IDbConnection connection, Type type, object[] ids, out DynamicParameters parameters)
@@ -166,17 +169,18 @@ namespace Dommel
         /// </summary>
         /// <typeparam name="TEntity">The type of the entity.</typeparam>
         /// <param name="connection">The connection to the database. This can either be open or closed.</param>
+        /// <param name="transaction">Optional transaction for the command.</param>
         /// <param name="buffered">
         /// A value indicating whether the result of the query should be executed directly,
         /// or when the query is materialized (using <c>ToList()</c> for example).
         /// </param>
-        /// <param name="transaction">Optional transaction for the command.</param>
+        /// <param name="commandTimeout">The command timeout (in seconds).</param>
         /// <returns>A collection of entities of type <typeparamref name="TEntity"/>.</returns>
-        public static IEnumerable<TEntity> GetAll<TEntity>(this IDbConnection connection, IDbTransaction transaction = null, bool buffered = true) where TEntity : class
+        public static IEnumerable<TEntity> GetAll<TEntity>(this IDbConnection connection, IDbTransaction transaction = null, bool buffered = true, int? commandTimeout = null) where TEntity : class
         {
             var sql = BuildGetAllQuery(connection, typeof(TEntity));
             LogQuery<TEntity>(sql);
-            return connection.Query<TEntity>(sql, transaction: transaction, buffered: buffered);
+            return connection.Query<TEntity>(sql, transaction: transaction, buffered: buffered, commandTimeout: commandTimeout);
         }
 
         /// <summary>
@@ -185,12 +189,13 @@ namespace Dommel
         /// <typeparam name="TEntity">The type of the entity.</typeparam>
         /// <param name="connection">The connection to the database. This can either be open or closed.</param>
         /// <param name="transaction">Optional transaction for the command.</param>
+        /// <param name="commandTimeout">The command timeout (in seconds).</param>
         /// <returns>A collection of entities of type <typeparamref name="TEntity"/>.</returns>
-        public static Task<IEnumerable<TEntity>> GetAllAsync<TEntity>(this IDbConnection connection, IDbTransaction transaction = null) where TEntity : class
+        public static Task<IEnumerable<TEntity>> GetAllAsync<TEntity>(this IDbConnection connection, IDbTransaction transaction = null, int? commandTimeout = null) where TEntity : class
         {
             var sql = BuildGetAllQuery(connection, typeof(TEntity));
             LogQuery<TEntity>(sql);
-            return connection.QueryAsync<TEntity>(sql, transaction: transaction);
+            return connection.QueryAsync<TEntity>(sql, transaction: transaction, commandTimeout: commandTimeout);
         }
 
         private static string BuildGetAllQuery(IDbConnection connection, Type type)
@@ -212,17 +217,18 @@ namespace Dommel
         /// <param name="connection">The connection to the database. This can either be open or closed.</param>
         /// <param name="pageNumber">The number of the page to fetch, starting at 1.</param>
         /// <param name="pageSize">The page size.</param>
+        /// <param name="transaction">Optional transaction for the command.</param>
         /// <param name="buffered">
         /// A value indicating whether the result of the query should be executed directly,
         /// or when the query is materialized (using <c>ToList()</c> for example).
         /// </param>
-        /// <param name="transaction">Optional transaction for the command.</param>
+        /// <param name="commandTimeout">The command timeout (in seconds).</param>
         /// <returns>A paged collection of entities of type <typeparamref name="TEntity"/>.</returns>
-        public static IEnumerable<TEntity> GetPaged<TEntity>(this IDbConnection connection, int pageNumber, int pageSize, IDbTransaction transaction = null, bool buffered = true) where TEntity : class
+        public static IEnumerable<TEntity> GetPaged<TEntity>(this IDbConnection connection, int pageNumber, int pageSize, IDbTransaction transaction = null, bool buffered = true, int? commandTimeout = null) where TEntity : class
         {
             var sql = BuildPagedQuery(connection, typeof(TEntity), pageNumber, pageSize);
             LogQuery<TEntity>(sql);
-            return connection.Query<TEntity>(sql, transaction: transaction, buffered: buffered);
+            return connection.Query<TEntity>(sql, transaction: transaction, buffered: buffered, commandTimeout: commandTimeout);
         }
 
         /// <summary>
@@ -233,12 +239,13 @@ namespace Dommel
         /// <param name="pageNumber">The number of the page to fetch, starting at 1.</param>
         /// <param name="pageSize">The page size.</param>
         /// <param name="transaction">Optional transaction for the command.</param>
+        /// <param name="commandTimeout">The command timeout (in seconds).</param>
         /// <returns>A paged collection of entities of type <typeparamref name="TEntity"/>.</returns>
-        public static Task<IEnumerable<TEntity>> GetPagedAsync<TEntity>(this IDbConnection connection, int pageNumber, int pageSize, IDbTransaction transaction = null) where TEntity : class
+        public static Task<IEnumerable<TEntity>> GetPagedAsync<TEntity>(this IDbConnection connection, int pageNumber, int pageSize, IDbTransaction transaction = null, int? commandTimeout = null) where TEntity : class
         {
             var sql = BuildPagedQuery(connection, typeof(TEntity), pageNumber, pageSize);
             LogQuery<TEntity>(sql);
-            return connection.QueryAsync<TEntity>(sql, transaction: transaction);
+            return connection.QueryAsync<TEntity>(sql, transaction: transaction, commandTimeout: commandTimeout);
         }
 
         private static string BuildPagedQuery(IDbConnection connection, Type type, int pageNumber, int pageSize)
