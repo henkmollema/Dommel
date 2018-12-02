@@ -1,9 +1,9 @@
-﻿using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Data;
-using Dapper;
+﻿using Dapper;
 using Moq;
 using Moq.Dapper;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.Data;
 using Xunit;
 
 namespace Dommel.Tests
@@ -29,7 +29,7 @@ namespace Dommel.Tests
 
             // Assert
             Assert.Single(logs);
-            Assert.Equal("Get<Foo>: select * from Foos where Id = @Id", logs[0]);
+            Assert.Equal("Get<Foo>: select * from [Foos] where [Id] = @Id", logs[0]);
         }
 
         [Fact]
@@ -50,7 +50,7 @@ namespace Dommel.Tests
 
             // Assert
             Assert.Single(logs);
-            Assert.Equal("Get<Bar>: select * from Bars where Id = @Id0 and KeyColumn2 = @Id1 and KeyColumn3 = @Id2", logs[0]);
+            Assert.Equal("Get<Bar>: select * from [Bars] where [Id] = @Id0 and [KeyColumn2] = @Id1 and [KeyColumn3] = @Id2", logs[0]);
         }
 
         [Fact]
@@ -72,8 +72,8 @@ namespace Dommel.Tests
 
             // Assert
             Assert.Equal(2, logs.Count);
-            Assert.Equal("Get<Foo>: select * from Foos where Id = @Id", logs[0]);
-            Assert.Equal("Get<Foo>: select * from Foos where Id = @Id", logs[1]);
+            Assert.Equal("Get<Foo>: select * from [Foos] where [Id] = @Id", logs[0]);
+            Assert.Equal("Get<Foo>: select * from [Foos] where [Id] = @Id", logs[1]);
         }
 
         [Fact]

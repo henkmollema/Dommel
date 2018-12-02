@@ -1,6 +1,4 @@
-﻿using System;
-using System.ComponentModel.DataAnnotations.Schema;
-using Moq;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 using Xunit;
 using static Dommel.DommelMapper;
 
@@ -19,7 +17,7 @@ namespace Dommel.Tests
             var sql = expression.ToSql(out var dynamicParameters);
 
             // Assert
-            Assert.Equal("where Bar like @p1", sql.Trim());
+            Assert.Equal("where [Bar] like @p1", sql.Trim());
             Assert.Single(dynamicParameters.ParameterNames);
             Assert.Equal("%test%", dynamicParameters.Get<string>("p1"));
         }
@@ -35,7 +33,7 @@ namespace Dommel.Tests
             var sql = expression.ToSql(out var dynamicParameters);
 
             // Assert
-            Assert.Equal("where Bar like @p1", sql.Trim());
+            Assert.Equal("where [Bar] like @p1", sql.Trim());
             Assert.Single(dynamicParameters.ParameterNames);
             Assert.Equal("test%", dynamicParameters.Get<string>("p1"));
         }
@@ -51,7 +49,7 @@ namespace Dommel.Tests
             var sql = expression.ToSql(out var dynamicParameters);
 
             // Assert
-            Assert.Equal("where Bar like @p1", sql.Trim());
+            Assert.Equal("where [Bar] like @p1", sql.Trim());
             Assert.Single(dynamicParameters.ParameterNames);
             Assert.Equal("%test", dynamicParameters.Get<string>("p1"));
         }

@@ -27,7 +27,7 @@ namespace Dommel
             }
 
             /// <inheritdoc/>
-            public string QuoteIdentifier(string identifier) => identifier;
+            public string QuoteIdentifier(string identifier) => $"[{identifier}]";
         }
     }
 }
