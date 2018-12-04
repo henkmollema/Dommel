@@ -1,9 +1,9 @@
+using Dapper;
 using System;
 using System.Data;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
-using Dapper;
 
 namespace Dommel
 {
@@ -47,17 +47,18 @@ namespace Dommel
             if (!QueryCache.TryGetValue(cacheKey, out var sql))
             {
                 var tableName = Resolvers.Table(type, connection);
-                var keyProperty = Resolvers.KeyProperty(type);
+                var keyProperties = Resolvers.KeyProperties(type);
                 var builder = GetSqlBuilder(connection);
 
                 // Use all properties which are settable.
                 var typeProperties = Resolvers.Properties(type)
-                                              .Where(p => p != keyProperty)
+                                              .Except(keyProperties)
                                               .Where(p => p.GetSetMethod() != null)
                                               .ToArray();
 
                 var columnNames = typeProperties.Select(p => $"{Resolvers.Column(p, connection)} = {builder.PrefixParameter(p.Name)}").ToArray();
-                sql = $"update {tableName} set {string.Join(", ", columnNames)} where {Resolvers.Column(keyProperty, connection)} = {builder.PrefixParameter(keyProperty.Name)}";
+                var keyPropertyWhereClauses = keyProperties.Select(p => $"{Resolvers.Column(p, connection)} = {builder.PrefixParameter(p.Name)}");
+                sql = $"update {tableName} set {string.Join(", ", columnNames)} where {string.Join(" and ", keyPropertyWhereClauses)}";
 
                 QueryCache.TryAdd(cacheKey, sql);
             }
