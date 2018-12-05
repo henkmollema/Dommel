@@ -58,12 +58,12 @@ namespace Dommel
             /// <param name="tableName">The name of the table to query.</param>
             /// <param name="columnNames">The names of the columns in the table.</param>
             /// <param name="paramNames">The names of the parameters in the database command.</param>
-            /// <param name="keyProperty">
-            /// The key property. This can be used to query a specific column for the new id. This is
-            /// optional.
+            /// <param name="identityProperties">
+            ///     The key property. This can be used to query a specific column for the new id. This is
+            ///     optional.
             /// </param>
             /// <returns>An insert query including a query to fetch the new id.</returns>
-            string BuildInsert(string tableName, string[] columnNames, string[] paramNames, PropertyInfo keyProperty);
+            string BuildInsert(string tableName, string[] columnNames, string[] paramNames, IEnumerable<PropertyInfo> identityProperties);
 
             /// <summary>
             /// Builds the paging part to be appended to an existing select query.

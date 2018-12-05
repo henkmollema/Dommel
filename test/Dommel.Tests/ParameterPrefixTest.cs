@@ -1,16 +1,13 @@
 ﻿using Dapper;
 using Moq;
 using Moq.Dapper;
-using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Data;
 using System.Reflection;
-using System.Text;
 using Xunit;
 using static Dommel.DommelMapper;
-using System.Data.SqlClient;
-using System.ComponentModel.DataAnnotations;
 
 namespace Dommel.Tests
 {
@@ -116,7 +113,7 @@ namespace Dommel.Tests
             public string QuoteIdentifier(string identifier) => identifier;
 
             /// <inheritdoc/>
-            public string BuildInsert(string tableName, string[] columnNames, string[] paramNames, PropertyInfo keyProperty)
+            public string BuildInsert(string tableName, string[] columnNames, string[] paramNames, IEnumerable<PropertyInfo> identityProperties)
             {
                 return $"insert into {tableName} ({string.Join(", ", columnNames)}) values ({string.Join(", ", paramNames)}); select last_insert_rowid() id";
             }

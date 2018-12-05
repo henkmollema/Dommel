@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System.Collections.Generic;
+using System.Reflection;
 
 namespace Dommel
 {
@@ -10,7 +11,8 @@ namespace Dommel
         public class SqlServerCeSqlBuilder : ISqlBuilder
         {
             /// <inheritdoc/>
-            public virtual string BuildInsert(string tableName, string[] columnNames, string[] paramNames, PropertyInfo keyProperty) =>
+            public virtual string BuildInsert(string tableName, string[] columnNames, string[] paramNames,
+                IEnumerable<PropertyInfo> identityProperties) =>
                 $"insert into {tableName} ({string.Join(", ", columnNames)}) values ({string.Join(", ", paramNames)}); select @@IDENTITY";
 
             /// <inheritdoc/>

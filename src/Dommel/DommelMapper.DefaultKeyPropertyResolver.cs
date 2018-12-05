@@ -1,28 +1,25 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Reflection;
-using Dapper;
 
 namespace Dommel
 {
     public static partial class DommelMapper
     {
+        /// <inheritdoc />
         /// <summary>
-        /// Implements the <see cref="IKeyPropertyResolver"/> interface by resolving key properties
+        /// Implements the <see cref="T:Dommel.DommelMapper.IKeyPropertyResolver" /> interface by resolving key properties
         /// with the [Key] attribute or with the name 'Id'.
         /// </summary>
         public class DefaultKeyPropertyResolver : IKeyPropertyResolver
         {
+            /// <inheritdoc />
             /// <summary>
             /// Finds the key properties by looking for properties with the [Key] attribute.
             /// </summary>
-            public PropertyInfo[] ResolveKeyProperties(Type type) => ResolveKeyProperties(type, out _);
-
-            /// <summary>
-            /// Finds the key properties by looking for properties with the [Key] attribute.
-            /// </summary>
-            public PropertyInfo[] ResolveKeyProperties(Type type, out bool isIdentity)
+            public virtual IEnumerable<PropertyInfo> ResolveKeyProperties(Type type)
             {
                 var keyProps = Resolvers
                         .Properties(type)
@@ -34,7 +31,6 @@ namespace Dommel
                     throw new InvalidOperationException($"Could not find the key properties for type '{type.FullName}'.");
                 }
 
-                isIdentity = true;
                 return keyProps;
             }
         }

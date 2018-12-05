@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System.Collections.Generic;
+using System.Reflection;
 
 namespace Dommel
 {
@@ -10,7 +11,8 @@ namespace Dommel
         public class SqliteSqlBuilder : ISqlBuilder
         {
             /// <inheritdoc/>
-            public virtual string BuildInsert(string tableName, string[] columnNames, string[] paramNames, PropertyInfo keyProperty)
+            public virtual string BuildInsert(string tableName, string[] columnNames, string[] paramNames,
+                IEnumerable<PropertyInfo> identityProperties)
             {
                 return $"insert into {tableName} ({string.Join(", ", columnNames)}) values ({string.Join(", ", paramNames)}); select last_insert_rowid() id";
             }

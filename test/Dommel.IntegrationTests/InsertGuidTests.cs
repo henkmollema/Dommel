@@ -1,7 +1,8 @@
-﻿using System;
+﻿using Dapper;
+using System;
+using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Reflection;
-using Dapper;
 using Xunit;
 
 namespace Dommel.IntegrationTests
@@ -18,7 +19,7 @@ namespace Dommel.IntegrationTests
 
         public class GuidSqlServerSqlBuilder : DommelMapper.SqlServerSqlBuilder
         {
-            public override string BuildInsert(string tableName, string[] columnNames, string[] paramNames, PropertyInfo keyProperty) =>
+            public override string BuildInsert(string tableName, string[] columnNames, string[] paramNames, IEnumerable<PropertyInfo> identityProperties) =>
                 $"set nocount on insert into {tableName} ({string.Join(", ", columnNames)}) output inserted.Id values ({string.Join(", ", paramNames)})";
         }
 

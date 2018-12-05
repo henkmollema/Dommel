@@ -1,4 +1,6 @@
-﻿using System.Reflection;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 
 namespace Dommel
 {
@@ -10,8 +12,27 @@ namespace Dommel
         public class SqlServerSqlBuilder : ISqlBuilder
         {
             /// <inheritdoc/>
-            public virtual string BuildInsert(string tableName, string[] columnNames, string[] paramNames, PropertyInfo keyProperty) =>
-                $"set nocount on insert into {tableName} ({string.Join(", ", columnNames)}) values ({string.Join(", ", paramNames)}); select scope_identity()";
+            public virtual string BuildInsert(string tableName, string[] columnNames, string[] paramNames,
+                IEnumerable<PropertyInfo> identityProperties)
+            {
+                var outputClause = "";
+                if (identityProperties != null)
+                {
+                    var properties = identityProperties.ToArray();
+                    if (properties.Any())
+                    {
+                        foreach (var property in properties)
+                        {
+                            outputClause += $", inserted.{Resolvers.Column(property, this)}";
+                        }
+
+                        outputClause = $" output {outputClause.Substring(2)}";
+                    }
+                }
+
+                return $"set nocount on insert into {tableName} ({string.Join(", ", columnNames)}){outputClause} values ({string.Join(", ", paramNames)})";
+            }
+                
 
             /// <inheritdoc/>
             public virtual string BuildPaging(string orderBy, int pageNumber, int pageSize)

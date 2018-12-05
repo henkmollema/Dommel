@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using Xunit;
 
 namespace Dommel.Tests
@@ -11,7 +12,7 @@ namespace Dommel.Tests
         [Fact]
         public void MapsIdProperty()
         {
-            var prop = Resolver.ResolveKeyProperties(typeof(Foo))[0];
+            var prop = Resolver.ResolveKeyProperties(typeof(Foo)).First();
             Assert.Equal(typeof(Foo).GetProperty("Id"), prop);
         }
 
@@ -35,21 +36,21 @@ namespace Dommel.Tests
         [Fact]
         public void MapsWithAttribute()
         {
-            var prop = Resolver.ResolveKeyProperties(typeof(Bar))[0];
+            var prop = Resolver.ResolveKeyProperties(typeof(Bar)).First();
             Assert.Equal(typeof(Bar).GetProperty("BarId"), prop);
         }
 
         [Fact]
         public void NoKeyProperties_ThrowsException()
         {
-            var ex = Assert.Throws<InvalidOperationException>(() => Resolver.ResolveKeyProperties(typeof(Nope))[0]);
+            var ex = Assert.Throws<InvalidOperationException>(() => Resolver.ResolveKeyProperties(typeof(Nope)).First());
             Assert.Equal($"Could not find the key properties for type '{typeof(Nope).FullName}'.", ex.Message);
         }
 
         [Fact]
         public void MapsMultipleKeyProperties()
         {
-            var keyProperties = Resolver.ResolveKeyProperties(typeof(FooBar));
+            var keyProperties = Resolver.ResolveKeyProperties(typeof(FooBar)).ToArray();
             Assert.Equal(typeof(FooBar).GetProperty("Id"), keyProperties[0]);
             Assert.Equal(typeof(FooBar).GetProperty("BarId"), keyProperties[1]);
         }

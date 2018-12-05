@@ -1,4 +1,5 @@
-﻿using System;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 
 namespace Dommel
@@ -11,20 +12,18 @@ namespace Dommel
         public class PostgresSqlBuilder : ISqlBuilder
         {
             /// <inheritdoc/>
-            public virtual string BuildInsert(string tableName, string[] columnNames, string[] paramNames, PropertyInfo keyProperty)
+            public virtual string BuildInsert(string tableName, string[] columnNames, string[] paramNames,
+                IEnumerable<PropertyInfo> identityProperties)
             {
                 var sql = $"insert into {tableName} ({string.Join(", ", columnNames)}) values ({string.Join(", ", paramNames)})";
 
-                if (keyProperty != null)
+                if (identityProperties != null)
                 {
+                    var properties = identityProperties.ToArray();
+
                     // We know it's Postgres here
-                    var keyColumnName = Resolvers.Column(keyProperty, new PostgresSqlBuilder());
-                    sql += " RETURNING " + keyColumnName;
-                }
-                else
-                {
-                    // todo: what behavior is desired here?
-                    throw new Exception("A key property is required for the PostgresSqlBuilder.");
+                    var identityColumnNames = properties.Select(p => Resolvers.Column(p, this));
+                    sql += " RETURNING " + string.Join(", ", identityColumnNames);
                 }
 
                 return sql;

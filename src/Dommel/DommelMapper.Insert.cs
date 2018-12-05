@@ -1,10 +1,10 @@
+using Dapper;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
-using Dapper;
 
 namespace Dommel
 {
@@ -17,12 +17,12 @@ namespace Dommel
         /// <param name="connection">The connection to the database. This can either be open or closed.</param>
         /// <param name="entity">The entity to be inserted.</param>
         /// <param name="transaction">Optional transaction for the command.</param>
-        /// <returns>The id of the inserted entity.</returns>
+        /// <returns>The ID of the inserted entity.</returns>
         public static object Insert<TEntity>(this IDbConnection connection, TEntity entity, IDbTransaction transaction = null) where TEntity : class
         {
             var sql = BuildInsertQuery(connection, typeof(TEntity));
             LogQuery<TEntity>(sql);
-            return connection.ExecuteScalar(sql, entity, transaction);
+            return connection.QuerySingleOrDefault(sql, entity, transaction);
         }
 
         /// <summary>
@@ -37,7 +37,7 @@ namespace Dommel
         {
             var sql = BuildInsertQuery(connection, typeof(TEntity));
             LogQuery<TEntity>(sql);
-            return connection.ExecuteScalarAsync(sql, entity, transaction);
+            return connection.QuerySingleOrDefaultAsync(sql, entity, transaction);
         }
 
         /// <summary>
@@ -47,12 +47,12 @@ namespace Dommel
         /// <param name="connection">The connection to the database. This can either be open or closed.</param>
         /// <param name="entities">The entities to be inserted.</param>
         /// <param name="transaction">Optional transaction for the command.</param>
-        /// <returns>The id of the inserted entity.</returns>
-        public static void InsertAll<TEntity>(this IDbConnection connection, IEnumerable<TEntity> entities, IDbTransaction transaction = null) where TEntity : class
+        /// <returns>The number of records affected.</returns>
+        public static int InsertAll<TEntity>(this IDbConnection connection, IEnumerable<TEntity> entities, IDbTransaction transaction = null) where TEntity : class
         {
             var sql = BuildInsertQuery(connection, typeof(TEntity));
             LogQuery<TEntity>(sql);
-            connection.Execute(sql, entities, transaction);
+            return connection.Execute(sql, entities, transaction);
         }
 
         /// <summary>
@@ -62,12 +62,12 @@ namespace Dommel
         /// <param name="connection">The connection to the database. This can either be open or closed.</param>
         /// <param name="entities">The entities to be inserted.</param>
         /// <param name="transaction">Optional transaction for the command.</param>
-        /// <returns>The id of the inserted entity.</returns>
-        public static async Task InsertAllAsync<TEntity>(this IDbConnection connection, IEnumerable<TEntity> entities, IDbTransaction transaction = null) where TEntity : class
+        /// <returns>The number of records affected.</returns>
+        public static Task<int> InsertAllAsync<TEntity>(this IDbConnection connection, IEnumerable<TEntity> entities, IDbTransaction transaction = null) where TEntity : class
         {
             var sql = BuildInsertQuery(connection, typeof(TEntity));
             LogQuery<TEntity>(sql);
-            await connection.ExecuteAsync(sql, entities);
+            return connection.ExecuteAsync(sql, entities);
         }
 
         private static string BuildInsertQuery(IDbConnection connection, Type type)
@@ -76,18 +76,15 @@ namespace Dommel
             if (!QueryCache.TryGetValue(cacheKey, out var sql))
             {
                 var tableName = Resolvers.Table(type, connection);
-                var keyProperty = Resolvers.KeyProperty(type, out var isIdentity);
+                var identityProperties = Resolvers.IdentityProperties(type).ToArray();
 
                 var typeProperties = new List<PropertyInfo>();
                 foreach (var typeProperty in Resolvers.Properties(type))
                 {
-                    if (typeProperty == keyProperty)
+                    if (identityProperties.Contains(typeProperty))
                     {
-                        if (isIdentity)
-                        {
-                            // Skip key properties marked as an identity column.
-                            continue;
-                        }
+                        // Skip key properties marked as an identity column.
+                        continue;
                     }
 
                     if (typeProperty.GetSetMethod() != null)
@@ -100,7 +97,7 @@ namespace Dommel
                 var paramNames = typeProperties.Select(p => "@" + p.Name).ToArray();
 
                 var builder = GetSqlBuilder(connection);
-                sql = builder.BuildInsert(tableName, columnNames, paramNames, keyProperty);
+                sql = builder.BuildInsert(tableName, columnNames, paramNames, identityProperties);
 
                 QueryCache.TryAdd(cacheKey, sql);
             }
