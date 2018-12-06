@@ -1,8 +1,9 @@
+using Dapper;
 using System;
 using System.Data;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
-using Dapper;
 
 namespace Dommel
 {
@@ -46,11 +47,12 @@ namespace Dommel
             if (!QueryCache.TryGetValue(cacheKey, out var sql))
             {
                 var tableName = Resolvers.Table(type, connection);
-                var keyProperty = Resolvers.KeyProperty(type);
-                var keyColumnName = Resolvers.Column(keyProperty, connection);
-                var builder = GetSqlBuilder(connection);
+                var keyProperties = Resolvers.KeyProperties(type);
 
-                sql = $"delete from {tableName} where {keyColumnName} = {builder.PrefixParameter(keyProperty.Name)}";
+                var builder = GetSqlBuilder(connection);
+                var keyPropertyWhereClauses = keyProperties.Select(p => $"{Resolvers.Column(p, connection)} = {builder.PrefixParameter(p.Name)}");
+
+                sql = $"delete from {tableName} where {string.Join(" and ", keyPropertyWhereClauses)}";
 
                 QueryCache.TryAdd(cacheKey, sql);
             }
