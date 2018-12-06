@@ -48,11 +48,13 @@ namespace Dommel
             {
                 var tableName = Resolvers.Table(type, connection);
                 var keyProperties = Resolvers.KeyProperties(type);
+                var identityProperties = Resolvers.IdentityProperties(type);
                 var builder = GetSqlBuilder(connection);
 
-                // Use all properties which are settable.
+                // Use all properties which are settable except key and identity properties.
                 var typeProperties = Resolvers.Properties(type)
                                               .Except(keyProperties)
+                                              .Except(identityProperties)
                                               .Where(p => p.GetSetMethod() != null)
                                               .ToArray();
 
