@@ -1,10 +1,10 @@
-using Dapper;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using Dapper;
 
 namespace Dommel
 {
@@ -24,7 +24,8 @@ namespace Dommel
             LogQuery<TEntity>(sql);
             var result = connection.QuerySingleOrDefault(sql, entity, transaction);
 
-            PopulateEntity(entity, result);
+
+            result = PopulateEntity(entity, result);
 
             return result;
         }
@@ -43,7 +44,7 @@ namespace Dommel
             LogQuery<TEntity>(sql);
             var result = await connection.QuerySingleOrDefaultAsync(sql, entity, transaction).ConfigureAwait(false);
 
-            PopulateEntity(entity, result);
+            result = PopulateEntity(entity, result);
 
             return result;
         }
@@ -114,7 +115,7 @@ namespace Dommel
             return sql;
         }
 
-        private static void PopulateEntity<TEntity>(TEntity entity, dynamic result)
+        private static dynamic PopulateEntity<TEntity>(TEntity entity, dynamic result)
         {
             // populate the identity values back into the entity
             if (result is IDictionary<string, object> row)
@@ -125,12 +126,20 @@ namespace Dommel
                     var memberMap = typeMap.GetMember(column.Key);
 
                     var identityProperty = memberMap != null ? memberMap.Property : Resolvers.IdentityProperty(typeof(TEntity));
-                    identityProperty.SetValue(entity,
-                        identityProperty.PropertyType != column.Value.GetType()
-                            ? Convert.ChangeType(column.Value, identityProperty.PropertyType)
-                            : column.Value);
+                    var value = identityProperty.PropertyType != column.Value.GetType()
+                        ? Convert.ChangeType(column.Value, identityProperty.PropertyType)
+                        : column.Value;
+                    identityProperty.SetValue(entity, value);
+
+                    if (row.Count == 1)
+                    {
+                        // if the entity only contains 1 identity property, return just the identity value instead of a list of key/value.
+                        result = value;
+                    }
                 }
             }
+
+            return result;
         }
     }
 }
