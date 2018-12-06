@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Dommel.Attributes;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -6,6 +7,7 @@ namespace Dommel.IntegrationTests
 {
     public class Product
     {
+        [Identity]
         public int Id { get; set; }
 
         public string Name { get; set; }
@@ -19,6 +21,7 @@ namespace Dommel.IntegrationTests
 
     public class Category
     {
+        [Identity]
         public int Id { get; set; }
 
         public string Name { get; set; }
@@ -26,6 +29,7 @@ namespace Dommel.IntegrationTests
 
     public class Order
     {
+        [Identity]
         public int Id { get; set; }
 
         public DateTime Created { get; set; } = DateTime.UtcNow;
@@ -36,6 +40,7 @@ namespace Dommel.IntegrationTests
 
     public class OrderLine
     {
+        [Identity]
         public int Id { get; set; }
 
         public int OrderId { get; set; }
@@ -45,6 +50,7 @@ namespace Dommel.IntegrationTests
 
     public class Foo
     {
+        [Identity]
         public int Id { get; set; }
 
         public string Name { get; set; } = nameof(Foo);
@@ -52,6 +58,7 @@ namespace Dommel.IntegrationTests
 
     public class Bar
     {
+        [Identity]
         public int Id { get; set; }
 
         public string Name { get; set; } = nameof(Bar);
