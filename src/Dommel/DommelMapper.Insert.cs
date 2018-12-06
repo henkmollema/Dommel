@@ -22,7 +22,11 @@ namespace Dommel
         {
             var sql = BuildInsertQuery(connection, typeof(TEntity));
             LogQuery<TEntity>(sql);
-            return connection.QuerySingleOrDefault(sql, entity, transaction);
+            var result = connection.QuerySingleOrDefault(sql, entity, transaction);
+
+            PopulateEntity(entity, result);
+
+            return result;
         }
 
         /// <summary>
@@ -33,11 +37,15 @@ namespace Dommel
         /// <param name="entity">The entity to be inserted.</param>
         /// <param name="transaction">Optional transaction for the command.</param>
         /// <returns>The ID of the inserted entity.</returns>
-        public static Task<object> InsertAsync<TEntity>(this IDbConnection connection, TEntity entity, IDbTransaction transaction = null) where TEntity : class
+        public static async Task<object> InsertAsync<TEntity>(this IDbConnection connection, TEntity entity, IDbTransaction transaction = null) where TEntity : class
         {
             var sql = BuildInsertQuery(connection, typeof(TEntity));
             LogQuery<TEntity>(sql);
-            return connection.QuerySingleOrDefaultAsync(sql, entity, transaction);
+            var result = await connection.QuerySingleOrDefaultAsync(sql, entity, transaction).ConfigureAwait(false);
+
+            PopulateEntity(entity, result);
+
+            return result;
         }
 
         /// <summary>
@@ -67,7 +75,7 @@ namespace Dommel
         {
             var sql = BuildInsertQuery(connection, typeof(TEntity));
             LogQuery<TEntity>(sql);
-            return connection.ExecuteAsync(sql, entities);
+            return connection.ExecuteAsync(sql, entities, transaction);
         }
 
         private static string BuildInsertQuery(IDbConnection connection, Type type)
@@ -104,6 +112,25 @@ namespace Dommel
             }
 
             return sql;
+        }
+
+        private static void PopulateEntity<TEntity>(TEntity entity, dynamic result)
+        {
+            // populate the identity values back into the entity
+            if (result is IDictionary<string, object> row)
+            {
+                foreach (var column in row)
+                {
+                    var typeMap = SqlMapper.GetTypeMap(typeof(TEntity));
+                    var memberMap = typeMap.GetMember(column.Key);
+
+                    var identityProperty = memberMap != null ? memberMap.Property : Resolvers.IdentityProperty(typeof(TEntity));
+                    identityProperty.SetValue(entity,
+                        identityProperty.PropertyType != column.Value.GetType()
+                            ? Convert.ChangeType(column.Value, identityProperty.PropertyType)
+                            : column.Value);
+                }
+            }
         }
     }
 }
