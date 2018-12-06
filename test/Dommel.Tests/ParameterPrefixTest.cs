@@ -113,7 +113,7 @@ namespace Dommel.Tests
             public string QuoteIdentifier(string identifier) => identifier;
 
             /// <inheritdoc/>
-            public string BuildInsert(string tableName, string[] columnNames, string[] paramNames, IEnumerable<PropertyInfo> identityProperties)
+            public string BuildInsert(string tableName, string[] columnNames, string[] paramNames, IEnumerable<PropertyInfo> keyProperties, IEnumerable<PropertyInfo> identityProperties)
             {
                 return $"insert into {tableName} ({string.Join(", ", columnNames)}) values ({string.Join(", ", paramNames)}); select last_insert_rowid() id";
             }

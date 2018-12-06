@@ -12,11 +12,9 @@ namespace Dommel
         {
             /// <inheritdoc/>
             public virtual string BuildInsert(string tableName, string[] columnNames, string[] paramNames,
-                IEnumerable<PropertyInfo> identityProperties)
-            {
-                return $"insert into {tableName} ({string.Join(", ", columnNames)}) values ({string.Join(", ", paramNames)}); select last_insert_rowid() id";
-            }
-
+                IEnumerable<PropertyInfo> keyProperties, IEnumerable<PropertyInfo> identityProperties) =>
+                $"insert into {tableName} ({string.Join(", ", columnNames)}) values ({string.Join(", ", paramNames)}); select last_insert_rowid() id";
+            
             /// <inheritdoc/>
             public virtual string BuildPaging(string orderBy, int pageNumber, int pageSize)
             {

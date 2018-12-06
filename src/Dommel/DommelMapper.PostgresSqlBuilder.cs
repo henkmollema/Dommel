@@ -13,7 +13,7 @@ namespace Dommel
         {
             /// <inheritdoc/>
             public virtual string BuildInsert(string tableName, string[] columnNames, string[] paramNames,
-                IEnumerable<PropertyInfo> identityProperties)
+                IEnumerable<PropertyInfo> keyProperties, IEnumerable<PropertyInfo> identityProperties)
             {
                 var sql = $"insert into {tableName} ({string.Join(", ", columnNames)}) values ({string.Join(", ", paramNames)})";
 

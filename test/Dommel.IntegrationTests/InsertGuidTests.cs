@@ -19,7 +19,7 @@ namespace Dommel.IntegrationTests
 
         public class GuidSqlServerSqlBuilder : DommelMapper.SqlServerSqlBuilder
         {
-            public override string BuildInsert(string tableName, string[] columnNames, string[] paramNames, IEnumerable<PropertyInfo> identityProperties) =>
+            public override string BuildInsert(string tableName, string[] columnNames, string[] paramNames, IEnumerable<PropertyInfo> keyProperties, IEnumerable<PropertyInfo> identityProperties) =>
                 $"set nocount on insert into {tableName} ({string.Join(", ", columnNames)}) output inserted.Id values ({string.Join(", ", paramNames)})";
         }
 
