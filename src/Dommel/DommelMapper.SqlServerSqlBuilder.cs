@@ -30,7 +30,7 @@ namespace Dommel
                     }
                 }
 
-                return $"set nocount on insert into {tableName} ({string.Join(", ", columnNames)}){outputClause} values ({string.Join(", ", paramNames)})";
+                return $"insert into {tableName} ({string.Join(", ", columnNames)}){outputClause} values ({string.Join(", ", paramNames)})";
             }
                 
 
