@@ -147,7 +147,14 @@ namespace Dommel
                 switch (method)
                 {
                     case "contains":
-                        return VisitContainsExpression(expression, TextSearch.Contains);
+                        if (expression.Method == typeof(string).GetMethod("Contains", new[] {typeof(string)}))
+                        {
+                            return VisitContainsExpression(expression, TextSearch.Contains);
+                        }
+                        else
+                        {
+                            return VisitInExpression(expression);
+                        }
                     case "startswith":
                         return VisitContainsExpression(expression, TextSearch.StartsWith);
                     case "endswith":
@@ -157,6 +164,45 @@ namespace Dommel
                 }
 
                 return expression;
+            }
+
+            /// <summary>
+            /// Processes a contains expression as IN clause
+            /// </summary>
+            /// <param name="expression">The method call expression.</param>
+            /// <returns>The result of the processing.</returns>
+            protected virtual object VisitInExpression(MethodCallExpression expression)
+            {
+                Expression collection;
+                Expression property;
+                if (expression.Method.IsDefined(typeof(System.Runtime.CompilerServices.ExtensionAttribute)) && expression.Arguments.Count == 2)
+                {
+                    collection = expression.Arguments[0];
+                    property = expression.Arguments[1];
+                }
+                else if (!expression.Method.IsDefined(typeof(System.Runtime.CompilerServices.ExtensionAttribute)) && expression.Arguments.Count == 1)
+                {
+                    collection = expression.Object;
+                    property = expression.Arguments[0];
+                }
+                else
+                {
+                    throw new Exception("Unsupported method call: " + expression.Method.Name);
+                }
+
+                var inClause = new StringBuilder("(");
+                foreach (var value in (System.Collections.IEnumerable)VisitMemberAccess((MemberExpression)collection))
+                {
+                    AddParameter(value, out var paramName);
+                    inClause.Append($"{paramName},");
+                }
+                if (inClause.Length == 1)
+                {
+                    inClause.Append("null,");
+                }
+                inClause[inClause.Length - 1] = ')';
+
+                return $"{VisitExpression(property)} in {inClause}";
             }
 
             /// <summary>

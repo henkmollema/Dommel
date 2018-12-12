@@ -72,6 +72,21 @@ namespace Dommel.Tests
             Assert.Equal(2, dynamicParameters.Get<int>("p2"));
         }
 
+        [Fact]
+        public void InExpression()
+        {
+            var ids = new[] {1, 2};
+            Expression<Func<Foo, bool>> expression = p => ids.Contains(p.Id) || p.Bar.Contains("testIn");
+
+            var dommelExpression = sqlExpression.Where(expression);
+            var sql = dommelExpression.ToSql(out var dynamicParameters);
+
+            Assert.Equal("where [Id] in (@p1,@p2) or [Bar] like @p3", sql.Trim());
+            Assert.Equal(1, dynamicParameters.Get<int>("p1"));
+            Assert.Equal(2, dynamicParameters.Get<int>("p2"));
+            Assert.Equal("%testIn%", dynamicParameters.Get<string>("p3"));
+        }
+
         [Table("tblFoo")]
         public class Foo
         {
