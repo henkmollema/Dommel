@@ -147,7 +147,7 @@ namespace Dommel
                 switch (method)
                 {
                     case "contains":
-                        if (expression.Method == typeof(string).GetMethod("Contains", new[] {typeof(string)}))
+                        if (expression.Object != null && expression.Object.Type == typeof(string))
                         {
                             return VisitContainsExpression(expression, TextSearch.Contains);
                         }
@@ -175,12 +175,12 @@ namespace Dommel
             {
                 Expression collection;
                 Expression property;
-                if (expression.Method.IsDefined(typeof(System.Runtime.CompilerServices.ExtensionAttribute)) && expression.Arguments.Count == 2)
+                if (expression.Object == null && expression.Arguments.Count == 2)
                 {
                     collection = expression.Arguments[0];
                     property = expression.Arguments[1];
                 }
-                else if (!expression.Method.IsDefined(typeof(System.Runtime.CompilerServices.ExtensionAttribute)) && expression.Arguments.Count == 1)
+                else if (expression.Object != null && expression.Arguments.Count == 1)
                 {
                     collection = expression.Object;
                     property = expression.Arguments[0];
