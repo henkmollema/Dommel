@@ -2,6 +2,8 @@
 using Moq;
 using Moq.Dapper;
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Data;
 using System.Linq;
@@ -76,21 +78,36 @@ namespace Dommel.Tests
         public void InExpression()
         {
             var ids = new[] {1, 2};
-            Expression<Func<Foo, bool>> expression = p => ids.Contains(p.Id) || p.Bar.Contains("testIn");
+            var idList = new ArrayList {"1", "2"};
+            var guid1 = Guid.NewGuid();
+            var guid2 = Guid.NewGuid();
+            var guidList = new List<Guid>() {guid1, guid2};
+            Expression<Func<Foo, bool>> expression = p =>
+                ids.Contains(p.Id) || idList.Contains(p.StringId) || guidList.Contains(p.Guid) ||
+                p.Bar.Contains("testIn");
 
             var dommelExpression = sqlExpression.Where(expression);
             var sql = dommelExpression.ToSql(out var dynamicParameters);
 
-            Assert.Equal("where [Id] in (@p1,@p2) or [Bar] like @p3", sql.Trim());
+            Assert.Equal("where [Id] in (@p1,@p2) or [StringId] in (@p3,@p4) or [Guid] in (@p5,@p6) or [Bar] like @p7", sql.Trim());
             Assert.Equal(1, dynamicParameters.Get<int>("p1"));
             Assert.Equal(2, dynamicParameters.Get<int>("p2"));
-            Assert.Equal("%testIn%", dynamicParameters.Get<string>("p3"));
+            Assert.Equal("1", dynamicParameters.Get<string>("p3"));
+            Assert.Equal("2", dynamicParameters.Get<string>("p4"));
+            Assert.Equal(guid1, dynamicParameters.Get<Guid>("p5"));
+            Assert.Equal(guid2, dynamicParameters.Get<Guid>("p6"));
+            Assert.Equal("%testIn%", dynamicParameters.Get<string>("p7"));
+
         }
 
         [Table("tblFoo")]
         public class Foo
         {
             public int Id { get; set; }
+
+            public string StringId { get; set; }
+
+            public Guid Guid { get; set; }
 
             public string Bar { get; set; }
         }

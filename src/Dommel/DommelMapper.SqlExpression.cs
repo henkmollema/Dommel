@@ -147,6 +147,7 @@ namespace Dommel
                 switch (method)
                 {
                     case "contains":
+                        //check if the method is instance method and caller is type of string.
                         if (expression.Object != null && expression.Object.Type == typeof(string))
                         {
                             return VisitContainsExpression(expression, TextSearch.Contains);
@@ -175,11 +176,15 @@ namespace Dommel
             {
                 Expression collection;
                 Expression property;
+                // The method is a static method, and has 2 arguments.
+                // usually, it's from System.Linq.Enumerable
                 if (expression.Object == null && expression.Arguments.Count == 2)
                 {
                     collection = expression.Arguments[0];
                     property = expression.Arguments[1];
                 }
+                // The method is an instance method, and has only 1 argument.
+                // usually, it's from System.Collections.IList
                 else if (expression.Object != null && expression.Arguments.Count == 1)
                 {
                     collection = expression.Object;
