@@ -324,8 +324,7 @@ namespace Dommel
                             return !(bool)o;
                         }
 
-                        var memberExpression = expression.Operand as MemberExpression;
-                        if (memberExpression != null &&
+                        if (expression.Operand is MemberExpression memberExpression &&
                             Resolvers.Properties(memberExpression.Expression.Type).Any(p => p.Name == (string)o))
                         {
                             o = $"{o} = '1'";

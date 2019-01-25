@@ -6,7 +6,7 @@ namespace Dommel.Tests
 {
     public class DefaultKeyPropertyResolverTests
     {
-        private static DommelMapper.IKeyPropertyResolver Resolver = new DommelMapper.DefaultKeyPropertyResolver();
+        private static readonly DommelMapper.IKeyPropertyResolver Resolver = new DommelMapper.DefaultKeyPropertyResolver();
 
         [Fact]
         public void MapsIdProperty()

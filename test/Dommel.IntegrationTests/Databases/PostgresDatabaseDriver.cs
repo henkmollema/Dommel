@@ -25,8 +25,6 @@ namespace Dommel.IntegrationTests
 
         public override string TempDbDatabaseName => "postgres";
 
-        private static readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1);
-
         protected override async Task CreateDatabase()
         {
             using (var con = GetConnection(TempDbDatabaseName))
