@@ -81,7 +81,7 @@ namespace Dommel
                 isIdentity = keyPropertyInfo.IsIdentity;
 
                 var propertyInfo = keyPropertyInfo.PropertyInfos[0];
-                LogReceived?.Invoke($"Resolved property '{propertyInfo}' (Identity: {isIdentity}) as key property for '{type.Name}'");
+                LogReceived?.Invoke($"Resolved property '{propertyInfo}' (Identity: {isIdentity}) as key property for '{type}'");
                 return propertyInfo;
             }
 
@@ -109,7 +109,7 @@ namespace Dommel
 
                 isIdentity = keyPropertyInfo.IsIdentity;
 
-                LogReceived?.Invoke($"Resolved property '{string.Join<PropertyInfo>(", ", keyPropertyInfo.PropertyInfos)}' (Identity: {isIdentity}) as key property for '{type.Name}'");
+                LogReceived?.Invoke($"Resolved property '{string.Join<PropertyInfo>(", ", keyPropertyInfo.PropertyInfos)}' (Identity: {isIdentity}) as key property for '{type}'");
                 return keyPropertyInfo.PropertyInfos;
             }
 
@@ -123,7 +123,7 @@ namespace Dommel
             /// <returns>The foreign key property for <paramref name="sourceType"/> and <paramref name="includingType"/>.</returns>
             public static PropertyInfo ForeignKeyProperty(Type sourceType, Type includingType, out ForeignKeyRelation foreignKeyRelation)
             {
-                var key = $"{sourceType.FullName};{includingType.FullName}";
+                var key = $"{sourceType};{includingType}";
                 if (!_typeForeignKeyPropertyCache.TryGetValue(key, out var foreignKeyInfo))
                 {
                     // Resolve the property and relation.
@@ -136,7 +136,7 @@ namespace Dommel
 
                 foreignKeyRelation = foreignKeyInfo.Relation;
 
-                LogReceived?.Invoke($"Resolved property '{foreignKeyInfo.PropertyInfo.Name}' ({foreignKeyInfo.Relation.ToString()}) as foreign key between '{sourceType.Name}' and '{includingType.Name}'");
+                LogReceived?.Invoke($"Resolved property '{foreignKeyInfo.PropertyInfo}' ({foreignKeyInfo.Relation}) as foreign key between '{sourceType}' and '{includingType}'");
                 return foreignKeyInfo.PropertyInfo;
             }
 
@@ -175,14 +175,14 @@ namespace Dommel
             /// <returns>The table name in the database for <paramref name="type"/>.</returns>
             public static string Table(Type type, ISqlBuilder sqlBuilder)
             {
-                var key = $"{sqlBuilder.GetType().Name}.{type.Name}";
+                var key = $"{sqlBuilder.GetType()}.{type}";
                 if (!_typeTableNameCache.TryGetValue(key, out var name))
                 {
-                    name =  sqlBuilder.QuoteIdentifier(_tableNameResolver.ResolveTableName(type));
+                    name = sqlBuilder.QuoteIdentifier(_tableNameResolver.ResolveTableName(type));
                     _typeTableNameCache.TryAdd(key, name);
                 }
 
-                LogReceived?.Invoke($"Resolved table name '{name}' for '{type.Name}'");
+                LogReceived?.Invoke($"Resolved table name '{name}' for '{type}'");
                 return name;
             }
 
@@ -205,14 +205,14 @@ namespace Dommel
             /// <returns>The column name in the database for <paramref name="propertyInfo"/>.</returns>
             public static string Column(PropertyInfo propertyInfo, ISqlBuilder sqlBuilder)
             {
-                var key = $"{sqlBuilder.GetType().Name}.{propertyInfo.DeclaringType}.{propertyInfo.Name}";
+                var key = $"{sqlBuilder.GetType()}.{propertyInfo.DeclaringType}.{propertyInfo.Name}";
                 if (!_columnNameCache.TryGetValue(key, out var columnName))
                 {
                     columnName = sqlBuilder.QuoteIdentifier(_columnNameResolver.ResolveColumnName(propertyInfo));
                     _columnNameCache.TryAdd(key, columnName);
                 }
 
-                LogReceived?.Invoke($"Resolved column name '{columnName}' for '{propertyInfo.Name}'");
+                LogReceived?.Invoke($"Resolved column name '{columnName}' for '{propertyInfo}'");
                 return columnName;
             }
 
