@@ -5,8 +5,8 @@
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="mysqlconnector" Version="0.47.1" />
-    <PackageReference Include="Npgsql" Version="4.0.3" />
+    <PackageReference Include="mysqlconnector" Version="0.49.3" />
+    <PackageReference Include="Npgsql" Version="4.0.4" />
     <ProjectReference Include="..\..\src\Dommel\Dommel.csproj" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.9.0" />
     <PackageReference Include="xunit" Version="2.4.1" />

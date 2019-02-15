@@ -16,9 +16,10 @@
     <RepositoryUrl>https://github.com/henkmollema/Dommel</RepositoryUrl>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>embedded</DebugType>
+    <Version>2.0.0-beta3.2</Version>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Dapper" Version="1.50.5" />
+    <PackageReference Include="Dapper" Version="1.50.7" />
     <PackageReference Include="Microsoft.CSharp" Version="4.5.0" />
     <PackageReference Include="System.ComponentModel.Annotations" Version="4.5.0" />
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-*" PrivateAssets="All" />
