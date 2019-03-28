@@ -23,6 +23,23 @@ namespace Dommel.Tests
         }
 
         [Fact]
+        public void LikeOperandContainsVariable()
+        {
+            // Arrange
+            var sqlExpression = new SqlExpression<Foo>(new SqlServerSqlBuilder());
+            var substring = "test";
+
+            // Act
+            var expression = sqlExpression.Where(p => p.Bar.Contains(substring));
+            var sql = expression.ToSql(out var dynamicParameters);
+
+            // Assert
+            Assert.Equal("where [Bar] like @p1", sql.Trim());
+            Assert.Single(dynamicParameters.ParameterNames);
+            Assert.Equal("%test%", dynamicParameters.Get<string>("p1"));
+        }
+
+        [Fact]
         public void LikeOperandStartsWith()
         {
             // Arrange

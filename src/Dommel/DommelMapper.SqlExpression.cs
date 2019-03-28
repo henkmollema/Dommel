@@ -213,10 +213,13 @@ namespace Dommel
             protected virtual object VisitContainsExpression(MethodCallExpression expression, TextSearch textSearch)
             {
                 var column = MemberToColumn((MemberExpression)expression.Object);
+                if (expression.Arguments.Count == 0 || expression.Arguments.Count > 1)
+                {
+                    throw new ArgumentException("Contains-expression should contain exatcly one argument.", nameof(expression));
+                }
 
-                var value = VisitConstantExpression((ConstantExpression)expression.Arguments.FirstOrDefault());
-                var textLike = "";
-
+                var value = VisitExpression(expression.Arguments[0]);
+                string textLike;
                 switch (textSearch)
                 {
                     case TextSearch.Contains:
@@ -228,6 +231,8 @@ namespace Dommel
                     case TextSearch.EndsWith:
                         textLike = $"%{value}";
                         break;
+                    default:
+                        throw new ArgumentOutOfRangeException($"Invalid TextSearch value '{textSearch}'.", nameof(textSearch));
                 }
 
                 AddParameter(textLike, out var paramName);
