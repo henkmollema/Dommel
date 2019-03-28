@@ -52,11 +52,6 @@ namespace Dommel
             private void AppendToWhere(string conditionOperator, Expression expression)
             {
                 var sqlExpression = VisitExpression(expression).ToString();
-                AppendToWhere(conditionOperator, sqlExpression);
-            }
-
-            private void AppendToWhere(string conditionOperator, string sqlExpression)
-            {
                 if (_whereBuilder.Length == 0)
                 {
                     _whereBuilder.Append(" where ");
@@ -79,7 +74,7 @@ namespace Dommel
                 switch (expression.NodeType)
                 {
                     case ExpressionType.Lambda:
-                        return VisitLambda(expression as LambdaExpression);
+                        return VisitLambda((LambdaExpression)expression);
 
                     case ExpressionType.LessThan:
                     case ExpressionType.LessThanOrEqual:
@@ -143,11 +138,10 @@ namespace Dommel
             protected virtual object VisitCallExpression(MethodCallExpression expression)
             {
                 var method = expression.Method.Name.ToLower();
-
                 switch (method)
                 {
                     case "contains":
-                        //check if the method is instance method and caller is type of string.
+                        // Is this a string-contains or array-contains expression?
                         if (expression.Object != null && expression.Object.Type == typeof(string))
                         {
                             return VisitContainsExpression(expression, TextSearch.Contains);
@@ -334,8 +328,7 @@ namespace Dommel
                             return !(bool)o;
                         }
 
-                        if (expression.Operand is MemberExpression memberExpression &&
-                            Resolvers.Properties(memberExpression.Expression.Type).Any(p => p.Name == (string)o))
+                        if (expression.Operand is MemberExpression)
                         {
                             o = $"{o} = '1'";
                         }
