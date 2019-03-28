@@ -270,25 +270,22 @@ namespace Dommel
                 var operand = BindOperant(expression.NodeType);
                 if (operand == "and" || operand == "or")
                 {
-                    // Left side.
-                    if (expression.Left is MemberExpression member &&
-                        member.Expression != null &&
-                        member.Expression.NodeType == ExpressionType.Parameter)
+                    // Process left and right side of the "and/or" expression, e.g.:
+                    // Foo == 42    or      Bar == 42
+                    //   left    operand     right
+                    //
+                    if (expression.Left is MemberExpression leftMember && leftMember.Expression?.NodeType == ExpressionType.Parameter)
                     {
-                        left = $"{VisitMemberAccess(member)} = '1'";
+                        left = $"{VisitMemberAccess(leftMember)} = '1'";
                     }
                     else
                     {
                         left = VisitExpression(expression.Left);
                     }
 
-                    // Right side.
-                    member = expression.Right as MemberExpression;
-                    if (member != null &&
-                        member.Expression != null &&
-                        member.Expression.NodeType == ExpressionType.Parameter)
+                    if (expression.Right is MemberExpression rightMember && rightMember.Expression?.NodeType == ExpressionType.Parameter)
                     {
-                        right = $"{VisitMemberAccess(member)} = '1'";
+                        right = $"{VisitMemberAccess(rightMember)} = '1'";
                     }
                     else
                     {
@@ -297,9 +294,22 @@ namespace Dommel
                 }
                 else
                 {
-                    // It's a single expression.
+                    // It's a single expression, e.g. Foo == 42
                     left = VisitExpression(expression.Left);
                     right = VisitExpression(expression.Right);
+
+                    if (right == null)
+                    {
+                        // Special case 'is (not) null' syntax
+                        if (expression.NodeType == ExpressionType.Equal)
+                        {
+                            return $"{left} is null";
+                        }
+                        else if (expression.NodeType == ExpressionType.NotEqual)
+                        {
+                            return $"{left} is not null";
+                        }
+                    }
 
                     AddParameter(right, out var paramName);
                     return $"{left} {operand} {paramName}";
@@ -378,7 +388,7 @@ namespace Dommel
             /// </summary>
             /// <param name="expression">The constant expression.</param>
             /// <returns>The result of the processing.</returns>
-            protected virtual object VisitConstantExpression(ConstantExpression expression) => expression.Value ?? "null";
+            protected virtual object VisitConstantExpression(ConstantExpression expression) => expression.Value;
 
             /// <summary>
             /// Proccesses a member expression.
