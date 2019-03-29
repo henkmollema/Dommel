@@ -1,33 +1,33 @@
-﻿using Dapper;
-using Moq;
-using Moq.Dapper;
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
+using Dapper;
+using Moq;
+using Moq.Dapper;
 using Xunit;
 using static Dommel.DommelMapper;
 
 namespace Dommel.Tests
 {
-    public class SupportDynamicExpressions
+    public class DynamicExpressionTests
     {
-        private readonly DommelMapper.SqlExpression<Foo> sqlExpression = new DommelMapper.SqlExpression<Foo>(new SqlServerSqlBuilder());
-        private readonly Mock<IDbConnection> mock = new Mock<IDbConnection>();
+        private readonly SqlExpression<Foo> _sqlExpression = new SqlExpression<Foo>(new SqlServerSqlBuilder());
+        private readonly Mock<IDbConnection> _mock = new Mock<IDbConnection>();
 
-        public SupportDynamicExpressions()
+        public DynamicExpressionTests()
         {
-            mock.SetupDapper(x => x.QueryFirstOrDefault<Foo>(It.IsAny<string>(), It.IsAny<object>(), null, null, null))
+            _mock.SetupDapper(x => x.QueryFirstOrDefault<Foo>(It.IsAny<string>(), It.IsAny<object>(), null, null, null))
                 .Returns(new Foo());
         }
 
         [Fact]
         public void CommonAndExpression()
         {
-            var dommelExpression = sqlExpression.Where(p => p.Id == 1 && p.Bar.Contains("test"));
+            var dommelExpression = _sqlExpression.Where(p => p.Id == 1 && p.Bar.Contains("test"));
             var sql = dommelExpression.ToSql(out var dynamicParameters);
 
             Assert.Equal("where [Id] = @p1 and [Bar] like @p2", sql.Trim());
@@ -41,7 +41,7 @@ namespace Dommel.Tests
             Expression<Func<Foo, bool>> expression = p => p.Id == 1;
             expression = And(expression, p => p.Bar.Contains("test"));
 
-            var dommelExpression = sqlExpression.Where(expression);
+            var dommelExpression = _sqlExpression.Where(expression);
             var sql = dommelExpression.ToSql(out var dynamicParameters);
 
             Assert.Equal("where [Id] = @p1 and [Bar] like @p2", sql.Trim());
@@ -52,7 +52,7 @@ namespace Dommel.Tests
         [Fact]
         public void CommonOrExpression()
         {
-            var dommelExpression = sqlExpression.Where(p => p.Id == 1 || p.Bar.Contains("testOr"));
+            var dommelExpression = _sqlExpression.Where(p => p.Id == 1 || p.Bar.Contains("testOr"));
             var sql = dommelExpression.ToSql(out var dynamicParameters);
 
             Assert.Equal("where [Id] = @p1 or [Bar] like @p2", sql.Trim());
@@ -66,7 +66,7 @@ namespace Dommel.Tests
             Expression<Func<Foo, bool>> expression = p => p.Id == 1;
             expression = Or(expression, p => p.Id == 2);
 
-            var dommelExpression = sqlExpression.Where(expression);
+            var dommelExpression = _sqlExpression.Where(expression);
             var sql = dommelExpression.ToSql(out var dynamicParameters);
 
             Assert.Equal("where [Id] = @p1 or [Id] = @p2", sql.Trim());
@@ -77,18 +77,18 @@ namespace Dommel.Tests
         [Fact]
         public void InExpression()
         {
-            var ids = new[] {1, 2};
-            var idList = new ArrayList {"1", "2"};
+            var ids = new[] { 1, 2 };
+            var idList = new ArrayList { "1", "2" };
             var guid1 = Guid.Parse("11111111-1111-1111-1111-111111111111");
             var guid2 = Guid.Parse("22222222-2222-2222-2222-222222222222");
-            var guidList = new List<Guid> {guid1, guid2};
-            var decimalList = new List<decimal> {1.0m, 2.0m};
+            var guidList = new List<Guid> { guid1, guid2 };
+            var decimalList = new List<decimal> { 1.0m, 2.0m };
             Expression<Func<Foo, bool>> expression = p =>
                 ids.Contains(p.Id) || idList.Contains(p.StringId) ||
                 decimalList.Contains(p.DecimalId) || guidList.Contains(p.Guid) ||
                 p.Bar.Contains("testIn");
 
-            var dommelExpression = sqlExpression.Where(expression);
+            var dommelExpression = _sqlExpression.Where(expression);
             var sql = dommelExpression.ToSql(out var dynamicParameters);
 
             Assert.Equal("where [Id] in (@p1,@p2) or [StringId] in (@p3,@p4) or [DecimalId] in (@p5,@p6) or [Guid] in (@p7,@p8) or [Bar] like @p9", sql.Trim());
