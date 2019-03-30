@@ -41,7 +41,7 @@ namespace Dommel
             return await connection.ExecuteAsync(sql, entity, transaction) > 0;
         }
 
-        private static string BuildDeleteQuery(IDbConnection connection, Type type)
+        internal static string BuildDeleteQuery(IDbConnection connection, Type type)
         {
             var cacheKey = new QueryCacheKey(QueryCacheType.Delete, connection, type);
             if (!QueryCache.TryGetValue(cacheKey, out var sql))
@@ -135,7 +135,7 @@ namespace Dommel
             return await connection.ExecuteAsync(sql, transaction: transaction) > 0;
         }
 
-        private static string BuildDeleteAllQuery(IDbConnection connection, Type type)
+        internal static string BuildDeleteAllQuery(IDbConnection connection, Type type)
         {
             var cacheKey = new QueryCacheKey(QueryCacheType.DeleteAll, connection, type);
             if (!QueryCache.TryGetValue(cacheKey, out var sql))

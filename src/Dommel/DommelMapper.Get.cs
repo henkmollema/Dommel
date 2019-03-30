@@ -40,7 +40,7 @@ namespace Dommel
             return connection.QueryFirstOrDefaultAsync<TEntity>(sql, parameters, transaction);
         }
 
-        private static string BuildGetById(IDbConnection connection, Type type, object id, out DynamicParameters parameters)
+        internal static string BuildGetById(IDbConnection connection, Type type, object id, out DynamicParameters parameters)
         {
             var cacheKey = new QueryCacheKey(QueryCacheType.Get, connection, type);
             if (!QueryCache.TryGetValue(cacheKey, out var sql))
@@ -120,7 +120,7 @@ namespace Dommel
             return connection.QueryFirstOrDefaultAsync<TEntity>(sql, parameters, transaction);
         }
 
-        private static string BuildGetByIds(IDbConnection connection, Type type, object[] ids, out DynamicParameters parameters)
+        internal static string BuildGetByIds(IDbConnection connection, Type type, object[] ids, out DynamicParameters parameters)
         {
             var cacheKey = new QueryCacheKey(QueryCacheType.GetByMultipleIds, connection, type);
             if (!QueryCache.TryGetValue(cacheKey, out var sql))
@@ -192,7 +192,7 @@ namespace Dommel
             return connection.QueryAsync<TEntity>(sql, transaction: transaction);
         }
 
-        private static string BuildGetAllQuery(IDbConnection connection, Type type)
+        internal static string BuildGetAllQuery(IDbConnection connection, Type type)
         {
             var cacheKey = new QueryCacheKey(QueryCacheType.GetAll, connection, type);
             if (!QueryCache.TryGetValue(cacheKey, out var sql))
@@ -240,7 +240,7 @@ namespace Dommel
             return connection.QueryAsync<TEntity>(sql, transaction: transaction);
         }
 
-        private static string BuildPagedQuery(IDbConnection connection, Type type, int pageNumber, int pageSize)
+        internal static string BuildPagedQuery(IDbConnection connection, Type type, int pageNumber, int pageSize)
         {
             // Start with the select query part.
             var sql = BuildGetAllQuery(connection, type);

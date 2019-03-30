@@ -40,7 +40,7 @@ namespace Dommel
             return connection.QueryFirstOrDefaultAsync<TEntity>(sql, parameters, transaction);
         }
 
-        private static string BuildProjectById(IDbConnection connection, Type type, object id, out DynamicParameters parameters)
+        internal static string BuildProjectById(IDbConnection connection, Type type, object id, out DynamicParameters parameters)
         {
             var cacheKey = new QueryCacheKey(QueryCacheType.Project, connection, type);
             if (!QueryCache.TryGetValue(cacheKey, out var sql))
@@ -91,7 +91,7 @@ namespace Dommel
             return connection.QueryAsync<TEntity>(sql, transaction: transaction);
         }
 
-        private static string BuildProjectAllQuery(IDbConnection connection, Type type)
+        internal static string BuildProjectAllQuery(IDbConnection connection, Type type)
         {
             var cacheKey = new QueryCacheKey(QueryCacheType.ProjectAll, connection, type);
             if (!QueryCache.TryGetValue(cacheKey, out var sql))
@@ -145,7 +145,7 @@ namespace Dommel
             return connection.QueryAsync<TEntity>(sql, transaction: transaction);
         }
 
-        private static string BuildProjectPagedQuery(IDbConnection connection, Type type, int pageNumber, int pageSize)
+        internal static string BuildProjectPagedQuery(IDbConnection connection, Type type, int pageNumber, int pageSize)
         {
             // Start with the select query part.
             var sql = BuildProjectAllQuery(connection, type);

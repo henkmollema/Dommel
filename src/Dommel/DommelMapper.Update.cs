@@ -41,7 +41,7 @@ namespace Dommel
             return await connection.ExecuteAsync(sql, entity, transaction) > 0;
         }
 
-        private static string BuildUpdateQuery(IDbConnection connection, Type type)
+        internal static string BuildUpdateQuery(IDbConnection connection, Type type)
         {
             var cacheKey = new QueryCacheKey(QueryCacheType.Update, connection, type);
             if (!QueryCache.TryGetValue(cacheKey, out var sql))
