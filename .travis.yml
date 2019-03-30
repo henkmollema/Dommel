@@ -1,7 +1,7 @@
 language: csharp
 mono: none
-dotnet: 2.1.403
-dist: trusty
+dotnet: 2.2
+dist: xenial
 env:
   global:
     - DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
@@ -13,7 +13,10 @@ services:
 branches:
   only:
   - master
-before_script:
-  - chmod +x ./build.sh
+script:
+    - dotnet restore
+    - dotnet build
+    - dotnet test test/Dommel.Tests
+    - dotnet test test/Dommel.IntegrationTests
 script:
   - ./build.sh
