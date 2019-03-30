@@ -16,11 +16,14 @@ namespace Dommel
         public class SqlExpression<TEntity>
         {
             private static readonly Type EntityType = typeof(TEntity);
+            private static readonly Func<TEntity> NewEntityFunc = Expression.Lambda<Func<TEntity>>(
+                Expression.New(typeof(TEntity).GetConstructors()[0])).Compile();
             private readonly ISqlBuilder _sqlBuilder;
             private readonly StringBuilder _whereBuilder = new StringBuilder();
             private readonly StringBuilder _orderByBuilder = new StringBuilder();
             private readonly DynamicParameters _parameters = new DynamicParameters();
             private string _selectQuery;
+            private string _pagingQuery;
             private int _parameterIndex;
 
             /// <summary>
@@ -33,23 +36,31 @@ namespace Dommel
                 _sqlBuilder = sqlBuilder;
             }
 
+            /// <summary>
+            /// Selects all columns from <typeparamref name="TEntity"/>.
+            /// </summary>
+            /// <returns>The current <see cref="SqlExpression{TEntity}"/> instance.</returns>
             public virtual SqlExpression<TEntity> Select()
             {
                 _selectQuery = $"select * from {Resolvers.Table(typeof(TEntity), _sqlBuilder)}";
                 return this;
             }
 
-            public virtual SqlExpression<TEntity> Select(Expression<Func<TEntity, object>> selector)
+            /// <summary>
+            /// Selects the specified set of columns from <typeparamref name="TEntity"/>.
+            /// </summary>
+            /// <param name="selector">The columns to select.
+            /// E.g. <code>x => new { x.Foo, x.Bar }</code>.</param>
+            /// <returns>The current <see cref="SqlExpression{TEntity}"/> instance.</returns>
+            public virtual SqlExpression<TEntity> Select(Func<TEntity, object> selector)
             {
                 if (selector == null)
                 {
                     throw new ArgumentNullException(nameof(selector));
                 }
 
-                // Create object instance of anonymous type via expressions
-                var newFunc = Expression.Lambda<Func<TEntity>>(
-                    Expression.New(EntityType.GetConstructors()[0])).Compile();
-                var obj = selector.Compile().Invoke(newFunc());
+                // Invoke the selector expression to obtain an object instance of anonymous type
+                var obj = selector.Invoke(NewEntityFunc());
 
                 // Resolve properties of anonymous type
                 var props = new DefaultPropertyResolver().ResolveProperties(obj.GetType());
@@ -81,6 +92,11 @@ namespace Dommel
                 return this;
             }
 
+            /// <summary>
+            /// Adds another where-statement with the 'and' operator.
+            /// </summary>
+            /// <param name="expression">The filter expression on the entity.</param>
+            /// <returns>The current <see cref="SqlExpression{TEntity}"/> instance.</returns>
             public virtual SqlExpression<TEntity> AndWhere(Expression<Func<TEntity, bool>> expression)
             {
                 if (_whereBuilder.Length == 0)
@@ -94,6 +110,11 @@ namespace Dommel
                 return this;
             }
 
+            /// <summary>
+            /// Adds another where-statement with the 'or' operator to the current expression.
+            /// </summary>
+            /// <param name="expression">The filter expression on the entity.</param>
+            /// <returns>The current <see cref="SqlExpression{TEntity}"/> instance.</returns>
             public virtual SqlExpression<TEntity> OrWhere(Expression<Func<TEntity, bool>> expression)
             {
                 if (_whereBuilder.Length == 0)
@@ -122,103 +143,76 @@ namespace Dommel
                 _whereBuilder.Append("(" + sqlExpression + ")");
             }
 
+            /// <summary>
+            /// Adds a paging-statement to the current expression.
+            /// </summary>
+            /// <param name="pageNumber">The number of the page to fetch, starting at 1.</param>
+            /// <param name="pageSize">The page size.</param>
+            /// <returns>The current <see cref="SqlExpression{TEntity}"/> instance.</returns>
+            public virtual SqlExpression<TEntity> Page(int pageNumber, int pageSize)
+            {
+                AppendOrderBy("asc", Resolvers.Column(Resolvers.KeyProperty(EntityType), _sqlBuilder), prepend: true);
+                _pagingQuery = _sqlBuilder.BuildPaging(null, pageNumber, pageSize).Substring(1);
+                return this;
+            }
+
+            /// <summary>
+            /// Adds an order-by-statement (ascending) to the current expression.
+            /// </summary>
+            /// <param name="selector">The column to order by. E.g. <code>x => x.Name</code>.</param>
+            /// <returns>The current <see cref="SqlExpression{TEntity}"/> instance.</returns>
             public virtual SqlExpression<TEntity> OrderBy(Expression<Func<TEntity, object>> selector)
             {
-                if (selector == null)
-                {
-                    throw new ArgumentNullException(nameof(selector));
-                }
-                if (_orderByBuilder.Length > 0)
-                {
-                    throw new InvalidOperationException("Order statement already started. Use 'ThenBy' or 'ThenByDescending' to add additional order statements.");
-                }
-
                 OrderByCore(selector, "asc");
                 return this;
             }
 
+            /// <summary>
+            /// Adds an order-by-statement (descending) to the current expression.
+            /// </summary>
+            /// <param name="selector">The column to order by. E.g. <code>x => x.Name</code>.</param>
+            /// <returns>The current <see cref="SqlExpression{TEntity}"/> instance.</returns>
             public virtual SqlExpression<TEntity> OrderByDescending(Expression<Func<TEntity, object>> selector)
             {
-                if (selector == null)
-                {
-                    throw new ArgumentNullException(nameof(selector));
-                }
-                if (_orderByBuilder.Length > 0)
-                {
-                    throw new InvalidOperationException("Order statement already started. Use 'ThenBy' or 'ThenByDescending' to add additional order statements.");
-                }
-                OrderByCore(selector, "desc");
-                return this;
-            }
-
-            public virtual SqlExpression<TEntity> ThenBy(Expression<Func<TEntity, object>> selector)
-            {
-                if (selector == null)
-                {
-                    throw new ArgumentNullException(nameof(selector));
-                }
-                if (_orderByBuilder.Length == 0)
-                {
-                    throw new InvalidOperationException("Order statement not started. Use 'OrderBy' or 'OrderByDescending' to start the order statement.");
-                }
-                OrderByCore(selector, "asc");
-                return this;
-            }
-
-            public virtual SqlExpression<TEntity> ThenByDescending(Expression<Func<TEntity, object>> selector)
-            {
-                if (selector == null)
-                {
-                    throw new ArgumentNullException(nameof(selector));
-                }
-                if (_orderByBuilder.Length == 0)
-                {
-                    throw new InvalidOperationException("Order statement not started. Use 'OrderBy' or 'OrderByDescending' to start the order statement.");
-                }
                 OrderByCore(selector, "desc");
                 return this;
             }
 
             private void OrderByCore(Expression<Func<TEntity, object>> selector, string direction)
             {
-                var column = VisitExpression(selector.Body);
+                if (selector == null)
+                {
+                    throw new ArgumentNullException(nameof(selector));
+                }
+
+                var column = VisitExpression(selector.Body) as string;
+                AppendOrderBy(direction, column);
+            }
+
+            private void AppendOrderBy(string direction, string column, bool prepend = false)
+            {
+                if (string.IsNullOrEmpty(direction))
+                {
+                    throw new ArgumentNullException(nameof(direction));
+                }
+                if (string.IsNullOrEmpty(column))
+                {
+                    throw new ArgumentNullException(nameof(column));
+                }
                 if (_orderByBuilder.Length == 0)
                 {
                     _orderByBuilder.Append($" order by {column} {direction}");
+                }
+                else if (prepend)
+                {
+                    // Insert the column sort option right after 'order by '
+                    _orderByBuilder.Insert(10, $"{column} {direction}, ");
                 }
                 else
                 {
                     _orderByBuilder.Append($", {column} {direction}");
                 }
             }
-
-            //private void OrderByCore(Expression<Func<TEntity, object>> selector, string direction)
-            //{
-            //    var anonType = selector.Compile().Invoke(new TEntity()).GetType();
-            //    if (IsAnonymousType(anonType))
-            //    {
-            //        var columns = GetColumns(anonType);
-            //        _orderByBuilder.Append($" order by {string.Join(", ", columns)} {direction}");
-            //    }
-            //    else
-            //    {
-            //        var column = VisitExpression(selector);
-            //        _orderByBuilder.Append($" order by {column} {direction}");
-            //    }
-            //}
-
-            //private static bool IsAnonymousType(Type type)
-            //{
-            //    return Attribute.IsDefined(type, typeof(CompilerGeneratedAttribute), false)
-            //        && type.IsGenericType && type.Name.Contains("AnonymousType")
-            //        && (type.Attributes & TypeAttributes.NotPublic) == TypeAttributes.NotPublic;
-            //}
-
-            //private string[] GetColumns(Type type)
-            //{
-            //    var props = new DefaultPropertyResolver().ResolveProperties(type);
-            //    return props.Select(p => Resolvers.Column(p, SqlBuilder)).ToArray();
-            //}
 
             /// <summary>
             /// Visits the expression.
@@ -422,7 +416,7 @@ namespace Dommel
             protected virtual object VisitBinary(BinaryExpression expression)
             {
                 object left, right;
-                var operand = BindOperant(expression.NodeType);
+                var operand = GetOperant(expression.NodeType);
                 if (operand == "and" || operand == "or")
                 {
                     // Process left and right side of the "and/or" expression, e.g.:
@@ -553,11 +547,11 @@ namespace Dommel
                 Resolvers.Column((PropertyInfo)expression.Member, _sqlBuilder);
 
             /// <summary>
-            /// Returns the expression operand for the specified expression type.
+            /// Returns the expression operant for the specified expression type.
             /// </summary>
             /// <param name="expressionType">The expression type for node of an expression tree.</param>
             /// <returns>The expression operand equivalent of the <paramref name="expressionType"/>.</returns>
-            protected virtual string BindOperant(ExpressionType expressionType)
+            protected virtual string GetOperant(ExpressionType expressionType)
             {
                 switch (expressionType)
                 {
@@ -626,6 +620,10 @@ namespace Dommel
                 if (!string.IsNullOrEmpty(orderBy))
                 {
                     query += orderBy;
+                }
+                if (!string.IsNullOrEmpty(_pagingQuery))
+                {
+                    query += _pagingQuery;
                 }
                 return query;
             }

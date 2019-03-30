@@ -31,7 +31,7 @@ namespace Dommel.IntegrationTests
                         .Where(p => p.Name.StartsWith("Chai"))
                         .OrderBy(p => p.CategoryId));
 
-                Assert.Equal(2, products.Count());
+                Assert.NotEmpty(products);
             }
         }
 
@@ -46,7 +46,8 @@ namespace Dommel.IntegrationTests
                         .Where(p => p.Name.StartsWith("Chai") && p.CategoryId == 1)
                         .OrWhere(p => p.Name != null)
                         .OrderBy(p => p.CategoryId)
-                        .ThenByDescending(p => p.Name));
+                        .OrderByDescending(p => p.Name)
+                        .Page(1, 5));
 
                 Assert.NotEmpty(products);
             }
