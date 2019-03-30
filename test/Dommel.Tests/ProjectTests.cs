@@ -1,10 +1,10 @@
-﻿using Dapper;
-using Moq;
-using Moq.Dapper;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using Dapper;
+using Moq;
+using Moq.Dapper;
 using Xunit;
 
 namespace Dommel.Tests

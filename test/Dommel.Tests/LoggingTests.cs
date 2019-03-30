@@ -1,9 +1,9 @@
-﻿using Dapper;
-using Moq;
-using Moq.Dapper;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Data;
+using Dapper;
+using Moq;
+using Moq.Dapper;
 using Xunit;
 
 namespace Dommel.Tests
@@ -103,9 +103,9 @@ namespace Dommel.Tests
         public string Id { get; set; }
 
         [Key]
-        public string KeyColumn2 {get;set;}
+        public string KeyColumn2 { get; set; }
 
         [Key]
-        public string KeyColumn3 {get;set;}
+        public string KeyColumn3 { get; set; }
     }
 }

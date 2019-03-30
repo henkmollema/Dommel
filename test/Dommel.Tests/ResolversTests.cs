@@ -6,7 +6,7 @@ namespace Dommel.Tests
 {
     public class ResolversTests
     {
-        private static readonly ISqlBuilder _sqlBuilder = new SqlServerSqlBuilder();
+        private readonly ISqlBuilder _sqlBuilder = new SqlServerSqlBuilder();
 
         [Fact]
         public void Table_NoCacheConflictNestedClass()

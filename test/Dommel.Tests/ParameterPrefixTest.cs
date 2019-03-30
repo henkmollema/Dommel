@@ -1,40 +1,37 @@
-﻿using Dapper;
-using Moq;
-using Moq.Dapper;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Data;
 using System.Reflection;
-using System.Text;
+using Dapper;
+using Moq;
+using Moq.Dapper;
 using Xunit;
 using static Dommel.DommelMapper;
-using System.Data.SqlClient;
-using System.ComponentModel.DataAnnotations;
 
 namespace Dommel.Tests
 {
     [Collection("Use Dommel Log to check on results")]
     public class ParameterPrefixTest
     {
-        private readonly Mock<IDataBaseParameterPrefix> mock = new Mock<IDataBaseParameterPrefix>();
+        private readonly Mock<IDataBaseParameterPrefix> _mock = new Mock<IDataBaseParameterPrefix>();
 
         public ParameterPrefixTest()
         {
-            mock.As<IDbConnection>().SetupDapper(x => x.QueryFirstOrDefault<FooParameterPrefix>(It.IsAny<string>(), It.IsAny<object>(), null, null, null))
+            _mock.As<IDbConnection>().SetupDapper(x => x.QueryFirstOrDefault<FooParameterPrefix>(It.IsAny<string>(), It.IsAny<object>(), null, null, null))
                 .Returns(new FooParameterPrefix());
 
-            var connectionType = mock.Object.GetType();
+            var connectionType = _mock.Object.GetType();
 
             // Change the default Sql Connection
-            DommelMapper.AddSqlBuilder(connectionType, new ExampleBuilderBuilder());
+            AddSqlBuilder(connectionType, new ExampleBuilderBuilder());
         }
 
         [Fact]
         public void SqlExpressionDirectAccess()
         {
             var builder = new ExampleBuilderBuilder();
-            var sqlExpression = new DommelMapper.SqlExpression<FooParameterPrefix>(builder);
+            var sqlExpression = new SqlExpression<FooParameterPrefix>(builder);
 
             var expression = sqlExpression.Where(p => p.Bar.Contains("test"));
             var sql = expression.ToSql(out var dynamicParameters);
@@ -49,12 +46,12 @@ namespace Dommel.Tests
         {
             var logs = new List<string>();
             // Initialize resolver caches so these messages are not logged
-            mock.Object.Get<FooParameterPrefix>(1);
+            _mock.Object.Get<FooParameterPrefix>(1);
 
             DommelMapper.LogReceived = s => logs.Add(s);
 
             // Act
-            mock.Object.Get<FooParameterPrefix>(1);
+            _mock.Object.Get<FooParameterPrefix>(1);
 
             Assert.Equal("Get<FooParameterPrefix>: select * from tblFoo where Id = #Id", logs[0]);
         }
@@ -64,12 +61,12 @@ namespace Dommel.Tests
         {
             var logs = new List<string>();
             // Initialize resolver caches so these messages are not logged
-            mock.Object.Get<FooTwoIds>(1, 2);
+            _mock.Object.Get<FooTwoIds>(1, 2);
 
             DommelMapper.LogReceived = s => logs.Add(s);
 
             // Act
-            mock.Object.Get<FooTwoIds>(1, 2);
+            _mock.Object.Get<FooTwoIds>(1, 2);
 
             Assert.Equal("Get<FooTwoIds>: select * from tblFooTwoIds where One = #Id0 and Two = #Id1", logs[0]);
         }
@@ -77,13 +74,13 @@ namespace Dommel.Tests
         [Fact]
         public void TestDelete()
         {
-           var logs = new List<string>();
+            var logs = new List<string>();
             // Initialize resolver caches so these messages are not logged
-            mock.Object.Delete<FooParameterPrefix>(new FooParameterPrefix { Id = 1 });
+            _mock.Object.Delete(new FooParameterPrefix { Id = 1 });
             DommelMapper.LogReceived = s => logs.Add(s);
 
             // Act
-            mock.Object.Delete<FooParameterPrefix>(new FooParameterPrefix { Id = 1 });
+            _mock.Object.Delete(new FooParameterPrefix { Id = 1 });
 
             Assert.Equal("Delete<FooParameterPrefix>: delete from tblFoo where Id = #Id", logs[0]);
         }
@@ -93,11 +90,11 @@ namespace Dommel.Tests
         {
             var logs = new List<string>();
             // Initialize resolver caches so these messages are not logged
-            mock.Object.Update<FooParameterPrefix>(new FooParameterPrefix { Id = 1, Bar = "test" });
+            _mock.Object.Update(new FooParameterPrefix { Id = 1, Bar = "test" });
             DommelMapper.LogReceived = s => logs.Add(s);
 
             // Act
-            mock.Object.Update<FooParameterPrefix>(new FooParameterPrefix { Id = 1, Bar = "test" });
+            _mock.Object.Update(new FooParameterPrefix { Id = 1, Bar = "test" });
 
             Assert.Equal("Update<FooParameterPrefix>: update tblFoo set Bar = #Bar where Id = #Id", logs[0]);
         }
@@ -116,10 +113,7 @@ namespace Dommel.Tests
             public string QuoteIdentifier(string identifier) => identifier;
 
             /// <inheritdoc/>
-            public string BuildInsert(string tableName, string[] columnNames, string[] paramNames, PropertyInfo keyProperty)
-            {
-                return $"insert into {tableName} ({string.Join(", ", columnNames)}) values ({string.Join(", ", paramNames)}); select last_insert_rowid() id";
-            }
+            public string BuildInsert(string tableName, string[] columnNames, string[] paramNames, PropertyInfo keyProperty) => $"insert into {tableName} ({string.Join(", ", columnNames)}) values ({string.Join(", ", paramNames)}); select last_insert_rowid() id";
 
             /// <inheritdoc/>
             public string BuildPaging(string orderBy, int pageNumber, int pageSize)
