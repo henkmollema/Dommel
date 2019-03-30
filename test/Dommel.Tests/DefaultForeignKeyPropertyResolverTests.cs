@@ -66,6 +66,10 @@ namespace Dommel.Tests
 
     public class Product
     {
+        public int Id { get; set; }
+
+        public string Name { get; set; }
+
         // One Product has one Category
         public Category Category { get; set; }
 

@@ -39,7 +39,7 @@ namespace Dommel.Tests
             var expression = sqlExpression.Where(p => p.Bar.Contains("test"));
             var sql = expression.ToSql(out var dynamicParameters);
 
-            Assert.Equal("where Bar like #p1", sql.Trim());
+            Assert.Equal("where (Bar like #p1)", sql.Trim());
             Assert.Single(dynamicParameters.ParameterNames);
             Assert.Equal("%test%", dynamicParameters.Get<string>("#p1"));
         }
