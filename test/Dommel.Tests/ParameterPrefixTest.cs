@@ -7,17 +7,12 @@ namespace Dommel.Tests
 {
     public class ParameterPrefixTest
     {
-        private static readonly IDbConnection DbConnection = new FooDbConnection();
-
-        public ParameterPrefixTest()
-        {
-            AddSqlBuilder(typeof(FooDbConnection), new DummySqlBuilder());
-        }
+        private static readonly ISqlBuilder SqlBuilder = new DummySqlBuilder();
 
         [Fact]
         public void Get()
         {
-            var sql = BuildGetById(DbConnection, typeof(Foo), new[] { (object)1 }, out var parameters);
+            var sql = BuildGetById(SqlBuilder, typeof(Foo), new[] { (object)1 }, out var parameters);
             Assert.Equal("select * from Foos where Id = #Id", sql);
             Assert.Single(parameters.ParameterNames);
         }
@@ -40,14 +35,14 @@ namespace Dommel.Tests
         [Fact]
         public void TestUpdate()
         {
-            var sql = BuildUpdateQuery(DbConnection, typeof(Foo));
+            var sql = BuildUpdateQuery(SqlBuilder, typeof(Foo));
             Assert.Equal("update Foos set Bar = #Bar where Id = #Id", sql);
         }
 
         [Fact]
         public void TestDelete()
         {
-            var sql = BuildDeleteQuery(DbConnection, typeof(Foo));
+            var sql = BuildDeleteQuery(SqlBuilder, typeof(Foo));
             Assert.Equal("delete from Foos where Id = #Id", sql);
         }
 

@@ -1,9 +1,9 @@
-using Dapper;
 using System;
 using System.Data;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using Dapper;
 
 namespace Dommel
 {
@@ -20,7 +20,7 @@ namespace Dommel
         /// <returns>A value indicating whether the update operation succeeded.</returns>
         public static bool Update<TEntity>(this IDbConnection connection, TEntity entity, IDbTransaction transaction = null)
         {
-            var sql = BuildUpdateQuery(connection, typeof(TEntity));
+            var sql = BuildUpdateQuery(GetSqlBuilder(connection), typeof(TEntity));
             LogQuery<TEntity>(sql);
             return connection.Execute(sql, entity, transaction) > 0;
         }
@@ -36,19 +36,18 @@ namespace Dommel
         /// <returns>A value indicating whether the update operation succeeded.</returns>
         public static async Task<bool> UpdateAsync<TEntity>(this IDbConnection connection, TEntity entity, IDbTransaction transaction = null)
         {
-            var sql = BuildUpdateQuery(connection, typeof(TEntity));
+            var sql = BuildUpdateQuery(GetSqlBuilder(connection), typeof(TEntity));
             LogQuery<TEntity>(sql);
             return await connection.ExecuteAsync(sql, entity, transaction) > 0;
         }
 
-        internal static string BuildUpdateQuery(IDbConnection connection, Type type)
+        internal static string BuildUpdateQuery(ISqlBuilder sqlBuilder, Type type)
         {
-            var cacheKey = new QueryCacheKey(QueryCacheType.Update, connection, type);
+            var cacheKey = new QueryCacheKey(QueryCacheType.Update, sqlBuilder, type);
             if (!QueryCache.TryGetValue(cacheKey, out var sql))
             {
-                var tableName = Resolvers.Table(type, connection);
+                var tableName = Resolvers.Table(type, sqlBuilder);
                 var keyProperties = Resolvers.KeyProperties(type);
-                var builder = GetSqlBuilder(connection);
 
                 // Use all properties which are settable.
                 var typeProperties = Resolvers.Properties(type)
@@ -56,8 +55,8 @@ namespace Dommel
                                               .Where(p => p.GetSetMethod() != null)
                                               .ToArray();
 
-                var columnNames = typeProperties.Select(p => $"{Resolvers.Column(p, connection)} = {builder.PrefixParameter(p.Name)}").ToArray();
-                var keyPropertyWhereClauses = keyProperties.Select(p => $"{Resolvers.Column(p, connection)} = {builder.PrefixParameter(p.Name)}");
+                var columnNames = typeProperties.Select(p => $"{Resolvers.Column(p, sqlBuilder)} = {sqlBuilder.PrefixParameter(p.Name)}").ToArray();
+                var keyPropertyWhereClauses = keyProperties.Select(p => $"{Resolvers.Column(p, sqlBuilder)} = {sqlBuilder.PrefixParameter(p.Name)}");
                 sql = $"update {tableName} set {string.Join(", ", columnNames)} where {string.Join(" and ", keyPropertyWhereClauses)}";
 
                 QueryCache.TryAdd(cacheKey, sql);

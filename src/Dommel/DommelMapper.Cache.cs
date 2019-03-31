@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Data;
 using System.Reflection;
 
 namespace Dommel
@@ -25,17 +24,17 @@ namespace Dommel
 
         internal struct QueryCacheKey : IEquatable<QueryCacheKey>
         {
-            public QueryCacheKey(QueryCacheType cacheType, IDbConnection connection, MemberInfo memberInfo)
+            public QueryCacheKey(QueryCacheType cacheType, ISqlBuilder sqlBuilder, MemberInfo memberInfo)
             {
-                ConnectionType = connection.GetType();
+                SqlBuilderType = sqlBuilder.GetType();
                 CacheType = cacheType;
                 MemberInfo = memberInfo;
             }
 
 #if NETSTANDARD1_3
-            public QueryCacheKey(QueryCacheType cacheType, IDbConnection connection, Type type)
+            public QueryCacheKey(QueryCacheType cacheType, ISqlBuilder sqlBuilder, Type type)
             {
-                ConnectionType = connection.GetType();
+                SqlBuilderType = sqlBuilder.GetType();
                 CacheType = cacheType;
                 MemberInfo = type.GetTypeInfo();
             }
@@ -43,11 +42,11 @@ namespace Dommel
 
             public QueryCacheType CacheType { get; }
 
-            public Type ConnectionType { get; }
+            public Type SqlBuilderType { get; }
 
             public MemberInfo MemberInfo { get; }
 
-            public bool Equals(QueryCacheKey other) => CacheType == other.CacheType && ConnectionType == other.ConnectionType && MemberInfo == other.MemberInfo;
+            public bool Equals(QueryCacheKey other) => CacheType == other.CacheType && SqlBuilderType == other.SqlBuilderType && MemberInfo == other.MemberInfo;
         }
     }
 }

@@ -40,8 +40,9 @@ namespace Dommel
 
         private static string BuildCountSql<TEntity>(IDbConnection connection, Expression<Func<TEntity, bool>> predicate, out DynamicParameters parameters)
         {
+            var sqlBuilder = GetSqlBuilder(connection);
             var type = typeof(TEntity);
-            var cacheKey = new QueryCacheKey(QueryCacheType.Count, connection, type);
+            var cacheKey = new QueryCacheKey(QueryCacheType.Count, sqlBuilder, type);
             if (!QueryCache.TryGetValue(cacheKey, out var sql))
             {
                 var tableName = Resolvers.Table(type, connection);
@@ -49,7 +50,7 @@ namespace Dommel
                 QueryCache.TryAdd(cacheKey, sql);
             }
 
-            sql += new SqlExpression<TEntity>(GetSqlBuilder(connection))
+            sql += new SqlExpression<TEntity>(sqlBuilder)
                 .Where(predicate)
                 .ToSql(out parameters);
             return sql;

@@ -20,7 +20,7 @@ namespace Dommel
         /// <returns>The entity with the corresponding id.</returns>
         public static TEntity Project<TEntity>(this IDbConnection connection, object id, IDbTransaction transaction = null) where TEntity : class
         {
-            var sql = BuildProjectById(connection, typeof(TEntity), id, out var parameters);
+            var sql = BuildProjectById(GetSqlBuilder(connection), typeof(TEntity), id, out var parameters);
             LogQuery<TEntity>(sql);
             return connection.QueryFirstOrDefault<TEntity>(sql, parameters, transaction);
         }
@@ -35,20 +35,20 @@ namespace Dommel
         /// <returns>The entity with the corresponding id.</returns>
         public static Task<TEntity> ProjectAsync<TEntity>(this IDbConnection connection, object id, IDbTransaction transaction = null) where TEntity : class
         {
-            var sql = BuildProjectById(connection, typeof(TEntity), id, out var parameters);
+            var sql = BuildProjectById(GetSqlBuilder(connection), typeof(TEntity), id, out var parameters);
             LogQuery<TEntity>(sql);
             return connection.QueryFirstOrDefaultAsync<TEntity>(sql, parameters, transaction);
         }
 
-        internal static string BuildProjectById(IDbConnection connection, Type type, object id, out DynamicParameters parameters)
+        internal static string BuildProjectById(ISqlBuilder sqlBuilder, Type type, object id, out DynamicParameters parameters)
         {
-            var cacheKey = new QueryCacheKey(QueryCacheType.Project, connection, type);
+            var cacheKey = new QueryCacheKey(QueryCacheType.Project, sqlBuilder, type);
             if (!QueryCache.TryGetValue(cacheKey, out var sql))
             {
                 var keyProperty = Resolvers.KeyProperty(type);
-                var keyColumnName = Resolvers.Column(keyProperty, connection);
+                var keyColumnName = Resolvers.Column(keyProperty, sqlBuilder);
 
-                sql = BuildProjectAllQuery(connection, type);
+                sql = BuildProjectAllQuery(sqlBuilder, type);
                 sql += $" where {keyColumnName} = @Id";
                 QueryCache.TryAdd(cacheKey, sql);
             }
@@ -72,7 +72,7 @@ namespace Dommel
         /// <returns>A collection of entities of type <typeparamref name="TEntity"/>.</returns>
         public static IEnumerable<TEntity> ProjectAll<TEntity>(this IDbConnection connection, IDbTransaction transaction = null, bool buffered = true) where TEntity : class
         {
-            var sql = BuildProjectAllQuery(connection, typeof(TEntity));
+            var sql = BuildProjectAllQuery(GetSqlBuilder(connection), typeof(TEntity));
             LogQuery<TEntity>(sql);
             return connection.Query<TEntity>(sql, transaction: transaction, buffered: buffered);
         }
@@ -86,21 +86,21 @@ namespace Dommel
         /// <returns>A collection of entities of type <typeparamref name="TEntity"/>.</returns>
         public static Task<IEnumerable<TEntity>> ProjectAllAsync<TEntity>(this IDbConnection connection, IDbTransaction transaction = null) where TEntity : class
         {
-            var sql = BuildProjectAllQuery(connection, typeof(TEntity));
+            var sql = BuildProjectAllQuery(GetSqlBuilder(connection), typeof(TEntity));
             LogQuery<TEntity>(sql);
             return connection.QueryAsync<TEntity>(sql, transaction: transaction);
         }
 
-        internal static string BuildProjectAllQuery(IDbConnection connection, Type type)
+        internal static string BuildProjectAllQuery(ISqlBuilder sqlBuilder, Type type)
         {
-            var cacheKey = new QueryCacheKey(QueryCacheType.ProjectAll, connection, type);
+            var cacheKey = new QueryCacheKey(QueryCacheType.ProjectAll, sqlBuilder, type);
             if (!QueryCache.TryGetValue(cacheKey, out var sql))
             {
-                var tableName = Resolvers.Table(type, connection);
+                var tableName = Resolvers.Table(type, sqlBuilder);
                 var keyProperty = Resolvers.KeyProperty(type);
                 var properties = Resolvers.Properties(type)
                                               .Where(p => p.GetSetMethod() != null)
-                                              .Select(p => Resolvers.Column(p, connection));
+                                              .Select(p => Resolvers.Column(p, sqlBuilder));
 
                 sql = $"select {string.Join(", ", properties)} from {tableName}";
                 QueryCache.TryAdd(cacheKey, sql);
@@ -124,7 +124,7 @@ namespace Dommel
         /// <returns>A paged collection of entities of type <typeparamref name="TEntity"/>.</returns>
         public static IEnumerable<TEntity> ProjectPaged<TEntity>(this IDbConnection connection, int pageNumber, int pageSize, IDbTransaction transaction = null, bool buffered = true) where TEntity : class
         {
-            var sql = BuildProjectPagedQuery(connection, typeof(TEntity), pageNumber, pageSize);
+            var sql = BuildProjectPagedQuery(GetSqlBuilder(connection), typeof(TEntity), pageNumber, pageSize);
             LogQuery<TEntity>(sql);
             return connection.Query<TEntity>(sql, transaction: transaction, buffered: buffered);
         }
@@ -140,19 +140,19 @@ namespace Dommel
         /// <returns>A paged collection of entities of type <typeparamref name="TEntity"/>.</returns>
         public static Task<IEnumerable<TEntity>> ProjectPagedAsync<TEntity>(this IDbConnection connection, int pageNumber, int pageSize, IDbTransaction transaction = null) where TEntity : class
         {
-            var sql = BuildProjectPagedQuery(connection, typeof(TEntity), pageNumber, pageSize);
+            var sql = BuildProjectPagedQuery(GetSqlBuilder(connection), typeof(TEntity), pageNumber, pageSize);
             LogQuery<TEntity>(sql);
             return connection.QueryAsync<TEntity>(sql, transaction: transaction);
         }
 
-        internal static string BuildProjectPagedQuery(IDbConnection connection, Type type, int pageNumber, int pageSize)
+        internal static string BuildProjectPagedQuery(ISqlBuilder sqlBuilder, Type type, int pageNumber, int pageSize)
         {
             // Start with the select query part.
-            var sql = BuildProjectAllQuery(connection, type);
+            var sql = BuildProjectAllQuery(sqlBuilder, type);
 
             // Append the paging part including the order by.
-            var orderBy = "order by " + Resolvers.Column(Resolvers.KeyProperty(type), connection);
-            sql += GetSqlBuilder(connection).BuildPaging(orderBy, pageNumber, pageSize);
+            var orderBy = "order by " + Resolvers.Column(Resolvers.KeyProperty(type), sqlBuilder);
+            sql += sqlBuilder.BuildPaging(orderBy, pageNumber, pageSize);
             return sql;
         }
     }
