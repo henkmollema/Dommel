@@ -5,6 +5,10 @@
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="coverlet.msbuild" Version="2.6.0">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
     <PackageReference Include="mysqlconnector" Version="0.51.1" />
     <PackageReference Include="Npgsql" Version="4.0.5" />
     <ProjectReference Include="..\..\src\Dommel\Dommel.csproj" />
