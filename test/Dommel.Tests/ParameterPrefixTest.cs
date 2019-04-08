@@ -1,6 +1,4 @@
-﻿using System.Data;
-using System.Reflection;
-using Xunit;
+﻿using Xunit;
 using static Dommel.DommelMapper;
 
 namespace Dommel.Tests
@@ -44,27 +42,6 @@ namespace Dommel.Tests
         {
             var sql = BuildDeleteQuery(SqlBuilder, typeof(Foo));
             Assert.Equal("delete from Foos where Id = #Id", sql);
-        }
-
-        public interface IDataBaseParameterPrefix : IDbConnection { }
-
-        public sealed class DummySqlBuilder : ISqlBuilder
-        {
-            /// <inheritdoc/>
-            public string PrefixParameter(string paramName) => $"#{paramName}";
-
-            /// <inheritdoc/>
-            public string QuoteIdentifier(string identifier) => identifier;
-
-            /// <inheritdoc/>
-            public string BuildInsert(string tableName, string[] columnNames, string[] paramNames, PropertyInfo keyProperty) => $"insert into {tableName} ({string.Join(", ", columnNames)}) values ({string.Join(", ", paramNames)}); select last_insert_rowid() id";
-
-            /// <inheritdoc/>
-            public string BuildPaging(string orderBy, int pageNumber, int pageSize)
-            {
-                var start = pageNumber >= 1 ? (pageNumber - 1) * pageSize : 0;
-                return $" {orderBy} LIMIT {start}, {pageSize}";
-            }
         }
 
         public class Foo
