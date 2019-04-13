@@ -20,7 +20,7 @@ namespace Dommel
         /// <returns>The entity with the corresponding id.</returns>
         public static TEntity Get<TEntity>(this IDbConnection connection, object id, IDbTransaction transaction = null) where TEntity : class
         {
-            var sql = BuildGetById(connection, typeof(TEntity), id, out var parameters);
+            var sql = BuildGetById(GetSqlBuilder(connection), typeof(TEntity), id, out var parameters);
             LogQuery<TEntity>(sql);
             return connection.QueryFirstOrDefault<TEntity>(sql, parameters, transaction);
         }
@@ -35,22 +35,21 @@ namespace Dommel
         /// <returns>The entity with the corresponding id.</returns>
         public static Task<TEntity> GetAsync<TEntity>(this IDbConnection connection, object id, IDbTransaction transaction = null) where TEntity : class
         {
-            var sql = BuildGetById(connection, typeof(TEntity), id, out var parameters);
+            var sql = BuildGetById(GetSqlBuilder(connection), typeof(TEntity), id, out var parameters);
             LogQuery<TEntity>(sql);
             return connection.QueryFirstOrDefaultAsync<TEntity>(sql, parameters, transaction);
         }
 
-        private static string BuildGetById(IDbConnection connection, Type type, object id, out DynamicParameters parameters)
+        internal static string BuildGetById(ISqlBuilder sqlBuilder, Type type, object id, out DynamicParameters parameters)
         {
-            var cacheKey = new QueryCacheKey(QueryCacheType.Get, connection, type);
+            var cacheKey = new QueryCacheKey(QueryCacheType.Get, sqlBuilder, type);
             if (!QueryCache.TryGetValue(cacheKey, out var sql))
             {
-                var tableName = Resolvers.Table(type, connection);
+                var tableName = Resolvers.Table(type, sqlBuilder);
                 var keyProperty = Resolvers.KeyProperty(type);
-                var keyColumnName = Resolvers.Column(keyProperty, connection);
-                var builder = GetSqlBuilder(connection);
+                var keyColumnName = Resolvers.Column(keyProperty, sqlBuilder);
 
-                sql = $"select * from {tableName} where {keyColumnName} = {builder.PrefixParameter("Id")}";
+                sql = $"select * from {tableName} where {keyColumnName} = {sqlBuilder.PrefixParameter("Id")}";
                 QueryCache.TryAdd(cacheKey, sql);
             }
 
@@ -120,15 +119,15 @@ namespace Dommel
             return connection.QueryFirstOrDefaultAsync<TEntity>(sql, parameters, transaction);
         }
 
-        private static string BuildGetByIds(IDbConnection connection, Type type, object[] ids, out DynamicParameters parameters)
+        internal static string BuildGetByIds(IDbConnection connection, Type type, object[] ids, out DynamicParameters parameters)
         {
-            var cacheKey = new QueryCacheKey(QueryCacheType.GetByMultipleIds, connection, type);
+            var sqlBuilder = GetSqlBuilder(connection);
+            var cacheKey = new QueryCacheKey(QueryCacheType.GetByMultipleIds, sqlBuilder, type);
             if (!QueryCache.TryGetValue(cacheKey, out var sql))
             {
-                var builder = GetSqlBuilder(connection);
-                var tableName = Resolvers.Table(type, connection);
+                var tableName = Resolvers.Table(type, sqlBuilder);
                 var keyProperties = Resolvers.KeyProperties(type);
-                var keyColumnsNames = keyProperties.Select(p => Resolvers.Column(p, connection)).ToArray();
+                var keyColumnsNames = keyProperties.Select(p => Resolvers.Column(p, sqlBuilder)).ToArray();
                 if (keyColumnsNames.Length != ids.Length)
                 {
                     throw new InvalidOperationException($"Number of key columns ({keyColumnsNames.Length}) of type {type.Name} does not match with the number of specified IDs ({ids.Length}).");
@@ -143,7 +142,7 @@ namespace Dommel
                         sb.Append(" and");
                     }
 
-                    sb.Append(" ").Append(keyColumnName).Append($" = { builder.PrefixParameter("Id") }").Append(i);
+                    sb.Append(" ").Append(keyColumnName).Append($" = {sqlBuilder.PrefixParameter("Id")}").Append(i);
                     i++;
                 }
 
@@ -192,12 +191,13 @@ namespace Dommel
             return connection.QueryAsync<TEntity>(sql, transaction: transaction);
         }
 
-        private static string BuildGetAllQuery(IDbConnection connection, Type type)
+        internal static string BuildGetAllQuery(IDbConnection connection, Type type)
         {
-            var cacheKey = new QueryCacheKey(QueryCacheType.GetAll, connection, type);
+            var sqlBuilder = GetSqlBuilder(connection);
+            var cacheKey = new QueryCacheKey(QueryCacheType.GetAll, sqlBuilder, type);
             if (!QueryCache.TryGetValue(cacheKey, out var sql))
             {
-                sql = "select * from " + Resolvers.Table(type, connection);
+                sql = "select * from " + Resolvers.Table(type, sqlBuilder);
                 QueryCache.TryAdd(cacheKey, sql);
             }
 
@@ -240,7 +240,7 @@ namespace Dommel
             return connection.QueryAsync<TEntity>(sql, transaction: transaction);
         }
 
-        private static string BuildPagedQuery(IDbConnection connection, Type type, int pageNumber, int pageSize)
+        internal static string BuildPagedQuery(IDbConnection connection, Type type, int pageNumber, int pageSize)
         {
             // Start with the select query part.
             var sql = BuildGetAllQuery(connection, type);

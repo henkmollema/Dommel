@@ -1,85 +1,34 @@
-﻿using Dapper;
-using Moq;
-using Moq.Dapper;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Data;
-using System.Linq;
 using Xunit;
+using static Dommel.DommelMapper;
 
 namespace Dommel.Tests
 {
-    [Collection("Use Dommel Log to check on results")]
     public class ProjectTests
     {
+        private static readonly ISqlBuilder SqlBuilder = new SqlServerSqlBuilder();
+
         [Fact]
-        public void Project()
+        public void ProjectById()
         {
-            // Arrange
-            var queries = new List<string>();
-            var expectedQuery = "Project<ProjectedFoo>: select [Id], [Name], [DateUpdated] from [ProjectedFoos] where [Id] = @Id";
-            var mock = new Mock<IDbConnection>();
-            mock.SetupDapper(x => x.QueryFirstOrDefault<ProjectedFoo>(It.Is<string>(s => s == expectedQuery), It.IsAny<object>(), null, null, null))
-                .Returns(new ProjectedFoo())
-                .Verifiable();
-
-            // Act
-            DommelMapper.LogReceived += queries.Add;
-            var p = mock.Object.Project<ProjectedFoo>(42);
-            DommelMapper.LogReceived -= queries.Add;
-
-            // Arrange
-            Assert.NotNull(p);
-            Assert.NotEmpty(queries);
-            mock.Verify();
-            Assert.Contains(expectedQuery, queries);
+            var sql = BuildProjectById(SqlBuilder, typeof(ProjectedFoo), 42, out var parameters);
+            Assert.Equal("select [Id], [Name], [DateUpdated] from [ProjectedFoos] where [Id] = @Id", sql);
+            Assert.NotNull(parameters);
         }
 
         [Fact]
         public void ProjectAll()
         {
-            // Arrange
-            var queries = new List<string>();
-            var expectedQuery = "ProjectAll<ProjectedFoo>: select [Id], [Name], [DateUpdated] from [ProjectedFoos]";
-            var mock = new Mock<IDbConnection>();
-            mock.SetupDapper(x => x.Query<ProjectedFoo>(It.Is<string>(s => s == expectedQuery), It.IsAny<object>(), null, true, null, null))
-                .Returns(new[] { new ProjectedFoo() })
-                .Verifiable();
-
-            // Act
-            DommelMapper.LogReceived += queries.Add;
-            var p = mock.Object.ProjectAll<ProjectedFoo>();
-            DommelMapper.LogReceived -= queries.Add;
-
-            // Arrange
-            Assert.Single(p);
-            Assert.NotEmpty(queries);
-            mock.Verify();
-            Assert.Contains(expectedQuery, queries);
+            var sql = BuildProjectAllQuery(SqlBuilder, typeof(ProjectedFoo));
+            Assert.Equal("select [Id], [Name], [DateUpdated] from [ProjectedFoos]", sql);
         }
 
         [Fact]
         public void ProjectPaged()
         {
-            // Arrange
-            var queries = new List<string>();
-            var expectedQuery = "ProjectPaged<ProjectedFoo>: select [Id], [Name], [DateUpdated] from [ProjectedFoos] order by [Id] offset 0 rows fetch next 5 rows only"; ;
-            var mock = new Mock<IDbConnection>();
-            mock.SetupDapper(x => x.Query<ProjectedFoo>(It.Is<string>(s => s == expectedQuery), It.IsAny<object>(), null, true, null, null))
-                .Returns(new[] { new ProjectedFoo() })
-                .Verifiable();
-
-            // Act
-            DommelMapper.LogReceived += queries.Add;
-            var p = mock.Object.ProjectPaged<ProjectedFoo>(pageNumber: 1, pageSize: 5);
-            DommelMapper.LogReceived -= queries.Add;
-
-            // Arrange
-            Assert.Single(p);
-            Assert.NotEmpty(queries);
-            mock.Verify();
-            Assert.Equal(expectedQuery, queries.Last());
-            Assert.Contains(expectedQuery, queries);
+            var sql = BuildProjectPagedQuery(SqlBuilder, typeof(ProjectedFoo), 1, 5);
+            Assert.Equal("select [Id], [Name], [DateUpdated] from [ProjectedFoos] order by [Id] offset 0 rows fetch next 5 rows only", sql);
         }
 
         public class ProjectedFoo

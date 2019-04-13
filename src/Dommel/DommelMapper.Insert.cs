@@ -70,7 +70,8 @@ namespace Dommel
 
         private static string BuildInsertQuery(IDbConnection connection, Type type)
         {
-            var cacheKey = new QueryCacheKey(QueryCacheType.Insert, connection, type);
+            var sqlBuilder = GetSqlBuilder(connection);
+            var cacheKey = new QueryCacheKey(QueryCacheType.Insert, sqlBuilder, type);
             if (!QueryCache.TryGetValue(cacheKey, out var sql))
             {
                 var tableName = Resolvers.Table(type, connection);
@@ -94,11 +95,10 @@ namespace Dommel
                     }
                 }
 
-                var columnNames = typeProperties.Select(p => Resolvers.Column(p, connection)).ToArray();
+                var columnNames = typeProperties.Select(p => Resolvers.Column(p, sqlBuilder)).ToArray();
                 var paramNames = typeProperties.Select(p => "@" + p.Name).ToArray();
 
-                var builder = GetSqlBuilder(connection);
-                sql = builder.BuildInsert(tableName, columnNames, paramNames, keyProperty);
+                sql = sqlBuilder.BuildInsert(tableName, columnNames, paramNames, keyProperty);
 
                 QueryCache.TryAdd(cacheKey, sql);
             }

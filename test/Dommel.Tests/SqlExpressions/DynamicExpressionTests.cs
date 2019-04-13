@@ -2,12 +2,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
-using Dapper;
-using Moq;
-using Moq.Dapper;
 using Xunit;
 using static Dommel.DommelMapper;
 
@@ -16,13 +12,6 @@ namespace Dommel.Tests
     public class DynamicExpressionTests
     {
         private readonly SqlExpression<Foo> _sqlExpression = new SqlExpression<Foo>(new SqlServerSqlBuilder());
-        private readonly Mock<IDbConnection> _mock = new Mock<IDbConnection>();
-
-        public DynamicExpressionTests()
-        {
-            _mock.SetupDapper(x => x.QueryFirstOrDefault<Foo>(It.IsAny<string>(), It.IsAny<object>(), null, null, null))
-                .Returns(new Foo());
-        }
 
         [Fact]
         public void CommonAndExpression()
