@@ -10,7 +10,7 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="mysqlconnector" Version="0.51.1" />
-    <PackageReference Include="Npgsql" Version="4.0.7" />
+    <PackageReference Include="Npgsql" Version="4.0.8" />
     <ProjectReference Include="..\..\src\Dommel\Dommel.csproj" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.2.0" />
     <PackageReference Include="xunit" Version="2.4.1" />
