@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Reflection;
+using System.Linq;
 
 namespace Dommel
 {
@@ -13,7 +14,7 @@ namespace Dommel
             /// <inheritdoc/>
             public virtual string BuildInsert(string tableName, string[] columnNames, string[] paramNames, PropertyInfo keyProperty)
             {
-                var sql = $"insert into {tableName} ({string.Join(", ", columnNames)}) values ({string.Join(", ", paramNames)})";
+                var sql = $"insert into \"{tableName}\" ({string.Join(", ", columnNames.Select(x => $"\"{x}\""))}) values ({string.Join(", ", paramNames)})";
 
                 if (keyProperty != null)
                 {

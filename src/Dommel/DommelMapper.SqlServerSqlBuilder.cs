@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using System.Linq;
 
 namespace Dommel
 {
@@ -11,7 +12,7 @@ namespace Dommel
         {
             /// <inheritdoc/>
             public virtual string BuildInsert(string tableName, string[] columnNames, string[] paramNames, PropertyInfo keyProperty) =>
-                $"set nocount on insert into {tableName} ({string.Join(", ", columnNames)}) values ({string.Join(", ", paramNames)}); select scope_identity()";
+                $"set nocount on insert into [{tableName}] ({string.Join(", ", columnNames.Select(x => $"[{x}]"))}) values ({string.Join(", ", paramNames)}); select scope_identity()";
 
             /// <inheritdoc/>
             public virtual string BuildPaging(string orderBy, int pageNumber, int pageSize)

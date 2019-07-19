@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Data.SqlClient;
+using System.Linq;
 using System.Reflection;
 using Dapper;
 using Xunit;
@@ -19,7 +20,7 @@ namespace Dommel.IntegrationTests
         public class GuidSqlServerSqlBuilder : DommelMapper.SqlServerSqlBuilder
         {
             public override string BuildInsert(string tableName, string[] columnNames, string[] paramNames, PropertyInfo keyProperty) =>
-                $"set nocount on insert into {tableName} ({string.Join(", ", columnNames)}) output inserted.Id values ({string.Join(", ", paramNames)})";
+                $"set nocount on insert into [{tableName}] ({string.Join(", ", columnNames.Select(x => $"[{x}]"))}) output inserted.Id values ({string.Join(", ", paramNames)})";
         }
 
         [Fact]
