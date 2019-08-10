@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 
 namespace Dommel
@@ -30,7 +31,8 @@ namespace Dommel
             /// </summary>
             /// <param name="type">The type to resolve the properties to be mapped for.</param>
             /// <returns>A collection of <see cref="PropertyInfo"/>'s of the <paramref name="type"/>.</returns>
-            public virtual IEnumerable<PropertyInfo> ResolveProperties(Type type) => FilterComplexTypes(type.GetRuntimeProperties());
+            public virtual IEnumerable<PropertyInfo> ResolveProperties(Type type) =>
+                FilterComplexTypes(type.GetRuntimeProperties()).Where(p => !p.IsDefined(typeof(IgnoreAttribute)));
 
             /// <summary>
             /// Gets a collection of types that are considered 'primitive' for Dommel but are not for the CLR.
@@ -49,7 +51,6 @@ namespace Dommel
                 {
                     var type = property.PropertyType;
                     type = Nullable.GetUnderlyingType(type) ?? type;
-
                     if (type.GetTypeInfo().IsPrimitive || type.GetTypeInfo().IsEnum || PrimitiveTypes.Contains(type))
                     {
                         yield return property;
@@ -57,5 +58,13 @@ namespace Dommel
                 }
             }
         }
+    }
+
+    /// <summary>
+    /// Specifies that a property should be ignored.
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Property)]
+    public class IgnoreAttribute : Attribute
+    {
     }
 }
