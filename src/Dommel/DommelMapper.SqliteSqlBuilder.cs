@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+﻿using System;
 
 namespace Dommel
 {
@@ -10,10 +10,8 @@ namespace Dommel
         public class SqliteSqlBuilder : ISqlBuilder
         {
             /// <inheritdoc/>
-            public virtual string BuildInsert(string tableName, string[] columnNames, string[] paramNames, PropertyInfo keyProperty)
-            {
-                return $"insert into {tableName} ({string.Join(", ", columnNames)}) values ({string.Join(", ", paramNames)}); select last_insert_rowid() id";
-            }
+            public virtual string BuildInsert(Type type, string tableName, string[] columnNames, string[] paramNames) => 
+                $"insert into {tableName} ({string.Join(", ", columnNames)}) values ({string.Join(", ", paramNames)}); select last_insert_rowid() id";
 
             /// <inheritdoc/>
             public virtual string BuildPaging(string orderBy, int pageNumber, int pageSize)
@@ -23,10 +21,7 @@ namespace Dommel
             }
 
             /// <inheritdoc/>
-            public string PrefixParameter(string paramName)
-            {
-                return $"@{paramName}";
-            }
+            public string PrefixParameter(string paramName) => $"@{paramName}";
 
             /// <inheritdoc/>
             public string QuoteIdentifier(string identifier) => identifier;

@@ -11,7 +11,7 @@ namespace Dommel.IntegrationTests
 
         public DatabaseFixture()
         {
-            // Extract the
+            // Extract the database drivers from the test data
             _databases = new DatabaseTestData()
                 .Select(x => x[0])
                 .OfType<DatabaseDriver>()

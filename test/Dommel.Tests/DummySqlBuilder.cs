@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+﻿using System;
 using static Dommel.DommelMapper;
 
 namespace Dommel.Tests
@@ -12,7 +12,8 @@ namespace Dommel.Tests
         public string QuoteIdentifier(string identifier) => identifier;
 
         /// <inheritdoc/>
-        public string BuildInsert(string tableName, string[] columnNames, string[] paramNames, PropertyInfo keyProperty) => $"insert into {tableName} ({string.Join(", ", columnNames)}) values ({string.Join(", ", paramNames)}); select last_insert_rowid() id";
+        public string BuildInsert(Type type, string tableName, string[] columnNames, string[] paramNames) =>
+            $"insert into {tableName} ({string.Join(", ", columnNames)}) values ({string.Join(", ", paramNames)}); select last_insert_rowid() id";
 
         /// <inheritdoc/>
         public string BuildPaging(string orderBy, int pageNumber, int pageSize)

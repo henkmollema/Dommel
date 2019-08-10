@@ -151,7 +151,8 @@ namespace Dommel
             /// <returns>The current <see cref="SqlExpression{TEntity}"/> instance.</returns>
             public virtual SqlExpression<TEntity> Page(int pageNumber, int pageSize)
             {
-                AppendOrderBy("asc", Resolvers.Column(Resolvers.KeyProperty(EntityType), _sqlBuilder), prepend: true);
+                var keyColumns = Resolvers.KeyProperties(typeof(TEntity)).Select(p => Resolvers.Column(p.Property, _sqlBuilder));
+                AppendOrderBy("asc", string.Join(", ", keyColumns), prepend: true);
                 _pagingQuery = _sqlBuilder.BuildPaging(null, pageNumber, pageSize).Substring(1);
                 return this;
             }

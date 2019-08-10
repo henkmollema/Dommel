@@ -2,7 +2,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Reflection;
-using Dapper;
 
 namespace Dommel
 {
@@ -17,12 +16,7 @@ namespace Dommel
             /// <summary>
             /// Finds the key properties by looking for properties with the [Key] attribute.
             /// </summary>
-            public PropertyInfo[] ResolveKeyProperties(Type type) => ResolveKeyProperties(type, out _);
-
-            /// <summary>
-            /// Finds the key properties by looking for properties with the [Key] attribute.
-            /// </summary>
-            public PropertyInfo[] ResolveKeyProperties(Type type, out bool isIdentity)
+            public KeyPropertyInfo[] ResolveKeyProperties(Type type)
             {
                 var keyProps = Resolvers
                         .Properties(type)
@@ -34,8 +28,7 @@ namespace Dommel
                     throw new InvalidOperationException($"Could not find the key properties for type '{type.FullName}'.");
                 }
 
-                isIdentity = true;
-                return keyProps;
+                return keyProps.Select(p => new KeyPropertyInfo(p)).ToArray();
             }
         }
     }

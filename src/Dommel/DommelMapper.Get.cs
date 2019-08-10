@@ -46,8 +46,13 @@ namespace Dommel
             if (!QueryCache.TryGetValue(cacheKey, out var sql))
             {
                 var tableName = Resolvers.Table(type, sqlBuilder);
-                var keyProperty = Resolvers.KeyProperty(type);
-                var keyColumnName = Resolvers.Column(keyProperty, sqlBuilder);
+                var keyProperties = Resolvers.KeyProperties(type);
+                if (keyProperties.Length > 1)
+                {
+                    throw new InvalidOperationException($"Entity {type.Name} contains more than one key property." +
+                        "Use the Get<T> overload which supports passing multiple IDs.");
+                }
+                var keyColumnName = Resolvers.Column(keyProperties[0].Property, sqlBuilder);
 
                 sql = $"select * from {tableName} where {keyColumnName} = {sqlBuilder.PrefixParameter("Id")}";
                 QueryCache.TryAdd(cacheKey, sql);
@@ -127,15 +132,15 @@ namespace Dommel
             {
                 var tableName = Resolvers.Table(type, sqlBuilder);
                 var keyProperties = Resolvers.KeyProperties(type);
-                var keyColumnsNames = keyProperties.Select(p => Resolvers.Column(p, sqlBuilder)).ToArray();
-                if (keyColumnsNames.Length != ids.Length)
+                var keyColumnNames = keyProperties.Select(p => Resolvers.Column(p.Property, sqlBuilder)).ToArray();
+                if (keyColumnNames.Length != ids.Length)
                 {
-                    throw new InvalidOperationException($"Number of key columns ({keyColumnsNames.Length}) of type {type.Name} does not match with the number of specified IDs ({ids.Length}).");
+                    throw new InvalidOperationException($"Number of key columns ({keyColumnNames.Length}) of type {type.Name} does not match with the number of specified IDs ({ids.Length}).");
                 }
 
                 var sb = new StringBuilder("select * from ").Append(tableName).Append(" where");
                 var i = 0;
-                foreach (var keyColumnName in keyColumnsNames)
+                foreach (var keyColumnName in keyColumnNames)
                 {
                     if (i != 0)
                     {
@@ -242,11 +247,12 @@ namespace Dommel
 
         internal static string BuildPagedQuery(IDbConnection connection, Type type, int pageNumber, int pageSize)
         {
-            // Start with the select query part.
+            // Start with the select query part
             var sql = BuildGetAllQuery(connection, type);
 
-            // Append the paging part including the order by.
-            var orderBy = "order by " + Resolvers.Column(Resolvers.KeyProperty(type), connection);
+            // Append the paging part including the order by
+            var keyColumns = Resolvers.KeyProperties(type).Select(p => Resolvers.Column(p.Property, connection));
+            var orderBy = "order by " + string.Join(", ", keyColumns);
             sql += GetSqlBuilder(connection).BuildPaging(orderBy, pageNumber, pageSize);
             return sql;
         }

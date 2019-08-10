@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+﻿using System;
 
 namespace Dommel
 {
@@ -10,7 +10,7 @@ namespace Dommel
         public class SqlServerCeSqlBuilder : ISqlBuilder
         {
             /// <inheritdoc/>
-            public virtual string BuildInsert(string tableName, string[] columnNames, string[] paramNames, PropertyInfo keyProperty) =>
+            public virtual string BuildInsert(Type type, string tableName, string[] columnNames, string[] paramNames) =>
                 $"insert into {tableName} ({string.Join(", ", columnNames)}) values ({string.Join(", ", paramNames)}); select @@IDENTITY";
 
             /// <inheritdoc/>
@@ -21,10 +21,7 @@ namespace Dommel
             }
 
             /// <inheritdoc/>
-            public string PrefixParameter(string paramName)
-            {
-                return $"@{paramName}";
-            }
+            public string PrefixParameter(string paramName) => $"@{paramName}";
 
             /// <inheritdoc/>
             public string QuoteIdentifier(string identifier) => $"[{identifier}]";
