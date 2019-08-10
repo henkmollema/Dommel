@@ -25,7 +25,7 @@ namespace Dommel.IntegrationTests
             using (var con = database.GetConnection())
             {
                 var products = con.From<Product>(sql =>
-                    sql.Select(p => new { p.Id, p.Name }));
+                    sql.Select(p => new { p.ProductId, p.Name }));
                 Assert.NotEmpty(products);
                 Assert.All(products, p => Assert.Equal(0, p.CategoryId));
             }
@@ -49,7 +49,7 @@ namespace Dommel.IntegrationTests
             using (var con = database.GetConnection())
             {
                 var products = await con.FromAsync<Product>(sql =>
-                    sql.Select(p => new { p.Id, p.Name }));
+                    sql.Select(p => new { p.ProductId, p.Name }));
                 Assert.NotEmpty(products);
                 Assert.All(products, p => Assert.Equal(0, p.CategoryId));
             }

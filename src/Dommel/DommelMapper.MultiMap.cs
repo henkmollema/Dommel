@@ -663,21 +663,22 @@ namespace Dommel
 
             var sql = BuildMultiMapQuery(connection, resultType, includeTypes, id, out var parameters);
             LogQuery<TReturn>(sql);
+            var splitOn = CreateSplitOn(includeTypes);
 
             switch (includeTypes.Length)
             {
                 case 2:
-                    return connection.Query(sql, (Func<T1, T2, TReturn>)map, parameters, transaction, buffered);
+                    return connection.Query(sql, (Func<T1, T2, TReturn>)map, parameters, transaction, buffered, splitOn);
                 case 3:
-                    return connection.Query(sql, (Func<T1, T2, T3, TReturn>)map, parameters, transaction, buffered);
+                    return connection.Query(sql, (Func<T1, T2, T3, TReturn>)map, parameters, transaction, buffered, splitOn);
                 case 4:
-                    return connection.Query(sql, (Func<T1, T2, T3, T4, TReturn>)map, parameters, transaction, buffered);
+                    return connection.Query(sql, (Func<T1, T2, T3, T4, TReturn>)map, parameters, transaction, buffered, splitOn);
                 case 5:
-                    return connection.Query(sql, (Func<T1, T2, T3, T4, T5, TReturn>)map, parameters, transaction, buffered);
+                    return connection.Query(sql, (Func<T1, T2, T3, T4, T5, TReturn>)map, parameters, transaction, buffered, splitOn);
                 case 6:
-                    return connection.Query(sql, (Func<T1, T2, T3, T4, T5, T6, TReturn>)map, parameters, transaction, buffered);
+                    return connection.Query(sql, (Func<T1, T2, T3, T4, T5, T6, TReturn>)map, parameters, transaction, buffered, splitOn);
                 case 7:
-                    return connection.Query(sql, (Func<T1, T2, T3, T4, T5, T6, T7, TReturn>)map, parameters, transaction, buffered);
+                    return connection.Query(sql, (Func<T1, T2, T3, T4, T5, T6, T7, TReturn>)map, parameters, transaction, buffered, splitOn);
             }
 
             throw new InvalidOperationException($"Invalid amount of include types: {includeTypes.Length}.");
@@ -701,24 +702,36 @@ namespace Dommel
 
             var sql = BuildMultiMapQuery(connection, resultType, includeTypes, id, out var parameters);
             LogQuery<TReturn>(sql);
+            var splitOn = CreateSplitOn(includeTypes);
 
             switch (includeTypes.Length)
             {
                 case 2:
-                    return connection.QueryAsync(sql, (Func<T1, T2, TReturn>)map, parameters, transaction, buffered);
+                    return connection.QueryAsync(sql, (Func<T1, T2, TReturn>)map, parameters, transaction, buffered, splitOn);
                 case 3:
-                    return connection.QueryAsync(sql, (Func<T1, T2, T3, TReturn>)map, parameters, transaction, buffered);
+                    return connection.QueryAsync(sql, (Func<T1, T2, T3, TReturn>)map, parameters, transaction, buffered, splitOn);
                 case 4:
-                    return connection.QueryAsync(sql, (Func<T1, T2, T3, T4, TReturn>)map, parameters, transaction, buffered);
+                    return connection.QueryAsync(sql, (Func<T1, T2, T3, T4, TReturn>)map, parameters, transaction, buffered, splitOn);
                 case 5:
-                    return connection.QueryAsync(sql, (Func<T1, T2, T3, T4, T5, TReturn>)map, parameters, transaction, buffered);
+                    return connection.QueryAsync(sql, (Func<T1, T2, T3, T4, T5, TReturn>)map, parameters, transaction, buffered, splitOn);
                 case 6:
-                    return connection.QueryAsync(sql, (Func<T1, T2, T3, T4, T5, T6, TReturn>)map, parameters, transaction, buffered);
+                    return connection.QueryAsync(sql, (Func<T1, T2, T3, T4, T5, T6, TReturn>)map, parameters, transaction, buffered, splitOn);
                 case 7:
-                    return connection.QueryAsync(sql, (Func<T1, T2, T3, T4, T5, T6, T7, TReturn>)map, parameters, transaction, buffered);
+                    return connection.QueryAsync(sql, (Func<T1, T2, T3, T4, T5, T6, T7, TReturn>)map, parameters, transaction, buffered, splitOn);
             }
 
             throw new InvalidOperationException($"Invalid amount of include types: {includeTypes.Length}.");
+        }
+
+        private static string CreateSplitOn(Type[] includeTypes)
+        {
+            // Create a splitOn parameter from the key properties of the included types
+            // We use the column name resolver directly rather than via the Resolvers class
+            // because Dapper needs an un-quoted column identifier. 
+            // E.g. FooId rather than [FooId] for SQL server, etc.
+            return string.Join(",", includeTypes
+                .Select(t => Resolvers.KeyProperties(t).First())
+                .Select(p => _columnNameResolver.ResolveColumnName(p.Property)));
         }
 
         private static string BuildMultiMapQuery(IDbConnection connection, Type resultType, Type[] includeTypes, object id, out DynamicParameters parameters)

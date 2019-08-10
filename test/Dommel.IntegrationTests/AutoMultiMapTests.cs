@@ -16,7 +16,7 @@ namespace Dommel.IntegrationTests
                 Assert.NotNull(product);
                 Assert.NotNull(product.Category);
                 Assert.Equal("Food", product.Category.Name);
-                Assert.Equal(product.CategoryId, product.Category.Id);
+                Assert.Equal(product.CategoryId, product.Category.CategoryId);
             }
         }
 
@@ -67,7 +67,7 @@ namespace Dommel.IntegrationTests
                 Assert.NotNull(product);
                 Assert.NotNull(product.Category);
                 Assert.Equal("Food", product.Category.Name);
-                Assert.Equal(product.CategoryId, product.Category.Id);
+                Assert.Equal(product.CategoryId, product.Category.CategoryId);
             }
         }
 

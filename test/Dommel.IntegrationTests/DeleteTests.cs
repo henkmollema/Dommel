@@ -19,7 +19,7 @@ namespace Dommel.IntegrationTests
                 var product = con.Get<Product>(id);
                 Assert.NotNull(product);
                 Assert.Equal("blah", product.Name);
-                Assert.Equal(id, product.Id);
+                Assert.Equal(id, product.ProductId);
 
                 con.Delete(product);
                 Assert.Null(con.Get<Product>(id));
@@ -36,7 +36,7 @@ namespace Dommel.IntegrationTests
                 var product = await con.GetAsync<Product>(id);
                 Assert.NotNull(product);
                 Assert.Equal("blah", product.Name);
-                Assert.Equal(id, product.Id);
+                Assert.Equal(id, product.ProductId);
 
                 await con.DeleteAsync(product);
                 Assert.Null(await con.GetAsync<Product>(id));
