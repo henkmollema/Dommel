@@ -267,6 +267,301 @@ namespace Dommel
                     transaction))
                 .FirstOrDefault();
 
+        /// <summary>
+        /// Retrieves the automatically mapped entities of type <typeparamref name="TReturn"/>
+        /// joined with the types specified as type parameters.
+        /// </summary>
+        /// <typeparam name="T1">The first type parameter. This is the source entity.</typeparam>
+        /// <typeparam name="T2">The second type parameter.</typeparam>
+        /// <typeparam name="TReturn">The return type parameter.</typeparam>
+        /// <param name="connection">The connection to the database. This can either be open or closed.</param>
+        /// <param name="transaction">Optional transaction for the command.</param>
+        /// <param name="buffered">
+        /// A value indicating whether the result of the query should be executed directly,
+        /// or when the query is materialized (using <c>ToList()</c> for example).
+        /// </param>
+        /// <returns>The entity with the corresponding id joined with the specified types.</returns>
+        public static IEnumerable<TReturn> GetAll<T1, T2, TReturn>(this IDbConnection connection, IDbTransaction transaction = null, bool buffered = true) where T1 : TReturn
+            => MultiMap<T1, T2, DontMap, DontMap, DontMap, DontMap, DontMap, TReturn>(
+                    connection,
+                    CreateMapDelegate<T1, T2, DontMap, DontMap, DontMap, DontMap, DontMap, TReturn>(),
+                    id: null,
+                    transaction,
+                    buffered);
+
+        /// <summary>
+        /// Retrieves the automatically mapped entities of type <typeparamref name="TReturn"/>
+        /// joined with the types specified as type parameters.
+        /// </summary>
+        /// <typeparam name="T1">The first type parameter. This is the source entity.</typeparam>
+        /// <typeparam name="T2">The second type parameter.</typeparam>
+        /// <typeparam name="TReturn">The return type parameter.</typeparam>
+        /// <param name="connection">The connection to the database. This can either be open or closed.</param>
+        /// <param name="transaction">Optional transaction for the command.</param>
+        /// <param name="buffered">
+        /// A value indicating whether the result of the query should be executed directly,
+        /// or when the query is materialized (using <c>ToList()</c> for example).
+        /// </param>
+        /// <returns>The entity with the corresponding id joined with the specified types.</returns>
+        public static Task<IEnumerable<TReturn>> GetAllAsync<T1, T2, TReturn>(this IDbConnection connection, IDbTransaction transaction = null, bool buffered = true) where T1 : TReturn
+            => MultiMapAsync<T1, T2, DontMap, DontMap, DontMap, DontMap, DontMap, TReturn>(
+                    connection,
+                    CreateMapDelegate<T1, T2, DontMap, DontMap, DontMap, DontMap, DontMap, TReturn>(),
+                    id: null,
+                    transaction,
+                    buffered);
+
+        /// <summary>
+        /// Retrieves the automatically mapped entities of type <typeparamref name="TReturn"/>
+        /// joined with the types specified as type parameters.
+        /// </summary>
+        /// <typeparam name="T1">The first type parameter. This is the source entity.</typeparam>
+        /// <typeparam name="T2">The second type parameter.</typeparam>
+        /// <typeparam name="T3">The third type parameter.</typeparam>
+        /// <typeparam name="TReturn">The return type parameter.</typeparam>
+        /// <param name="connection">The connection to the database. This can either be open or closed.</param>
+        /// <param name="transaction">Optional transaction for the command.</param>
+        /// <param name="buffered">
+        /// A value indicating whether the result of the query should be executed directly,
+        /// or when the query is materialized (using <c>ToList()</c> for example).
+        /// </param>
+        /// <returns>The entity with the corresponding id joined with the specified types.</returns>
+        public static IEnumerable<TReturn> GetAll<T1, T2, T3, TReturn>(this IDbConnection connection, IDbTransaction transaction = null, bool buffered = true) where T1 : TReturn
+            => MultiMap<T1, T2, T3, DontMap, DontMap, DontMap, DontMap, TReturn>(
+                    connection,
+                    CreateMapDelegate<T1, T2, T3, DontMap, DontMap, DontMap, DontMap, TReturn>(),
+                    id: null,
+                    transaction,
+                    buffered);
+
+        /// <summary>
+        /// Retrieves the automatically mapped entities of type <typeparamref name="TReturn"/>
+        /// joined with the types specified as type parameters.
+        /// </summary>
+        /// <typeparam name="T1">The first type parameter. This is the source entity.</typeparam>
+        /// <typeparam name="T2">The second type parameter.</typeparam>
+        /// <typeparam name="T3">The third type parameter.</typeparam>
+        /// <typeparam name="TReturn">The return type parameter.</typeparam>
+        /// <param name="connection">The connection to the database. This can either be open or closed.</param>
+        /// <param name="transaction">Optional transaction for the command.</param>
+        /// <param name="buffered">
+        /// A value indicating whether the result of the query should be executed directly,
+        /// or when the query is materialized (using <c>ToList()</c> for example).
+        /// </param>
+        /// <returns>The entity with the corresponding id joined with the specified types.</returns>
+        public static Task<IEnumerable<TReturn>> GetAllAsync<T1, T2, T3, TReturn>(this IDbConnection connection, IDbTransaction transaction = null, bool buffered = true) where T1 : TReturn
+            => MultiMapAsync<T1, T2, T3, DontMap, DontMap, DontMap, DontMap, TReturn>(
+                    connection,
+                    CreateMapDelegate<T1, T2, T3, DontMap, DontMap, DontMap, DontMap, TReturn>(),
+                    id: null,
+                    transaction,
+                    buffered);
+
+        /// <summary>
+        /// Retrieves the automatically mapped entities of type <typeparamref name="TReturn"/>
+        /// joined with the types specified as type parameters.
+        /// </summary>
+        /// <typeparam name="T1">The first type parameter. This is the source entity.</typeparam>
+        /// <typeparam name="T2">The second type parameter.</typeparam>
+        /// <typeparam name="T3">The third type parameter.</typeparam>
+        /// <typeparam name="T4">The fourth type parameter.</typeparam>
+        /// <typeparam name="TReturn">The return type parameter.</typeparam>
+        /// <param name="connection">The connection to the database. This can either be open or closed.</param>
+        /// <param name="transaction">Optional transaction for the command.</param>
+        /// <param name="buffered">
+        /// A value indicating whether the result of the query should be executed directly,
+        /// or when the query is materialized (using <c>ToList()</c> for example).
+        /// </param>
+        /// <returns>The entity with the corresponding id joined with the specified types.</returns>
+        public static IEnumerable<TReturn> GetAll<T1, T2, T3, T4, TReturn>(this IDbConnection connection, IDbTransaction transaction = null, bool buffered = true) where T1 : TReturn
+            => MultiMap<T1, T2, T3, T4, DontMap, DontMap, DontMap, TReturn>(
+                    connection,
+                    CreateMapDelegate<T1, T2, T3, T4, DontMap, DontMap, DontMap, TReturn>(),
+                    id: null,
+                    transaction,
+                    buffered);
+
+        /// <summary>
+        /// Retrieves the automatically mapped entities of type <typeparamref name="TReturn"/>
+        /// joined with the types specified as type parameters.
+        /// </summary>
+        /// <typeparam name="T1">The first type parameter. This is the source entity.</typeparam>
+        /// <typeparam name="T2">The second type parameter.</typeparam>
+        /// <typeparam name="T3">The third type parameter.</typeparam>
+        /// <typeparam name="T4">The fourth type parameter.</typeparam>
+        /// <typeparam name="TReturn">The return type parameter.</typeparam>
+        /// <param name="connection">The connection to the database. This can either be open or closed.</param>
+        /// <param name="transaction">Optional transaction for the command.</param>
+        /// <param name="buffered">
+        /// A value indicating whether the result of the query should be executed directly,
+        /// or when the query is materialized (using <c>ToList()</c> for example).
+        /// </param>
+        /// <returns>The entity with the corresponding id joined with the specified types.</returns>
+        public static Task<IEnumerable<TReturn>> GetAllAsync<T1, T2, T3, T4, TReturn>(this IDbConnection connection, IDbTransaction transaction = null, bool buffered = true) where T1 : TReturn
+            => MultiMapAsync<T1, T2, T3, T4, DontMap, DontMap, DontMap, TReturn>(
+                    connection,
+                    CreateMapDelegate<T1, T2, T3, T4, DontMap, DontMap, DontMap, TReturn>(),
+                    id: null,
+                    transaction,
+                    buffered);
+
+        /// <summary>
+        /// Retrieves the automatically mapped entities of type <typeparamref name="TReturn"/>
+        /// joined with the types specified as type parameters.
+        /// </summary>
+        /// <typeparam name="T1">The first type parameter. This is the source entity.</typeparam>
+        /// <typeparam name="T2">The second type parameter.</typeparam>
+        /// <typeparam name="T3">The third type parameter.</typeparam>
+        /// <typeparam name="T4">The fourth type parameter.</typeparam>
+        /// <typeparam name="T5">The fifth type parameter.</typeparam>
+        /// <typeparam name="TReturn">The return type parameter.</typeparam>
+        /// <param name="connection">The connection to the database. This can either be open or closed.</param>
+        /// <param name="transaction">Optional transaction for the command.</param>
+        /// <param name="buffered">
+        /// A value indicating whether the result of the query should be executed directly,
+        /// or when the query is materialized (using <c>ToList()</c> for example).
+        /// </param>
+        /// <returns>The entity with the corresponding id joined with the specified types.</returns>
+        public static IEnumerable<TReturn> GetAll<T1, T2, T3, T4, T5, TReturn>(this IDbConnection connection, IDbTransaction transaction = null, bool buffered = true) where T1 : TReturn
+            => MultiMap<T1, T2, T3, T4, T5, DontMap, DontMap, TReturn>(
+                    connection,
+                    CreateMapDelegate<T1, T2, T3, T4, T5, DontMap, DontMap, TReturn>(),
+                    id: null,
+                    transaction,
+                    buffered);
+
+        /// <summary>
+        /// Retrieves the automatically mapped entities of type <typeparamref name="TReturn"/>
+        /// joined with the types specified as type parameters.
+        /// </summary>
+        /// <typeparam name="T1">The first type parameter. This is the source entity.</typeparam>
+        /// <typeparam name="T2">The second type parameter.</typeparam>
+        /// <typeparam name="T3">The third type parameter.</typeparam>
+        /// <typeparam name="T4">The fourth type parameter.</typeparam>
+        /// <typeparam name="T5">The fifth type parameter.</typeparam>
+        /// <typeparam name="TReturn">The return type parameter.</typeparam>
+        /// <param name="connection">The connection to the database. This can either be open or closed.</param>
+        /// <param name="transaction">Optional transaction for the command.</param>
+        /// <param name="buffered">
+        /// A value indicating whether the result of the query should be executed directly,
+        /// or when the query is materialized (using <c>ToList()</c> for example).
+        /// </param>
+        /// <returns>The entity with the corresponding id joined with the specified types.</returns>
+        public static Task<IEnumerable<TReturn>> GetAllAsync<T1, T2, T3, T4, T5, TReturn>(this IDbConnection connection, IDbTransaction transaction = null, bool buffered = true) where T1 : TReturn
+            => MultiMapAsync<T1, T2, T3, T4, T5, DontMap, DontMap, TReturn>(
+                    connection,
+                    CreateMapDelegate<T1, T2, T3, T4, T5, DontMap, DontMap, TReturn>(),
+                    id: null,
+                    transaction,
+                    buffered);
+
+        /// <summary>
+        /// Retrieves the automatically mapped entities of type <typeparamref name="TReturn"/> 
+        /// 
+        /// joined with the types specified as type parameters.
+        /// </summary>
+        /// <typeparam name="T1">The first type parameter. This is the source entity.</typeparam>
+        /// <typeparam name="T2">The second type parameter.</typeparam>
+        /// <typeparam name="T3">The third type parameter.</typeparam>
+        /// <typeparam name="T4">The fourth type parameter.</typeparam>
+        /// <typeparam name="T5">The fifth type parameter.</typeparam>
+        /// <typeparam name="T6">The sixth type parameter.</typeparam>
+        /// <typeparam name="TReturn">The return type parameter.</typeparam>
+        /// <param name="connection">The connection to the database. This can either be open or closed.</param>
+        /// <param name="transaction">Optional transaction for the command.</param>
+        /// <param name="buffered">
+        /// A value indicating whether the result of the query should be executed directly,
+        /// or when the query is materialized (using <c>ToList()</c> for example).
+        /// </param>
+        /// <returns>The entity with the corresponding id joined with the specified types.</returns>
+        public static IEnumerable<TReturn> GetAll<T1, T2, T3, T4, T5, T6, TReturn>(this IDbConnection connection, IDbTransaction transaction = null, bool buffered = true) where T1 : TReturn
+            => MultiMap<T1, T2, T3, T4, T5, T6, DontMap, TReturn>(
+                    connection,
+                    CreateMapDelegate<T1, T2, T3, T4, T5, T6, DontMap, TReturn>(),
+                    id: null,
+                    transaction,
+                    buffered);
+
+        /// <summary>
+        /// Retrieves the automatically mapped entities of type <typeparamref name="TReturn"/>
+        /// joined with the types specified as type parameters.
+        /// </summary>
+        /// <typeparam name="T1">The first type parameter. This is the source entity.</typeparam>
+        /// <typeparam name="T2">The second type parameter.</typeparam>
+        /// <typeparam name="T3">The third type parameter.</typeparam>
+        /// <typeparam name="T4">The fourth type parameter.</typeparam>
+        /// <typeparam name="T5">The fifth type parameter.</typeparam>
+        /// <typeparam name="T6">The sixth type parameter.</typeparam>
+        /// <typeparam name="TReturn">The return type parameter.</typeparam>
+        /// <param name="connection">The connection to the database. This can either be open or closed.</param>
+        /// <param name="transaction">Optional transaction for the command.</param>
+        /// <param name="buffered">
+        /// A value indicating whether the result of the query should be executed directly,
+        /// or when the query is materialized (using <c>ToList()</c> for example).
+        /// </param>
+        /// <returns>The entity with the corresponding id joined with the specified types.</returns>
+        public static Task<IEnumerable<TReturn>> GetAllAsync<T1, T2, T3, T4, T5, T6, TReturn>(this IDbConnection connection, IDbTransaction transaction = null, bool buffered = true) where T1 : TReturn
+            => MultiMapAsync<T1, T2, T3, T4, T5, T6, DontMap, TReturn>(
+                    connection,
+                    CreateMapDelegate<T1, T2, T3, T4, T5, T6, DontMap, TReturn>(),
+                    id: null,
+                    transaction,
+                    buffered);
+
+        /// <summary>
+        /// Retrieves the automatically mapped entities of type <typeparamref name="TReturn"/>
+        /// joined with the types specified as type parameters.
+        /// </summary>
+        /// <typeparam name="T1">The first type parameter. This is the source entity.</typeparam>
+        /// <typeparam name="T2">The second type parameter.</typeparam>
+        /// <typeparam name="T3">The third type parameter.</typeparam>
+        /// <typeparam name="T4">The fourth type parameter.</typeparam>
+        /// <typeparam name="T5">The fifth type parameter.</typeparam>
+        /// <typeparam name="T6">The sixth type parameter.</typeparam>
+        /// <typeparam name="T7">The seventh type parameter.</typeparam>
+        /// <typeparam name="TReturn">The return type parameter.</typeparam>
+        /// <param name="connection">The connection to the database. This can either be open or closed.</param>
+        /// <param name="transaction">Optional transaction for the command.</param>
+        /// <param name="buffered">
+        /// A value indicating whether the result of the query should be executed directly,
+        /// or when the query is materialized (using <c>ToList()</c> for example).
+        /// </param>
+        /// <returns>The entity with the corresponding id joined with the specified types.</returns>
+        public static IEnumerable<TReturn> GetAll<T1, T2, T3, T4, T5, T6, T7, TReturn>(this IDbConnection connection, IDbTransaction transaction = null, bool buffered = true) where T1 : TReturn
+            => MultiMap<T1, T2, T3, T4, T5, T6, T7, TReturn>(
+                    connection,
+                    CreateMapDelegate<T1, T2, T3, T4, T5, T6, T7, TReturn>(),
+                    id: null,
+                    transaction,
+                    buffered);
+
+        /// <summary>
+        /// Retrieves the automatically mapped entity of type <typeparamref name="TReturn"/> 
+        /// joined with the types specified as type parameters.
+        /// </summary>
+        /// <typeparam name="T1">The first type parameter. This is the source entity.</typeparam>
+        /// <typeparam name="T2">The second type parameter.</typeparam>
+        /// <typeparam name="T3">The third type parameter.</typeparam>
+        /// <typeparam name="T4">The fourth type parameter.</typeparam>
+        /// <typeparam name="T5">The fifth type parameter.</typeparam>
+        /// <typeparam name="T6">The sixth type parameter.</typeparam>
+        /// <typeparam name="T7">The seventh type parameter.</typeparam>
+        /// <typeparam name="TReturn">The return type parameter.</typeparam>
+        /// <param name="connection">The connection to the database. This can either be open or closed.</param>
+        /// <param name="transaction">Optional transaction for the command.</param>
+        /// <param name="buffered">
+        /// A value indicating whether the result of the query should be executed directly,
+        /// or when the query is materialized (using <c>ToList()</c> for example).
+        /// </param>
+        /// <returns>The entity with the corresponding id joined with the specified types.</returns>
+        public static Task<IEnumerable<TReturn>> GetAllAsync<T1, T2, T3, T4, T5, T6, T7, TReturn>(this IDbConnection connection, IDbTransaction transaction = null, bool buffered = true) where T1 : TReturn
+            => MultiMapAsync<T1, T2, T3, T4, T5, T6, T7, TReturn>(
+                    connection,
+                    CreateMapDelegate<T1, T2, T3, T4, T5, T6, T7, TReturn>(),
+                    id: null,
+                    transaction,
+                    buffered);
+
         private static Delegate CreateMapDelegate<T1, T2, T3, T4, T5, T6, T7, TReturn>()
             where T1 : TReturn
         {
