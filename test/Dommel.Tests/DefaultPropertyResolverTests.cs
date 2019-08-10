@@ -10,19 +10,44 @@ namespace Dommel.Tests
         [Fact]
         public void ResolvesSimpleProperties()
         {
+            // Arrange
             var resolver = new DommelMapper.DefaultPropertyResolver();
             var type = typeof(Foo);
+
+            // Act
             var props = resolver.ResolveProperties(type).ToArray();
+
+            // Assert
             Assert.Equal(type.GetProperties().Skip(1).ToArray(), props);
         }
 
         [Fact]
         public void Resolves_WithCustom()
         {
+            // Arrange
             var resolver = new CustomResolver();
             var type = typeof(Foo);
+
+            // Act
             var props = resolver.ResolveProperties(type).ToArray();
+
+            // Assert
             Assert.Equal(type.GetProperties().Skip(2).ToArray(), props);
+        }
+
+        [Fact]
+        public void IgnoresIgnoreAttribute()
+        {
+            // Arrange
+            var resolver = new DommelMapper.DefaultPropertyResolver();
+            var type = typeof(Bar);
+
+            // Act
+            var props = resolver.ResolveProperties(type).ToArray();
+
+            // Assert
+            var prop = Assert.Single(props);
+            Assert.Equal(type.GetProperty("Id"), prop);
         }
 
         private class CustomResolver : DommelMapper.DefaultPropertyResolver
@@ -58,17 +83,12 @@ namespace Dommel.Tests
             public byte[] Bytes { get; set; }
         }
 
-        /*
-            typeof(object),
-            typeof(string),
-            typeof(Guid),
-            typeof(decimal),
-            typeof(double),
-            typeof(float),
-            typeof(DateTime),
-            typeof(DateTimeOffset),
-            typeof(TimeSpan),
-            typeof(byte[])
-         */
+        private class Bar
+        {
+            public int Id { get; set; }
+
+            [Ignore]
+            public DateTime Timestamp { get; set; }
+        }
     }
 }
