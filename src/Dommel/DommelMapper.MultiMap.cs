@@ -724,7 +724,7 @@ namespace Dommel
         private static string BuildMultiMapQuery(IDbConnection connection, Type resultType, Type[] includeTypes, object id, out DynamicParameters parameters)
         {
             var resultTableName = Resolvers.Table(resultType, connection);
-            var resultTableKeyColumnName = Resolvers.Column(Resolvers.KeyProperty(resultType), connection);
+            var resultTableKeyColumnName = Resolvers.Column(Resolvers.KeyProperties(resultType).Single().Property, connection);
 
             var sql = $"select * from {resultTableName}";
 
@@ -744,13 +744,13 @@ namespace Dommel
                 if (relation == ForeignKeyRelation.OneToOne)
                 {
                     // Determine the primary key of the foreign key table.
-                    var foreignKeyTableKeyColumName = Resolvers.Column(Resolvers.KeyProperty(includeType), connection);
+                    var foreignKeyTableKeyColumName = Resolvers.Column(Resolvers.KeyProperties(includeType).Single().Property, connection);
                     sql += $" left join {foreignKeyTableName} on {sourceTableName}.{foreignKeyPropertyName} = {foreignKeyTableName}.{foreignKeyTableKeyColumName}";
                 }
                 else if (relation == ForeignKeyRelation.OneToMany)
                 {
                     // Determine the primary key of the source table.
-                    var sourceKeyColumnName = Resolvers.Column(Resolvers.KeyProperty(sourceType), connection);
+                    var sourceKeyColumnName = Resolvers.Column(Resolvers.KeyProperties(sourceType).Single().Property, connection);
                     sql += $" left join {foreignKeyTableName} on {sourceTableName}.{sourceKeyColumnName} = {foreignKeyTableName}.{foreignKeyPropertyName}";
                 }
                 else

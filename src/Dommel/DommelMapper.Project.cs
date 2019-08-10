@@ -45,7 +45,7 @@ namespace Dommel
             var cacheKey = new QueryCacheKey(QueryCacheType.Project, sqlBuilder, type);
             if (!QueryCache.TryGetValue(cacheKey, out var sql))
             {
-                var keyProperty = Resolvers.KeyProperty(type);
+                var keyProperty = Resolvers.KeyProperties(type).Single().Property;
                 var keyColumnName = Resolvers.Column(keyProperty, sqlBuilder);
 
                 sql = BuildProjectAllQuery(sqlBuilder, type);
@@ -97,7 +97,6 @@ namespace Dommel
             if (!QueryCache.TryGetValue(cacheKey, out var sql))
             {
                 var tableName = Resolvers.Table(type, sqlBuilder);
-                var keyProperty = Resolvers.KeyProperty(type);
                 var properties = Resolvers.Properties(type)
                                               .Where(p => p.GetSetMethod() != null)
                                               .Select(p => Resolvers.Column(p, sqlBuilder));
@@ -147,11 +146,12 @@ namespace Dommel
 
         internal static string BuildProjectPagedQuery(ISqlBuilder sqlBuilder, Type type, int pageNumber, int pageSize)
         {
-            // Start with the select query part.
+            // Start with the select query part
             var sql = BuildProjectAllQuery(sqlBuilder, type);
 
-            // Append the paging part including the order by.
-            var orderBy = "order by " + Resolvers.Column(Resolvers.KeyProperty(type), sqlBuilder);
+            // Append the paging part including the order by
+            var keyColumns = Resolvers.KeyProperties(type).Select(p => Resolvers.Column(p.Property, sqlBuilder));
+            var orderBy = "order by " + string.Join(", ", keyColumns);
             sql += sqlBuilder.BuildPaging(orderBy, pageNumber, pageSize);
             return sql;
         }

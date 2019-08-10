@@ -53,7 +53,8 @@ CREATE TABLE IF NOT EXISTS ""Products"" (""Id"" serial primary key, ""CategoryId
 CREATE TABLE IF NOT EXISTS ""Orders"" (""Id"" serial primary key, ""Created"" TIMESTAMP NOT NULL);
 CREATE TABLE IF NOT EXISTS ""OrderLines"" (""Id"" serial primary key, ""OrderId"" int, ""Line"" VARCHAR(255));
 CREATE TABLE IF NOT EXISTS ""Foos"" (""Id"" serial primary key, ""Name"" VARCHAR(255));
-CREATE TABLE IF NOT EXISTS ""Bars"" (""Id"" serial primary key, ""Name"" VARCHAR(255));";
+CREATE TABLE IF NOT EXISTS ""Bars"" (""Id"" serial primary key, ""Name"" VARCHAR(255));
+CREATE TABLE IF NOT EXISTS ""Bazs"" (""BazId"" uuid primary key, ""Name"" VARCHAR(255));";
                 var created = await con.ExecuteScalarAsync(sql);
 
                 // No result means the tables were just created
@@ -71,7 +72,8 @@ DROP TABLE ""Products"";
 DROP TABLE ""Orders"";
 DROP TABLE ""OrderLines"";
 DROP TABLE ""Foos"";
-DROP TABLE ""Bars"";");
+DROP TABLE ""Bars"";
+DROP TABLE ""Bazs"";");
                 con.Close();
             }
         }

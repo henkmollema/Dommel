@@ -51,13 +51,13 @@ namespace Dommel
 
                 // Use all properties which are settable.
                 var typeProperties = Resolvers.Properties(type)
-                                              .Except(keyProperties)
+                                              .Except(keyProperties.Where(p => p.IsGenerated).Select(p => p.Property))
                                               .Where(p => p.GetSetMethod() != null)
                                               .ToArray();
 
                 var columnNames = typeProperties.Select(p => $"{Resolvers.Column(p, sqlBuilder)} = {sqlBuilder.PrefixParameter(p.Name)}").ToArray();
-                var keyPropertyWhereClauses = keyProperties.Select(p => $"{Resolvers.Column(p, sqlBuilder)} = {sqlBuilder.PrefixParameter(p.Name)}");
-                sql = $"update {tableName} set {string.Join(", ", columnNames)} where {string.Join(" and ", keyPropertyWhereClauses)}";
+                var whereClauses = keyProperties.Select(p => $"{Resolvers.Column(p.Property, sqlBuilder)} = {sqlBuilder.PrefixParameter(p.Property.Name)}");
+                sql = $"update {tableName} set {string.Join(", ", columnNames)} where {string.Join(" and ", whereClauses)}";
 
                 QueryCache.TryAdd(cacheKey, sql);
             }

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Dapper;
@@ -145,11 +146,12 @@ namespace Dommel
 
         private static string BuildSelectPagedQuery<TEntity>(IDbConnection connection, Expression<Func<TEntity, bool>> predicate, int pageNumber, int pageSize, out DynamicParameters parameters)
         {
-            // Start with the select query part.
+            // Start with the select query part
             var sql = BuildSelectSql(connection, predicate, out parameters);
 
-            // Append  the paging part including the order by.
-            var orderBy = "order by " + Resolvers.Column(Resolvers.KeyProperty(typeof(TEntity)), connection);
+            // Append  the paging part including the order by
+            var keyColumns = Resolvers.KeyProperties(typeof(TEntity)).Select(p => Resolvers.Column(p.Property, connection));
+            var orderBy = "order by " + string.Join(", ", keyColumns);
             sql += GetSqlBuilder(connection).BuildPaging(orderBy, pageNumber, pageSize);
             return sql;
         }

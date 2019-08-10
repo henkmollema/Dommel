@@ -32,12 +32,13 @@ namespace Dommel.IntegrationTests
             {
                 var sql = @"IF OBJECT_ID(N'dbo.Products', N'U') IS NULL
 BEGIN
-    CREATE TABLE dbo.Categories (Id int IDENTITY(1,1) PRIMARY KEY, Name VARCHAR(255));
-    CREATE TABLE dbo.Products (Id int IDENTITY(1,1) PRIMARY KEY, CategoryId int, Name VARCHAR(255));
-    CREATE TABLE dbo.Orders (Id int IDENTITY(1,1) PRIMARY KEY, Created DATETIME NOT NULL);
-    CREATE TABLE dbo.OrderLines (Id int IDENTITY(1,1) PRIMARY KEY, OrderId int, Line VARCHAR(255));
-    CREATE TABLE dbo.Foos (Id int IDENTITY(1,1) PRIMARY KEY, Name VARCHAR(255));
-    CREATE TABLE dbo.Bars (Id int IDENTITY(1,1) PRIMARY KEY, Name VARCHAR(255));
+    CREATE TABLE dbo.Categories (Id INT IDENTITY(1,1) PRIMARY KEY, Name VARCHAR(255));
+    CREATE TABLE dbo.Products (Id INT IDENTITY(1,1) PRIMARY KEY, CategoryId int, Name VARCHAR(255));
+    CREATE TABLE dbo.Orders (Id INT IDENTITY(1,1) PRIMARY KEY, Created DATETIME NOT NULL);
+    CREATE TABLE dbo.OrderLines (Id INT IDENTITY(1,1) PRIMARY KEY, OrderId int, Line VARCHAR(255));
+    CREATE TABLE dbo.Foos (Id INT IDENTITY(1,1) PRIMARY KEY, Name VARCHAR(255));
+    CREATE TABLE dbo.Bars (Id INT IDENTITY(1,1) PRIMARY KEY, Name VARCHAR(255));
+    CREATE TABLE dbo.Bazs (BazId UNIQUEIDENTIFIER  PRIMARY KEY, Name VARCHAR(255));
     SELECT 1;
 END";
                 var created = await con.ExecuteScalarAsync(sql);

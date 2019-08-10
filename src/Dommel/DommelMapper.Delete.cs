@@ -48,9 +48,9 @@ namespace Dommel
             {
                 var tableName = Resolvers.Table(type, sqlBuilder);
                 var keyProperties = Resolvers.KeyProperties(type);
-                var keyPropertyWhereClauses = keyProperties.Select(p => $"{Resolvers.Column(p, sqlBuilder)} = {sqlBuilder.PrefixParameter(p.Name)}");
+                var whereClauses = keyProperties.Select(p => $"{Resolvers.Column(p.Property, sqlBuilder)} = {sqlBuilder.PrefixParameter(p.Property.Name)}");
 
-                sql = $"delete from {tableName} where {string.Join(" and ", keyPropertyWhereClauses)}";
+                sql = $"delete from {tableName} where {string.Join(" and ", whereClauses)}";
 
                 QueryCache.TryAdd(cacheKey, sql);
             }

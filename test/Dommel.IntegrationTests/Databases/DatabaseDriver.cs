@@ -89,7 +89,8 @@ DROP TABLE Products;
 DROP TABLE Orders;
 DROP TABLE OrderLines;
 DROP TABLE Foos;
-DROP TABLE Bars;");
+DROP TABLE Bars;
+DROP TABLE Bazs;");
             }
         }
 

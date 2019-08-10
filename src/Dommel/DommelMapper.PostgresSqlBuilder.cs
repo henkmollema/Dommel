@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Reflection;
+using System.Linq;
 
 namespace Dommel
 {
@@ -11,20 +11,19 @@ namespace Dommel
         public class PostgresSqlBuilder : ISqlBuilder
         {
             /// <inheritdoc/>
-            public virtual string BuildInsert(string tableName, string[] columnNames, string[] paramNames, PropertyInfo keyProperty)
+            public virtual string BuildInsert(Type type, string tableName, string[] columnNames, string[] paramNames)
             {
-                var sql = $"insert into {tableName} ({string.Join(", ", columnNames)}) values ({string.Join(", ", paramNames)})";
-
-                if (keyProperty != null)
+                if (type == null)
                 {
-                    // We know it's Postgres here
-                    var keyColumnName = Resolvers.Column(keyProperty, new PostgresSqlBuilder());
-                    sql += " RETURNING " + keyColumnName;
+                    throw new ArgumentNullException(nameof(type));
                 }
-                else
+
+                var sql = $"insert into {tableName} ({string.Join(", ", columnNames)}) values ({string.Join(", ", paramNames)}) ";
+
+                var keyColumns = Resolvers.KeyProperties(type).Where(p => p.IsGenerated).Select(p => Resolvers.Column(p.Property, this));
+                if (keyColumns.Any())
                 {
-                    // todo: what behavior is desired here?
-                    throw new Exception("A key property is required for the PostgresSqlBuilder.");
+                    sql += $"returning ({string.Join(", ", keyColumns)})";
                 }
 
                 return sql;
@@ -38,10 +37,7 @@ namespace Dommel
             }
 
             /// <inheritdoc/>
-            public string PrefixParameter(string paramName)
-            {
-                return $"@{paramName}";
-            }
+            public string PrefixParameter(string paramName) => $"@{paramName}";
 
             /// <inheritdoc/>
             public string QuoteIdentifier(string identifier) => $"\"{identifier}\"";

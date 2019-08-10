@@ -53,17 +53,14 @@ namespace Dommel
 
             /// <summary>
             /// Builds an insert query using the specified table name, column names and parameter names.
-            /// A query to fetch the new id will be included as well.
+            /// A query to fetch the new ID will be included as well.
             /// </summary>
+            /// <param name="type">The type of the entity to generate the insert query for.</param>
             /// <param name="tableName">The name of the table to query.</param>
             /// <param name="columnNames">The names of the columns in the table.</param>
             /// <param name="paramNames">The names of the parameters in the database command.</param>
-            /// <param name="keyProperty">
-            /// The key property. This can be used to query a specific column for the new id. This is
-            /// optional.
-            /// </param>
-            /// <returns>An insert query including a query to fetch the new id.</returns>
-            string BuildInsert(string tableName, string[] columnNames, string[] paramNames, PropertyInfo keyProperty);
+            /// <returns>An insert query including a query to fetch the new ID.</returns>
+            string BuildInsert(Type type, string tableName, string[] columnNames, string[] paramNames);
 
             /// <summary>
             /// Builds the paging part to be appended to an existing select query.
