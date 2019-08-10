@@ -9,7 +9,7 @@ namespace Dommel.IntegrationTests
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int Id { get; set; }
+        public int ProductId { get; set; }
 
         public string Name { get; set; }
 
@@ -22,7 +22,8 @@ namespace Dommel.IntegrationTests
 
     public class Category
     {
-        public int Id { get; set; }
+        [Key]
+        public int CategoryId { get; set; }
 
         public string Name { get; set; }
     }

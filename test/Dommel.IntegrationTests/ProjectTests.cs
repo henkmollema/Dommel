@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -14,7 +15,7 @@ namespace Dommel.IntegrationTests
             using (var con = database.GetConnection())
             {
                 var p = con.Project<ProductSmall>(1);
-                Assert.NotEqual(0, p.Id);
+                Assert.NotEqual(0, p.ProductId);
                 Assert.NotNull(p.Name);
             }
         }
@@ -26,7 +27,7 @@ namespace Dommel.IntegrationTests
             using (var con = database.GetConnection())
             {
                 var p = await con.ProjectAsync<ProductSmall>(1);
-                Assert.NotEqual(0, p.Id);
+                Assert.NotEqual(0, p.ProductId);
                 Assert.NotNull(p.Name);
             }
         }
@@ -41,7 +42,7 @@ namespace Dommel.IntegrationTests
                 Assert.NotEmpty(ps);
                 Assert.All(ps, p =>
                 {
-                    Assert.NotEqual(0, p.Id);
+                    Assert.NotEqual(0, p.ProductId);
                     Assert.NotNull(p.Name);
                 });
             }
@@ -57,7 +58,7 @@ namespace Dommel.IntegrationTests
                 Assert.NotEmpty(ps);
                 Assert.All(ps, p =>
                 {
-                    Assert.NotEqual(0, p.Id);
+                    Assert.NotEqual(0, p.ProductId);
                     Assert.NotNull(p.Name);
                 });
             }
@@ -72,7 +73,7 @@ namespace Dommel.IntegrationTests
                 Assert.NotEmpty(ps);
                 Assert.All(ps, p =>
                 {
-                    Assert.NotEqual(0, p.Id);
+                    Assert.NotEqual(0, p.ProductId);
                     Assert.NotNull(p.Name);
                 });
             }
@@ -88,7 +89,7 @@ namespace Dommel.IntegrationTests
                 Assert.NotEmpty(ps);
                 Assert.All(ps, p =>
                 {
-                    Assert.NotEqual(0, p.Id);
+                    Assert.NotEqual(0, p.ProductId);
                     Assert.NotNull(p.Name);
                 });
             }
@@ -98,7 +99,8 @@ namespace Dommel.IntegrationTests
         [Table("Products")]
         public class ProductSmall
         {
-            public int Id { get; set; }
+            [Key]
+            public int ProductId { get; set; }
 
             public string Name { get; set; }
         }

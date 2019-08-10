@@ -48,8 +48,8 @@ namespace Dommel.IntegrationTests
             {
                 var sql = @"
 SELECT * FROM information_schema.tables where table_name = 'Products' LIMIT 1;
-CREATE TABLE IF NOT EXISTS ""Categories"" (""Id"" serial primary key, ""Name"" VARCHAR(255));
-CREATE TABLE IF NOT EXISTS ""Products"" (""Id"" serial primary key, ""CategoryId"" int, ""Name"" VARCHAR(255));
+CREATE TABLE IF NOT EXISTS ""Categories"" (""CategoryId"" serial primary key, ""Name"" VARCHAR(255));
+CREATE TABLE IF NOT EXISTS ""Products"" (""ProductId"" serial primary key, ""CategoryId"" int, ""Name"" VARCHAR(255));
 CREATE TABLE IF NOT EXISTS ""Orders"" (""Id"" serial primary key, ""Created"" TIMESTAMP NOT NULL);
 CREATE TABLE IF NOT EXISTS ""OrderLines"" (""Id"" serial primary key, ""OrderId"" int, ""Line"" VARCHAR(255));
 CREATE TABLE IF NOT EXISTS ""Foos"" (""Id"" serial primary key, ""Name"" VARCHAR(255));
