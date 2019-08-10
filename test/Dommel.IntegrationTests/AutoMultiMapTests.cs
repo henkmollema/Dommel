@@ -8,7 +8,7 @@ namespace Dommel.IntegrationTests
     {
         [Theory]
         [ClassData(typeof(DatabaseTestData))]
-        public void OneToOne(DatabaseDriver database)
+        public void Get_OneToOne(DatabaseDriver database)
         {
             using (var con = database.GetConnection())
             {
@@ -22,7 +22,7 @@ namespace Dommel.IntegrationTests
 
         [Theory]
         [ClassData(typeof(DatabaseTestData))]
-        public void OneToOneNotExisting(DatabaseDriver database)
+        public void Get_OneToOneNotExisting(DatabaseDriver database)
         {
             using (var con = database.GetConnection())
             {
@@ -34,7 +34,7 @@ namespace Dommel.IntegrationTests
 
         [Theory]
         [ClassData(typeof(DatabaseTestData))]
-        public void OneToMany(DatabaseDriver database)
+        public void Get_OneToMany(DatabaseDriver database)
         {
             using (var con = database.GetConnection())
             {
@@ -47,7 +47,7 @@ namespace Dommel.IntegrationTests
 
         [Theory]
         [ClassData(typeof(DatabaseTestData))]
-        public void OneToManyNonExsting(DatabaseDriver database)
+        public void Get_OneToManyNonExsting(DatabaseDriver database)
         {
             using (var con = database.GetConnection())
             {
@@ -59,7 +59,7 @@ namespace Dommel.IntegrationTests
 
         [Theory]
         [ClassData(typeof(DatabaseTestData))]
-        public async Task OneToOneAsync(DatabaseDriver database)
+        public async Task GetAsync_OneToOne(DatabaseDriver database)
         {
             using (var con = database.GetConnection())
             {
@@ -73,7 +73,7 @@ namespace Dommel.IntegrationTests
 
         [Theory]
         [ClassData(typeof(DatabaseTestData))]
-        public async Task OneToOneNotExistingAsync(DatabaseDriver database)
+        public async Task GetAsync_OneToOneNotExisting(DatabaseDriver database)
         {
             using (var con = database.GetConnection())
             {
@@ -85,7 +85,7 @@ namespace Dommel.IntegrationTests
 
         [Theory]
         [ClassData(typeof(DatabaseTestData))]
-        public async Task OneToManyAsync(DatabaseDriver database)
+        public async Task GetAsync_OneToMany(DatabaseDriver database)
         {
             using (var con = database.GetConnection())
             {
@@ -98,13 +98,57 @@ namespace Dommel.IntegrationTests
 
         [Theory]
         [ClassData(typeof(DatabaseTestData))]
-        public async Task OneToManyNonExstingAsync(DatabaseDriver database)
+        public async Task GetAsync_OneToManyNonExsting(DatabaseDriver database)
         {
             using (var con = database.GetConnection())
             {
                 var order = await con.GetAsync<Order, OrderLine, Order>(2);
                 Assert.NotNull(order);
                 Assert.Null(order.OrderLines);
+            }
+        }
+
+        [Theory]
+        [ClassData(typeof(DatabaseTestData))]
+        public void GetAll_OneToOne(DatabaseDriver database)
+        {
+            using (var con = database.GetConnection())
+            {
+                var products = con.GetAll<Product, Category, Product>();
+                Assert.NotEmpty(products);
+            }
+        }
+
+        [Theory]
+        [ClassData(typeof(DatabaseTestData))]
+        public void GetAll_OneToMany(DatabaseDriver database)
+        {
+            using (var con = database.GetConnection())
+            {
+                var orders = con.GetAll<Order, OrderLine, Order>();
+                Assert.NotEmpty(orders);
+            }
+        }
+
+        [Theory]
+        [ClassData(typeof(DatabaseTestData))]
+        public async Task GetAllAsync_OneToOne(DatabaseDriver database)
+        {
+            using (var con = database.GetConnection())
+            {
+                var products = await con.GetAllAsync<Product, Category, Product>();
+                Assert.NotEmpty(products);
+            }
+        }
+
+        [Theory]
+        [ClassData(typeof(DatabaseTestData))]
+        public async Task GetAllAsync_OneToMany(DatabaseDriver database)
+        {
+            using (var con = database.GetConnection())
+            {
+                var orders = await con.GetAllAsync<Order, OrderLine, Order>();
+                Assert.NotEmpty(orders);
             }
         }
     }
