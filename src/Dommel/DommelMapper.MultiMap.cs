@@ -44,8 +44,8 @@ namespace Dommel
         /// <returns>The entity with the corresponding id joined with the specified types.</returns>
         public static async Task<TReturn> GetAsync<T1, T2, TReturn>(
             this IDbConnection connection,
-            Func<T1, T2, TReturn> map,
             object id,
+            Func<T1, T2, TReturn> map,
             IDbTransaction transaction = null)
         {
             return (await MultiMapAsync<T1, T2, DontMap, DontMap, DontMap, DontMap, DontMap, TReturn>(connection, map, id, transaction)).FirstOrDefault();
