@@ -12,11 +12,11 @@ namespace Dommel.IntegrationTests
         {
             using (var con = database.GetConnection())
             {
-                var product = await con.GetAsync<Product, Category, Product>((p, c) =>
+                var product = await con.GetAsync<Product, Category, Product>(1, (p, c) =>
                 {
                     p.Category = c;
                     return p;
-                }, 1);
+                });
 
                 Assert.NotNull(product);
                 Assert.NotEmpty(product.Name);
