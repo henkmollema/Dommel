@@ -738,7 +738,7 @@ namespace Dommel
         {
             var resultTableName = Resolvers.Table(resultType, connection);
             var resultTableKeyColumnName = Resolvers.Column(Resolvers.KeyProperties(resultType).Single().Property, connection);
-
+            var sqlBuilder = GetSqlBuilder(connection);
             var sql = $"select * from {resultTableName}";
 
             // Determine the table to join with.
@@ -775,7 +775,7 @@ namespace Dommel
             parameters = null;
             if (id != null)
             {
-                sql += $" where {resultTableName}.{resultTableKeyColumnName} = @Id";
+                sql += $" where {resultTableName}.{resultTableKeyColumnName} = {sqlBuilder.PrefixParameter("Id")}";
 
                 parameters = new DynamicParameters();
                 parameters.Add("Id", id);
