@@ -22,7 +22,7 @@ namespace Dommel
         /// <returns>The collection of entities returned from the query.</returns>
         public static IEnumerable<TEntity> From<TEntity>(this IDbConnection con, Action<SqlExpression<TEntity>> sqlBuilder, IDbTransaction transaction = null, bool buffered = true)
         {
-            var sqlExpression = new SqlExpression<TEntity>(GetSqlBuilder(con));
+            var sqlExpression = CreateSqlExpression<TEntity>(GetSqlBuilder(con));
             sqlBuilder(sqlExpression);
             var sql = sqlExpression.ToSql(out var parameters);
             return con.Query<TEntity>(sql, parameters, transaction, buffered);
@@ -38,7 +38,7 @@ namespace Dommel
         /// <returns>The collection of entities returned from the query.</returns>
         public static async Task<IEnumerable<TEntity>> FromAsync<TEntity>(this IDbConnection con, Action<SqlExpression<TEntity>> sqlBuilder, IDbTransaction transaction = null)
         {
-            var sqlExpression = new SqlExpression<TEntity>(GetSqlBuilder(con));
+            var sqlExpression = CreateSqlExpression<TEntity>(GetSqlBuilder(con));
             sqlBuilder(sqlExpression);
             var sql = sqlExpression.ToSql(out var parameters);
             return await con.QueryAsync<TEntity>(sql, parameters, transaction);

@@ -82,7 +82,7 @@ namespace Dommel
         internal static string BuildCountSql<TEntity>(ISqlBuilder sqlBuilder, Expression<Func<TEntity, bool>> predicate, out DynamicParameters parameters)
         {
             var sql = BuildCountAllSql(sqlBuilder, typeof(TEntity));
-            sql += new SqlExpression<TEntity>(sqlBuilder)
+            sql += CreateSqlExpression<TEntity>(sqlBuilder)
                 .Where(predicate)
                 .ToSql(out parameters);
             return sql;
