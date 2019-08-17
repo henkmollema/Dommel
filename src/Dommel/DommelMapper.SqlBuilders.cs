@@ -25,7 +25,15 @@ namespace Dommel
         /// Example: <c>typeof(SqlConnection)</c>.
         /// </param>
         /// <param name="builder">An implementation of the <see cref="ISqlBuilder"/> interface.</param>
-        public static void AddSqlBuilder(Type connectionType, ISqlBuilder builder) => _sqlBuilders[connectionType.Name.ToLower()] = builder;
+        public static void AddSqlBuilder(Type connectionType, ISqlBuilder builder) => AddSqlBuilder(connectionType.Name.ToLower(), builder);
+
+        /// <summary>
+        /// Adds a custom implementation of <see cref="ISqlBuilder"/> 
+        /// for the specified connection name        /// 
+        /// </summary>
+        /// <param name="connectionName">The name of the connection. E.g. "sqlconnection".</param>
+        /// <param name="builder">An implementation of the <see cref="ISqlBuilder"/> interface.</param>
+        public static void AddSqlBuilder(string connectionName, ISqlBuilder builder) => _sqlBuilders[connectionName] = builder;
 
         /// <summary>
         /// Gets the configured <see cref="ISqlBuilder"/> for the specified <see cref="IDbConnection"/> instance.
