@@ -2,7 +2,7 @@
 
 namespace Dommel.IntegrationTests
 {
-    internal static class CI
+    public static class CI
     {
         public static bool IsAppVeyor => EnvBool("APPVEYOR");
 

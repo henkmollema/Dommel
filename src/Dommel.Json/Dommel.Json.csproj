@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <Description>JSON support for Dommel.</Description>
+    <Copyright>Copyright © Henk Mollema 2019</Copyright>
+    <VersionPrefix>1.0.0-beta1</VersionPrefix>
+    <Authors>Henk Mollema</Authors>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <PackageTags>dommel;dapper;json</PackageTags>
+    <PackageProjectUrl>https://github.com/henkmollema/Dommel</PackageProjectUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/henkmollema/Dommel</RepositoryUrl>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>embedded</DebugType>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Dommel\Dommel.csproj" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
+  </ItemGroup>
+</Project>
