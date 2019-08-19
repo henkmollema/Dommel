@@ -58,7 +58,7 @@ namespace Dommel
             /// <summary>
             /// Gets the <see cref="IColumnNameResolver"/> instance used by this SQL expression.
             /// </summary>
-            protected virtual IColumnNameResolver ColumnNameResolver => _columnNameResolver;
+            protected virtual IColumnNameResolver ColumnNameResolver => DommelMapper.ColumnNameResolver;
 
             /// <summary>
             /// Selects all columns from <typeparamref name="TEntity"/>.
