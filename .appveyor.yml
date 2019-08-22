@@ -22,7 +22,7 @@ branches:
   only:
     - master
 artifacts:
-- path: .\src\Dommel\artifacts\**\*.nupkg
+- path: .\src\**\artifacts\**\*.nupkg
   name: NuGet
 deploy:
 - provider: NuGet
