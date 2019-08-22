@@ -47,3 +47,4 @@ else {
 
 echo "build: Creating NuGet package with suffix $versionSuffix"
 exec { & dotnet pack .\src\Dommel\Dommel.csproj -c Release -o .\artifacts --no-build --version-suffix=$versionSuffix }
+exec { & dotnet pack .\src\Dommel.Json\Dommel.Json.csproj -c Release -o .\artifacts --no-build --version-suffix=$versionSuffix }
