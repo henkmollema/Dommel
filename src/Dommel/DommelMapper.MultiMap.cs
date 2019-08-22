@@ -731,7 +731,7 @@ namespace Dommel
             // E.g. FooId rather than [FooId] for SQL server, etc.
             return string.Join(",", includeTypes
                 .Select(t => Resolvers.KeyProperties(t).First())
-                .Select(p => _columnNameResolver.ResolveColumnName(p.Property)));
+                .Select(p => ColumnNameResolver.ResolveColumnName(p.Property)));
         }
 
         private static string BuildMultiMapQuery(IDbConnection connection, Type resultType, Type[] includeTypes, object id, out DynamicParameters parameters)

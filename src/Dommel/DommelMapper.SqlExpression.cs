@@ -10,6 +10,21 @@ namespace Dommel
     public static partial class DommelMapper
     {
         /// <summary>
+        /// The factory to create <see cref="SqlExpression{TEntity}"/> or custom instances.
+        /// </summary>
+        public static Func<Type, ISqlBuilder, object> SqlExpressionFactory = (type, sqlBuilder) =>
+        {
+            var expr = typeof(SqlExpression<>).MakeGenericType(type);
+            return Activator.CreateInstance(expr, sqlBuilder);
+        };
+
+        internal static SqlExpression<TEntity> CreateSqlExpression<TEntity>(ISqlBuilder sqlBuilder)
+        {
+            var expr = SqlExpressionFactory(typeof(TEntity), sqlBuilder);
+            return (SqlExpression<TEntity>)expr;
+        }
+
+        /// <summary>
         /// Represents a typed SQL expression.
         /// </summary>
         /// <typeparam name="TEntity">The type of the entity.</typeparam>
@@ -18,7 +33,6 @@ namespace Dommel
             private static readonly Type EntityType = typeof(TEntity);
             private static readonly Func<TEntity> NewEntityFunc = Expression.Lambda<Func<TEntity>>(
                 Expression.New(typeof(TEntity).GetConstructors()[0])).Compile();
-            private readonly ISqlBuilder _sqlBuilder;
             private readonly StringBuilder _whereBuilder = new StringBuilder();
             private readonly StringBuilder _orderByBuilder = new StringBuilder();
             private readonly DynamicParameters _parameters = new DynamicParameters();
@@ -33,8 +47,18 @@ namespace Dommel
             /// <param name="sqlBuilder">The <see cref="ISqlBuilder"/> instance.</param>
             public SqlExpression(ISqlBuilder sqlBuilder)
             {
-                _sqlBuilder = sqlBuilder;
+                SqlBuilder = sqlBuilder;
             }
+
+            /// <summary>
+            /// Gets the <see cref="ISqlBuilder"/> instance used by this SQL expression.
+            /// </summary>
+            protected virtual ISqlBuilder SqlBuilder { get; }
+
+            /// <summary>
+            /// Gets the <see cref="IColumnNameResolver"/> instance used by this SQL expression.
+            /// </summary>
+            protected virtual IColumnNameResolver ColumnNameResolver => DommelMapper.ColumnNameResolver;
 
             /// <summary>
             /// Selects all columns from <typeparamref name="TEntity"/>.
@@ -42,7 +66,7 @@ namespace Dommel
             /// <returns>The current <see cref="SqlExpression{TEntity}"/> instance.</returns>
             public virtual SqlExpression<TEntity> Select()
             {
-                _selectQuery = $"select * from {Resolvers.Table(typeof(TEntity), _sqlBuilder)}";
+                _selectQuery = $"select * from {Resolvers.Table(typeof(TEntity), SqlBuilder)}";
                 return this;
             }
 
@@ -64,10 +88,10 @@ namespace Dommel
 
                 // Resolve properties of anonymous type
                 var props = new DefaultPropertyResolver().ResolveProperties(obj.GetType());
-                var columns = props.Select(p => Resolvers.Column(p, _sqlBuilder));
+                var columns = props.Select(p => Resolvers.Column(p, SqlBuilder));
 
                 // Create the select query
-                var tableName = Resolvers.Table(EntityType, _sqlBuilder);
+                var tableName = Resolvers.Table(EntityType, SqlBuilder);
                 _selectQuery = $"select {string.Join(", ", columns)} from {tableName}";
                 return this;
             }
@@ -151,9 +175,9 @@ namespace Dommel
             /// <returns>The current <see cref="SqlExpression{TEntity}"/> instance.</returns>
             public virtual SqlExpression<TEntity> Page(int pageNumber, int pageSize)
             {
-                var keyColumns = Resolvers.KeyProperties(typeof(TEntity)).Select(p => Resolvers.Column(p.Property, _sqlBuilder));
+                var keyColumns = Resolvers.KeyProperties(typeof(TEntity)).Select(p => Resolvers.Column(p.Property, SqlBuilder));
                 AppendOrderBy("asc", string.Join(", ", keyColumns), prepend: true);
-                _pagingQuery = _sqlBuilder.BuildPaging(null, pageNumber, pageSize).Substring(1);
+                _pagingQuery = SqlBuilder.BuildPaging(null, pageNumber, pageSize).Substring(1);
                 return this;
             }
 
@@ -521,7 +545,7 @@ namespace Dommel
             /// <returns>The result of the processing.</returns>
             protected virtual object VisitMemberAccess(MemberExpression expression)
             {
-                if (expression.Expression != null && expression.Expression.NodeType == ExpressionType.Parameter)
+                if (expression.Expression?.NodeType == ExpressionType.Parameter)
                 {
                     return MemberToColumn(expression);
                 }
@@ -545,7 +569,7 @@ namespace Dommel
             /// <param name="expression">The member expression.</param>
             /// <returns>The result of the processing.</returns>
             protected virtual string MemberToColumn(MemberExpression expression) =>
-                Resolvers.Column((PropertyInfo)expression.Member, _sqlBuilder);
+                Resolvers.Column((PropertyInfo)expression.Member, SqlBuilder);
 
             /// <summary>
             /// Returns the expression operant for the specified expression type.
@@ -597,7 +621,7 @@ namespace Dommel
             protected virtual void AddParameter(object value, out string paramName)
             {
                 _parameterIndex++;
-                paramName = _sqlBuilder.PrefixParameter($"p{_parameterIndex}");
+                paramName = SqlBuilder.PrefixParameter($"p{_parameterIndex}");
                 _parameters.Add(paramName, value: value);
             }
 

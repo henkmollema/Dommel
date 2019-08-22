@@ -97,7 +97,7 @@ namespace Dommel
             var sql = BuildDeleteAllQuery(sqlBuilder, type);
 
             // Append the where statement
-            sql += new SqlExpression<TEntity>(sqlBuilder)
+            sql += CreateSqlExpression<TEntity>(sqlBuilder)
                 .Where(predicate)
                 .ToSql(out parameters);
             return sql;

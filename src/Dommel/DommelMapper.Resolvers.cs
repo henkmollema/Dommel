@@ -9,41 +9,41 @@ namespace Dommel
 {
     public static partial class DommelMapper
     {
-        private static IPropertyResolver _propertyResolver = new DefaultPropertyResolver();
-        private static IKeyPropertyResolver _keyPropertyResolver = new DefaultKeyPropertyResolver();
-        private static IForeignKeyPropertyResolver _foreignKeyPropertyResolver = new DefaultForeignKeyPropertyResolver();
-        private static ITableNameResolver _tableNameResolver = new DefaultTableNameResolver();
-        private static IColumnNameResolver _columnNameResolver = new DefaultColumnNameResolver();
+        internal static IPropertyResolver PropertyResolver = new DefaultPropertyResolver();
+        internal static IKeyPropertyResolver KeyPropertyResolver = new DefaultKeyPropertyResolver();
+        internal static IForeignKeyPropertyResolver ForeignKeyPropertyResolver = new DefaultForeignKeyPropertyResolver();
+        internal static ITableNameResolver TableNameResolver = new DefaultTableNameResolver();
+        internal static IColumnNameResolver ColumnNameResolver = new DefaultColumnNameResolver();
 
         /// <summary>
         /// Sets the <see cref="IPropertyResolver"/> implementation for resolving key of entities.
         /// </summary>
         /// <param name="resolver">An instance of <see cref="IPropertyResolver"/>.</param>
-        public static void SetPropertyResolver(IPropertyResolver resolver) => _propertyResolver = resolver;
+        public static void SetPropertyResolver(IPropertyResolver resolver) => PropertyResolver = resolver;
 
         /// <summary>
         /// Sets the <see cref="IKeyPropertyResolver"/> implementation for resolving key properties of entities.
         /// </summary>
         /// <param name="resolver">An instance of <see cref="IKeyPropertyResolver"/>.</param>
-        public static void SetKeyPropertyResolver(IKeyPropertyResolver resolver) => _keyPropertyResolver = resolver;
+        public static void SetKeyPropertyResolver(IKeyPropertyResolver resolver) => KeyPropertyResolver = resolver;
 
         /// <summary>
         /// Sets the <see cref="IForeignKeyPropertyResolver"/> implementation for resolving foreign key properties.
         /// </summary>
         /// <param name="resolver">An instance of <see cref="IForeignKeyPropertyResolver"/>.</param>
-        public static void SetForeignKeyPropertyResolver(IForeignKeyPropertyResolver resolver) => _foreignKeyPropertyResolver = resolver;
+        public static void SetForeignKeyPropertyResolver(IForeignKeyPropertyResolver resolver) => ForeignKeyPropertyResolver = resolver;
 
         /// <summary>
         /// Sets the <see cref="ITableNameResolver"/> implementation for resolving table names for entities.
         /// </summary>
         /// <param name="resolver">An instance of <see cref="ITableNameResolver"/>.</param>
-        public static void SetTableNameResolver(ITableNameResolver resolver) => _tableNameResolver = resolver;
+        public static void SetTableNameResolver(ITableNameResolver resolver) => TableNameResolver = resolver;
 
         /// <summary>
         /// Sets the <see cref="IColumnNameResolver"/> implementation for resolving column names.
         /// </summary>
         /// <param name="resolver">An instance of <see cref="IColumnNameResolver"/>.</param>
-        public static void SetColumnNameResolver(IColumnNameResolver resolver) => _columnNameResolver = resolver;
+        public static void SetColumnNameResolver(IColumnNameResolver resolver) => ColumnNameResolver = resolver;
 
         /// <summary>
         /// Helper class for retrieving type metadata to build SQL queries using the configured resolvers.
@@ -65,7 +65,7 @@ namespace Dommel
             {
                 if (!_typeKeyPropertiesCache.TryGetValue(type, out var keyProperties))
                 {
-                    keyProperties = _keyPropertyResolver.ResolveKeyProperties(type);
+                    keyProperties = KeyPropertyResolver.ResolveKeyProperties(type);
                     _typeKeyPropertiesCache.TryAdd(type, keyProperties);
                 }
 
@@ -87,7 +87,7 @@ namespace Dommel
                 if (!_typeForeignKeyPropertyCache.TryGetValue(key, out var foreignKeyInfo))
                 {
                     // Resolve the property and relation.
-                    var foreignKeyProperty = _foreignKeyPropertyResolver.ResolveForeignKeyProperty(sourceType, includingType, out foreignKeyRelation);
+                    var foreignKeyProperty = ForeignKeyPropertyResolver.ResolveForeignKeyProperty(sourceType, includingType, out foreignKeyRelation);
 
                     // Cache the info.
                     foreignKeyInfo = new ForeignKeyInfo(foreignKeyProperty, foreignKeyRelation);
@@ -110,7 +110,7 @@ namespace Dommel
             {
                 if (!_typePropertiesCache.TryGetValue(type, out var properties))
                 {
-                    properties = _propertyResolver.ResolveProperties(type).ToArray();
+                    properties = PropertyResolver.ResolveProperties(type).ToArray();
                     _typePropertiesCache.TryAdd(type, properties);
                 }
 
@@ -138,7 +138,7 @@ namespace Dommel
                 var key = $"{sqlBuilder.GetType()}.{type}";
                 if (!_typeTableNameCache.TryGetValue(key, out var name))
                 {
-                    name = sqlBuilder.QuoteIdentifier(_tableNameResolver.ResolveTableName(type));
+                    name = sqlBuilder.QuoteIdentifier(TableNameResolver.ResolveTableName(type));
                     _typeTableNameCache.TryAdd(key, name);
                 }
 
@@ -168,7 +168,7 @@ namespace Dommel
                 var key = $"{sqlBuilder.GetType()}.{propertyInfo.DeclaringType}.{propertyInfo.Name}";
                 if (!_columnNameCache.TryGetValue(key, out var columnName))
                 {
-                    columnName = sqlBuilder.QuoteIdentifier(_columnNameResolver.ResolveColumnName(propertyInfo));
+                    columnName = sqlBuilder.QuoteIdentifier(ColumnNameResolver.ResolveColumnName(propertyInfo));
                     _columnNameCache.TryAdd(key, columnName);
                 }
 

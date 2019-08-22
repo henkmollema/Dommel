@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Reflection;
 
 namespace Dommel
 {
     public static partial class DommelMapper
     {
-        private static readonly Dictionary<string, ISqlBuilder> _sqlBuilders = new Dictionary<string, ISqlBuilder>
+        internal static readonly Dictionary<string, ISqlBuilder> SqlBuilders = new Dictionary<string, ISqlBuilder>
         {
             ["sqlconnection"] = new SqlServerSqlBuilder(),
             ["sqlceconnection"] = new SqlServerCeSqlBuilder(),
@@ -25,7 +24,15 @@ namespace Dommel
         /// Example: <c>typeof(SqlConnection)</c>.
         /// </param>
         /// <param name="builder">An implementation of the <see cref="ISqlBuilder"/> interface.</param>
-        public static void AddSqlBuilder(Type connectionType, ISqlBuilder builder) => _sqlBuilders[connectionType.Name.ToLower()] = builder;
+        public static void AddSqlBuilder(Type connectionType, ISqlBuilder builder) => AddSqlBuilder(connectionType.Name.ToLower(), builder);
+
+        /// <summary>
+        /// Adds a custom implementation of <see cref="ISqlBuilder"/> 
+        /// for the specified connection name        /// 
+        /// </summary>
+        /// <param name="connectionName">The name of the connection. E.g. "sqlconnection".</param>
+        /// <param name="builder">An implementation of the <see cref="ISqlBuilder"/> interface.</param>
+        public static void AddSqlBuilder(string connectionName, ISqlBuilder builder) => SqlBuilders[connectionName] = builder;
 
         /// <summary>
         /// Gets the configured <see cref="ISqlBuilder"/> for the specified <see cref="IDbConnection"/> instance.
@@ -35,7 +42,7 @@ namespace Dommel
         public static ISqlBuilder GetSqlBuilder(IDbConnection connection)
         {
             var connectionTypeName = connection.GetType().Name;
-            var builder = _sqlBuilders.TryGetValue(connectionTypeName.ToLower(), out var b) ? b : new SqlServerSqlBuilder();
+            var builder = SqlBuilders.TryGetValue(connectionTypeName.ToLower(), out var b) ? b : new SqlServerSqlBuilder();
             LogReceived?.Invoke($"Selected SQL Builder '{builder.GetType().Name}' for connection type '{connectionTypeName}'");
             return builder;
         }

@@ -5,16 +5,20 @@ using Xunit;
 
 namespace Dommel.IntegrationTests
 {
-    public class DatabaseFixture : IAsyncLifetime
+    public class DatabaseFixture : DatabaseFixtureBase
+    {
+        protected override TheoryData<DatabaseDriver> Drivers => new DatabaseTestData();
+    }
+
+    public abstract class DatabaseFixtureBase : IAsyncLifetime
     {
         private readonly DatabaseDriver[] _databases;
 
-        public DatabaseFixture()
+        public DatabaseFixtureBase()
         {
             // Extract the database drivers from the test data
-            _databases = new DatabaseTestData()
+            _databases = Drivers
                 .Select(x => x[0])
-                .OfType<DatabaseDriver>()
                 .OfType<DatabaseDriver>()
                 .ToArray();
 
@@ -23,6 +27,8 @@ namespace Dommel.IntegrationTests
                 throw new InvalidOperationException($"No databases defined in {nameof(DatabaseTestData)} theory data.");
             }
         }
+
+        protected abstract TheoryData<DatabaseDriver> Drivers { get; }
 
         public async Task InitializeAsync()
         {

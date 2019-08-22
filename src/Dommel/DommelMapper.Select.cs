@@ -94,7 +94,7 @@ namespace Dommel
             var sql = BuildGetAllQuery(connection, type);
 
             // Append the where statement
-            sql += new SqlExpression<TEntity>(GetSqlBuilder(connection))
+            sql += CreateSqlExpression<TEntity>(GetSqlBuilder(connection))
                 .Where(predicate)
                 .ToSql(out parameters);
             return sql;
