@@ -28,13 +28,12 @@ namespace Dommel.IntegrationTests
             // Is the table created? If so, insert dummy data
             if (created)
             {
-                using (var connection = GetConnection())
-                {
-                    await connection.OpenAsync();
+                using var connection = GetConnection();
+                await connection.OpenAsync();
 
-                    var categoryId = Convert.ToInt32(await connection.InsertAsync(new Category { Name = "Food" }));
+                var categoryId = Convert.ToInt32(await connection.InsertAsync(new Category { Name = "Food" }));
 
-                    var products = new List<Product>
+                var products = new List<Product>
                     {
                         new Product { CategoryId = categoryId, Name = "Chai" },
                         new Product { CategoryId = categoryId, Name = "Chang" },
@@ -53,25 +52,24 @@ namespace Dommel.IntegrationTests
                         new Product { Name = "Baz" }, // 13
                     };
 
-                    await connection.InsertAllAsync(products);
+                await connection.InsertAllAsync(products);
 
-                    // Order 1
-                    var orderId = Convert.ToInt32(await connection.InsertAsync(new Order()));
-                    var orderLines = new List<OrderLine>
+                // Order 1
+                var orderId = Convert.ToInt32(await connection.InsertAsync(new Order()));
+                var orderLines = new List<OrderLine>
                     {
                         new OrderLine { OrderId = orderId, Line = "Line 1"},
                         new OrderLine { OrderId = orderId, Line = "Line 2"},
                         new OrderLine { OrderId = orderId, Line = "Line 3"},
                     };
-                    await connection.InsertAllAsync(orderLines);
+                await connection.InsertAllAsync(orderLines);
 
-                    // Order 2
-                    _ = await connection.InsertAsync(new Order());
+                // Order 2
+                _ = await connection.InsertAsync(new Order());
 
-                    // Foo's and Bar's for delete queries
-                    await connection.InsertAllAsync(Enumerable.Range(0, 5).Select(_ => new Foo()));
-                    await connection.InsertAllAsync(Enumerable.Range(0, 5).Select(_ => new Bar()));
-                }
+                // Foo's and Bar's for delete queries
+                await connection.InsertAllAsync(Enumerable.Range(0, 5).Select(_ => new Foo()));
+                await connection.InsertAllAsync(Enumerable.Range(0, 5).Select(_ => new Bar()));
             }
         }
 
@@ -81,9 +79,8 @@ namespace Dommel.IntegrationTests
 
         protected virtual async Task DropTables()
         {
-            using (var con = GetConnection(DefaultDatabaseName))
-            {
-                await con.ExecuteAsync(@"
+            using var con = GetConnection(DefaultDatabaseName);
+            await con.ExecuteAsync(@"
 DROP TABLE Categories;
 DROP TABLE Products;
 DROP TABLE Orders;
@@ -91,7 +88,6 @@ DROP TABLE OrderLines;
 DROP TABLE Foos;
 DROP TABLE Bars;
 DROP TABLE Bazs;");
-            }
         }
 
         public virtual async Task DisposeAsync() => await DropTables();

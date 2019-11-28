@@ -31,33 +31,31 @@ namespace Dommel.IntegrationTests
                 return;
             }
 
-            using (var con = new SqlServerDatabaseDriver().GetConnection())
+            using var con = new SqlServerDatabaseDriver().GetConnection();
+            await con.ExecuteAsync("CREATE TABLE dbo.Quxs (Id UNIQUEIDENTIFIER NOT NULL DEFAULT NEWID(), Name VARCHAR(255));");
+            try
             {
-                await con.ExecuteAsync("CREATE TABLE dbo.Quxs (Id UNIQUEIDENTIFIER NOT NULL DEFAULT NEWID(), Name VARCHAR(255));");
+                object identity;
                 try
                 {
-                    object identity;
-                    try
-                    {
-                        DommelMapper.AddSqlBuilder(typeof(SqlConnection), new GuidSqlServerSqlBuilder());
-                        identity = await con.InsertAsync(new Qux { Name = "blah" });
-                    }
-                    finally
-                    {
-                        DommelMapper.AddSqlBuilder(typeof(SqlConnection), new DommelMapper.SqlServerSqlBuilder());
-                    }
-
-                    Assert.NotNull(identity);
-                    var id = Assert.IsType<Guid>(identity);
-                    var baz = await con.GetAsync<Qux>(id);
-                    Assert.NotNull(baz);
-                    Assert.Equal("blah", baz.Name);
-                    Assert.Equal(id, baz.Id);
+                    DommelMapper.AddSqlBuilder(typeof(SqlConnection), new GuidSqlServerSqlBuilder());
+                    identity = await con.InsertAsync(new Qux { Name = "blah" });
                 }
                 finally
                 {
-                    await con.ExecuteAsync("DROP TABLE dbo.Quxs");
+                    DommelMapper.AddSqlBuilder(typeof(SqlConnection), new DommelMapper.SqlServerSqlBuilder());
                 }
+
+                Assert.NotNull(identity);
+                var id = Assert.IsType<Guid>(identity);
+                var baz = await con.GetAsync<Qux>(id);
+                Assert.NotNull(baz);
+                Assert.Equal("blah", baz.Name);
+                Assert.Equal(id, baz.Id);
+            }
+            finally
+            {
+                await con.ExecuteAsync("DROP TABLE dbo.Quxs");
             }
         }
     }

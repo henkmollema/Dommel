@@ -416,22 +416,13 @@ namespace Dommel
                 }
 
                 var value = VisitExpression(expression.Arguments[0]);
-                string textLike;
-                switch (textSearch)
+                var textLike = textSearch switch
                 {
-                    case TextSearch.Contains:
-                        textLike = $"%{value}%";
-                        break;
-                    case TextSearch.StartsWith:
-                        textLike = $"{value}%";
-                        break;
-                    case TextSearch.EndsWith:
-                        textLike = $"%{value}";
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException($"Invalid TextSearch value '{textSearch}'.", nameof(textSearch));
-                }
-
+                    TextSearch.Contains => $"%{value}%",
+                    TextSearch.StartsWith => $"{value}%",
+                    TextSearch.EndsWith => $"%{value}",
+                    _ => throw new ArgumentOutOfRangeException($"Invalid TextSearch value '{textSearch}'.", nameof(textSearch)),
+                };
                 AddParameter(textLike, out var paramName);
                 return $"{column} like {paramName}";
             }
@@ -598,42 +589,24 @@ namespace Dommel
             /// </summary>
             /// <param name="expressionType">The expression type for node of an expression tree.</param>
             /// <returns>The expression operand equivalent of the <paramref name="expressionType"/>.</returns>
-            protected virtual string GetOperant(ExpressionType expressionType)
+            protected virtual string GetOperant(ExpressionType expressionType) => expressionType switch
             {
-                switch (expressionType)
-                {
-                    case ExpressionType.Equal:
-                        return "=";
-                    case ExpressionType.NotEqual:
-                        return "<>";
-                    case ExpressionType.GreaterThan:
-                        return ">";
-                    case ExpressionType.GreaterThanOrEqual:
-                        return ">=";
-                    case ExpressionType.LessThan:
-                        return "<";
-                    case ExpressionType.LessThanOrEqual:
-                        return "<=";
-                    case ExpressionType.AndAlso:
-                        return "and";
-                    case ExpressionType.OrElse:
-                        return "or";
-                    case ExpressionType.Add:
-                        return "+";
-                    case ExpressionType.Subtract:
-                        return "-";
-                    case ExpressionType.Multiply:
-                        return "*";
-                    case ExpressionType.Divide:
-                        return "/";
-                    case ExpressionType.Modulo:
-                        return "MOD";
-                    case ExpressionType.Coalesce:
-                        return "COALESCE";
-                    default:
-                        return expressionType.ToString();
-                }
-            }
+                ExpressionType.Equal => "=",
+                ExpressionType.NotEqual => "<>",
+                ExpressionType.GreaterThan => ">",
+                ExpressionType.GreaterThanOrEqual => ">=",
+                ExpressionType.LessThan => "<",
+                ExpressionType.LessThanOrEqual => "<=",
+                ExpressionType.AndAlso => "and",
+                ExpressionType.OrElse => "or",
+                ExpressionType.Add => "+",
+                ExpressionType.Subtract => "-",
+                ExpressionType.Multiply => "*",
+                ExpressionType.Divide => "/",
+                ExpressionType.Modulo => "MOD",
+                ExpressionType.Coalesce => "COALESCE",
+                _ => expressionType.ToString(),
+            };
 
             /// <summary>
             /// Adds a parameter with the specified value to this SQL expression.
