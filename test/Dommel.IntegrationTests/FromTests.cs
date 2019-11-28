@@ -72,6 +72,32 @@ namespace Dommel.IntegrationTests
 
         [Theory]
         [ClassData(typeof(DatabaseTestData))]
+        public async Task OrderBy(DatabaseDriver database)
+        {
+            using (var con = database.GetConnection())
+            {
+                var products = await con.FromAsync<Product>(
+                    sql => sql.OrderBy(p => p.Name).Select());
+
+                Assert.NotEmpty(products);
+            }
+        }
+
+        [Theory]
+        [ClassData(typeof(DatabaseTestData))]
+        public async Task OrderByPropertyInfo(DatabaseDriver database)
+        {
+            using (var con = database.GetConnection())
+            {
+                var products = await con.FromAsync<Product>(
+                    sql => sql.OrderBy(typeof(Product).GetProperty("Name")).Select());
+
+                Assert.NotEmpty(products);
+            }
+        }
+
+        [Theory]
+        [ClassData(typeof(DatabaseTestData))]
         public async Task KitchenSink(DatabaseDriver database)
         {
             using (var con = database.GetConnection())

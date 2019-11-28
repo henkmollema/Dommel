@@ -56,9 +56,9 @@ namespace Dommel
             protected virtual ISqlBuilder SqlBuilder { get; }
 
             /// <summary>
-            /// Gets the <see cref="IColumnNameResolver"/> instance used by this SQL expression.
+            /// Resolves the column name of the specified <see cref="PropertyInfo"/>.
             /// </summary>
-            protected virtual IColumnNameResolver ColumnNameResolver => DommelMapper.ColumnNameResolver;
+            protected string ResolveColumnName(PropertyInfo property) => Resolvers.Column(property, SqlBuilder);
 
             /// <summary>
             /// Selects all columns from <typeparamref name="TEntity"/>.
@@ -176,7 +176,7 @@ namespace Dommel
             public virtual SqlExpression<TEntity> Page(int pageNumber, int pageSize)
             {
                 var keyColumns = Resolvers.KeyProperties(typeof(TEntity)).Select(p => Resolvers.Column(p.Property, SqlBuilder));
-                AppendOrderBy("asc", string.Join(", ", keyColumns), prepend: true);
+                AppendOrderBy(string.Join(", ", keyColumns), direction: "asc", prepend: true);
                 _pagingQuery = SqlBuilder.BuildPaging(null, pageNumber, pageSize).Substring(1);
                 return this;
             }
@@ -193,6 +193,17 @@ namespace Dommel
             }
 
             /// <summary>
+            /// Adds an order-by-statement (ascending) to the current expression.
+            /// </summary>
+            /// <param name="property">The property info of the column to order by.</param>
+            /// <returns>The current <see cref="SqlExpression{TEntity}"/> instance.</returns>
+            public virtual SqlExpression<TEntity> OrderBy(PropertyInfo property)
+            {
+                AppendOrderBy(ResolveColumnName(property), direction: "asc");
+                return this;
+            }
+
+            /// <summary>
             /// Adds an order-by-statement (descending) to the current expression.
             /// </summary>
             /// <param name="selector">The column to order by. E.g. <code>x => x.Name</code>.</param>
@@ -200,6 +211,17 @@ namespace Dommel
             public virtual SqlExpression<TEntity> OrderByDescending(Expression<Func<TEntity, object>> selector)
             {
                 OrderByCore(selector, "desc");
+                return this;
+            }
+
+            /// <summary>
+            /// Adds an order-by-statement (descending) to the current expression.
+            /// </summary>
+            /// <param name="property">The property info of the column to order by.</param>
+            /// <returns>The current <see cref="SqlExpression{TEntity}"/> instance.</returns>
+            public virtual SqlExpression<TEntity> OrderByDescending(PropertyInfo property)
+            {
+                AppendOrderBy(ResolveColumnName(property), direction: "desc");
                 return this;
             }
 
@@ -211,18 +233,18 @@ namespace Dommel
                 }
 
                 var column = VisitExpression(selector.Body) as string;
-                AppendOrderBy(direction, column);
+                AppendOrderBy(column, direction);
             }
 
-            private void AppendOrderBy(string direction, string column, bool prepend = false)
+            private void AppendOrderBy(string column, string direction, bool prepend = false)
             {
-                if (string.IsNullOrEmpty(direction))
-                {
-                    throw new ArgumentNullException(nameof(direction));
-                }
                 if (string.IsNullOrEmpty(column))
                 {
                     throw new ArgumentNullException(nameof(column));
+                }
+                if (string.IsNullOrEmpty(direction))
+                {
+                    throw new ArgumentNullException(nameof(direction));
                 }
                 if (_orderByBuilder.Length == 0)
                 {
