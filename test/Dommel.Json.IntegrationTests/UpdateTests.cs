@@ -37,29 +37,25 @@ namespace Dommel.Json.IntegrationTests
         [ClassData(typeof(JsonDatabaseTestData))]
         public void SelectSingleStatement(DatabaseDriver database)
         {
-            using (var con = database.GetConnection())
-            {
-                // Arrange
-                var lead = InsertLead(con);
+            using var con = database.GetConnection();
+            // Arrange
+            var lead = InsertLead(con);
 
-                // Act
-                lead.Data.FirstName = "Bar";
-                con.Update(lead);
+            // Act
+            lead.Data.FirstName = "Bar";
+            con.Update(lead);
 
-                // Assert
-                var updatedLead = con.Get<Lead>(lead.Id);
-                Assert.Equal("Bar", updatedLead.Data.FirstName);
-            }
+            // Assert
+            var updatedLead = con.Get<Lead>(lead.Id);
+            Assert.Equal("Bar", updatedLead.Data.FirstName);
         }
 
         [Theory]
         [ClassData(typeof(JsonDatabaseTestData))]
         public async Task SelectSingleStatementAsync(DatabaseDriver database)
         {
-            using (var con = database.GetConnection())
-            {
-                var lead = await InsertLeadAsync(con);
-            }
+            using var con = database.GetConnection();
+            var lead = await InsertLeadAsync(con);
         }
     }
 }

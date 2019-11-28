@@ -665,23 +665,16 @@ namespace Dommel
             LogQuery<TReturn>(sql);
             var splitOn = CreateSplitOn(includeTypes);
 
-            switch (includeTypes.Length)
+            return includeTypes.Length switch
             {
-                case 2:
-                    return connection.Query(sql, (Func<T1, T2, TReturn>)map, parameters, transaction, buffered, splitOn);
-                case 3:
-                    return connection.Query(sql, (Func<T1, T2, T3, TReturn>)map, parameters, transaction, buffered, splitOn);
-                case 4:
-                    return connection.Query(sql, (Func<T1, T2, T3, T4, TReturn>)map, parameters, transaction, buffered, splitOn);
-                case 5:
-                    return connection.Query(sql, (Func<T1, T2, T3, T4, T5, TReturn>)map, parameters, transaction, buffered, splitOn);
-                case 6:
-                    return connection.Query(sql, (Func<T1, T2, T3, T4, T5, T6, TReturn>)map, parameters, transaction, buffered, splitOn);
-                case 7:
-                    return connection.Query(sql, (Func<T1, T2, T3, T4, T5, T6, T7, TReturn>)map, parameters, transaction, buffered, splitOn);
-            }
-
-            throw new InvalidOperationException($"Invalid amount of include types: {includeTypes.Length}.");
+                2 => connection.Query(sql, (Func<T1, T2, TReturn>)map, parameters, transaction, buffered, splitOn),
+                3 => connection.Query(sql, (Func<T1, T2, T3, TReturn>)map, parameters, transaction, buffered, splitOn),
+                4 => connection.Query(sql, (Func<T1, T2, T3, T4, TReturn>)map, parameters, transaction, buffered, splitOn),
+                5 => connection.Query(sql, (Func<T1, T2, T3, T4, T5, TReturn>)map, parameters, transaction, buffered, splitOn),
+                6 => connection.Query(sql, (Func<T1, T2, T3, T4, T5, T6, TReturn>)map, parameters, transaction, buffered, splitOn),
+                7 => connection.Query(sql, (Func<T1, T2, T3, T4, T5, T6, T7, TReturn>)map, parameters, transaction, buffered, splitOn),
+                _ => throw new InvalidOperationException($"Invalid amount of include types: {includeTypes.Length}."),
+            };
         }
 
         private static Task<IEnumerable<TReturn>> MultiMapAsync<T1, T2, T3, T4, T5, T6, T7, TReturn>(IDbConnection connection, Delegate map, object id, IDbTransaction transaction, bool buffered = true)
@@ -704,30 +697,23 @@ namespace Dommel
             LogQuery<TReturn>(sql);
             var splitOn = CreateSplitOn(includeTypes);
 
-            switch (includeTypes.Length)
+            return includeTypes.Length switch
             {
-                case 2:
-                    return connection.QueryAsync(sql, (Func<T1, T2, TReturn>)map, parameters, transaction, buffered, splitOn);
-                case 3:
-                    return connection.QueryAsync(sql, (Func<T1, T2, T3, TReturn>)map, parameters, transaction, buffered, splitOn);
-                case 4:
-                    return connection.QueryAsync(sql, (Func<T1, T2, T3, T4, TReturn>)map, parameters, transaction, buffered, splitOn);
-                case 5:
-                    return connection.QueryAsync(sql, (Func<T1, T2, T3, T4, T5, TReturn>)map, parameters, transaction, buffered, splitOn);
-                case 6:
-                    return connection.QueryAsync(sql, (Func<T1, T2, T3, T4, T5, T6, TReturn>)map, parameters, transaction, buffered, splitOn);
-                case 7:
-                    return connection.QueryAsync(sql, (Func<T1, T2, T3, T4, T5, T6, T7, TReturn>)map, parameters, transaction, buffered, splitOn);
-            }
-
-            throw new InvalidOperationException($"Invalid amount of include types: {includeTypes.Length}.");
+                2 => connection.QueryAsync(sql, (Func<T1, T2, TReturn>)map, parameters, transaction, buffered, splitOn),
+                3 => connection.QueryAsync(sql, (Func<T1, T2, T3, TReturn>)map, parameters, transaction, buffered, splitOn),
+                4 => connection.QueryAsync(sql, (Func<T1, T2, T3, T4, TReturn>)map, parameters, transaction, buffered, splitOn),
+                5 => connection.QueryAsync(sql, (Func<T1, T2, T3, T4, T5, TReturn>)map, parameters, transaction, buffered, splitOn),
+                6 => connection.QueryAsync(sql, (Func<T1, T2, T3, T4, T5, T6, TReturn>)map, parameters, transaction, buffered, splitOn),
+                7 => connection.QueryAsync(sql, (Func<T1, T2, T3, T4, T5, T6, T7, TReturn>)map, parameters, transaction, buffered, splitOn),
+                _ => throw new InvalidOperationException($"Invalid amount of include types: {includeTypes.Length}."),
+            };
         }
 
         private static string CreateSplitOn(Type[] includeTypes)
         {
             // Create a splitOn parameter from the key properties of the included types
             // We use the column name resolver directly rather than via the Resolvers class
-            // because Dapper needs an un-quoted column identifier. 
+            // because Dapper needs an un-quoted column identifier.
             // E.g. FooId rather than [FooId] for SQL server, etc.
             return string.Join(",", includeTypes
                 .Select(t => Resolvers.KeyProperties(t).First())
