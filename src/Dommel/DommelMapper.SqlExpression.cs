@@ -56,9 +56,9 @@ namespace Dommel
             protected virtual ISqlBuilder SqlBuilder { get; }
 
             /// <summary>
-            /// Resolves the column name of the specified <see cref="PropertyInfo"/>.
+            /// Gets the <see cref="IColumnNameResolver"/> instance used by this SQL expression.
             /// </summary>
-            protected string ResolveColumnName(PropertyInfo property) => Resolvers.Column(property, SqlBuilder);
+            protected virtual IColumnNameResolver ColumnNameResolver => DommelMapper.ColumnNameResolver;
 
             /// <summary>
             /// Selects all columns from <typeparamref name="TEntity"/>.
@@ -199,7 +199,7 @@ namespace Dommel
             /// <returns>The current <see cref="SqlExpression{TEntity}"/> instance.</returns>
             public virtual SqlExpression<TEntity> OrderBy(PropertyInfo property)
             {
-                AppendOrderBy(ResolveColumnName(property), direction: "asc");
+                AppendOrderBy(Resolvers.Column(property, SqlBuilder), direction: "asc");
                 return this;
             }
 
@@ -221,7 +221,7 @@ namespace Dommel
             /// <returns>The current <see cref="SqlExpression{TEntity}"/> instance.</returns>
             public virtual SqlExpression<TEntity> OrderByDescending(PropertyInfo property)
             {
-                AppendOrderBy(ResolveColumnName(property), direction: "desc");
+                AppendOrderBy(Resolvers.Column(property, SqlBuilder), direction: "desc");
                 return this;
             }
 

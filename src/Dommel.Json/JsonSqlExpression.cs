@@ -22,7 +22,7 @@ namespace Dommel.Json
             {
                 return SqlBuilder.JsonValue(
                     VisitMemberAccess(jsonContainerExpr).ToString(),
-                    ResolveColumnName(jsonValue));
+                    ColumnNameResolver.ResolveColumnName(jsonValue));
             }
 
             return base.VisitMemberAccess(expression);
