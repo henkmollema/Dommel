@@ -9,10 +9,10 @@ namespace Dommel.Tests
         private readonly SqlExpression<Product> _sqlExpression = new SqlExpression<Product>(new SqlServerSqlBuilder());
 
         [Fact]
-        public void Where_ThrowsForNullExpression()
+        public void Where_AllowsNullExpression()
         {
             // Act & Assert
-            Assert.Throws<ArgumentNullException>("expression", () => _sqlExpression.Where(null!));
+            Assert.NotNull(_sqlExpression.Where(null));
         }
 
         [Fact]

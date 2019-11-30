@@ -101,18 +101,18 @@ namespace Dommel
             /// </summary>
             /// <param name="expression">The filter expression on the entity.</param>
             /// <returns>The current <see cref="SqlExpression{TEntity}"/> instance.</returns>
-            public virtual SqlExpression<TEntity> Where(Expression<Func<TEntity, bool>> expression)
+            public virtual SqlExpression<TEntity> Where(Expression<Func<TEntity, bool>>? expression)
             {
-                if (expression == null)
+                if (expression != null)
                 {
-                    throw new ArgumentNullException(nameof(expression));
-                }
-                if (_whereBuilder.Length > 0)
-                {
-                    throw new InvalidOperationException("Where statement already started. Use 'AndWhere' or 'OrWhere' to add additional statements.");
+                    if (_whereBuilder.Length > 0)
+                    {
+                        throw new InvalidOperationException("Where statement already started. Use 'AndWhere' or 'OrWhere' to add additional statements.");
+                    }
+
+                    AppendToWhere(null, expression);
                 }
 
-                AppendToWhere(null, expression);
                 return this;
             }
 
@@ -121,7 +121,7 @@ namespace Dommel
             /// </summary>
             /// <param name="expression">The filter expression on the entity.</param>
             /// <returns>The current <see cref="SqlExpression{TEntity}"/> instance.</returns>
-            public virtual SqlExpression<TEntity> AndWhere(Expression<Func<TEntity, bool>> expression)
+            public virtual SqlExpression<TEntity> AndWhere(Expression<Func<TEntity, bool>>? expression)
             {
                 if (_whereBuilder.Length == 0)
                 {
@@ -139,7 +139,7 @@ namespace Dommel
             /// </summary>
             /// <param name="expression">The filter expression on the entity.</param>
             /// <returns>The current <see cref="SqlExpression{TEntity}"/> instance.</returns>
-            public virtual SqlExpression<TEntity> OrWhere(Expression<Func<TEntity, bool>> expression)
+            public virtual SqlExpression<TEntity> OrWhere(Expression<Func<TEntity, bool>>? expression)
             {
                 if (_whereBuilder.Length == 0)
                 {
