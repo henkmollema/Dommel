@@ -11,7 +11,7 @@ namespace Dommel.IntegrationTests
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int ProductId { get; set; }
 
-        public string Name { get; set; } = "";
+        public string? Name { get; set; }
 
         // The foreign key to Categories table
         public int CategoryId { get; set; }

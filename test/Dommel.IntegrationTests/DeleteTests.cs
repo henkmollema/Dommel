@@ -111,7 +111,7 @@ namespace Dommel.IntegrationTests
 
             Assert.Equal(3, con.Select<Product>(p => p.Name == "blah").Count());
 
-            con.DeleteMultiple<Product>(p => p.Name.Contains("bla"));
+            con.DeleteMultiple<Product>(p => p.Name!.Contains("bla"));
         }
 
         [Theory]
@@ -130,7 +130,7 @@ namespace Dommel.IntegrationTests
 
             Assert.Equal(3, (await con.SelectAsync<Product>(p => p.Name == "blah")).Count());
 
-            con.DeleteMultiple<Product>(p => p.Name.Contains("bla"));
+            con.DeleteMultiple<Product>(p => p.Name!.Contains("bla"));
         }
     }
 }

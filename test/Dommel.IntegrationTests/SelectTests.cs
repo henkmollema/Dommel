@@ -21,7 +21,7 @@ namespace Dommel.IntegrationTests
         public async Task SelectAsyncContains(DatabaseDriver database)
         {
             using var con = database.GetConnection();
-            var products = await con.SelectAsync<Product>(p => p.Name.Contains("Anton"));
+            var products = await con.SelectAsync<Product>(p => p.Name!.Contains("Anton"));
             Assert.Equal(4, products.Count());
         }
 
@@ -31,7 +31,7 @@ namespace Dommel.IntegrationTests
         {
             var productName = "Anton";
             using var con = database.GetConnection();
-            var products = await con.SelectAsync<Product>(p => p.Name.Contains(productName));
+            var products = await con.SelectAsync<Product>(p => p.Name!.Contains(productName));
             Assert.Equal(4, products.Count());
         }
 
@@ -41,7 +41,7 @@ namespace Dommel.IntegrationTests
         {
             var productName = "Cha";
             using var con = database.GetConnection();
-            var products = await con.SelectAsync<Product>(p => p.Name.StartsWith(productName));
+            var products = await con.SelectAsync<Product>(p => p.Name!.StartsWith(productName));
             Assert.Equal(4, products.Count());
         }
 
@@ -51,7 +51,7 @@ namespace Dommel.IntegrationTests
         {
             var productName = "2";
             using var con = database.GetConnection();
-            var products = await con.SelectAsync<Product>(p => p.Name.EndsWith(productName));
+            var products = await con.SelectAsync<Product>(p => p.Name!.EndsWith(productName));
             Assert.Equal(5, products.Count());
         }
     }
