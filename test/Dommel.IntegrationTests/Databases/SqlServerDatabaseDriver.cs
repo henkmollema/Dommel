@@ -1,7 +1,7 @@
 ﻿using System.Data.Common;
-using System.Data.SqlClient;
 using System.Threading.Tasks;
 using Dapper;
+using Microsoft.Data.SqlClient;
 
 namespace Dommel.IntegrationTests
 {
