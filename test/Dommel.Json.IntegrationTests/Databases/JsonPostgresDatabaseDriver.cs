@@ -6,15 +6,17 @@ namespace Dommel.Json.IntegrationTests
 {
     public class JsonPostgresDatabaseDriver : PostgresDatabaseDriver
     {
+        public override string DefaultDatabaseName => "dommeljsontests";
+
         protected override async Task<bool> CreateTables()
         {
             using (var con = GetConnection(DefaultDatabaseName))
             {
                 var sql = @"
 create table if not exists ""Leads"" (
-    ""Id"" serial primary key, 
-    ""DateCreated"" timestamp, 
-    ""Email"" varchar(255), 
+    ""Id"" serial primary key,
+    ""DateCreated"" timestamp,
+    ""Email"" varchar(255),
     ""Data"" json,
     ""Metadata"" json
 );";

@@ -6,6 +6,8 @@ namespace Dommel.Json.IntegrationTests
 {
     public class JsonMySqlDatabaseDriver : MySqlDatabaseDriver
     {
+        public override string DefaultDatabaseName => "dommeljsontests";
+
         protected override async Task<bool> CreateTables()
         {
             using (var con = GetConnection(DefaultDatabaseName))
