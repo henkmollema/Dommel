@@ -16,9 +16,4 @@ branches:
 script:
     - dotnet restore
     - dotnet build
-    - dotnet test test/Dommel.Tests
-    - dotnet test test/Dommel.IntegrationTests
-    - dotnet test test/Dommel.Json.Tests
-    - dotnet test test/Dommel.Json.IntegrationTests
-script:
-  - ./build.sh
+    - dotnet test --no-build

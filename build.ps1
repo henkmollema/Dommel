@@ -25,18 +25,7 @@ echo "build: Build version suffix is $buildSuffix"
 exec { & dotnet build Dommel.sln -c Release --version-suffix=$buildSuffix /p:CI=true }
 
 echo "build: Executing tests"
-Push-Location -Path .\test\Dommel.Tests
 exec { & dotnet test -c Release --no-build }
-Pop-Location
-Push-Location -Path .\test\Dommel.IntegrationTests
-exec { & dotnet test -c Release --no-build }
-Pop-Location
-Push-Location -Path .\test\Dommel.Json.Tests
-exec { & dotnet test -c Release --no-build }
-Pop-Location
-Push-Location -Path .\test\Dommel.Json.IntegrationTests
-exec { & dotnet test -c Release --no-build }
-Pop-Location
 
 if ($env:APPVEYOR_BUILD_NUMBER) {
     $versionSuffix = "{0:00000}" -f [convert]::ToInt32("0" + $env:APPVEYOR_BUILD_NUMBER, 10)
