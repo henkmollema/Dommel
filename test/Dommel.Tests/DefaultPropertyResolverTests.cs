@@ -60,11 +60,11 @@ namespace Dommel.Tests
         {
             public class Bar { }
 
-            public Bar Baz { get; set; }
+            public Bar? Baz { get; set; }
 
-            public object Object { get; set; }
+            public object? Object { get; set; }
 
-            public string String { get; set; }
+            public string? String { get; set; }
 
             public Guid? Guid { get; set; }
 
@@ -80,7 +80,7 @@ namespace Dommel.Tests
 
             public TimeSpan? Timespan { get; set; }
 
-            public byte[] Bytes { get; set; }
+            public byte[]? Bytes { get; set; }
         }
 
         private class Bar

@@ -25,7 +25,7 @@ namespace Dommel
             this IDbConnection connection,
             object id,
             Func<T1, T2, TReturn> map,
-            IDbTransaction transaction = null)
+            IDbTransaction? transaction = null)
         {
             return MultiMap<T1, T2, DontMap, DontMap, DontMap, DontMap, DontMap, TReturn>(connection, map, id, transaction).FirstOrDefault();
         }
@@ -46,7 +46,7 @@ namespace Dommel
             this IDbConnection connection,
             object id,
             Func<T1, T2, TReturn> map,
-            IDbTransaction transaction = null)
+            IDbTransaction? transaction = null)
         {
             return (await MultiMapAsync<T1, T2, DontMap, DontMap, DontMap, DontMap, DontMap, TReturn>(connection, map, id, transaction)).FirstOrDefault();
         }
@@ -68,7 +68,7 @@ namespace Dommel
             this IDbConnection connection,
             object id,
             Func<T1, T2, T3, TReturn> map,
-            IDbTransaction transaction = null)
+            IDbTransaction? transaction = null)
         {
             return MultiMap<T1, T2, T3, DontMap, DontMap, DontMap, DontMap, TReturn>(connection, map, id, transaction).FirstOrDefault();
         }
@@ -90,7 +90,7 @@ namespace Dommel
             this IDbConnection connection,
             object id,
             Func<T1, T2, T3, TReturn> map,
-            IDbTransaction transaction = null)
+            IDbTransaction? transaction = null)
         {
             return (await MultiMapAsync<T1, T2, T3, DontMap, DontMap, DontMap, DontMap, TReturn>(connection, map, id, transaction)).FirstOrDefault();
         }
@@ -113,7 +113,7 @@ namespace Dommel
             this IDbConnection connection,
             object id,
             Func<T1, T2, T3, T4, TReturn> map,
-            IDbTransaction transaction = null)
+            IDbTransaction? transaction = null)
         {
             return MultiMap<T1, T2, T3, T4, DontMap, DontMap, DontMap, TReturn>(connection, map, id, transaction).FirstOrDefault();
         }
@@ -136,7 +136,7 @@ namespace Dommel
             this IDbConnection connection,
             object id,
             Func<T1, T2, T3, T4, TReturn> map,
-            IDbTransaction transaction = null)
+            IDbTransaction? transaction = null)
         {
             return (await MultiMapAsync<T1, T2, T3, T4, DontMap, DontMap, DontMap, TReturn>(connection, map, id, transaction)).FirstOrDefault();
         }
@@ -160,7 +160,7 @@ namespace Dommel
             this IDbConnection connection,
             object id,
             Func<T1, T2, T3, T4, T5, TReturn> map,
-            IDbTransaction transaction = null)
+            IDbTransaction? transaction = null)
         {
             return MultiMap<T1, T2, T3, T4, T5, DontMap, DontMap, TReturn>(connection, map, id, transaction).FirstOrDefault();
         }
@@ -184,7 +184,7 @@ namespace Dommel
             this IDbConnection connection,
             object id,
             Func<T1, T2, T3, T4, T5, TReturn> map,
-            IDbTransaction transaction = null)
+            IDbTransaction? transaction = null)
         {
             return (await MultiMapAsync<T1, T2, T3, T4, T5, DontMap, DontMap, TReturn>(connection, map, id, transaction)).FirstOrDefault();
         }
@@ -209,7 +209,7 @@ namespace Dommel
             this IDbConnection connection,
             object id,
             Func<T1, T2, T3, T4, T5, T6, TReturn> map,
-            IDbTransaction transaction = null)
+            IDbTransaction? transaction = null)
         {
             return MultiMap<T1, T2, T3, T4, T5, T6, DontMap, TReturn>(connection, map, id, transaction).FirstOrDefault();
         }
@@ -234,7 +234,7 @@ namespace Dommel
             this IDbConnection connection,
             object id,
             Func<T1, T2, T3, T4, T5, T6, TReturn> map,
-            IDbTransaction transaction = null)
+            IDbTransaction? transaction = null)
         {
             return (await MultiMapAsync<T1, T2, T3, T4, T5, T6, DontMap, TReturn>(connection, map, id, transaction)).FirstOrDefault();
         }
@@ -260,7 +260,7 @@ namespace Dommel
             this IDbConnection connection,
             object id,
             Func<T1, T2, T3, T4, T5, T6, T7, TReturn> map,
-            IDbTransaction transaction = null)
+            IDbTransaction? transaction = null)
         {
             return MultiMap<T1, T2, T3, T4, T5, T6, T7, TReturn>(connection, map, id, transaction).FirstOrDefault();
         }
@@ -286,7 +286,7 @@ namespace Dommel
             this IDbConnection connection,
             object id,
             Func<T1, T2, T3, T4, T5, T6, T7, TReturn> map,
-            IDbTransaction transaction = null)
+            IDbTransaction? transaction = null)
         {
             return (await MultiMapAsync<T1, T2, T3, T4, T5, T6, T7, TReturn>(connection, map, id, transaction)).FirstOrDefault();
         }
@@ -312,7 +312,7 @@ namespace Dommel
         public static IEnumerable<TReturn> GetAll<T1, T2, TReturn>(
             this IDbConnection connection,
             Func<T1, T2, TReturn> map,
-            IDbTransaction transaction = null,
+            IDbTransaction? transaction = null,
             bool buffered = true)
         {
             return MultiMap<T1, T2, DontMap, DontMap, DontMap, DontMap, DontMap, TReturn>(connection, map, id: null, transaction, buffered);
@@ -339,7 +339,7 @@ namespace Dommel
         public static Task<IEnumerable<TReturn>> GetAllAsync<T1, T2, TReturn>(
             this IDbConnection connection,
             Func<T1, T2, TReturn> map,
-            IDbTransaction transaction = null,
+            IDbTransaction? transaction = null,
             bool buffered = true)
         {
             return MultiMapAsync<T1, T2, DontMap, DontMap, DontMap, DontMap, DontMap, TReturn>(connection, map, id: null, transaction, buffered);
@@ -367,7 +367,7 @@ namespace Dommel
         public static IEnumerable<TReturn> GetAll<T1, T2, T3, TReturn>(
             this IDbConnection connection,
             Func<T1, T2, T3, TReturn> map,
-            IDbTransaction transaction = null,
+            IDbTransaction? transaction = null,
             bool buffered = true)
         {
             return MultiMap<T1, T2, T3, DontMap, DontMap, DontMap, DontMap, TReturn>(connection, map, id: null, transaction, buffered);
@@ -395,7 +395,7 @@ namespace Dommel
         public static Task<IEnumerable<TReturn>> GetAllAsync<T1, T2, T3, TReturn>(
             this IDbConnection connection,
             Func<T1, T2, T3, TReturn> map,
-            IDbTransaction transaction = null,
+            IDbTransaction? transaction = null,
             bool buffered = true)
         {
             return MultiMapAsync<T1, T2, T3, DontMap, DontMap, DontMap, DontMap, TReturn>(connection, map, id: null, transaction, buffered);
@@ -424,7 +424,7 @@ namespace Dommel
         public static IEnumerable<TReturn> GetAll<T1, T2, T3, T4, TReturn>(
             this IDbConnection connection,
             Func<T1, T2, T3, T4, TReturn> map,
-            IDbTransaction transaction = null,
+            IDbTransaction? transaction = null,
             bool buffered = true)
         {
             return MultiMap<T1, T2, T3, T4, DontMap, DontMap, DontMap, TReturn>(connection, map, id: null, transaction, buffered);
@@ -453,7 +453,7 @@ namespace Dommel
         public static Task<IEnumerable<TReturn>> GetAllAsync<T1, T2, T3, T4, TReturn>(
             this IDbConnection connection,
             Func<T1, T2, T3, T4, TReturn> map,
-            IDbTransaction transaction = null,
+            IDbTransaction? transaction = null,
             bool buffered = true)
         {
             return MultiMapAsync<T1, T2, T3, T4, DontMap, DontMap, DontMap, TReturn>(connection, map, id: null, transaction, buffered);
@@ -483,7 +483,7 @@ namespace Dommel
         public static IEnumerable<TReturn> GetAll<T1, T2, T3, T4, T5, TReturn>(
             this IDbConnection connection,
             Func<T1, T2, T3, T4, T5, TReturn> map,
-            IDbTransaction transaction = null,
+            IDbTransaction? transaction = null,
             bool buffered = true)
         {
             return MultiMap<T1, T2, T3, T4, T5, DontMap, DontMap, TReturn>(connection, map, id: null, transaction, buffered);
@@ -513,7 +513,7 @@ namespace Dommel
         public static Task<IEnumerable<TReturn>> GetAllAsync<T1, T2, T3, T4, T5, TReturn>(
             this IDbConnection connection,
             Func<T1, T2, T3, T4, T5, TReturn> map,
-            IDbTransaction transaction = null,
+            IDbTransaction? transaction = null,
             bool buffered = true)
         {
             return MultiMapAsync<T1, T2, T3, T4, T5, DontMap, DontMap, TReturn>(connection, map, id: null, transaction, buffered);
@@ -544,7 +544,7 @@ namespace Dommel
         public static IEnumerable<TReturn> GetAll<T1, T2, T3, T4, T5, T6, TReturn>(
             this IDbConnection connection,
             Func<T1, T2, T3, T4, T5, T6, TReturn> map,
-            IDbTransaction transaction = null,
+            IDbTransaction? transaction = null,
             bool buffered = true)
         {
             return MultiMap<T1, T2, T3, T4, T5, T6, DontMap, TReturn>(connection, map, id: null, transaction, buffered);
@@ -575,7 +575,7 @@ namespace Dommel
         public static Task<IEnumerable<TReturn>> GetAllAsync<T1, T2, T3, T4, T5, T6, TReturn>(
             this IDbConnection connection,
             Func<T1, T2, T3, T4, T5, T6, TReturn> map,
-            IDbTransaction transaction = null,
+            IDbTransaction? transaction = null,
             bool buffered = true)
         {
             return MultiMapAsync<T1, T2, T3, T4, T5, T6, DontMap, TReturn>(connection, map, id: null, transaction, buffered);
@@ -607,7 +607,7 @@ namespace Dommel
         public static IEnumerable<TReturn> GetAll<T1, T2, T3, T4, T5, T6, T7, TReturn>(
             this IDbConnection connection,
             Func<T1, T2, T3, T4, T5, T6, T7, TReturn> map,
-            IDbTransaction transaction = null,
+            IDbTransaction? transaction = null,
             bool buffered = true)
         {
             return MultiMap<T1, T2, T3, T4, T5, T6, T7, TReturn>(connection, map, id: null, transaction, buffered);
@@ -639,13 +639,13 @@ namespace Dommel
         public static Task<IEnumerable<TReturn>> GetAllAsync<T1, T2, T3, T4, T5, T6, T7, TReturn>(
             this IDbConnection connection,
             Func<T1, T2, T3, T4, T5, T6, T7, TReturn> map,
-            IDbTransaction transaction = null,
+            IDbTransaction? transaction = null,
             bool buffered = true)
         {
             return MultiMapAsync<T1, T2, T3, T4, T5, T6, T7, TReturn>(connection, map, id: null, transaction, buffered);
         }
 
-        private static IEnumerable<TReturn> MultiMap<T1, T2, T3, T4, T5, T6, T7, TReturn>(IDbConnection connection, Delegate map, object id, IDbTransaction transaction, bool buffered = true)
+        private static IEnumerable<TReturn> MultiMap<T1, T2, T3, T4, T5, T6, T7, TReturn>(IDbConnection connection, Delegate map, object? id, IDbTransaction? transaction = null, bool buffered = true)
         {
             var resultType = typeof(TReturn);
             var includeTypes = new[]
@@ -677,7 +677,7 @@ namespace Dommel
             };
         }
 
-        private static Task<IEnumerable<TReturn>> MultiMapAsync<T1, T2, T3, T4, T5, T6, T7, TReturn>(IDbConnection connection, Delegate map, object id, IDbTransaction transaction, bool buffered = true)
+        private static Task<IEnumerable<TReturn>> MultiMapAsync<T1, T2, T3, T4, T5, T6, T7, TReturn>(IDbConnection connection, Delegate map, object? id, IDbTransaction? transaction = null, bool buffered = true)
         {
             var resultType = typeof(TReturn);
             var includeTypes = new[]
@@ -720,7 +720,7 @@ namespace Dommel
                 .Select(p => ColumnNameResolver.ResolveColumnName(p.Property)));
         }
 
-        private static string BuildMultiMapQuery(IDbConnection connection, Type resultType, Type[] includeTypes, object id, out DynamicParameters parameters)
+        private static string BuildMultiMapQuery(IDbConnection connection, Type resultType, Type[] includeTypes, object? id, out DynamicParameters? parameters)
         {
             var resultTableName = Resolvers.Table(resultType, connection);
             var resultTableKeyColumnName = Resolvers.Column(Resolvers.KeyProperties(resultType).Single().Property, connection);

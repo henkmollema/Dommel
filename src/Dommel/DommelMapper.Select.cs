@@ -25,7 +25,7 @@ namespace Dommel
         /// A collection of entities of type <typeparamref name="TEntity"/> matching the specified
         /// <paramref name="predicate"/>.
         /// </returns>
-        public static IEnumerable<TEntity> Select<TEntity>(this IDbConnection connection, Expression<Func<TEntity, bool>> predicate, IDbTransaction transaction = null, bool buffered = true)
+        public static IEnumerable<TEntity> Select<TEntity>(this IDbConnection connection, Expression<Func<TEntity, bool>> predicate, IDbTransaction? transaction = null, bool buffered = true)
         {
             var sql = BuildSelectSql(connection, predicate, out var parameters);
             LogQuery<TEntity>(sql);
@@ -43,7 +43,7 @@ namespace Dommel
         /// A collection of entities of type <typeparamref name="TEntity"/> matching the specified
         /// <paramref name="predicate"/>.
         /// </returns>
-        public static Task<IEnumerable<TEntity>> SelectAsync<TEntity>(this IDbConnection connection, Expression<Func<TEntity, bool>> predicate, IDbTransaction transaction = null)
+        public static Task<IEnumerable<TEntity>> SelectAsync<TEntity>(this IDbConnection connection, Expression<Func<TEntity, bool>> predicate, IDbTransaction? transaction = null)
         {
             var sql = BuildSelectSql(connection, predicate, out var parameters);
             LogQuery<TEntity>(sql);
@@ -61,7 +61,7 @@ namespace Dommel
         /// A instance of type <typeparamref name="TEntity"/> matching the specified
         /// <paramref name="predicate"/>.
         /// </returns>
-        public static TEntity FirstOrDefault<TEntity>(this IDbConnection connection, Expression<Func<TEntity, bool>> predicate, IDbTransaction transaction = null)
+        public static TEntity FirstOrDefault<TEntity>(this IDbConnection connection, Expression<Func<TEntity, bool>> predicate, IDbTransaction? transaction = null)
         {
             var sql = BuildSelectSql(connection, predicate, out var parameters);
             LogQuery<TEntity>(sql);
@@ -79,7 +79,7 @@ namespace Dommel
         /// A instance of type <typeparamref name="TEntity"/> matching the specified
         /// <paramref name="predicate"/>.
         /// </returns>
-        public static Task<TEntity> FirstOrDefaultAsync<TEntity>(this IDbConnection connection, Expression<Func<TEntity, bool>> predicate, IDbTransaction transaction = null)
+        public static Task<TEntity> FirstOrDefaultAsync<TEntity>(this IDbConnection connection, Expression<Func<TEntity, bool>> predicate, IDbTransaction? transaction = null)
         {
             var sql = BuildSelectSql(connection, predicate, out var parameters);
             LogQuery<TEntity>(sql);
@@ -117,7 +117,7 @@ namespace Dommel
         /// A collection of entities of type <typeparamref name="TEntity"/> matching the specified
         /// <paramref name="predicate"/>.
         /// </returns>
-        public static IEnumerable<TEntity> SelectPaged<TEntity>(this IDbConnection connection, Expression<Func<TEntity, bool>> predicate, int pageNumber, int pageSize, IDbTransaction transaction = null, bool buffered = true)
+        public static IEnumerable<TEntity> SelectPaged<TEntity>(this IDbConnection connection, Expression<Func<TEntity, bool>> predicate, int pageNumber, int pageSize, IDbTransaction? transaction = null, bool buffered = true)
         {
             var sql = BuildSelectPagedQuery(connection, predicate, pageNumber, pageSize, out var parameters);
             LogQuery<TEntity>(sql);
@@ -137,7 +137,7 @@ namespace Dommel
         /// A collection of entities of type <typeparamref name="TEntity"/> matching the specified
         /// <paramref name="predicate"/>.
         /// </returns>
-        public static Task<IEnumerable<TEntity>> SelectPagedAsync<TEntity>(this IDbConnection connection, Expression<Func<TEntity, bool>> predicate, int pageNumber, int pageSize, IDbTransaction transaction = null)
+        public static Task<IEnumerable<TEntity>> SelectPagedAsync<TEntity>(this IDbConnection connection, Expression<Func<TEntity, bool>> predicate, int pageNumber, int pageSize, IDbTransaction? transaction = null)
         {
             var sql = BuildSelectPagedQuery(connection, predicate, pageNumber, pageSize, out var parameters);
             LogQuery<TEntity>(sql);

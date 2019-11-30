@@ -3,7 +3,8 @@
     <TargetFrameworks>net461;netcoreapp2.1;netcoreapp3.0</TargetFrameworks>
     <TargetFrameworks Condition=" '$(OS)' != 'Windows_NT' ">netcoreapp3.0</TargetFrameworks>
     <IsPackable>false</IsPackable>
-    <LangVersion>latest</LangVersion>
+    <LangVersion>8.0</LangVersion>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="coverlet.msbuild" Version="2.7.0">

@@ -98,13 +98,13 @@ namespace Dommel.Tests
         {
             public int Id { get; set; }
 
-            public string StringId { get; set; }
+            public string? StringId { get; set; }
 
             public decimal DecimalId { get; set; }
 
             public Guid Guid { get; set; }
 
-            public string Bar { get; set; }
+            public string Bar { get; set; } = "";
         }
 
         public Expression<Func<T, bool>> And<T>(Expression<Func<T, bool>> left, Expression<Func<T, bool>> right)

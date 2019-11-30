@@ -14,7 +14,7 @@ namespace Dommel
                 $"insert into {tableName} ({string.Join(", ", columnNames)}) values ({string.Join(", ", paramNames)}); select @@IDENTITY";
 
             /// <inheritdoc/>
-            public virtual string BuildPaging(string orderBy, int pageNumber, int pageSize)
+            public virtual string BuildPaging(string? orderBy, int pageNumber, int pageSize)
             {
                 var start = pageNumber >= 1 ? (pageNumber - 1) * pageSize : 0;
                 return $" {orderBy} offset {start} rows fetch next {pageSize} rows only";

@@ -20,7 +20,7 @@ return p;
             Assert.NotNull(product);
             Assert.NotEmpty(product.Name);
             Assert.NotNull(product.Category);
-            Assert.NotNull(product.Category.Name);
+            Assert.NotNull(product.Category?.Name);
         }
 
         [Theory]
@@ -37,7 +37,7 @@ return p;
             Assert.NotNull(product);
             Assert.NotEmpty(product.Name);
             Assert.NotNull(product.Category);
-            Assert.NotNull(product.Category.Name);
+            Assert.NotNull(product.Category?.Name);
         }
     }
 }

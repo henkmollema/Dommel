@@ -18,7 +18,7 @@ namespace Dommel
         /// <param name="id">The id of the entity in the database.</param>
         /// <param name="transaction">Optional transaction for the command.</param>
         /// <returns>The entity with the corresponding id.</returns>
-        public static TEntity Get<TEntity>(this IDbConnection connection, object id, IDbTransaction transaction = null) where TEntity : class
+        public static TEntity Get<TEntity>(this IDbConnection connection, object id, IDbTransaction? transaction = null) where TEntity : class
         {
             var sql = BuildGetById(GetSqlBuilder(connection), typeof(TEntity), id, out var parameters);
             LogQuery<TEntity>(sql);
@@ -33,7 +33,7 @@ namespace Dommel
         /// <param name="id">The id of the entity in the database.</param>
         /// <param name="transaction">Optional transaction for the command.</param>
         /// <returns>The entity with the corresponding id.</returns>
-        public static Task<TEntity> GetAsync<TEntity>(this IDbConnection connection, object id, IDbTransaction transaction = null) where TEntity : class
+        public static Task<TEntity> GetAsync<TEntity>(this IDbConnection connection, object id, IDbTransaction? transaction = null) where TEntity : class
         {
             var sql = BuildGetById(GetSqlBuilder(connection), typeof(TEntity), id, out var parameters);
             LogQuery<TEntity>(sql);
@@ -82,7 +82,7 @@ namespace Dommel
         /// <param name="ids">The id of the entity in the database.</param>
         /// <param name="transaction">Optional transaction for the command.</param>
         /// <returns>The entity with the corresponding id.</returns>
-        public static TEntity Get<TEntity>(this IDbConnection connection, object[] ids, IDbTransaction transaction = null) where TEntity : class
+        public static TEntity Get<TEntity>(this IDbConnection connection, object[] ids, IDbTransaction? transaction = null) where TEntity : class
         {
             if (ids.Length == 1)
             {
@@ -112,7 +112,7 @@ namespace Dommel
         /// <param name="ids">The id of the entity in the database.</param>
         /// <param name="transaction">Optional transaction for the command.</param>
         /// <returns>The entity with the corresponding id.</returns>
-        public static Task<TEntity> GetAsync<TEntity>(this IDbConnection connection, object[] ids, IDbTransaction transaction = null) where TEntity : class
+        public static Task<TEntity> GetAsync<TEntity>(this IDbConnection connection, object[] ids, IDbTransaction? transaction = null) where TEntity : class
         {
             if (ids.Length == 1)
             {
@@ -175,7 +175,7 @@ namespace Dommel
         /// </param>
         /// <param name="transaction">Optional transaction for the command.</param>
         /// <returns>A collection of entities of type <typeparamref name="TEntity"/>.</returns>
-        public static IEnumerable<TEntity> GetAll<TEntity>(this IDbConnection connection, IDbTransaction transaction = null, bool buffered = true) where TEntity : class
+        public static IEnumerable<TEntity> GetAll<TEntity>(this IDbConnection connection, IDbTransaction? transaction = null, bool buffered = true) where TEntity : class
         {
             var sql = BuildGetAllQuery(connection, typeof(TEntity));
             LogQuery<TEntity>(sql);
@@ -189,7 +189,7 @@ namespace Dommel
         /// <param name="connection">The connection to the database. This can either be open or closed.</param>
         /// <param name="transaction">Optional transaction for the command.</param>
         /// <returns>A collection of entities of type <typeparamref name="TEntity"/>.</returns>
-        public static Task<IEnumerable<TEntity>> GetAllAsync<TEntity>(this IDbConnection connection, IDbTransaction transaction = null) where TEntity : class
+        public static Task<IEnumerable<TEntity>> GetAllAsync<TEntity>(this IDbConnection connection, IDbTransaction? transaction = null) where TEntity : class
         {
             var sql = BuildGetAllQuery(connection, typeof(TEntity));
             LogQuery<TEntity>(sql);
@@ -222,7 +222,7 @@ namespace Dommel
         /// </param>
         /// <param name="transaction">Optional transaction for the command.</param>
         /// <returns>A paged collection of entities of type <typeparamref name="TEntity"/>.</returns>
-        public static IEnumerable<TEntity> GetPaged<TEntity>(this IDbConnection connection, int pageNumber, int pageSize, IDbTransaction transaction = null, bool buffered = true) where TEntity : class
+        public static IEnumerable<TEntity> GetPaged<TEntity>(this IDbConnection connection, int pageNumber, int pageSize, IDbTransaction? transaction = null, bool buffered = true) where TEntity : class
         {
             var sql = BuildPagedQuery(connection, typeof(TEntity), pageNumber, pageSize);
             LogQuery<TEntity>(sql);
@@ -238,7 +238,7 @@ namespace Dommel
         /// <param name="pageSize">The page size.</param>
         /// <param name="transaction">Optional transaction for the command.</param>
         /// <returns>A paged collection of entities of type <typeparamref name="TEntity"/>.</returns>
-        public static Task<IEnumerable<TEntity>> GetPagedAsync<TEntity>(this IDbConnection connection, int pageNumber, int pageSize, IDbTransaction transaction = null) where TEntity : class
+        public static Task<IEnumerable<TEntity>> GetPagedAsync<TEntity>(this IDbConnection connection, int pageNumber, int pageSize, IDbTransaction? transaction = null) where TEntity : class
         {
             var sql = BuildPagedQuery(connection, typeof(TEntity), pageNumber, pageSize);
             LogQuery<TEntity>(sql);

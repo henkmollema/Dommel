@@ -8,19 +8,19 @@ namespace Dommel.Json.Tests
 
         public DateTime DateCreated { get; set; } = DateTime.UtcNow;
 
-        public string Email { get; set; }
+        public string? Email { get; set; }
 
         [JsonData]
-        public LeadData Data { get; set; }
+        public LeadData Data { get; set; } = new LeadData();
     }
 
     public class LeadData
     {
-        public string FirstName { get; set; }
+        public string? FirstName { get; set; }
 
-        public string LastName { get; set; }
+        public string? LastName { get; set; }
 
-        public string Email { get; set; }
+        public string? Email { get; set; }
 
         public DateTime Birthdate { get; set; }
     }

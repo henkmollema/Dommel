@@ -11,13 +11,13 @@ namespace Dommel.IntegrationTests
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int ProductId { get; set; }
 
-        public string Name { get; set; }
+        public string Name { get; set; } = "";
 
         // The foreign key to Categories table
         public int CategoryId { get; set; }
 
         // The navigation property
-        public Category Category { get; set; }
+        public Category? Category { get; set; }
     }
 
     public class Category
@@ -25,7 +25,7 @@ namespace Dommel.IntegrationTests
         [Key]
         public int CategoryId { get; set; }
 
-        public string Name { get; set; }
+        public string? Name { get; set; }
     }
 
     public class Order
@@ -35,7 +35,7 @@ namespace Dommel.IntegrationTests
         public DateTime Created { get; set; } = DateTime.UtcNow;
 
         [ForeignKey(nameof(OrderLine.OrderId))]
-        public ICollection<OrderLine> OrderLines { get; set; }
+        public ICollection<OrderLine>? OrderLines { get; set; }
     }
 
     public class OrderLine
@@ -44,21 +44,21 @@ namespace Dommel.IntegrationTests
 
         public int OrderId { get; set; }
 
-        public string Line { get; set; }
+        public string? Line { get; set; }
     }
 
     public class Foo
     {
         public int Id { get; set; }
 
-        public string Name { get; set; } = nameof(Foo);
+        public string? Name { get; set; } = nameof(Foo);
     }
 
     public class Bar
     {
         public int Id { get; set; }
 
-        public string Name { get; set; } = nameof(Bar);
+        public string? Name { get; set; } = nameof(Bar);
     }
 
     public class Baz
@@ -67,6 +67,6 @@ namespace Dommel.IntegrationTests
         [DatabaseGenerated(DatabaseGeneratedOption.None)]
         public Guid BazId { get; set; }
 
-        public string Name { get; set; } = nameof(Baz);
+        public string? Name { get; set; } = nameof(Baz);
     }
 }

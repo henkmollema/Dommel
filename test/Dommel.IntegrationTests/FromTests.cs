@@ -22,7 +22,7 @@ namespace Dommel.IntegrationTests
         {
             using var con = database.GetConnection();
             var products = con.From<Product>(sql =>
-sql.Select(p => new { p.ProductId, p.Name }));
+                sql.Select(p => new { p.ProductId, p.Name }));
             Assert.NotEmpty(products);
             Assert.All(products, p => Assert.Equal(0, p.CategoryId));
         }
@@ -42,7 +42,7 @@ sql.Select(p => new { p.ProductId, p.Name }));
         {
             using var con = database.GetConnection();
             var products = await con.FromAsync<Product>(sql =>
-sql.Select(p => new { p.ProductId, p.Name }));
+                sql.Select(p => new { p.ProductId, p.Name }));
             Assert.NotEmpty(products);
             Assert.All(products, p => Assert.Equal(0, p.CategoryId));
         }
@@ -53,8 +53,8 @@ sql.Select(p => new { p.ProductId, p.Name }));
         {
             using var con = database.GetConnection();
             var products = await con.FromAsync<Product>(
-sql => sql.Select(p => new { p.Name, p.CategoryId })
-.Where(p => p.Name.StartsWith("Chai")));
+                sql => sql.Select(p => new { p.Name, p.CategoryId })
+                .Where(p => p.Name!.StartsWith("Chai")));
 
             Assert.NotEmpty(products);
             Assert.All(products, p => Assert.StartsWith("Chai", p.Name));
@@ -66,7 +66,7 @@ sql => sql.Select(p => new { p.Name, p.CategoryId })
         {
             using var con = database.GetConnection();
             var products = await con.FromAsync<Product>(
-sql => sql.OrderBy(p => p.Name).Select());
+                sql => sql.OrderBy(p => p.Name).Select());
 
             Assert.NotEmpty(products);
         }
@@ -77,7 +77,7 @@ sql => sql.OrderBy(p => p.Name).Select());
         {
             using var con = database.GetConnection();
             var products = await con.FromAsync<Product>(
-sql => sql.OrderBy(typeof(Product).GetProperty("Name")).Select());
+                sql => sql.OrderBy(typeof(Product).GetProperty("Name")!).Select());
 
             Assert.NotEmpty(products);
         }
@@ -88,13 +88,13 @@ sql => sql.OrderBy(typeof(Product).GetProperty("Name")).Select());
         {
             using var con = database.GetConnection();
             var products = await con.FromAsync<Product>(sql =>
-sql.Select(p => new { p.Name, p.CategoryId })
-.Where(p => p.Name.StartsWith("Chai") && p.CategoryId == 1)
-.OrWhere(p => p.Name != null)
-.AndWhere(p => p.CategoryId != 0)
-.OrderBy(p => p.CategoryId)
-.OrderByDescending(p => p.Name)
-.Page(1, 5));
+                sql.Select(p => new { p.Name, p.CategoryId })
+                    .Where(p => p.Name!.StartsWith("Chai") && p.CategoryId == 1)
+                    .OrWhere(p => p.Name != null)
+                    .AndWhere(p => p.CategoryId != 0)
+                    .OrderBy(p => p.CategoryId)
+                    .OrderByDescending(p => p.Name)
+                    .Page(1, 5));
 
             Assert.Equal(5, products.Count());
         }

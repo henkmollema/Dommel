@@ -15,7 +15,7 @@ namespace Dommel
         /// <param name="connection">The connection to the database. This can either be open or closed.</param>
         /// <param name="transaction">Optional transaction for the command.</param>
         /// <returns>The number of entities matching the specified predicate.</returns>
-        public static long Count<TEntity>(this IDbConnection connection, IDbTransaction transaction = null)
+        public static long Count<TEntity>(this IDbConnection connection, IDbTransaction? transaction = null)
         {
             var sql = BuildCountAllSql(GetSqlBuilder(connection), typeof(TEntity));
             LogQuery<TEntity>(sql);
@@ -29,7 +29,7 @@ namespace Dommel
         /// <param name="connection">The connection to the database. This can either be open or closed.</param>
         /// <param name="transaction">Optional transaction for the command.</param>
         /// <returns>The number of entities matching the specified predicate.</returns>
-        public static Task<long> CountAsync<TEntity>(this IDbConnection connection, IDbTransaction transaction = null)
+        public static Task<long> CountAsync<TEntity>(this IDbConnection connection, IDbTransaction? transaction = null)
         {
             var sql = BuildCountAllSql(GetSqlBuilder(connection), typeof(TEntity));
             LogQuery<TEntity>(sql);
@@ -44,7 +44,7 @@ namespace Dommel
         /// <param name="predicate">A predicate to filter the results.</param>
         /// <param name="transaction">Optional transaction for the command.</param>
         /// <returns>The number of entities matching the specified predicate.</returns>
-        public static long Count<TEntity>(this IDbConnection connection, Expression<Func<TEntity, bool>> predicate, IDbTransaction transaction = null)
+        public static long Count<TEntity>(this IDbConnection connection, Expression<Func<TEntity, bool>> predicate, IDbTransaction? transaction = null)
         {
             var sql = BuildCountSql(GetSqlBuilder(connection), predicate, out var parameters);
             LogQuery<TEntity>(sql);
@@ -59,7 +59,7 @@ namespace Dommel
         /// <param name="predicate">A predicate to filter the results.</param>
         /// <param name="transaction">Optional transaction for the command.</param>
         /// <returns>The number of entities matching the specified predicate.</returns>
-        public static Task<long> CountAsync<TEntity>(this IDbConnection connection, Expression<Func<TEntity, bool>> predicate, IDbTransaction transaction = null)
+        public static Task<long> CountAsync<TEntity>(this IDbConnection connection, Expression<Func<TEntity, bool>> predicate, IDbTransaction? transaction = null)
         {
             var sql = BuildCountSql(GetSqlBuilder(connection), predicate, out var parameters);
             LogQuery<TEntity>(sql);

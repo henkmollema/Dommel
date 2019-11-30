@@ -24,7 +24,7 @@ namespace Dommel.Tests
 
         private class Foo
         {
-            public string Bar { get; set; }
+            public string? Bar { get; set; }
         }
     }
 }

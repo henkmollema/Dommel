@@ -18,7 +18,7 @@ namespace Dommel
         /// <param name="entity">The entity to be deleted.</param>
         /// <param name="transaction">Optional transaction for the command.</param>
         /// <returns>A value indicating whether the delete operation succeeded.</returns>
-        public static bool Delete<TEntity>(this IDbConnection connection, TEntity entity, IDbTransaction transaction = null)
+        public static bool Delete<TEntity>(this IDbConnection connection, TEntity entity, IDbTransaction? transaction = null)
         {
             var sql = BuildDeleteQuery(GetSqlBuilder(connection), typeof(TEntity));
             LogQuery<TEntity>(sql);
@@ -34,7 +34,7 @@ namespace Dommel
         /// <param name="entity">The entity to be deleted.</param>
         /// <param name="transaction">Optional transaction for the command.</param>
         /// <returns>A value indicating whether the delete operation succeeded.</returns>
-        public static async Task<bool> DeleteAsync<TEntity>(this IDbConnection connection, TEntity entity, IDbTransaction transaction = null)
+        public static async Task<bool> DeleteAsync<TEntity>(this IDbConnection connection, TEntity entity, IDbTransaction? transaction = null)
         {
             var sql = BuildDeleteQuery(GetSqlBuilder(connection), typeof(TEntity));
             LogQuery<TEntity>(sql);
@@ -67,7 +67,7 @@ namespace Dommel
         /// <param name="predicate">A predicate to filter which entities are deleted.</param>
         /// <param name="transaction">Optional transaction for the command.</param>
         /// <returns>A value indicating whether the delete operation succeeded.</returns>
-        public static bool DeleteMultiple<TEntity>(this IDbConnection connection, Expression<Func<TEntity, bool>> predicate, IDbTransaction transaction = null)
+        public static bool DeleteMultiple<TEntity>(this IDbConnection connection, Expression<Func<TEntity, bool>> predicate, IDbTransaction? transaction = null)
         {
             var sql = BuildDeleteMultipleQuery(GetSqlBuilder(connection), predicate, out var parameters);
             LogQuery<TEntity>(sql);
@@ -83,7 +83,7 @@ namespace Dommel
         /// <param name="predicate">A predicate to filter which entities are deleted.</param>
         /// <param name="transaction">Optional transaction for the command.</param>
         /// <returns>A value indicating whether the delete operation succeeded.</returns>
-        public static async Task<bool> DeleteMultipleAsync<TEntity>(this IDbConnection connection, Expression<Func<TEntity, bool>> predicate, IDbTransaction transaction = null)
+        public static async Task<bool> DeleteMultipleAsync<TEntity>(this IDbConnection connection, Expression<Func<TEntity, bool>> predicate, IDbTransaction? transaction = null)
         {
             var sql = BuildDeleteMultipleQuery(GetSqlBuilder(connection), predicate, out var parameters);
             LogQuery<TEntity>(sql);
@@ -111,7 +111,7 @@ namespace Dommel
         /// <param name="connection">The connection to the database. This can either be open or closed.</param>
         /// <param name="transaction">Optional transaction for the command.</param>
         /// <returns>A value indicating whether the delete operation succeeded.</returns>
-        public static bool DeleteAll<TEntity>(this IDbConnection connection, IDbTransaction transaction = null)
+        public static bool DeleteAll<TEntity>(this IDbConnection connection, IDbTransaction? transaction = null)
         {
             var sql = BuildDeleteAllQuery(GetSqlBuilder(connection), typeof(TEntity));
             LogQuery<TEntity>(sql);
@@ -126,7 +126,7 @@ namespace Dommel
         /// <param name="connection">The connection to the database. This can either be open or closed.</param>
         /// <param name="transaction">Optional transaction for the command.</param>
         /// <returns>A value indicating whether the delete operation succeeded.</returns>
-        public static async Task<bool> DeleteAllAsync<TEntity>(this IDbConnection connection, IDbTransaction transaction = null)
+        public static async Task<bool> DeleteAllAsync<TEntity>(this IDbConnection connection, IDbTransaction? transaction = null)
         {
             var sql = BuildDeleteAllQuery(GetSqlBuilder(connection), typeof(TEntity));
             LogQuery<TEntity>(sql);

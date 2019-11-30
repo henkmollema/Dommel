@@ -42,12 +42,12 @@ namespace Dommel.Json.IntegrationTests
             var lead = InsertLead(con);
 
             // Act
-            lead.Data.FirstName = "Bar";
+            lead.Data!.FirstName = "Bar";
             con.Update(lead);
 
             // Assert
             var updatedLead = con.Get<Lead>(lead.Id);
-            Assert.Equal("Bar", updatedLead.Data.FirstName);
+            Assert.Equal("Bar", updatedLead.Data?.FirstName);
         }
 
         [Theory]

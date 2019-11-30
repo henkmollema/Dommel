@@ -10,11 +10,11 @@ namespace Dommel
         public class SqliteSqlBuilder : ISqlBuilder
         {
             /// <inheritdoc/>
-            public virtual string BuildInsert(Type type, string tableName, string[] columnNames, string[] paramNames) => 
+            public virtual string BuildInsert(Type type, string tableName, string[] columnNames, string[] paramNames) =>
                 $"insert into {tableName} ({string.Join(", ", columnNames)}) values ({string.Join(", ", paramNames)}); select last_insert_rowid() id";
 
             /// <inheritdoc/>
-            public virtual string BuildPaging(string orderBy, int pageNumber, int pageSize)
+            public virtual string BuildPaging(string? orderBy, int pageNumber, int pageSize)
             {
                 var start = pageNumber >= 1 ? (pageNumber - 1) * pageSize : 0;
                 return $" {orderBy} LIMIT {start}, {pageSize}";

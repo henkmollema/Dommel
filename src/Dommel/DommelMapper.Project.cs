@@ -18,7 +18,7 @@ namespace Dommel
         /// <param name="id">The id of the entity in the database.</param>
         /// <param name="transaction">Optional transaction for the command.</param>
         /// <returns>The entity with the corresponding id.</returns>
-        public static TEntity Project<TEntity>(this IDbConnection connection, object id, IDbTransaction transaction = null) where TEntity : class
+        public static TEntity Project<TEntity>(this IDbConnection connection, object id, IDbTransaction? transaction = null) where TEntity : class
         {
             var sql = BuildProjectById(GetSqlBuilder(connection), typeof(TEntity), id, out var parameters);
             LogQuery<TEntity>(sql);
@@ -33,7 +33,7 @@ namespace Dommel
         /// <param name="id">The id of the entity in the database.</param>
         /// <param name="transaction">Optional transaction for the command.</param>
         /// <returns>The entity with the corresponding id.</returns>
-        public static Task<TEntity> ProjectAsync<TEntity>(this IDbConnection connection, object id, IDbTransaction transaction = null) where TEntity : class
+        public static Task<TEntity> ProjectAsync<TEntity>(this IDbConnection connection, object id, IDbTransaction? transaction = null) where TEntity : class
         {
             var sql = BuildProjectById(GetSqlBuilder(connection), typeof(TEntity), id, out var parameters);
             LogQuery<TEntity>(sql);
@@ -70,7 +70,7 @@ namespace Dommel
         /// </param>
         /// <param name="transaction">Optional transaction for the command.</param>
         /// <returns>A collection of entities of type <typeparamref name="TEntity"/>.</returns>
-        public static IEnumerable<TEntity> ProjectAll<TEntity>(this IDbConnection connection, IDbTransaction transaction = null, bool buffered = true) where TEntity : class
+        public static IEnumerable<TEntity> ProjectAll<TEntity>(this IDbConnection connection, IDbTransaction? transaction = null, bool buffered = true) where TEntity : class
         {
             var sql = BuildProjectAllQuery(GetSqlBuilder(connection), typeof(TEntity));
             LogQuery<TEntity>(sql);
@@ -84,7 +84,7 @@ namespace Dommel
         /// <param name="connection">The connection to the database. This can either be open or closed.</param>
         /// <param name="transaction">Optional transaction for the command.</param>
         /// <returns>A collection of entities of type <typeparamref name="TEntity"/>.</returns>
-        public static Task<IEnumerable<TEntity>> ProjectAllAsync<TEntity>(this IDbConnection connection, IDbTransaction transaction = null) where TEntity : class
+        public static Task<IEnumerable<TEntity>> ProjectAllAsync<TEntity>(this IDbConnection connection, IDbTransaction? transaction = null) where TEntity : class
         {
             var sql = BuildProjectAllQuery(GetSqlBuilder(connection), typeof(TEntity));
             LogQuery<TEntity>(sql);
@@ -121,7 +121,7 @@ namespace Dommel
         /// </param>
         /// <param name="transaction">Optional transaction for the command.</param>
         /// <returns>A paged collection of entities of type <typeparamref name="TEntity"/>.</returns>
-        public static IEnumerable<TEntity> ProjectPaged<TEntity>(this IDbConnection connection, int pageNumber, int pageSize, IDbTransaction transaction = null, bool buffered = true) where TEntity : class
+        public static IEnumerable<TEntity> ProjectPaged<TEntity>(this IDbConnection connection, int pageNumber, int pageSize, IDbTransaction? transaction = null, bool buffered = true) where TEntity : class
         {
             var sql = BuildProjectPagedQuery(GetSqlBuilder(connection), typeof(TEntity), pageNumber, pageSize);
             LogQuery<TEntity>(sql);
@@ -137,7 +137,7 @@ namespace Dommel
         /// <param name="pageSize">The page size.</param>
         /// <param name="transaction">Optional transaction for the command.</param>
         /// <returns>A paged collection of entities of type <typeparamref name="TEntity"/>.</returns>
-        public static Task<IEnumerable<TEntity>> ProjectPagedAsync<TEntity>(this IDbConnection connection, int pageNumber, int pageSize, IDbTransaction transaction = null) where TEntity : class
+        public static Task<IEnumerable<TEntity>> ProjectPagedAsync<TEntity>(this IDbConnection connection, int pageNumber, int pageSize, IDbTransaction? transaction = null) where TEntity : class
         {
             var sql = BuildProjectPagedQuery(GetSqlBuilder(connection), typeof(TEntity), pageNumber, pageSize);
             LogQuery<TEntity>(sql);

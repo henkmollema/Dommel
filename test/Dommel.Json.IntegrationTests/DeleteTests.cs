@@ -45,8 +45,8 @@ namespace Dommel.Json.IntegrationTests
         {
             using var con = database.GetConnection();
             var id = InsertLead(con);
-            Assert.True(con.DeleteMultiple<Lead>(p => p.Data.Email == "foo@example.com"));
-            var leads = con.Select<Lead>(p => p.Data.Email == "foo@example.com");
+            Assert.True(con.DeleteMultiple<Lead>(p => p.Data!.Email == "foo@example.com"));
+            var leads = con.Select<Lead>(p => p.Data!.Email == "foo@example.com");
             Assert.Empty(leads);
         }
 
@@ -56,8 +56,8 @@ namespace Dommel.Json.IntegrationTests
         {
             using var con = database.GetConnection();
             var id = await InsertLeadAsync(con);
-            Assert.True(await con.DeleteMultipleAsync<Lead>(p => p.Data.Email == "foo@example.com"));
-            var leads = await con.SelectAsync<Lead>(p => p.Data.Email == "foo@example.com");
+            Assert.True(await con.DeleteMultipleAsync<Lead>(p => p.Data!.Email == "foo@example.com"));
+            var leads = await con.SelectAsync<Lead>(p => p.Data!.Email == "foo@example.com");
             Assert.Empty(leads);
         }
 
@@ -67,8 +67,8 @@ namespace Dommel.Json.IntegrationTests
         {
             using var con = database.GetConnection();
             var id = InsertLead(con);
-            Assert.True(con.DeleteMultiple<Lead>(p => p.Data.FirstName == "Foo" && p.Data.LastName == "Bar" && p.Email == "foo@example.com"));
-            var leads = con.Select<Lead>(p => p.Data.FirstName == "Foo" && p.Data.LastName == "Bar" && p.Email == "foo@example.com");
+            Assert.True(con.DeleteMultiple<Lead>(p => p.Data!.FirstName == "Foo" && p.Data.LastName == "Bar" && p.Email == "foo@example.com"));
+            var leads = con.Select<Lead>(p => p.Data!.FirstName == "Foo" && p.Data.LastName == "Bar" && p.Email == "foo@example.com");
             Assert.Empty(leads);
         }
 
@@ -78,8 +78,8 @@ namespace Dommel.Json.IntegrationTests
         {
             using var con = database.GetConnection();
             var id = await InsertLeadAsync(con);
-            Assert.True(await con.DeleteMultipleAsync<Lead>(p => p.Data.FirstName == "Foo" && p.Data.LastName == "Bar" && p.Email == "foo@example.com"));
-            var leads = await con.SelectAsync<Lead>(p => p.Data.FirstName == "Foo" && p.Data.LastName == "Bar" && p.Email == "foo@example.com");
+            Assert.True(await con.DeleteMultipleAsync<Lead>(p => p.Data!.FirstName == "Foo" && p.Data.LastName == "Bar" && p.Email == "foo@example.com"));
+            var leads = await con.SelectAsync<Lead>(p => p.Data!.FirstName == "Foo" && p.Data.LastName == "Bar" && p.Email == "foo@example.com");
             Assert.Empty(leads);
         }
 
@@ -89,8 +89,8 @@ namespace Dommel.Json.IntegrationTests
         {
             using var con = database.GetConnection();
             var id = InsertLead(con);
-            Assert.True(con.DeleteMultiple<Lead>(p => p.Data.FirstName == "Foo" && p.Data.LastName == "Bar" || p.Email == "foo@example.com"));
-            var leads = con.Select<Lead>(p => p.Data.FirstName == "Foo" && p.Data.LastName == "Bar" || p.Email == "foo@example.com");
+            Assert.True(con.DeleteMultiple<Lead>(p => p.Data!.FirstName == "Foo" && p.Data.LastName == "Bar" || p.Email == "foo@example.com"));
+            var leads = con.Select<Lead>(p => p.Data!.FirstName == "Foo" && p.Data.LastName == "Bar" || p.Email == "foo@example.com");
             Assert.Empty(leads);
         }
 
@@ -100,8 +100,8 @@ namespace Dommel.Json.IntegrationTests
         {
             using var con = database.GetConnection();
             var id = await InsertLeadAsync(con);
-            Assert.True(await con.DeleteMultipleAsync<Lead>(p => p.Data.FirstName == "Foo" && p.Data.LastName == "Bar" || p.Email == "foo@example.com"));
-            var leads = await con.SelectAsync<Lead>(p => p.Data.FirstName == "Foo" && p.Data.LastName == "Bar" || p.Email == "foo@example.com");
+            Assert.True(await con.DeleteMultipleAsync<Lead>(p => p.Data!.FirstName == "Foo" && p.Data.LastName == "Bar" || p.Email == "foo@example.com"));
+            var leads = await con.SelectAsync<Lead>(p => p.Data!.FirstName == "Foo" && p.Data.LastName == "Bar" || p.Email == "foo@example.com");
             Assert.Empty(leads);
         }
     }

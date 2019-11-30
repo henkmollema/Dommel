@@ -12,7 +12,7 @@ namespace Dommel
     /// </summary>
     public static partial class DommelMapper
     {
-        private static readonly ConcurrentDictionary<string, PropertyInfo> _columnNameCache = new ConcurrentDictionary<string, PropertyInfo>();
+        private static readonly ConcurrentDictionary<string, PropertyInfo> ColumnNameCache = new ConcurrentDictionary<string, PropertyInfo>();
 
         static DommelMapper()
         {
@@ -23,10 +23,10 @@ namespace Dommel
                 (type, columnName) =>
                 {
                     var cacheKey = type + columnName;
-                    if (!_columnNameCache.TryGetValue(cacheKey, out var propertyInfo))
+                    if (!ColumnNameCache.TryGetValue(cacheKey, out var propertyInfo))
                     {
                         propertyInfo = type.GetProperties().FirstOrDefault(p => p.GetCustomAttribute<ColumnAttribute>()?.Name == columnName || p.Name == columnName);
-                        _columnNameCache.TryAdd(cacheKey, propertyInfo);
+                        ColumnNameCache.TryAdd(cacheKey, propertyInfo);
                     }
 
                     return propertyInfo;

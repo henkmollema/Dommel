@@ -12,7 +12,7 @@ namespace Dommel.Tests
         public void Where_ThrowsForNullExpression()
         {
             // Act & Assert
-            Assert.Throws<ArgumentNullException>("expression", () => _sqlExpression.Where(null));
+            Assert.Throws<ArgumentNullException>("expression", () => _sqlExpression.Where(null!));
         }
 
         [Fact]

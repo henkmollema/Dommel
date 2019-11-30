@@ -9,22 +9,22 @@ namespace Dommel.Json.IntegrationTests
 
         public DateTime DateCreated { get; set; } = DateTime.UtcNow;
 
-        public string Email { get; set; }
+        public string? Email { get; set; }
 
         [JsonData]
-        public LeadData Data { get; set; }
+        public LeadData? Data { get; set; }
 
         [JsonData]
-        public IDictionary<string, object> Metadata { get; set; }
+        public IDictionary<string, object>? Metadata { get; set; }
     }
 
     public class LeadData
     {
-        public string FirstName { get; set; }
+        public string? FirstName { get; set; }
 
-        public string LastName { get; set; }
+        public string? LastName { get; set; }
 
-        public string Email { get; set; }
+        public string? Email { get; set; }
 
         public DateTime Birthdate { get; set; }
     }

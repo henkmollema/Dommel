@@ -17,7 +17,7 @@ namespace Dommel.Json.IntegrationTests
             var id = con.Insert(new Lead
             {
                 Email = "foo@example.com",
-                Data = null,
+                Data = null!,
             });
 
             var lead = con.Get<Lead>(id);
@@ -33,7 +33,7 @@ namespace Dommel.Json.IntegrationTests
             var id = await con.InsertAsync(new Lead
             {
                 Email = "foo@example.com",
-                Data = null,
+                Data = null!,
             });
 
             var lead = await con.GetAsync<Lead>(id);
@@ -55,7 +55,7 @@ namespace Dommel.Json.IntegrationTests
             var lead = con.Get<Lead>(id);
             Assert.NotNull(lead);
             Assert.NotNull(lead.Data);
-            Assert.Null(lead.Data.FirstName);
+            Assert.Null(lead.Data?.FirstName);
         }
 
         [Theory]
@@ -72,7 +72,7 @@ namespace Dommel.Json.IntegrationTests
             var lead = await con.GetAsync<Lead>(id);
             Assert.NotNull(lead);
             Assert.NotNull(lead.Data);
-            Assert.Null(lead.Data.FirstName);
+            Assert.Null(lead.Data?.FirstName);
         }
 
         [Theory]
@@ -95,7 +95,7 @@ namespace Dommel.Json.IntegrationTests
             var lead = con.Get<Lead>(id);
             Assert.NotNull(lead);
             Assert.NotNull(lead.Data);
-            Assert.NotNull(lead.Data.FirstName);
+            Assert.NotNull(lead.Data?.FirstName);
         }
 
         [Theory]
@@ -118,7 +118,7 @@ namespace Dommel.Json.IntegrationTests
             var lead = await con.GetAsync<Lead>(id);
             Assert.NotNull(lead);
             Assert.NotNull(lead.Data);
-            Assert.NotNull(lead.Data.FirstName);
+            Assert.NotNull(lead.Data?.FirstName);
         }
 
         [Theory]

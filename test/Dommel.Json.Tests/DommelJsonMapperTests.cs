@@ -56,7 +56,7 @@ namespace Dommel.Json.Tests
 
         // Dirty hack to determine whether the Dapper type handler has been added
         private static Dictionary<Type, SqlMapper.ITypeHandler> GetDapperTypeHandlers() =>
-            (Dictionary<Type, SqlMapper.ITypeHandler>)typeof(SqlMapper).GetField("typeHandlers", BindingFlags.Static | BindingFlags.NonPublic).GetValue(null);
+            (Dictionary<Type, SqlMapper.ITypeHandler>)typeof(SqlMapper).GetField("typeHandlers", BindingFlags.Static | BindingFlags.NonPublic)!.GetValue(null)!;
 
         [Fact]
         public void AddsCustomJsonTypeHandler()

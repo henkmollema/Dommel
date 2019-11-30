@@ -18,8 +18,8 @@ namespace Dommel.Tests
         [Fact]
         public void Column_NoCacheConflictNestedClass()
         {
-            Assert.Equal("[BazA]", Resolvers.Column(typeof(Foo.Bar).GetProperty("Baz"), _sqlBuilder));
-            Assert.Equal("[BazB]", Resolvers.Column(typeof(Baz.Bar).GetProperty("Baz"), _sqlBuilder));
+            Assert.Equal("[BazA]", Resolvers.Column(typeof(Foo.Bar).GetProperty("Baz")!, _sqlBuilder));
+            Assert.Equal("[BazB]", Resolvers.Column(typeof(Baz.Bar).GetProperty("Baz")!, _sqlBuilder));
         }
 
         [Fact]
@@ -38,7 +38,7 @@ namespace Dommel.Tests
             public class Bar
             {
                 [Column("BazA")]
-                public string Baz { get; set; }
+                public string? Baz { get; set; }
             }
 
             [Table("BarA")]
@@ -54,7 +54,7 @@ namespace Dommel.Tests
             public class Bar
             {
                 [Column("BazB")]
-                public string Baz { get; set; }
+                public string? Baz { get; set; }
             }
 
             [Table("BarA")]

@@ -27,8 +27,8 @@ namespace Dommel
         public static void AddSqlBuilder(Type connectionType, ISqlBuilder builder) => AddSqlBuilder(connectionType.Name.ToLower(), builder);
 
         /// <summary>
-        /// Adds a custom implementation of <see cref="ISqlBuilder"/> 
-        /// for the specified connection name        /// 
+        /// Adds a custom implementation of <see cref="ISqlBuilder"/>
+        /// for the specified connection name        ///
         /// </summary>
         /// <param name="connectionName">The name of the connection. E.g. "sqlconnection".</param>
         /// <param name="builder">An implementation of the <see cref="ISqlBuilder"/> interface.</param>
@@ -76,7 +76,7 @@ namespace Dommel
             /// <param name="pageNumber">The number of the page to fetch, starting at 1.</param>
             /// <param name="pageSize">The page size.</param>
             /// <returns>The paging part of a query.</returns>
-            string BuildPaging(string orderBy, int pageNumber, int pageSize);
+            string BuildPaging(string? orderBy, int pageNumber, int pageSize);
 
             /// <summary>
             /// Adds quotes around (or at the start) of an identifier such as a table or column name.

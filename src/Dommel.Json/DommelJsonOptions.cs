@@ -10,14 +10,14 @@ namespace Dommel.Json
     public class DommelJsonOptions
     {
         /// <summary>
-        /// Gets or sets the set of assemblies to scan for 
+        /// Gets or sets the set of assemblies to scan for
         /// entities with [<see cref="JsonDataAttribute"/>] properties.
         /// </summary>
-        public Assembly[] EntityAssemblies { get; set; }
+        public Assembly[]? EntityAssemblies { get; set; }
 
         /// <summary>
         /// Gets or sets the Dapper type handler being used to handle JSON objects.
         /// </summary>
-        public Func<SqlMapper.ITypeHandler> JsonTypeHandler { get; set; }
+        public Func<SqlMapper.ITypeHandler>? JsonTypeHandler { get; set; }
     }
 }

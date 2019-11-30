@@ -20,7 +20,7 @@ namespace Dommel
         /// or when the query is materialized (using <c>ToList()</c> for example).
         /// </param>
         /// <returns>The collection of entities returned from the query.</returns>
-        public static IEnumerable<TEntity> From<TEntity>(this IDbConnection con, Action<SqlExpression<TEntity>> sqlBuilder, IDbTransaction transaction = null, bool buffered = true)
+        public static IEnumerable<TEntity> From<TEntity>(this IDbConnection con, Action<SqlExpression<TEntity>> sqlBuilder, IDbTransaction? transaction = null, bool buffered = true)
         {
             var sqlExpression = CreateSqlExpression<TEntity>(GetSqlBuilder(con));
             sqlBuilder(sqlExpression);
@@ -36,7 +36,7 @@ namespace Dommel
         /// <param name="sqlBuilder">A callback to build a <see cref="SqlExpression{TEntity}"/>.</param>
         /// <param name="transaction">Optional transaction for the command.</param>
         /// <returns>The collection of entities returned from the query.</returns>
-        public static async Task<IEnumerable<TEntity>> FromAsync<TEntity>(this IDbConnection con, Action<SqlExpression<TEntity>> sqlBuilder, IDbTransaction transaction = null)
+        public static async Task<IEnumerable<TEntity>> FromAsync<TEntity>(this IDbConnection con, Action<SqlExpression<TEntity>> sqlBuilder, IDbTransaction? transaction = null)
         {
             var sqlExpression = CreateSqlExpression<TEntity>(GetSqlBuilder(con));
             sqlBuilder(sqlExpression);

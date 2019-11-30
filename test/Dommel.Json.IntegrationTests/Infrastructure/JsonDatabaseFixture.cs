@@ -38,7 +38,7 @@ namespace Dommel.Json.IntegrationTests
                 }
             }
 
-            public object Parse(Type destinationType, object value) =>
+            public object? Parse(Type destinationType, object value) =>
                 value is string str ? JsonConvert.DeserializeObject(str, destinationType) : null;
         }
 

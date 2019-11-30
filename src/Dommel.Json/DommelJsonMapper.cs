@@ -50,7 +50,7 @@ namespace Dommel.Json
                 return Activator.CreateInstance(sqlExpression, sqlBuilder);
             };
 
-            // Add a Dapper type mapper with JSON support for 
+            // Add a Dapper type mapper with JSON support for
             // properties annotated with the [JsonData] attribute.
             var jsonTypeHander = options.JsonTypeHandler?.Invoke() ?? new JsonObjectTypeHandler();
             var jsonTypes = new List<Type>();

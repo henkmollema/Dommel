@@ -77,7 +77,7 @@ namespace Dommel.Tests
             Assert.False(keyProperty.IsGenerated);
         }
 
-        private class FooGeneric<T>
+        private class FooGeneric<T> where T : struct
         {
             public T Id { get; set; }
         }
@@ -94,26 +94,26 @@ namespace Dommel.Tests
 
         private class Foo
         {
-            public object Id { get; set; }
+            public object? Id { get; set; }
         }
 
         private class Bar
         {
             [Key]
-            public object BarId { get; set; }
+            public object? BarId { get; set; }
         }
 
         private class FooBar
         {
-            public object Id { get; set; }
+            public object? Id { get; set; }
 
             [Key]
-            public object BarId { get; set; }
+            public object? BarId { get; set; }
         }
 
         private class Nope
         {
-            public object Foo { get; set; }
+            public object? Foo { get; set; }
         }
 
         private class WithNonGeneratedIdColumn

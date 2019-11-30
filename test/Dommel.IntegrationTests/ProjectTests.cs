@@ -90,7 +90,7 @@ namespace Dommel.IntegrationTests
             [Key]
             public int ProductId { get; set; }
 
-            public string Name { get; set; }
+            public string? Name { get; set; }
         }
     }
 }

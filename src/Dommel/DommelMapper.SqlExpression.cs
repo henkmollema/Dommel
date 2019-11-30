@@ -36,8 +36,8 @@ namespace Dommel
             private readonly StringBuilder _whereBuilder = new StringBuilder();
             private readonly StringBuilder _orderByBuilder = new StringBuilder();
             private readonly DynamicParameters _parameters = new DynamicParameters();
-            private string _selectQuery;
-            private string _pagingQuery;
+            private string? _selectQuery;
+            private string? _pagingQuery;
             private int _parameterIndex;
 
             /// <summary>
@@ -152,7 +152,7 @@ namespace Dommel
                 return this;
             }
 
-            private void AppendToWhere(string conditionOperator, Expression expression)
+            private void AppendToWhere(string? conditionOperator, Expression expression)
             {
                 var sqlExpression = VisitExpression(expression).ToString();
                 if (_whereBuilder.Length == 0)
@@ -186,7 +186,7 @@ namespace Dommel
             /// </summary>
             /// <param name="selector">The column to order by. E.g. <code>x => x.Name</code>.</param>
             /// <returns>The current <see cref="SqlExpression{TEntity}"/> instance.</returns>
-            public virtual SqlExpression<TEntity> OrderBy(Expression<Func<TEntity, object>> selector)
+            public virtual SqlExpression<TEntity> OrderBy(Expression<Func<TEntity, object?>> selector)
             {
                 OrderByCore(selector, "asc");
                 return this;
@@ -208,7 +208,7 @@ namespace Dommel
             /// </summary>
             /// <param name="selector">The column to order by. E.g. <code>x => x.Name</code>.</param>
             /// <returns>The current <see cref="SqlExpression{TEntity}"/> instance.</returns>
-            public virtual SqlExpression<TEntity> OrderByDescending(Expression<Func<TEntity, object>> selector)
+            public virtual SqlExpression<TEntity> OrderByDescending(Expression<Func<TEntity, object?>> selector)
             {
                 OrderByCore(selector, "desc");
                 return this;
@@ -225,7 +225,7 @@ namespace Dommel
                 return this;
             }
 
-            private void OrderByCore(Expression<Func<TEntity, object>> selector, string direction)
+            private void OrderByCore(Expression<Func<TEntity, object?>> selector, string direction)
             {
                 if (selector == null)
                 {
@@ -236,7 +236,7 @@ namespace Dommel
                 AppendOrderBy(column, direction);
             }
 
-            private void AppendOrderBy(string column, string direction, bool prepend = false)
+            private void AppendOrderBy(string? column, string direction, bool prepend = false)
             {
                 if (string.IsNullOrEmpty(column))
                 {
@@ -492,7 +492,7 @@ namespace Dommel
                         {
                             return $"{left} is null";
                         }
-                        else if (expression.NodeType == ExpressionType.NotEqual)
+                        else
                         {
                             return $"{left} is not null";
                         }

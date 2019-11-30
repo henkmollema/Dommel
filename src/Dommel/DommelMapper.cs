@@ -11,9 +11,9 @@ namespace Dommel
         /// <summary>
         /// A callback which gets invoked when queries and other information are logged.
         /// </summary>
-        public static Action<string> LogReceived;
+        public static Action<string>? LogReceived;
 
-        private static void LogQuery<T>(string query, [CallerMemberName]string method = null)
+        private static void LogQuery<T>(string query, [CallerMemberName]string? method = null)
             => LogReceived?.Invoke(method != null ? $"{method}<{typeof(T).Name}>: {query}" : query);
     }
 }

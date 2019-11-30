@@ -20,7 +20,7 @@ namespace Dommel.Tests
         [Fact]
         public void Select_ThrowsForNullSelector()
         {
-            Assert.Throws<ArgumentNullException>("selector", () => _sqlExpression.Select(null));
+            Assert.Throws<ArgumentNullException>("selector", () => _sqlExpression.Select(null!));
         }
 
         [Fact]

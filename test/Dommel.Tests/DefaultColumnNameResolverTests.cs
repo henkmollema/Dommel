@@ -10,26 +10,26 @@ namespace Dommel.Tests
         [Fact]
         public void ResolvesName()
         {
-            var name = Resolver.ResolveColumnName(typeof(Foo).GetProperty("Bar"));
+            var name = Resolver.ResolveColumnName(typeof(Foo).GetProperty("Bar")!);
             Assert.Equal("Bar", name);
         }
 
         [Fact]
         public void ResolvesColumnAttribute()
         {
-            var name = Resolver.ResolveColumnName(typeof(Bar).GetProperty("FooBarBaz"));
+            var name = Resolver.ResolveColumnName(typeof(Bar).GetProperty("FooBarBaz")!);
             Assert.Equal("foo_bar_baz", name);
         }
 
         private class Foo
         {
-            public string Bar { get; set; }
+            public string? Bar { get; set; }
         }
 
         private class Bar
         {
             [Column("foo_bar_baz")]
-            public string FooBarBaz { get; set; }
+            public string? FooBarBaz { get; set; }
         }
     }
 }

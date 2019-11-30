@@ -41,7 +41,7 @@ namespace Dommel
                 throw new Exception(msg);
             }
 
-            private static PropertyInfo ResolveOneToOne(Type sourceType, Type includingType)
+            private static PropertyInfo? ResolveOneToOne(Type sourceType, Type includingType)
             {
                 // Look for the foreign key on the source type by making an educated guess about the property name.
                 var foreignKeyName = includingType.Name + "Id";
@@ -66,7 +66,7 @@ namespace Dommel
                 return null;
             }
 
-            private static PropertyInfo ResolveOneToMany(Type sourceType, Type includingType)
+            private static PropertyInfo? ResolveOneToMany(Type sourceType, Type includingType)
             {
                 // Look for the foreign key on the including type by making an educated guess about the property name.
                 var foreignKeyName = sourceType.Name + "Id";

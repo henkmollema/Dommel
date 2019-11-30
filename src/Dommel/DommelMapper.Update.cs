@@ -18,7 +18,7 @@ namespace Dommel
         /// <param name="entity">The entity in the database.</param>
         /// <param name="transaction">Optional transaction for the command.</param>
         /// <returns>A value indicating whether the update operation succeeded.</returns>
-        public static bool Update<TEntity>(this IDbConnection connection, TEntity entity, IDbTransaction transaction = null)
+        public static bool Update<TEntity>(this IDbConnection connection, TEntity entity, IDbTransaction? transaction = null)
         {
             var sql = BuildUpdateQuery(GetSqlBuilder(connection), typeof(TEntity));
             LogQuery<TEntity>(sql);
@@ -34,7 +34,7 @@ namespace Dommel
         /// <param name="entity">The entity in the database.</param>
         /// <param name="transaction">Optional transaction for the command.</param>
         /// <returns>A value indicating whether the update operation succeeded.</returns>
-        public static async Task<bool> UpdateAsync<TEntity>(this IDbConnection connection, TEntity entity, IDbTransaction transaction = null)
+        public static async Task<bool> UpdateAsync<TEntity>(this IDbConnection connection, TEntity entity, IDbTransaction? transaction = null)
         {
             var sql = BuildUpdateQuery(GetSqlBuilder(connection), typeof(TEntity));
             LogQuery<TEntity>(sql);

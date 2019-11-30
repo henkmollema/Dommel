@@ -68,23 +68,23 @@ namespace Dommel.Tests
     {
         public int Id { get; set; }
 
-        public string Name { get; set; }
+        public string? Name { get; set; }
 
         // One Product has one Category
-        public Category Category { get; set; }
+        public Category? Category { get; set; }
 
         // Represents the foreign key to the category table
         public int CategoryId { get; set; }
 
         // One Product has many Options
-        public List<ProductOption> Options { get; set; }
+        public List<ProductOption>? Options { get; set; }
     }
 
     public class Category
     {
         public int Id { get; set; }
 
-        public string Name { get; set; }
+        public string? Name { get; set; }
     }
 
     public class ProductOption
@@ -100,20 +100,20 @@ namespace Dommel.Tests
     {
         // One Product has One
         [ForeignKey("CategoryId")]
-        public CategoryDto Category { get; set; }
+        public CategoryDto? Category { get; set; }
 
         public int CategoryId { get; set; }
 
         // One Product has many Options
         [ForeignKey("ProductId")]
-        public List<ProductOptionDto> Options { get; set; }
+        public List<ProductOptionDto>? Options { get; set; }
     }
 
     public class CategoryDto
     {
         public int Id { get; set; }
 
-        public string Name { get; set; }
+        public string? Name { get; set; }
     }
 
     public class ProductOptionDto
@@ -128,6 +128,6 @@ namespace Dommel.Tests
     {
         // One Order has many Products
         // TODO: How to support this?
-        public List<Product> Products { get; set; }
+        public List<Product>? Products { get; set; }
     }
 }
