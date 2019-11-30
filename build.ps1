@@ -25,7 +25,10 @@ echo "build: Build version suffix is $buildSuffix"
 exec { & dotnet build Dommel.sln -c Release --version-suffix=$buildSuffix /p:CI=true }
 
 echo "build: Executing tests"
-exec { & dotnet test -c Release --no-build }
+exec { & dotnet test test/Dommel.Tests -c Release --no-build }
+exec { & dotnet testt test/Dommel.IntegrationTests -c Release --no-build }
+exec { & dotnet testt test/Dommel.Json.Tests -c Release --no-build }
+exec { & dotnet testt test/Dommel.Json.IntegrationTests -c Release --no-build }
 
 if ($env:APPVEYOR_BUILD_NUMBER) {
     $versionSuffix = "{0:00000}" -f [convert]::ToInt32("0" + $env:APPVEYOR_BUILD_NUMBER, 10)
