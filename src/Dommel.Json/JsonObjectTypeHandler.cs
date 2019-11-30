@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Data;
+using System.Text.Json;
 using Dapper;
-using Newtonsoft.Json;
 
 namespace Dommel.Json
 {
@@ -11,11 +11,11 @@ namespace Dommel.Json
         {
             parameter.Value = value == null || value is DBNull
                 ? (object)DBNull.Value
-                : JsonConvert.SerializeObject(value);
+                : JsonSerializer.Serialize(value);
             parameter.DbType = DbType.String;
         }
 
         public object Parse(Type destinationType, object value) =>
-            value is string str ? JsonConvert.DeserializeObject(str, destinationType) : null;
+            value is string str ? JsonSerializer.Deserialize(str, destinationType) : null;
     }
 }
