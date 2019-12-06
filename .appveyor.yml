@@ -22,7 +22,7 @@ branches:
   only:
     - master
 artifacts:
-- path: .\src\**\artifacts\**\*.nupkg
+- path: .\artifacts\**\*.nupkg
   name: NuGet
 deploy:
 - provider: NuGet

@@ -11,7 +11,7 @@ function Exec
     }
 }
 
-if(Test-Path .\src\Dommel\artifacts) { Remove-Item .\src\Dommel\artifacts -Force -Recurse }
+if(Test-Path .\artifacts) { Remove-Item .\artifacts -Force -Recurse }
 
 exec { & dotnet restore }
 
