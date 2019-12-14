@@ -16,14 +16,6 @@ namespace Dommel.Tests
         }
 
         [Fact]
-        public void Where_ThrowsWhenCalledTwice()
-        {
-            _sqlExpression.Where(_ => true);
-            var ex = Assert.Throws<InvalidOperationException>(() => _sqlExpression.Where(_ => true));
-            Assert.Equal("Where statement already started. Use 'AndWhere' or 'OrWhere' to add additional statements.", ex.Message);
-        }
-
-        [Fact]
         public void AndWhere_ThrowsWhenStatementStarted()
         {
             var ex = Assert.Throws<InvalidOperationException>(() => _sqlExpression.AndWhere(_ => true));
@@ -42,6 +34,16 @@ namespace Dommel.Tests
         {
             var sql = _sqlExpression.Where(p => p.Name == "Chai").ToSql();
             Assert.Equal(" where ([Name] = @p1)", sql);
+        }
+
+        [Fact]
+        public void Where_AppendsWhenCalledTwice()
+        {
+            var sql = _sqlExpression
+                .Where(p => p.Name == "Chai")
+                .Where(p => p.CategoryId == 1)
+                .ToSql();
+            Assert.Equal(" where ([Name] = @p1) and ([CategoryId] = @p2)", sql);
         }
 
         [Fact]

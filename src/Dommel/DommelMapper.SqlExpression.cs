@@ -110,9 +110,11 @@ namespace Dommel
                         // Start a new where expression
                         AppendToWhere(null, expression);
                     }
-
-                    // Append a where expression with the 'and' operator
-                    AppendToWhere("and", expression);
+                    else
+                    {
+                        // Append a where expression with the 'and' operator
+                        AppendToWhere("and", expression);
+                    }
                 }
 
                 return this;
