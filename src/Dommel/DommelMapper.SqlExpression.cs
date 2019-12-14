@@ -365,17 +365,17 @@ namespace Dommel
             {
                 Expression collection;
                 Expression property;
-                // The method is a static method, and has 2 arguments.
-                // usually, it's from System.Linq.Enumerable
                 if (expression.Object == null && expression.Arguments.Count == 2)
                 {
+                    // The method is a static method, and has 2 arguments.
+                    // usually, it's from System.Linq.Enumerable
                     collection = expression.Arguments[0];
                     property = expression.Arguments[1];
                 }
-                // The method is an instance method, and has only 1 argument.
-                // usually, it's from System.Collections.IList
                 else if (expression.Object != null && expression.Arguments.Count == 1)
                 {
+                    // The method is an instance method, and has only 1 argument.
+                    // usually, it's from System.Collections.IList
                     collection = expression.Object;
                     property = expression.Arguments[0];
                 }
@@ -407,10 +407,10 @@ namespace Dommel
             /// <returns>The result of the processing.</returns>
             protected virtual object VisitContainsExpression(MethodCallExpression expression, TextSearch textSearch)
             {
-                var column = MemberToColumn((MemberExpression)expression.Object);
+                var column = VisitExpression(expression.Object);
                 if (expression.Arguments.Count == 0 || expression.Arguments.Count > 1)
                 {
-                    throw new ArgumentException("Contains-expression should contain exatcly one argument.", nameof(expression));
+                    throw new ArgumentException("Contains-expression should contain exactly one argument.", nameof(expression));
                 }
 
                 var value = VisitExpression(expression.Arguments[0]);
