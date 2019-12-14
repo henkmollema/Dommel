@@ -175,8 +175,6 @@ namespace Dommel
             /// <returns>The current <see cref="SqlExpression{TEntity}"/> instance.</returns>
             public virtual SqlExpression<TEntity> Page(int pageNumber, int pageSize)
             {
-                var keyColumns = Resolvers.KeyProperties(typeof(TEntity)).Select(p => Resolvers.Column(p.Property, SqlBuilder));
-                AppendOrderBy(string.Join(", ", keyColumns), direction: "asc", prepend: true);
                 _pagingQuery = SqlBuilder.BuildPaging(null, pageNumber, pageSize).Substring(1);
                 return this;
             }
@@ -643,6 +641,15 @@ namespace Dommel
                 }
                 if (!string.IsNullOrEmpty(_pagingQuery))
                 {
+                    if (string.IsNullOrEmpty(orderBy))
+                    {
+                        // When we're paging we'll need an order to guarantee consistent paging results, when
+                        // the user did not specified an order themself we'll order on the PKs of the table.
+                        var keyColumns = Resolvers.KeyProperties(typeof(TEntity)).Select(p => Resolvers.Column(p.Property, SqlBuilder));
+                        AppendOrderBy(string.Join(", ", keyColumns), direction: "asc", prepend: true);
+                        query += _orderByBuilder.ToString();
+                    }
+
                     query += _pagingQuery;
                 }
                 return query;

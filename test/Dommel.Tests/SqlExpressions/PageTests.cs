@@ -18,14 +18,14 @@ namespace Dommel.Tests
         public void Page_OrderBy()
         {
             var sql = _sqlExpression.Page(1, 5).OrderBy(p => p.CategoryId).ToSql();
-            Assert.Equal(" order by [Id] asc, [CategoryId] asc offset 0 rows fetch next 5 rows only", sql);
+            Assert.Equal(" order by [CategoryId] asc offset 0 rows fetch next 5 rows only", sql);
         }
 
         [Fact]
         public void OrderBy_Page_OrderBy()
         {
             var sql = _sqlExpression.OrderBy(p => p.Name).Page(1, 5).OrderByDescending(p => p.CategoryId).ToSql();
-            Assert.Equal(" order by [Id] asc, [Name] asc, [CategoryId] desc offset 0 rows fetch next 5 rows only", sql);
+            Assert.Equal(" order by [Name] asc, [CategoryId] desc offset 0 rows fetch next 5 rows only", sql);
         }
     }
 }
