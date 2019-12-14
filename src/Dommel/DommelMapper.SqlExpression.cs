@@ -105,12 +105,14 @@ namespace Dommel
             {
                 if (expression != null)
                 {
-                    if (_whereBuilder.Length > 0)
+                    if (_whereBuilder.Length == 0)
                     {
-                        throw new InvalidOperationException("Where statement already started. Use 'AndWhere' or 'OrWhere' to add additional statements.");
+                        // Start a new where expression
+                        AppendToWhere(null, expression);
                     }
 
-                    AppendToWhere(null, expression);
+                    // Append a where expression with the 'and' operator
+                    AppendToWhere("and", expression);
                 }
 
                 return this;
