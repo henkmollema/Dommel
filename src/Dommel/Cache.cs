@@ -31,15 +31,6 @@ namespace Dommel
                 MemberInfo = memberInfo;
             }
 
-#if NETSTANDARD1_3
-            public QueryCacheKey(QueryCacheType cacheType, ISqlBuilder sqlBuilder, Type type)
-            {
-                SqlBuilderType = sqlBuilder.GetType();
-                CacheType = cacheType;
-                MemberInfo = type.GetTypeInfo();
-            }
-#endif
-
             public QueryCacheType CacheType { get; }
 
             public Type SqlBuilderType { get; }
