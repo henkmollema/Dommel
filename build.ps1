@@ -25,13 +25,20 @@ echo "build: Build version suffix is $buildSuffix"
 exec { & dotnet build Dommel.sln -c Release --version-suffix=$buildSuffix /p:CI=true }
 
 echo "build: Executing tests"
-exec { & dotnet test test/Dommel.Tests -c Release --no-build  /p:CollectCoverage=true /p:CoverletOutputFormat=opencover }
-exec { & dotnet test test/Dommel.IntegrationTests -c Release --no-build  /p:CollectCoverage=true /p:CoverletOutputFormat=opencover }
-exec { & dotnet test test/Dommel.Json.Tests -c Release --no-build  /p:CollectCoverage=true /p:CoverletOutputFormat=opencover }
-exec { & dotnet test test/Dommel.Json.IntegrationTests -c Release --no-build  /p:CollectCoverage=true /p:CoverletOutputFormat=opencover }
+#exec { & dotnet test test/Dommel.Tests -c Release --no-build }
+#exec { & dotnet test test/Dommel.IntegrationTests -c Release --no-build }
+#exec { & dotnet test test/Dommel.Json.Tests -c Release --no-build }
+#exec { & dotnet test test/Dommel.Json.IntegrationTests -c Release --no-build }
 
-echo "build: Pushing code coverage metrics"
-exec { & codecov -f "test/Dommel.Tests/coverage.netcoreapp3.1.opencover.xml" -t $env:CODECOV_TOKEN }
+echo "build: Calculating code coverage metrics"
+exec { & dotnet test test/Dommel.Tests -c Release -f netcoreapp3.1 --no-build /p:CollectCoverage=true /p:CoverletOutputFormat=json }
+
+Push-Location -Path "test/Dommel.IntegrationTests"
+exec { & dotnet test -c Release -f netcoreapp3.1 --no-build /p:CollectCoverage=true /p:CoverletOutputFormat=json /p:MergeWith="..\Dommel.Tests\coverage.netcoreapp3.1.json" }
+if ($env:APPVEYOR_BUILD_NUMBER) {
+    exec { & codecov -f "test/Dommel.Tests/coverage.netcoreapp3.1.opencover.xml" -t $env:CODECOV_TOKEN }
+}
+Pop-Location
 
 if ($env:APPVEYOR_BUILD_NUMBER) {
     $versionSuffix = "{0:00000}" -f [convert]::ToInt32("0" + $env:APPVEYOR_BUILD_NUMBER, 10)
