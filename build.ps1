@@ -36,7 +36,7 @@ exec { & dotnet test test/Dommel.Tests -c Release -f netcoreapp3.1 --no-build /p
 Push-Location -Path "test/Dommel.IntegrationTests"
 exec { & dotnet test -c Release -f netcoreapp3.1 --no-build /p:CollectCoverage=true /p:CoverletOutputFormat=json /p:MergeWith="..\Dommel.Tests\coverage.netcoreapp3.1.json" }
 if ($env:APPVEYOR_BUILD_NUMBER) {
-    exec { & codecov -f "test/Dommel.IntegrationTests/coverage.netcoreapp3.1.json" -t $env:CODECOV_TOKEN }
+    exec { & codecov -f "coverage.netcoreapp3.1.json" -t $env:CODECOV_TOKEN }
 }
 Pop-Location
 
