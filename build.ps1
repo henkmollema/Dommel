@@ -53,10 +53,10 @@ Pop-Location
 
 #
 # Test coverage for Dommel.Json
-exec { & dotnet test test/Dommel.Json.Tests -c Release -f netcoreapp3.1 --no-build /p:CollectCoverage=true }
+exec { & dotnet test test/Dommel.Json.Tests -c Release -f netcoreapp3.1 --no-build /p:CollectCoverage=true /p:Include="[Dommel.Json]*" }
 
 Push-Location -Path "test/Dommel.Json.IntegrationTests"
-exec { & dotnet test -c Release -f netcoreapp3.1 --no-build /p:CollectCoverage=true /p:MergeWith="..\Dommel.Json.Tests\coverage.netcoreapp3.1.json" /p:CoverletOutputFormat=opencover }
+exec { & dotnet test -c Release -f netcoreapp3.1 --no-build /p:CollectCoverage=true /p:Include="[Dommel.Json]*" /p:MergeWith="..\Dommel.Json.Tests\coverage.netcoreapp3.1.json" /p:CoverletOutputFormat=opencover }
 if ($env:APPVEYOR_BUILD_NUMBER) {
     exec { & codecov -f "coverage.netcoreapp3.1.opencover.xml" }
 }
