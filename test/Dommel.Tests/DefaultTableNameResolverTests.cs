@@ -6,7 +6,7 @@ namespace Dommel.Tests
 {
     public class DefaultTableNameResolverTests
     {
-        private static readonly DommelMapper.DefaultTableNameResolver Resolver = new DommelMapper.DefaultTableNameResolver();
+        private static readonly DefaultTableNameResolver Resolver = new DefaultTableNameResolver();
 
         [Theory]
         [InlineData(typeof(Product), "Products")]

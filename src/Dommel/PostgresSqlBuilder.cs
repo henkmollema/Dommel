@@ -3,44 +3,41 @@ using System.Linq;
 
 namespace Dommel
 {
-    public static partial class DommelMapper
+    /// <summary>
+    /// <see cref="ISqlBuilder"/> implementation for Postgres.
+    /// </summary>
+    public class PostgresSqlBuilder : ISqlBuilder
     {
-        /// <summary>
-        /// <see cref="ISqlBuilder"/> implementation for Postgres.
-        /// </summary>
-        public class PostgresSqlBuilder : ISqlBuilder
+        /// <inheritdoc/>
+        public virtual string BuildInsert(Type type, string tableName, string[] columnNames, string[] paramNames)
         {
-            /// <inheritdoc/>
-            public virtual string BuildInsert(Type type, string tableName, string[] columnNames, string[] paramNames)
+            if (type == null)
             {
-                if (type == null)
-                {
-                    throw new ArgumentNullException(nameof(type));
-                }
-
-                var sql = $"insert into {tableName} ({string.Join(", ", columnNames)}) values ({string.Join(", ", paramNames)}) ";
-
-                var keyColumns = Resolvers.KeyProperties(type).Where(p => p.IsGenerated).Select(p => Resolvers.Column(p.Property, this));
-                if (keyColumns.Any())
-                {
-                    sql += $"returning ({string.Join(", ", keyColumns)})";
-                }
-
-                return sql;
+                throw new ArgumentNullException(nameof(type));
             }
 
-            /// <inheritdoc/>
-            public virtual string BuildPaging(string? orderBy, int pageNumber, int pageSize)
+            var sql = $"insert into {tableName} ({string.Join(", ", columnNames)}) values ({string.Join(", ", paramNames)}) ";
+
+            var keyColumns = Resolvers.KeyProperties(type).Where(p => p.IsGenerated).Select(p => Resolvers.Column(p.Property, this));
+            if (keyColumns.Any())
             {
-                var start = pageNumber >= 1 ? (pageNumber - 1) * pageSize : 0;
-                return $" {orderBy} OFFSET {start} LIMIT {pageSize}";
+                sql += $"returning ({string.Join(", ", keyColumns)})";
             }
 
-            /// <inheritdoc/>
-            public string PrefixParameter(string paramName) => $"@{paramName}";
-
-            /// <inheritdoc/>
-            public string QuoteIdentifier(string identifier) => $"\"{identifier}\"";
+            return sql;
         }
+
+        /// <inheritdoc/>
+        public virtual string BuildPaging(string? orderBy, int pageNumber, int pageSize)
+        {
+            var start = pageNumber >= 1 ? (pageNumber - 1) * pageSize : 0;
+            return $" {orderBy} OFFSET {start} LIMIT {pageSize}";
+        }
+
+        /// <inheritdoc/>
+        public string PrefixParameter(string paramName) => $"@{paramName}";
+
+        /// <inheritdoc/>
+        public string QuoteIdentifier(string identifier) => $"\"{identifier}\"";
     }
 }

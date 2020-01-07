@@ -27,7 +27,7 @@ namespace Dommel.Json.Tests
             Assert.IsType<SqlServerSqlBuilder>(DommelMapper.SqlBuilders["sqlconnection"]);
             Assert.IsType<SqlServerCeSqlBuilder>(DommelMapper.SqlBuilders["sqlceconnection"]);
             Assert.IsType<SqliteSqlBuilder>(DommelMapper.SqlBuilders["sqliteconnection"]);
-            Assert.IsType<PostgresSqlBuiler>(DommelMapper.SqlBuilders["npgsqlconnection"]);
+            Assert.IsType<PostgresSqlBuilder>(DommelMapper.SqlBuilders["npgsqlconnection"]);
             Assert.IsType<MySqlSqlBuilder>(DommelMapper.SqlBuilders["mysqlconnection"]);
         }
 
@@ -42,7 +42,7 @@ namespace Dommel.Json.Tests
         public void ThrowsWhenNotJsonSqlBuilder()
         {
             var ex = Assert.Throws<InvalidOperationException>(
-                () => DommelMapper.SqlExpressionFactory.Invoke(typeof(Lead), new DommelMapper.MySqlSqlBuilder()));
+                () => DommelMapper.SqlExpressionFactory.Invoke(typeof(Lead), new Dommel.MySqlSqlBuilder()));
             Assert.Equal($"The specified SQL builder type should be assignable from {nameof(IJsonSqlBuilder)}.", ex.Message);
         }
 

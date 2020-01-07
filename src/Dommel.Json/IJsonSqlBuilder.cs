@@ -1,10 +1,10 @@
 ﻿namespace Dommel.Json
 {
     /// <summary>
-    /// Extends the <see cref="DommelMapper.ISqlBuilder"/> with support for
+    /// Extends the <see cref="ISqlBuilder"/> with support for
     /// creating JSON value expressions.
     /// </summary>
-    public interface IJsonSqlBuilder : DommelMapper.ISqlBuilder
+    public interface IJsonSqlBuilder : ISqlBuilder
     {
         /// <summary>
         /// Creates a JSON value expression for the specified <paramref name="column"/> and <paramref name="path"/>.
@@ -18,7 +18,7 @@
     /// <summary>
     /// JSON SQL builder for SQL server.
     /// </summary>
-    public class SqlServerSqlBuilder : DommelMapper.SqlServerSqlBuilder, IJsonSqlBuilder
+    public class SqlServerSqlBuilder : Dommel.SqlServerSqlBuilder, IJsonSqlBuilder
     {
         /// <inheritdoc />
         public string JsonValue(string column, string path) => $"JSON_VALUE({column}, '$.{path}')";
@@ -27,7 +27,7 @@
     /// <summary>
     /// JSON SQL builder for MySQL.
     /// </summary>
-    public class MySqlSqlBuilder : DommelMapper.MySqlSqlBuilder, IJsonSqlBuilder
+    public class MySqlSqlBuilder : Dommel.MySqlSqlBuilder, IJsonSqlBuilder
     {
         /// <inheritdoc />
         public string JsonValue(string column, string path) => $"{column}->'$.{path}'";
@@ -36,7 +36,7 @@
     /// <summary>
     /// JSON SQL builder for PostgreSQL.
     /// </summary>
-    public class PostgresSqlBuiler : DommelMapper.PostgresSqlBuilder, IJsonSqlBuilder
+    public class PostgresSqlBuilder : Dommel.PostgresSqlBuilder, IJsonSqlBuilder
     {
         /// <inheritdoc />
         public string JsonValue(string column, string path) => $"{column}->>'{path}'";
@@ -45,7 +45,7 @@
     /// <summary>
     /// JSON SQL builder for SQLite.
     /// </summary>
-    public class SqliteSqlBuilder : DommelMapper.SqliteSqlBuilder, IJsonSqlBuilder
+    public class SqliteSqlBuilder : Dommel.SqliteSqlBuilder, IJsonSqlBuilder
     {
         /// <inheritdoc />
         public string JsonValue(string column, string path) => $"JSON_EXTRACT({column}, '$.{path}')";
@@ -54,7 +54,7 @@
     /// <summary>
     /// JSON SQL builder for SQL Server CE.
     /// </summary>
-    public class SqlServerCeSqlBuilder : DommelMapper.SqlServerCeSqlBuilder, IJsonSqlBuilder
+    public class SqlServerCeSqlBuilder : Dommel.SqlServerCeSqlBuilder, IJsonSqlBuilder
     {
         /// <inheritdoc />
         public string JsonValue(string column, string path) => $"JSON_VALUE({column}, '$.{path}')";

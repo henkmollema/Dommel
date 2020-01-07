@@ -64,7 +64,7 @@ namespace Dommel.Json.Tests
         public void GeneratesPostgresJsonValue()
         {
             // Arrange
-            var sql = new JsonSqlExpression<Lead>(new PostgresSqlBuiler());
+            var sql = new JsonSqlExpression<Lead>(new PostgresSqlBuilder());
 
             // Act
             var str = sql.Where(p => p.Data.LastName == "Foo").ToSql(out var parameters);
