@@ -31,12 +31,16 @@ echo "build: Executing tests"
 #exec { & dotnet test test/Dommel.Json.IntegrationTests -c Release --no-build }
 
 echo "build: Calculating code coverage metrics"
-exec { & dotnet test test/Dommel.Tests -c Release -f netcoreapp3.1 --no-build /p:CollectCoverage=true /p:CoverletOutputFormat=json }
 
+# Create the first coverage in the coverlet JSON format to allow merging
+exec { & dotnet test test/Dommel.Tests -c Release -f netcoreapp3.1 --no-build /p:CollectCoverage=true }
+
+# Merge this coverage output with the previous coverage output, this time
+# create a report using the opencover format which codecov can parse
 Push-Location -Path "test/Dommel.IntegrationTests"
-exec { & dotnet test -c Release -f netcoreapp3.1 --no-build /p:CollectCoverage=true /p:CoverletOutputFormat=json /p:MergeWith="..\Dommel.Tests\coverage.netcoreapp3.1.json" }
+exec { & dotnet test -c Release -f netcoreapp3.1 --no-build /p:CollectCoverage=true /p:MergeWith="..\Dommel.Tests\coverage.netcoreapp3.1.json" /p:CoverletOutputFormat=opencover }
 if ($env:APPVEYOR_BUILD_NUMBER) {
-    exec { & codecov -f "coverage.netcoreapp3.1.json" -t $env:CODECOV_TOKEN }
+    exec { & codecov -f "coverage.opencover.netcoreapp3.1.xml" }
 }
 Pop-Location
 
