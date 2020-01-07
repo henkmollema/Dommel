@@ -30,7 +30,7 @@ deploy:
 - provider: NuGet
   server: https://www.myget.org/F/dommel-ci/api/v2/package
   api_key:
-    secure: '{MYGET_KEY}'
+    secure: Ybv0BFFOnHJGoMHW85oav//wa7wExj2QRP7KV1Zegn7SMzNYPyv/DFF1IdzeonJA
   skip_symbols: true
   on:
     branch: master
