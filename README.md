@@ -1,9 +1,9 @@
 # Dommel
 CRUD operations with Dapper made simple.
 
-| Windows | Linux | NuGet | MyGet |
-| ------- | ----- | ----- | ----- |
-| [![AppVeyor](https://img.shields.io/appveyor/ci/henkmollema/dommel/master.svg?style=flat-square)](https://ci.appveyor.com/project/henkmollema/dommel) | [![Travis](https://img.shields.io/travis/henkmollema/Dommel.svg?style=flat-square)](https://travis-ci.org/henkmollema/Dommel) | [![NuGet](https://img.shields.io/nuget/vpre/Dommel.svg?style=flat-square)](https://www.nuget.org/packages/Dommel) | [![MyGet Pre Release](https://img.shields.io/myget/dommel-ci/vpre/Dommel.svg?style=flat-square)](https://www.myget.org/feed/dommel-ci/package/nuget/Dommel) |
+| Windows | Linux | NuGet | MyGet | Test Coverage |
+| ------- | ----- | ----- | ----- | ------------- |
+| [![AppVeyor](https://img.shields.io/appveyor/ci/henkmollema/dommel/master.svg?style=flat-square)](https://ci.appveyor.com/project/henkmollema/dommel) | [![Travis](https://img.shields.io/travis/henkmollema/Dommel.svg?style=flat-square)](https://travis-ci.org/henkmollema/Dommel) | [![NuGet](https://img.shields.io/nuget/vpre/Dommel.svg?style=flat-square)](https://www.nuget.org/packages/Dommel) | [![MyGet Pre Release](https://img.shields.io/myget/dommel-ci/vpre/Dommel.svg?style=flat-square)](https://www.myget.org/feed/dommel-ci/package/nuget/Dommel) | [![codecov](https://codecov.io/gh/henkmollema/Dommel/branch/master/graph/badge.svg)](https://codecov.io/gh/henkmollema/Dommel) |
 
 <hr>
 
@@ -45,7 +45,7 @@ Dommel allows you to specify a predicate which is being translated into a SQL ex
 using (var con = new SqlConnection())
 {
    var products = con.Select<Product>(p => p.Name == "Awesome bike");
-   
+
    var products = con.Select<Product>(p => p.Created < new DateTime(2014, 12, 31) && p.InStock > 5);
 }
 ```
@@ -97,7 +97,7 @@ using (var con = new SqlConnection())
 Dommel is able to generate join-queries based on the specified multi mapping function. Consider the following POCO's:
 
 ```cs
-public class Product 
+public class Product
 {
     public int Id { get; set; }
 
@@ -111,7 +111,7 @@ public class Product
 }
 
 
-public class Category 
+public class Category
 {
     public int Id { get; set; }
 
@@ -122,7 +122,7 @@ public class Category
 The `Product` with its associated `Category` can be queried toegether using the `Get<T1, T2, ..., TResult>()` method:
 
 ```cs
-var product = product.Get<Product, Category, Product>(1, (product, category) => 
+var product = product.Get<Product, Category, Product>(1, (product, category) =>
 {
     product.Category = category;
     return product;
@@ -138,7 +138,7 @@ var product = product.Get<Product, Category, Product>(1, (product, category) =>
 One-to-many relationships work in a similar way, expect that the foreign key is defined on the _joined_ type rather than the _source_ type. For example:
 
 ```cs
-public class Order 
+public class Order
 {
     public int Id { get; set; }
 
@@ -160,7 +160,7 @@ public class OrderLine
 The `Order` with its child `OrderLine`'s can be queried toegether using the `Get<T1, T2, ..., TResult>()` method:
 
 ```cs
-var product = product.Get<Order, OrderLine, Order>(1, (order, line) => 
+var product = product.Get<Order, OrderLine, Order>(1, (order, line) =>
 {
     // Naive mapping example, in reality it requires more gymnastics
     order.OrderLines.Add(line);
