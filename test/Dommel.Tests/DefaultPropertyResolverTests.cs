@@ -18,7 +18,18 @@ namespace Dommel.Tests
             var props = resolver.ResolveProperties(type).ToArray();
 
             // Assert
-            Assert.Equal(type.GetProperties().Skip(1).ToArray(), props);
+            Assert.Collection(props,
+                x => Assert.Equal(x, type.GetProperty("Object")),
+                x => Assert.Equal(x, type.GetProperty("String")),
+                x => Assert.Equal(x, type.GetProperty("Guid")),
+                x => Assert.Equal(x, type.GetProperty("Decimal")),
+                x => Assert.Equal(x, type.GetProperty("Double")),
+                x => Assert.Equal(x, type.GetProperty("Float")),
+                x => Assert.Equal(x, type.GetProperty("DateTime")),
+                x => Assert.Equal(x, type.GetProperty("DateTimeOffset")),
+                x => Assert.Equal(x, type.GetProperty("Timespan")),
+                x => Assert.Equal(x, type.GetProperty("Bytes"))
+            );
         }
 
         [Fact]
@@ -32,7 +43,17 @@ namespace Dommel.Tests
             var props = resolver.ResolveProperties(type).ToArray();
 
             // Assert
-            Assert.Equal(type.GetProperties().Skip(2).ToArray(), props);
+            Assert.Collection(props,
+                x => Assert.Equal(x, type.GetProperty("String")),
+                x => Assert.Equal(x, type.GetProperty("Guid")),
+                x => Assert.Equal(x, type.GetProperty("Decimal")),
+                x => Assert.Equal(x, type.GetProperty("Double")),
+                x => Assert.Equal(x, type.GetProperty("Float")),
+                x => Assert.Equal(x, type.GetProperty("DateTime")),
+                x => Assert.Equal(x, type.GetProperty("DateTimeOffset")),
+                x => Assert.Equal(x, type.GetProperty("Timespan")),
+                x => Assert.Equal(x, type.GetProperty("Bytes"))
+            );
         }
 
         [Fact]
@@ -62,6 +83,8 @@ namespace Dommel.Tests
 
             public Bar? Baz { get; set; }
 
+            //
+            // 10 primitive property types from here
             public object? Object { get; set; }
 
             public string? String { get; set; }
@@ -81,6 +104,12 @@ namespace Dommel.Tests
             public TimeSpan? Timespan { get; set; }
 
             public byte[]? Bytes { get; set; }
+
+            //
+            // Properties without a (public) setter
+            public string? ReadonlyProp { get; }
+
+            public string? PrivateSetterProp { get; private set; }
         }
 
         private class Bar

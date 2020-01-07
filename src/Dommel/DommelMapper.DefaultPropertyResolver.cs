@@ -12,7 +12,7 @@ namespace Dommel
         /// </summary>
         public class DefaultPropertyResolver : IPropertyResolver
         {
-            private static readonly HashSet<Type> _primitiveTypes = new HashSet<Type>
+            private static readonly HashSet<Type> PrimitiveTypesSet = new HashSet<Type>
             {
                 typeof(object),
                 typeof(string),
@@ -32,13 +32,13 @@ namespace Dommel
             /// <param name="type">The type to resolve the properties to be mapped for.</param>
             /// <returns>A collection of <see cref="PropertyInfo"/>'s of the <paramref name="type"/>.</returns>
             public virtual IEnumerable<PropertyInfo> ResolveProperties(Type type) =>
-                FilterComplexTypes(type.GetRuntimeProperties()).Where(p => !p.IsDefined(typeof(IgnoreAttribute)));
+                FilterComplexTypes(type.GetRuntimeProperties()).Where(p => p.GetSetMethod() is object && !p.IsDefined(typeof(IgnoreAttribute)));
 
             /// <summary>
             /// Gets a collection of types that are considered 'primitive' for Dommel but are not for the CLR.
             /// Override this to specify your own set of types.
             /// </summary>
-            protected virtual HashSet<Type> PrimitiveTypes => _primitiveTypes;
+            protected virtual HashSet<Type> PrimitiveTypes => PrimitiveTypesSet;
 
             /// <summary>
             /// Filters the complex types from the specified collection of properties.

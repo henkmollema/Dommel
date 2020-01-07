@@ -24,6 +24,13 @@ namespace Dommel.Tests
         }
 
         [Fact]
+        public void Select_ThrowsForEmptyProjection()
+        {
+            var ex = Assert.Throws<ArgumentException>("selector", () => _sqlExpression.Select(x => new object()));
+            Assert.Equal(new ArgumentException("Projection over type 'Product' yielded no properties.", "selector").Message, ex.Message);
+        }
+
+        [Fact]
         public void Select_SingleProperty()
         {
             var sql = _sqlExpression

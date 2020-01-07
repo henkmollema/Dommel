@@ -87,7 +87,12 @@ namespace Dommel
                 var obj = selector.Invoke(NewEntityFunc());
 
                 // Resolve properties of anonymous type
-                var props = new DefaultPropertyResolver().ResolveProperties(obj.GetType());
+                var props = obj.GetType().GetProperties();
+                if (props.Length == 0)
+                {
+                    throw new ArgumentException($"Projection over type '{typeof(TEntity).Name}' yielded no properties.", nameof(selector));
+                }
+
                 var columns = props.Select(p => Resolvers.Column(p, SqlBuilder));
 
                 // Create the select query
