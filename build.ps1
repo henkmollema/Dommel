@@ -40,7 +40,7 @@ exec { & dotnet test test/Dommel.Tests -c Release -f netcoreapp3.1 --no-build /p
 Push-Location -Path "test/Dommel.IntegrationTests"
 exec { & dotnet test -c Release -f netcoreapp3.1 --no-build /p:CollectCoverage=true /p:MergeWith="..\Dommel.Tests\coverage.netcoreapp3.1.json" /p:CoverletOutputFormat=opencover }
 if ($env:APPVEYOR_BUILD_NUMBER) {
-    exec { & codecov -f "coverage.opencover.netcoreapp3.1.xml" }
+    exec { & codecov -f "coverage.netcoreapp3.1.opencover.xml" }
 }
 Pop-Location
 
