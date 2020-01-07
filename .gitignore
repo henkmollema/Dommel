@@ -20,4 +20,5 @@ nuget.exe
 .build/
 *.ldf
 coveragereport/
-coverage.opencover.xml
+coverage*.opencover.xml
+coverage*.json
