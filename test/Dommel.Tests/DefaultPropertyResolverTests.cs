@@ -11,7 +11,7 @@ namespace Dommel.Tests
         public void ResolvesSimpleProperties()
         {
             // Arrange
-            var resolver = new DommelMapper.DefaultPropertyResolver();
+            var resolver = new DefaultPropertyResolver();
             var type = typeof(Foo);
 
             // Act
@@ -60,7 +60,7 @@ namespace Dommel.Tests
         public void IgnoresIgnoreAttribute()
         {
             // Arrange
-            var resolver = new DommelMapper.DefaultPropertyResolver();
+            var resolver = new DefaultPropertyResolver();
             var type = typeof(Bar);
 
             // Act
@@ -71,7 +71,7 @@ namespace Dommel.Tests
             Assert.Equal(type.GetProperty("Id"), prop);
         }
 
-        private class CustomResolver : DommelMapper.DefaultPropertyResolver
+        private class CustomResolver : DefaultPropertyResolver
         {
             // Create a new hashset without the object type.
             protected override HashSet<Type> PrimitiveTypes => new HashSet<Type>(base.PrimitiveTypes.Skip(1));

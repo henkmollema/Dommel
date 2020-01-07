@@ -1,43 +1,37 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Reflection;
 
 namespace Dommel
 {
-    public static partial class DommelMapper
+    internal enum QueryCacheType
     {
-        internal enum QueryCacheType
+        Get,
+        GetByMultipleIds,
+        GetAll,
+        Project,
+        ProjectAll,
+        Count,
+        Insert,
+        Update,
+        Delete,
+        DeleteAll,
+    }
+
+    internal struct QueryCacheKey : IEquatable<QueryCacheKey>
+    {
+        public QueryCacheKey(QueryCacheType cacheType, ISqlBuilder sqlBuilder, MemberInfo memberInfo)
         {
-            Get,
-            GetByMultipleIds,
-            GetAll,
-            Project,
-            ProjectAll,
-            Count,
-            Insert,
-            Update,
-            Delete,
-            DeleteAll,
+            SqlBuilderType = sqlBuilder.GetType();
+            CacheType = cacheType;
+            MemberInfo = memberInfo;
         }
 
-        internal static ConcurrentDictionary<QueryCacheKey, string> QueryCache { get; } = new ConcurrentDictionary<QueryCacheKey, string>();
+        public QueryCacheType CacheType { get; }
 
-        internal struct QueryCacheKey : IEquatable<QueryCacheKey>
-        {
-            public QueryCacheKey(QueryCacheType cacheType, ISqlBuilder sqlBuilder, MemberInfo memberInfo)
-            {
-                SqlBuilderType = sqlBuilder.GetType();
-                CacheType = cacheType;
-                MemberInfo = memberInfo;
-            }
+        public Type SqlBuilderType { get; }
 
-            public QueryCacheType CacheType { get; }
+        public MemberInfo MemberInfo { get; }
 
-            public Type SqlBuilderType { get; }
-
-            public MemberInfo MemberInfo { get; }
-
-            public bool Equals(QueryCacheKey other) => CacheType == other.CacheType && SqlBuilderType == other.SqlBuilderType && MemberInfo == other.MemberInfo;
-        }
+        public bool Equals(QueryCacheKey other) => CacheType == other.CacheType && SqlBuilderType == other.SqlBuilderType && MemberInfo == other.MemberInfo;
     }
 }

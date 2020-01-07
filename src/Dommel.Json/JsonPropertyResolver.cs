@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace Dommel.Json
 {
-    internal class JsonPropertyResolver : DommelMapper.DefaultPropertyResolver
+    internal class JsonPropertyResolver : DefaultPropertyResolver
     {
         private readonly HashSet<Type> _jsonPrimitiveTypes;
 
