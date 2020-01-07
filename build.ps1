@@ -31,7 +31,7 @@ exec { & dotnet test test/Dommel.Json.Tests -c Release --no-build  /p:CollectCov
 exec { & dotnet test test/Dommel.Json.IntegrationTests -c Release --no-build  /p:CollectCoverage=true /p:CoverletOutputFormat=opencover }
 
 echo "build: Pushing code coverage metrics"
-exec { & codecov -f "test/Dommel.Test/coverage.netcoreapp3.1.opencover.xml" -t $env:CODECOV_TOKEN }
+exec { & codecov -f "test/Dommel.Tests/coverage.netcoreapp3.1.opencover.xml" -t $env:CODECOV_TOKEN }
 
 if ($env:APPVEYOR_BUILD_NUMBER) {
     $versionSuffix = "{0:00000}" -f [convert]::ToInt32("0" + $env:APPVEYOR_BUILD_NUMBER, 10)
