@@ -5,7 +5,6 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Linq.Expressions;
 using Xunit;
-using static Dommel.DommelMapper;
 
 namespace Dommel.Tests
 {

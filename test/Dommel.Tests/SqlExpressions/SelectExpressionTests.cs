@@ -1,6 +1,5 @@
 ﻿using System;
 using Xunit;
-using static Dommel.DommelMapper;
 
 namespace Dommel.Tests
 {
@@ -18,10 +17,7 @@ namespace Dommel.Tests
         }
 
         [Fact]
-        public void Select_ThrowsForNullSelector()
-        {
-            Assert.Throws<ArgumentNullException>("selector", () => _sqlExpression.Select(null!));
-        }
+        public void Select_ThrowsForNullSelector() => Assert.Throws<ArgumentNullException>("selector", () => _sqlExpression.Select(null!));
 
         [Fact]
         public void Select_ThrowsForEmptyProjection()

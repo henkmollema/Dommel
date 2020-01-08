@@ -15,7 +15,7 @@ namespace Dommel
         public virtual string BuildPaging(string? orderBy, int pageNumber, int pageSize)
         {
             var start = pageNumber >= 1 ? (pageNumber - 1) * pageSize : 0;
-            return $" {orderBy} LIMIT {start}, {pageSize}";
+            return $" {orderBy} limit {start}, {pageSize}";
         }
 
         /// <inheritdoc/>
