@@ -30,7 +30,7 @@ namespace Dommel.IntegrationTests
             Assert.NotNull(product);
 
             product.Name = "Test";
-            con.Update(product);
+            await con.UpdateAsync(product);
 
             var newProduct = await con.GetAsync<Product>(1);
             Assert.Equal("Test", newProduct.Name);

@@ -34,23 +34,23 @@ namespace Dommel.IntegrationTests
                 var categoryId = Convert.ToInt32(await connection.InsertAsync(new Category { Name = "Food" }));
 
                 var products = new List<Product>
-                    {
-                        new Product { CategoryId = categoryId, Name = "Chai" },
-                        new Product { CategoryId = categoryId, Name = "Chang" },
-                        new Product { CategoryId = categoryId, Name = "Aniseed Syrup" },
-                        new Product { CategoryId = categoryId, Name = "Chef Anton's Cajun Seasoning" },
-                        new Product { CategoryId = categoryId, Name = "Chef Anton's Gumbo Mix" },
+                {
+                    new Product { CategoryId = categoryId, Name = "Chai" },
+                    new Product { CategoryId = categoryId, Name = "Chang" },
+                    new Product { CategoryId = categoryId, Name = "Aniseed Syrup" },
+                    new Product { CategoryId = categoryId, Name = "Chef Anton's Cajun Seasoning" },
+                    new Product { CategoryId = categoryId, Name = "Chef Anton's Gumbo Mix" },
 
-                        new Product { CategoryId = categoryId, Name = "Chai 2" },
-                        new Product { CategoryId = categoryId, Name = "Chang 2" },
-                        new Product { CategoryId = categoryId, Name = "Aniseed Syrup 2" },
-                        new Product { CategoryId = categoryId, Name = "Chef Anton's Cajun Seasoning 2" },
-                        new Product { CategoryId = categoryId, Name = "Chef Anton's Gumbo Mix 2" },
+                    new Product { CategoryId = categoryId, Name = "Chai 2" },
+                    new Product { CategoryId = categoryId, Name = "Chang 2" },
+                    new Product { CategoryId = categoryId, Name = "Aniseed Syrup 2" },
+                    new Product { CategoryId = categoryId, Name = "Chef Anton's Cajun Seasoning 2" },
+                    new Product { CategoryId = categoryId, Name = "Chef Anton's Gumbo Mix 2" },
 
-                        new Product { Name = "Foo" }, // 11
-                        new Product { Name = "Bar" }, // 12
-                        new Product { Name = "Baz" }, // 13
-                    };
+                    new Product { Name = "Foo" }, // 11
+                    new Product { Name = "Bar" }, // 12
+                    new Product { Name = "Baz" }, // 13
+                };
 
                 await connection.InsertAllAsync(products);
 
@@ -70,6 +70,11 @@ namespace Dommel.IntegrationTests
                 // Foo's and Bar's for delete queries
                 await connection.InsertAllAsync(Enumerable.Range(0, 5).Select(_ => new Foo()));
                 await connection.InsertAllAsync(Enumerable.Range(0, 5).Select(_ => new Bar()));
+
+                // Composite key entities
+                await connection.InsertAsync(new ProductsCategories { ProductId = 1, CategoryId = 1 });
+                await connection.InsertAsync(new ProductsCategories { ProductId = 1, CategoryId = 2 });
+                await connection.InsertAsync(new ProductsCategories { ProductId = 3, CategoryId = 1 });
             }
         }
 
@@ -80,14 +85,18 @@ namespace Dommel.IntegrationTests
         protected virtual async Task DropTables()
         {
             using var con = GetConnection(DefaultDatabaseName);
-            await con.ExecuteAsync(@"
-DROP TABLE Categories;
-DROP TABLE Products;
-DROP TABLE Orders;
-DROP TABLE OrderLines;
-DROP TABLE Foos;
-DROP TABLE Bars;
-DROP TABLE Bazs;");
+            var sqlBuilder = DommelMapper.GetSqlBuilder(con);
+            string Quote(string s) => sqlBuilder.QuoteIdentifier(s);
+
+            await con.ExecuteAsync($@"
+DROP TABLE {Quote("Categories")};
+DROP TABLE {Quote("Products")};
+DROP TABLE {Quote("ProductsCategories")};
+DROP TABLE {Quote("Orders")};
+DROP TABLE {Quote("OrderLines")};
+DROP TABLE {Quote("Foos")};
+DROP TABLE {Quote("Bars")};
+DROP TABLE {Quote("Bazs")};");
         }
 
         public virtual async Task DisposeAsync() => await DropTables();

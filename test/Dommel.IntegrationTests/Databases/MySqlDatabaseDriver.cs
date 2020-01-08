@@ -36,6 +36,7 @@ namespace Dommel.IntegrationTests
             var sql = @"
 SELECT * FROM information_schema.tables where table_name = 'Products' LIMIT 1;
 CREATE TABLE IF NOT EXISTS Categories (CategoryId INT UNSIGNED AUTO_INCREMENT PRIMARY KEY, Name VARCHAR(255));
+CREATE TABLE IF NOT EXISTS ProductsCategories (ProductId INT, CategoryId INT, PRIMARY KEY (ProductId, CategoryId));
 CREATE TABLE IF NOT EXISTS Products (ProductId INT UNSIGNED AUTO_INCREMENT PRIMARY KEY, CategoryId int, Name VARCHAR(255));
 CREATE TABLE IF NOT EXISTS Orders (Id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY, Created DATETIME NOT NULL);
 CREATE TABLE IF NOT EXISTS OrderLines (Id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY, OrderId int, Line VARCHAR(255));

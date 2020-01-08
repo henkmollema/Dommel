@@ -1,5 +1,4 @@
 ﻿using System.Data.Common;
-using System.Threading;
 using System.Threading.Tasks;
 using Dapper;
 using Npgsql;
@@ -47,6 +46,7 @@ namespace Dommel.IntegrationTests
 SELECT * FROM information_schema.tables where table_name = 'Products' LIMIT 1;
 CREATE TABLE IF NOT EXISTS ""Categories"" (""CategoryId"" serial primary key, ""Name"" VARCHAR(255));
 CREATE TABLE IF NOT EXISTS ""Products"" (""ProductId"" serial primary key, ""CategoryId"" int, ""Name"" VARCHAR(255));
+CREATE TABLE IF NOT EXISTS ""ProductsCategories"" (""ProductId"" INT, ""CategoryId"" INT, PRIMARY KEY (""ProductId"", ""CategoryId""));
 CREATE TABLE IF NOT EXISTS ""Orders"" (""Id"" serial primary key, ""Created"" TIMESTAMP NOT NULL);
 CREATE TABLE IF NOT EXISTS ""OrderLines"" (""Id"" serial primary key, ""OrderId"" int, ""Line"" VARCHAR(255));
 CREATE TABLE IF NOT EXISTS ""Foos"" (""Id"" serial primary key, ""Name"" VARCHAR(255));
@@ -56,20 +56,6 @@ CREATE TABLE IF NOT EXISTS ""Bazs"" (""BazId"" uuid primary key, ""Name"" VARCHA
 
             // No result means the tables were just created
             return created == null;
-        }
-
-        protected override async Task DropTables()
-        {
-            using var con = GetConnection(DefaultDatabaseName);
-            await con.ExecuteAsync(@"
-DROP TABLE ""Categories"";
-DROP TABLE ""Products"";
-DROP TABLE ""Orders"";
-DROP TABLE ""OrderLines"";
-DROP TABLE ""Foos"";
-DROP TABLE ""Bars"";
-DROP TABLE ""Bazs"";");
-            con.Close();
         }
     }
 }
