@@ -35,8 +35,8 @@ namespace Dommel
                 return oneToManyFk;
             }
 
-            var msg = $"Could not resolve foreign key property. Source type '{sourceType.FullName}'; including type: '{includingType.FullName}'.";
-            throw new Exception(msg);
+            throw new InvalidOperationException(
+                $"Could not resolve foreign key property. Source type '{sourceType.FullName}'; including type: '{includingType.FullName}'.");
         }
 
         private static PropertyInfo? ResolveOneToOne(Type sourceType, Type includingType)

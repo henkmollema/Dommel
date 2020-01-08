@@ -1,14 +1,22 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using Xunit;
-using static Dommel.DommelMapper;
 
 namespace Dommel.Tests
 {
     public class DefaultForeignKeyPropertyResolverTests
     {
         [Fact]
-        public void Resolves_OneToOne_WithDefaultConvetions()
+        public void Resolves_ThrowsWhenUnableToFind()
+        {
+            var resolver = new DefaultForeignKeyPropertyResolver();
+            var fk = Assert.Throws<InvalidOperationException>(() => resolver.ResolveForeignKeyProperty(typeof(Product), typeof(Product), out var fkRelation));
+            Assert.Equal("Could not resolve foreign key property. Source type 'Dommel.Tests.Product'; including type: 'Dommel.Tests.Product'.", fk.Message);
+        }
+
+        [Fact]
+        public void Resolves_OneToOne_WithDefaultConventions()
         {
             // Arrange
             var resolver = new DefaultForeignKeyPropertyResolver();
@@ -22,7 +30,7 @@ namespace Dommel.Tests
         }
 
         [Fact]
-        public void Resolves_OneToMany_WithDefaultConvetions()
+        public void Resolves_OneToMany_WithDefaultConventions()
         {
             // Arrange
             var resolver = new DefaultForeignKeyPropertyResolver();
