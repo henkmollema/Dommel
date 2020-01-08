@@ -88,6 +88,26 @@ namespace Dommel.IntegrationTests
             Assert.Equal(1, product.ProductId);
             Assert.Equal(1, product.CategoryId);
         }
+
+        [Theory]
+        [ClassData(typeof(DatabaseTestData))]
+        public void Get_ThrowsWhenCompositeKeyArgumentsDontMatch(DatabaseDriver database)
+        {
+            DommelMapper.QueryCache.Clear();
+            using var con = database.GetConnection();
+            var ex = Assert.Throws<InvalidOperationException>(() => con.Get<ProductsCategories>(1, 2, 3));
+            Assert.Equal("Number of key columns (2) of type ProductsCategories does not match with the number of specified IDs (3).", ex.Message);
+        }
+
+        [Theory]
+        [ClassData(typeof(DatabaseTestData))]
+        public async Task GetAsync_ThrowsWhenCompositeKeyArgumentsDontMatch(DatabaseDriver database)
+        {
+            DommelMapper.QueryCache.Clear();
+            using var con = database.GetConnection();
+            var ex = await Assert.ThrowsAsync<InvalidOperationException>(() => con.GetAsync<ProductsCategories>(1, 2, 3));
+            Assert.Equal("Number of key columns (2) of type ProductsCategories does not match with the number of specified IDs (3).", ex.Message);
+        }
     }
 
     public class ProductsCategories
