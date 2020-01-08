@@ -81,6 +81,10 @@ namespace Dommel.Json.Tests
         }
 
         [Fact]
+        public void ThrowsWhenNullOptions() =>
+            Assert.Throws<ArgumentNullException>("options", () => DommelJsonMapper.AddJson(options: null!));
+
+        [Fact]
         public void ThrowsWhenNullEntityAssemblies()
         {
             var ex = Assert.Throws<ArgumentException>("options", () => DommelJsonMapper.AddJson(new DommelJsonOptions()));
