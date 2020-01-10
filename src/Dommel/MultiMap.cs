@@ -661,7 +661,7 @@ namespace Dommel
             .Where(t => t != typeof(DontMap))
             .ToArray();
 
-            var sql = BuildMultiMapQuery(connection, resultType, includeTypes, id, out var parameters);
+            var sql = BuildMultiMapQuery(GetSqlBuilder(connection), resultType, includeTypes, id, out var parameters);
             LogQuery<TReturn>(sql);
             var splitOn = CreateSplitOn(includeTypes);
 
@@ -693,7 +693,7 @@ namespace Dommel
             .Where(t => t != typeof(DontMap))
             .ToArray();
 
-            var sql = BuildMultiMapQuery(connection, resultType, includeTypes, id, out var parameters);
+            var sql = BuildMultiMapQuery(GetSqlBuilder(connection), resultType, includeTypes, id, out var parameters);
             LogQuery<TReturn>(sql);
             var splitOn = CreateSplitOn(includeTypes);
 
@@ -709,7 +709,7 @@ namespace Dommel
             };
         }
 
-        private static string CreateSplitOn(Type[] includeTypes)
+        internal static string CreateSplitOn(Type[] includeTypes)
         {
             // Create a splitOn parameter from the key properties of the included types
             // We use the column name resolver directly rather than via the Resolvers class
@@ -720,41 +720,36 @@ namespace Dommel
                 .Select(p => ColumnNameResolver.ResolveColumnName(p.Property)));
         }
 
-        private static string BuildMultiMapQuery(IDbConnection connection, Type resultType, Type[] includeTypes, object? id, out DynamicParameters? parameters)
+        internal static string BuildMultiMapQuery(ISqlBuilder sqlBuilder, Type resultType, Type[] includeTypes, object? id, out DynamicParameters? parameters)
         {
-            var resultTableName = Resolvers.Table(resultType, connection);
-            var resultTableKeyColumnName = Resolvers.Column(Resolvers.KeyProperties(resultType).Single().Property, connection);
-            var sqlBuilder = GetSqlBuilder(connection);
+            var resultTableName = Resolvers.Table(resultType, sqlBuilder);
+            var resultTableKeyColumnName = Resolvers.Column(Resolvers.KeyProperties(resultType).Single().Property, sqlBuilder);
             var sql = $"select * from {resultTableName}";
 
             // Determine the table to join with.
             var sourceType = includeTypes[0];
-            var sourceTableName = Resolvers.Table(sourceType, connection);
+            var sourceTableName = Resolvers.Table(sourceType, sqlBuilder);
             for (var i = 1; i < includeTypes.Length; i++)
             {
                 // Determine the table name of the joined table.
                 var includeType = includeTypes[i];
-                var foreignKeyTableName = Resolvers.Table(includeType, connection);
+                var foreignKeyTableName = Resolvers.Table(includeType, sqlBuilder);
 
                 // Determine the foreign key and the relationship type.
                 var foreignKeyProperty = Resolvers.ForeignKeyProperty(sourceType, includeType, out var relation);
-                var foreignKeyPropertyName = Resolvers.Column(foreignKeyProperty, connection);
+                var foreignKeyPropertyName = Resolvers.Column(foreignKeyProperty, sqlBuilder);
 
                 if (relation == ForeignKeyRelation.OneToOne)
                 {
                     // Determine the primary key of the foreign key table.
-                    var foreignKeyTableKeyColumName = Resolvers.Column(Resolvers.KeyProperties(includeType).Single().Property, connection);
+                    var foreignKeyTableKeyColumName = Resolvers.Column(Resolvers.KeyProperties(includeType).Single().Property, sqlBuilder);
                     sql += $" left join {foreignKeyTableName} on {sourceTableName}.{foreignKeyPropertyName} = {foreignKeyTableName}.{foreignKeyTableKeyColumName}";
                 }
                 else if (relation == ForeignKeyRelation.OneToMany)
                 {
                     // Determine the primary key of the source table.
-                    var sourceKeyColumnName = Resolvers.Column(Resolvers.KeyProperties(sourceType).Single().Property, connection);
+                    var sourceKeyColumnName = Resolvers.Column(Resolvers.KeyProperties(sourceType).Single().Property, sqlBuilder);
                     sql += $" left join {foreignKeyTableName} on {sourceTableName}.{sourceKeyColumnName} = {foreignKeyTableName}.{foreignKeyPropertyName}";
-                }
-                else
-                {
-                    throw new NotImplementedException($"Foreign key relation type '{relation}' is not implemented.");
                 }
             }
 
@@ -770,7 +765,7 @@ namespace Dommel
             return sql;
         }
 
-        private class DontMap
+        internal class DontMap
         {
         }
     }

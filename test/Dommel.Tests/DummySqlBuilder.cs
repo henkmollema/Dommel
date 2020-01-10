@@ -1,5 +1,4 @@
 ﻿using System;
-using static Dommel.DommelMapper;
 
 namespace Dommel.Tests
 {

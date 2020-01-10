@@ -1,6 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using Xunit;
-using static Dommel.DommelMapper;
 
 namespace Dommel.Tests
 {
@@ -30,6 +29,13 @@ namespace Dommel.Tests
 
             Assert.Equal(typeof(Foo.BarChild).GetProperty("BarId"), foreignKeyA);
             Assert.Equal(typeof(Baz.BarChild).GetProperty("BarId"), foreignKeyB);
+        }
+
+        [Fact]
+        public void KeyProperty()
+        {
+            var key = Assert.Single(Resolvers.KeyProperties(typeof(Product)));
+            Assert.Equal(typeof(Product).GetProperty("Id"), key.Property);
         }
 
         public class Foo

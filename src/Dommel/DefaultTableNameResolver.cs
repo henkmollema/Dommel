@@ -41,12 +41,6 @@ namespace Dommel
                 name += "s";
             }
 
-            if (typeInfo.IsInterface && name.StartsWith("I", StringComparison.OrdinalIgnoreCase))
-            {
-                // Remove leading I from interfaces
-                name = name.Substring(1);
-            }
-
             return name;
         }
     }

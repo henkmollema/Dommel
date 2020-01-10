@@ -1,6 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using Xunit;
-using static Dommel.DommelMapper;
 
 namespace Dommel.Tests
 {

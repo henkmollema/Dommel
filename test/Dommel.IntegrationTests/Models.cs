@@ -18,6 +18,9 @@ namespace Dommel.IntegrationTests
 
         // The navigation property
         public Category? Category { get; set; }
+
+        // One Product has many Options
+        public List<ProductOption>? Options { get; set; }
     }
 
     public class Category
@@ -26,6 +29,15 @@ namespace Dommel.IntegrationTests
         public int CategoryId { get; set; }
 
         public string? Name { get; set; }
+    }
+
+    public class ProductOption
+    {
+        public int Id { get; set; }
+
+        // One ProductOption has one Product (no navigation)
+        // Represents the foreign key to the product table
+        public int ProductId { get; set; }
     }
 
     public class Order

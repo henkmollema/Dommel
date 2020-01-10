@@ -34,7 +34,7 @@ namespace Dommel
         /// </param>
         public KeyPropertyInfo(PropertyInfo property)
         {
-            Property = property;
+            Property = property ?? throw new ArgumentNullException(nameof(property));
             GeneratedOption = property.GetCustomAttribute<DatabaseGeneratedAttribute>()?.DatabaseGeneratedOption
                 ?? DatabaseGeneratedOption.Identity;
         }
@@ -51,7 +51,7 @@ namespace Dommel
         /// </param>
         public KeyPropertyInfo(PropertyInfo property, DatabaseGeneratedOption generatedOption)
         {
-            Property = property;
+            Property = property ?? throw new ArgumentNullException(nameof(property));
             GeneratedOption = generatedOption;
         }
 
