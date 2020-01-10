@@ -21,6 +21,19 @@ namespace Dommel.IntegrationTests
 
         [Theory]
         [ClassData(typeof(DatabaseTestData))]
+        public void Get_OneToOneOneToMany(DatabaseDriver database)
+        {
+            using var con = database.GetConnection();
+            var product = con.Get<Product, Category, ProductOption, Product>(1);
+            Assert.NotNull(product);
+            Assert.NotNull(product.Category);
+            Assert.Equal("Food", product.Category?.Name);
+            Assert.Equal(product.CategoryId, product.Category?.CategoryId);
+            Assert.NotEmpty(product.Options);
+        }
+
+        [Theory]
+        [ClassData(typeof(DatabaseTestData))]
         public void Get_OneToOneNotExisting(DatabaseDriver database)
         {
             using var con = database.GetConnection();
@@ -60,6 +73,19 @@ namespace Dommel.IntegrationTests
             Assert.NotNull(product.Category);
             Assert.Equal("Food", product.Category?.Name);
             Assert.Equal(product.CategoryId, product.Category?.CategoryId);
+        }
+
+        [Theory]
+        [ClassData(typeof(DatabaseTestData))]
+        public async Task GetAsync_OneToOneOneToMany(DatabaseDriver database)
+        {
+            using var con = database.GetConnection();
+            var product = await con.GetAsync<Product, Category, ProductOption, Product>(1);
+            Assert.NotNull(product);
+            Assert.NotNull(product.Category);
+            Assert.Equal("Food", product.Category?.Name);
+            Assert.Equal(product.CategoryId, product.Category?.CategoryId);
+            Assert.NotEmpty(product.Options);
         }
 
         [Theory]

@@ -43,15 +43,16 @@ namespace Dommel.IntegrationTests
         {
             using var con = GetConnection(DefaultDatabaseName);
             var sql = @"
-SELECT * FROM information_schema.tables where table_name = 'Products' LIMIT 1;
-CREATE TABLE IF NOT EXISTS ""Categories"" (""CategoryId"" serial primary key, ""Name"" VARCHAR(255));
-CREATE TABLE IF NOT EXISTS ""Products"" (""ProductId"" serial primary key, ""CategoryId"" int, ""Name"" VARCHAR(255));
+SELECT * FROM information_schema.tables WHERE table_name = 'Products' LIMIT 1;
+CREATE TABLE IF NOT EXISTS ""Categories"" (""CategoryId"" SERIAL PRIMARY KEY, ""Name"" VARCHAR(255));
+CREATE TABLE IF NOT EXISTS ""Products"" (""ProductId"" SERIAL PRIMARY KEY, ""CategoryId"" INT, ""Name"" VARCHAR(255));
+CREATE TABLE IF NOT EXISTS ""ProductOptions"" (""Id"" SERIAL PRIMARY KEY, ""ProductId"" INT);
 CREATE TABLE IF NOT EXISTS ""ProductsCategories"" (""ProductId"" INT, ""CategoryId"" INT, PRIMARY KEY (""ProductId"", ""CategoryId""));
-CREATE TABLE IF NOT EXISTS ""Orders"" (""Id"" serial primary key, ""Created"" TIMESTAMP NOT NULL);
-CREATE TABLE IF NOT EXISTS ""OrderLines"" (""Id"" serial primary key, ""OrderId"" int, ""Line"" VARCHAR(255));
-CREATE TABLE IF NOT EXISTS ""Foos"" (""Id"" serial primary key, ""Name"" VARCHAR(255));
-CREATE TABLE IF NOT EXISTS ""Bars"" (""Id"" serial primary key, ""Name"" VARCHAR(255));
-CREATE TABLE IF NOT EXISTS ""Bazs"" (""BazId"" uuid primary key, ""Name"" VARCHAR(255));";
+CREATE TABLE IF NOT EXISTS ""Orders"" (""Id"" SERIAL PRIMARY KEY, ""Created"" TIMESTAMP NOT NULL);
+CREATE TABLE IF NOT EXISTS ""OrderLines"" (""Id"" SERIAL PRIMARY KEY, ""OrderId"" INT, ""Line"" VARCHAR(255));
+CREATE TABLE IF NOT EXISTS ""Foos"" (""Id"" SERIAL PRIMARY KEY, ""Name"" VARCHAR(255));
+CREATE TABLE IF NOT EXISTS ""Bars"" (""Id"" SERIAL PRIMARY KEY, ""Name"" VARCHAR(255));
+CREATE TABLE IF NOT EXISTS ""Bazs"" (""BazId"" UUID primary key, ""Name"" VARCHAR(255));";
             var created = await con.ExecuteScalarAsync(sql);
 
             // No result means the tables were just created

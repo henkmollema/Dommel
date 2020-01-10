@@ -54,6 +54,9 @@ namespace Dommel.IntegrationTests
 
                 await connection.InsertAllAsync(products);
 
+                var productId = (await connection.FirstOrDefaultAsync<Product>(x => x.Name == "Chai")).ProductId;
+                await connection.InsertAsync(new ProductOption { ProductId = productId });
+
                 // Order 1
                 var orderId = Convert.ToInt32(await connection.InsertAsync(new Order()));
                 var orderLines = new List<OrderLine>
@@ -92,6 +95,7 @@ namespace Dommel.IntegrationTests
 DROP TABLE {Quote("Categories")};
 DROP TABLE {Quote("Products")};
 DROP TABLE {Quote("ProductsCategories")};
+DROP TABLE {Quote("ProductOptions")};
 DROP TABLE {Quote("Orders")};
 DROP TABLE {Quote("OrderLines")};
 DROP TABLE {Quote("Foos")};

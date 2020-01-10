@@ -31,6 +31,7 @@ namespace Dommel.IntegrationTests
 BEGIN
     CREATE TABLE dbo.Categories (CategoryId INT IDENTITY(1,1) PRIMARY KEY, Name VARCHAR(255));
     CREATE TABLE dbo.Products (ProductId INT IDENTITY(1,1) PRIMARY KEY, CategoryId int, Name VARCHAR(255));
+    CREATE TABLE dbo.ProductOptions (Id INT IDENTITY(1,1) PRIMARY KEY, ProductId INT);
     CREATE TABLE dbo.ProductsCategories (ProductId INT, CategoryId INT, PRIMARY KEY (ProductId, CategoryId));
     CREATE TABLE dbo.Orders (Id INT IDENTITY(1,1) PRIMARY KEY, Created DATETIME NOT NULL);
     CREATE TABLE dbo.OrderLines (Id INT IDENTITY(1,1) PRIMARY KEY, OrderId int, Line VARCHAR(255));
