@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace Dommel.IntegrationTests
@@ -127,5 +128,50 @@ namespace Dommel.IntegrationTests
             var orders = await con.GetAllAsync<Order, OrderLine, Order>();
             Assert.NotEmpty(orders);
         }
+    }
+
+    public class ProductWithCategories
+    {
+        public int Id { get; set; }
+
+        public int Category1Id { get; set; }
+
+        [ForeignKey(nameof(Category1Id))]
+        public Category? Category1 { get; set; }
+
+        public int Category2Id { get; set; }
+
+        [ForeignKey(nameof(Category2Id))]
+        public Category? Category2 { get; set; }
+
+        public int Category3Id { get; set; }
+
+        [ForeignKey(nameof(Category3Id))]
+        public Category? Category3 { get; set; }
+
+        public int Category4Id { get; set; }
+
+        [ForeignKey(nameof(Category4Id))]
+        public Category? Category4 { get; set; }
+
+        public int Category5Id { get; set; }
+
+        [ForeignKey(nameof(Category5Id))]
+        public Category? Category5 { get; set; }
+
+        public int Category6Id { get; set; }
+
+        [ForeignKey(nameof(Category6Id))]
+        public Category? Category6 { get; set; }
+
+        public int Category7Id { get; set; }
+
+        [ForeignKey(nameof(Category7Id))]
+        public Category? Category7 { get; set; }
+
+        public int Category8Id { get; set; }
+
+        [ForeignKey(nameof(Category8Id))]
+        public Category? Category8 { get; set; }
     }
 }

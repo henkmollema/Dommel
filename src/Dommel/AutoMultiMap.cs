@@ -562,7 +562,7 @@ namespace Dommel
                     transaction,
                     buffered);
 
-        private static Delegate CreateMapDelegate<T1, T2, T3, T4, T5, T6, T7, TReturn>()
+        internal static Delegate CreateMapDelegate<T1, T2, T3, T4, T5, T6, T7, TReturn>()
             where T1 : class, TReturn
         {
             var includeTypes = new[]
@@ -658,7 +658,7 @@ namespace Dommel
                     };
                     return f6;
 
-                case 7:
+                default:
                     Func<T1, T2, T3, T4, T5, T6, T7, TReturn> f7 = (target, t2, t3, t4, t5, t6, t7) =>
                     {
                         if (result == null)
@@ -676,8 +676,6 @@ namespace Dommel
                     };
                     return f7;
             }
-
-            throw new InvalidOperationException($"Invalid amount of include types: {includeTypes.Length}.");
         }
 
         private static void MapValueToTarget<T>(PropertyInfo[] props, object target, T instance)
