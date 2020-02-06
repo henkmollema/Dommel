@@ -2,7 +2,6 @@
 using System.Data;
 using Dapper;
 using Dommel.IntegrationTests;
-using Newtonsoft.Json;
 using Npgsql;
 using Xunit;
 
@@ -19,19 +18,20 @@ namespace Dommel.Json.IntegrationTests
                     typeof(JsonDatabaseFixture).Assembly,
                     typeof(DatabaseFixture).Assembly
                 },
-                JsonTypeHandler = () => new JsonObjectTypeHandler(),
+                JsonTypeHandler = () => new NpgJsonObjectTypeHandler(),
             });
         }
 
-        private class JsonObjectTypeHandler : SqlMapper.ITypeHandler
+        private class NpgJsonObjectTypeHandler : SqlMapper.ITypeHandler
         {
+            private readonly JsonObjectTypeHandler _defaultTypeHandler = new JsonObjectTypeHandler();
+
             public void SetValue(IDbDataParameter parameter, object value)
             {
-                parameter.Value = value is null || value is DBNull
-                    ? (object)DBNull.Value
-                    : JsonConvert.SerializeObject(value);
-                parameter.DbType = DbType.String;
+                // Use the default handler
+                _defaultTypeHandler.SetValue(parameter, value);
 
+                // Set the special NpgsqlDbType to use the JSON data type
                 if (parameter is NpgsqlParameter npgsqlParameter)
                 {
                     npgsqlParameter.NpgsqlDbType = NpgsqlTypes.NpgsqlDbType.Json;
@@ -39,7 +39,7 @@ namespace Dommel.Json.IntegrationTests
             }
 
             public object? Parse(Type destinationType, object value) =>
-                value is string str ? JsonConvert.DeserializeObject(str, destinationType) : null;
+                _defaultTypeHandler.Parse(destinationType, value);
         }
 
         protected override TheoryData<DatabaseDriver> Drivers => new JsonDatabaseTestData();

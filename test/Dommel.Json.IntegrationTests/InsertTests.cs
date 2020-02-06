@@ -129,10 +129,10 @@ namespace Dommel.Json.IntegrationTests
             var id = con.Insert(new Lead
             {
                 Email = "foo@example.com",
-                Metadata = new Dictionary<string, object>
+                Metadata = new Dictionary<string, string>
                 {
                     ["Foo"] = "Bar",
-                    ["DateModified"] = DateTime.UtcNow,
+                    ["DateModified"] = DateTime.UtcNow.ToString(),
                 }
             });
 
@@ -140,7 +140,7 @@ namespace Dommel.Json.IntegrationTests
             Assert.NotNull(lead);
             Assert.NotNull(lead.Metadata);
             Assert.Equal("Bar", Assert.Contains("Foo", lead.Metadata));
-            Assert.IsType<DateTime>(Assert.Contains("DateModified", lead.Metadata));
+            Assert.Contains("DateModified", lead.Metadata);
         }
 
         [Theory]
@@ -151,10 +151,10 @@ namespace Dommel.Json.IntegrationTests
             var id = await con.InsertAsync(new Lead
             {
                 Email = "foo@example.com",
-                Metadata = new Dictionary<string, object>
+                Metadata = new Dictionary<string, string>
                 {
                     ["Foo"] = "Bar",
-                    ["DateModified"] = DateTime.UtcNow,
+                    ["DateModified"] = DateTime.UtcNow.ToString(),
                 }
             });
 
@@ -162,7 +162,7 @@ namespace Dommel.Json.IntegrationTests
             Assert.NotNull(lead);
             Assert.NotNull(lead.Metadata);
             Assert.Equal("Bar", Assert.Contains("Foo", lead.Metadata));
-            Assert.IsType<DateTime>(Assert.Contains("DateModified", lead.Metadata));
+            Assert.Contains("DateModified", lead.Metadata);
         }
     }
 }

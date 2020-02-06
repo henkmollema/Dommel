@@ -15,7 +15,7 @@ namespace Dommel.Json.IntegrationTests
         public LeadData? Data { get; set; }
 
         [JsonData]
-        public IDictionary<string, object>? Metadata { get; set; }
+        public IDictionary<string, string>? Metadata { get; set; }
     }
 
     public class LeadData
