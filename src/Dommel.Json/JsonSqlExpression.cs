@@ -1,14 +1,16 @@
 ﻿using System.Linq.Expressions;
 using System.Reflection;
-using static Dommel.DommelMapper;
 
 namespace Dommel.Json
 {
     internal class JsonSqlExpression<T> : SqlExpression<T>
         where T : class
     {
-        public JsonSqlExpression(IJsonSqlBuilder sqlBuilder) : base(sqlBuilder)
+        private readonly DommelJsonOptions _options;
+
+        public JsonSqlExpression(IJsonSqlBuilder sqlBuilder, DommelJsonOptions options) : base(sqlBuilder)
         {
+            _options = options;
         }
 
         public new IJsonSqlBuilder SqlBuilder => (IJsonSqlBuilder)base.SqlBuilder;
@@ -18,7 +20,7 @@ namespace Dommel.Json
             if (expression.Member is PropertyInfo jsonValue &&
                 expression.Expression is MemberExpression jsonContainerExpr &&
                 jsonContainerExpr.Member is PropertyInfo jsonContainer &&
-                jsonContainer.IsDefined(typeof(JsonDataAttribute)))
+                jsonContainer.IsDefined(_options.JsonDataAttributeType))
             {
                 return SqlBuilder.JsonValue(
                     VisitMemberAccess(jsonContainerExpr).ToString(),

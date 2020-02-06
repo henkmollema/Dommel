@@ -9,7 +9,7 @@ namespace Dommel.Json.Tests
         public void LikeOperandContains_WithConstant()
         {
             // Arrange
-            var sqlExpression = new JsonSqlExpression<Lead>(new MySqlSqlBuilder());
+            var sqlExpression = new JsonSqlExpression<Lead>(new MySqlSqlBuilder(), new DommelJsonOptions());
 
             // Act
             var expression = sqlExpression.Where(p => p.Data.FirstName!.Contains("test"));
@@ -25,7 +25,7 @@ namespace Dommel.Json.Tests
         public void LikeOperand_WithVariable()
         {
             // Arrange
-            var sqlExpression = new JsonSqlExpression<Lead>(new MySqlSqlBuilder());
+            var sqlExpression = new JsonSqlExpression<Lead>(new MySqlSqlBuilder(), new DommelJsonOptions());
             var substring = "test";
 
             // Act
@@ -42,7 +42,7 @@ namespace Dommel.Json.Tests
         public void LikeOperandStartsWith_WithConstant()
         {
             // Arrange
-            var sqlExpression = new JsonSqlExpression<Lead>(new MySqlSqlBuilder());
+            var sqlExpression = new JsonSqlExpression<Lead>(new MySqlSqlBuilder(), new DommelJsonOptions());
 
             // Act
             var expression = sqlExpression.Where(p => p.Data.FirstName!.StartsWith("test"));
@@ -58,7 +58,7 @@ namespace Dommel.Json.Tests
         public void LikeOperandStartsWith_WithVariable()
         {
             // Arrange
-            var sqlExpression = new JsonSqlExpression<Lead>(new MySqlSqlBuilder());
+            var sqlExpression = new JsonSqlExpression<Lead>(new MySqlSqlBuilder(), new DommelJsonOptions());
             var substring = "test";
 
             // Act
@@ -75,7 +75,7 @@ namespace Dommel.Json.Tests
         public void LikeOperandEndsWith_WithConstant()
         {
             // Arrange
-            var sqlExpression = new JsonSqlExpression<Lead>(new MySqlSqlBuilder());
+            var sqlExpression = new JsonSqlExpression<Lead>(new MySqlSqlBuilder(), new DommelJsonOptions());
 
             // Act
             var expression = sqlExpression.Where(p => p.Data.FirstName!.EndsWith("test"));
@@ -91,7 +91,7 @@ namespace Dommel.Json.Tests
         public void LikeOperandEndsWith_WithVariable()
         {
             // Arrange
-            var sqlExpression = new JsonSqlExpression<Lead>(new MySqlSqlBuilder());
+            var sqlExpression = new JsonSqlExpression<Lead>(new MySqlSqlBuilder(), new DommelJsonOptions());
             var substring = "test";
 
             // Act

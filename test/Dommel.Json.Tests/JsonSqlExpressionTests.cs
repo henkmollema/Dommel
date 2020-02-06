@@ -8,7 +8,7 @@ namespace Dommel.Json.Tests
         public void GeneratesMySqlJsonValue()
         {
             // Arrange
-            var sql = new JsonSqlExpression<Lead>(new MySqlSqlBuilder());
+            var sql = new JsonSqlExpression<Lead>(new MySqlSqlBuilder(), new DommelJsonOptions());
 
             // Act
             var str = sql.Where(p => p.Data.LastName == "Foo").ToSql(out var parameters);
@@ -22,7 +22,7 @@ namespace Dommel.Json.Tests
         public void GeneratesSqlServerJsonValue()
         {
             // Arrange
-            var sql = new JsonSqlExpression<Lead>(new SqlServerSqlBuilder());
+            var sql = new JsonSqlExpression<Lead>(new SqlServerSqlBuilder(), new DommelJsonOptions());
 
             // Act
             var str = sql.Where(p => p.Data.LastName == "Foo").ToSql(out var parameters);
@@ -36,7 +36,7 @@ namespace Dommel.Json.Tests
         public void GeneratesSqliteJsonValue()
         {
             // Arrange
-            var sql = new JsonSqlExpression<Lead>(new SqliteSqlBuilder());
+            var sql = new JsonSqlExpression<Lead>(new SqliteSqlBuilder(), new DommelJsonOptions());
 
             // Act
             var str = sql.Where(p => p.Data.LastName == "Foo").ToSql(out var parameters);
@@ -50,7 +50,7 @@ namespace Dommel.Json.Tests
         public void GeneratesSqlServerCeJsonValue()
         {
             // Arrange
-            var sql = new JsonSqlExpression<Lead>(new SqlServerCeSqlBuilder());
+            var sql = new JsonSqlExpression<Lead>(new SqlServerCeSqlBuilder(), new DommelJsonOptions());
 
             // Act
             var str = sql.Where(p => p.Data.LastName == "Foo").ToSql(out var parameters);
@@ -64,7 +64,7 @@ namespace Dommel.Json.Tests
         public void GeneratesPostgresJsonValue()
         {
             // Arrange
-            var sql = new JsonSqlExpression<Lead>(new PostgresSqlBuilder());
+            var sql = new JsonSqlExpression<Lead>(new PostgresSqlBuilder(), new DommelJsonOptions());
 
             // Act
             var str = sql.Where(p => p.Data.LastName == "Foo").ToSql(out var parameters);
