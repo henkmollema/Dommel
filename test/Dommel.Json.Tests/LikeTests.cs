@@ -16,7 +16,7 @@ namespace Dommel.Json.Tests
             var sql = expression.ToSql(out var dynamicParameters);
 
             // Assert
-            Assert.Equal("where (`Data`->'$.FirstName' like @p1)", sql.Trim());
+            Assert.Equal("where (lower(`Data`->'$.FirstName') like lower(@p1))", sql.Trim());
             Assert.Single(dynamicParameters.ParameterNames);
             Assert.Equal("%test%", dynamicParameters.Get<string>("p1"));
         }
@@ -33,7 +33,7 @@ namespace Dommel.Json.Tests
             var sql = expression.ToSql(out var dynamicParameters);
 
             // Assert
-            Assert.Equal("where (`Data`->'$.FirstName' like @p1)", sql.Trim());
+            Assert.Equal("where (lower(`Data`->'$.FirstName') like lower(@p1))", sql.Trim());
             Assert.Single(dynamicParameters.ParameterNames);
             Assert.Equal("%test%", dynamicParameters.Get<string>("p1"));
         }
@@ -49,7 +49,7 @@ namespace Dommel.Json.Tests
             var sql = expression.ToSql(out var dynamicParameters);
 
             // Assert
-            Assert.Equal("where (`Data`->'$.FirstName' like @p1)", sql.Trim());
+            Assert.Equal("where (lower(`Data`->'$.FirstName') like lower(@p1))", sql.Trim());
             Assert.Single(dynamicParameters.ParameterNames);
             Assert.Equal("test%", dynamicParameters.Get<string>("p1"));
         }
@@ -66,7 +66,7 @@ namespace Dommel.Json.Tests
             var sql = expression.ToSql(out var dynamicParameters);
 
             // Assert
-            Assert.Equal("where (`Data`->'$.FirstName' like @p1)", sql.Trim());
+            Assert.Equal("where (lower(`Data`->'$.FirstName') like lower(@p1))", sql.Trim());
             Assert.Single(dynamicParameters.ParameterNames);
             Assert.Equal("test%", dynamicParameters.Get<string>("p1"));
         }
@@ -82,7 +82,7 @@ namespace Dommel.Json.Tests
             var sql = expression.ToSql(out var dynamicParameters);
 
             // Assert
-            Assert.Equal("where (`Data`->'$.FirstName' like @p1)", sql.Trim());
+            Assert.Equal("where (lower(`Data`->'$.FirstName') like lower(@p1))", sql.Trim());
             Assert.Single(dynamicParameters.ParameterNames);
             Assert.Equal("%test", dynamicParameters.Get<string>("p1"));
         }
@@ -99,7 +99,7 @@ namespace Dommel.Json.Tests
             var sql = expression.ToSql(out var dynamicParameters);
 
             // Assert
-            Assert.Equal("where (`Data`->'$.FirstName' like @p1)", sql.Trim());
+            Assert.Equal("where (lower(`Data`->'$.FirstName') like lower(@p1))", sql.Trim());
             Assert.Single(dynamicParameters.ParameterNames);
             Assert.Equal("%test", dynamicParameters.Get<string>("p1"));
         }

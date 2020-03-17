@@ -36,6 +36,15 @@ namespace Dommel.IntegrationTests
 
         [Theory]
         [ClassData(typeof(DatabaseTestData))]
+        public void Select_ContainsConstant_CaseInsensitive(DatabaseDriver database)
+        {
+            using var con = database.GetConnection();
+            var products = con.Select<Product>(p => p.Name!.Contains("anton"));
+            Assert.Equal(4, products.Count());
+        }
+
+        [Theory]
+        [ClassData(typeof(DatabaseTestData))]
         public async Task SelectAsync_ContainsConstant(DatabaseDriver database)
         {
             using var con = database.GetConnection();
@@ -45,9 +54,28 @@ namespace Dommel.IntegrationTests
 
         [Theory]
         [ClassData(typeof(DatabaseTestData))]
+        public async Task SelectAsync_ContainsConstant_CaseInsensitive(DatabaseDriver database)
+        {
+            using var con = database.GetConnection();
+            var products = await con.SelectAsync<Product>(p => p.Name!.Contains("anton"));
+            Assert.Equal(4, products.Count());
+        }
+
+        [Theory]
+        [ClassData(typeof(DatabaseTestData))]
         public void Select_ContainsVariable(DatabaseDriver database)
         {
             var productName = "Anton";
+            using var con = database.GetConnection();
+            var products = con.Select<Product>(p => p.Name!.Contains(productName));
+            Assert.Equal(4, products.Count());
+        }
+
+        [Theory]
+        [ClassData(typeof(DatabaseTestData))]
+        public void Select_ContainsVariable_CaseInsensitive(DatabaseDriver database)
+        {
+            var productName = "anton";
             using var con = database.GetConnection();
             var products = con.Select<Product>(p => p.Name!.Contains(productName));
             Assert.Equal(4, products.Count());
@@ -65,6 +93,16 @@ namespace Dommel.IntegrationTests
 
         [Theory]
         [ClassData(typeof(DatabaseTestData))]
+        public async Task SelectAsync_ContainsVariable_CaseInsensitive(DatabaseDriver database)
+        {
+            var productName = "anton";
+            using var con = database.GetConnection();
+            var products = await con.SelectAsync<Product>(p => p.Name!.Contains(productName));
+            Assert.Equal(4, products.Count());
+        }
+
+        [Theory]
+        [ClassData(typeof(DatabaseTestData))]
         public void Select_StartsWith(DatabaseDriver database)
         {
             var productName = "Cha";
@@ -75,9 +113,29 @@ namespace Dommel.IntegrationTests
 
         [Theory]
         [ClassData(typeof(DatabaseTestData))]
+        public void Select_StartsWith_CaseInsensitive(DatabaseDriver database)
+        {
+            var productName = "cha";
+            using var con = database.GetConnection();
+            var products = con.Select<Product>(p => p.Name!.StartsWith(productName));
+            Assert.Equal(4, products.Count());
+        }
+
+        [Theory]
+        [ClassData(typeof(DatabaseTestData))]
         public async Task SelectAsync_StartsWith(DatabaseDriver database)
         {
             var productName = "Cha";
+            using var con = database.GetConnection();
+            var products = await con.SelectAsync<Product>(p => p.Name!.StartsWith(productName));
+            Assert.Equal(4, products.Count());
+        }
+
+        [Theory]
+        [ClassData(typeof(DatabaseTestData))]
+        public async Task SelectAsync_StartsWith_CaseInsensitive(DatabaseDriver database)
+        {
+            var productName = "cha";
             using var con = database.GetConnection();
             var products = await con.SelectAsync<Product>(p => p.Name!.StartsWith(productName));
             Assert.Equal(4, products.Count());

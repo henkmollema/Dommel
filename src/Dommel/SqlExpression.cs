@@ -414,7 +414,9 @@ namespace Dommel
                 _ => throw new ArgumentOutOfRangeException($"Invalid TextSearch value '{textSearch}'.", nameof(textSearch)),
             };
             AddParameter(textLike, out var paramName);
-            return $"{column} like {paramName}";
+
+            // Use lower() to make the queries case-insensitive
+            return $"lower({column}) like lower({paramName})";
         }
 
         /// <summary>
