@@ -39,5 +39,9 @@ namespace Dommel
 
         /// <inheritdoc/>
         public string QuoteIdentifier(string identifier) => $"\"{identifier}\"";
+
+        /// <inheritdoc/>
+        public string LimitClause(int count) => $"limit {count}";
+
     }
 }

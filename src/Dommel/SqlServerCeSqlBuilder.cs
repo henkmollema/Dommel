@@ -23,5 +23,8 @@ namespace Dommel
 
         /// <inheritdoc/>
         public string QuoteIdentifier(string identifier) => $"[{identifier}]";
+
+        /// <inheritdoc/>
+        public string LimitClause(int count) => $"offset 0 rows fetch next {count} rows only";
     }
 }

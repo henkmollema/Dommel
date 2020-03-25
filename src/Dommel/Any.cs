@@ -81,7 +81,7 @@ namespace Dommel
 
         internal static string BuildAnyAllSql(ISqlBuilder sqlBuilder, Type type)
         {
-            var sql = $"{BuildAnyPredicate(sqlBuilder, type)} limit 1";
+            var sql = $"{BuildAnyPredicate(sqlBuilder, type)} {sqlBuilder.LimitClause(1)}";
             return sql;
         }
         internal static string BuildAnySql<TEntity>(ISqlBuilder sqlBuilder, Expression<Func<TEntity, bool>> predicate, out DynamicParameters parameters)
@@ -90,8 +90,7 @@ namespace Dommel
             sql += CreateSqlExpression<TEntity>(sqlBuilder)
                 .Where(predicate)
                 .ToSql(out parameters);
-
-            sql += " limit 1";
+            sql += $" {sqlBuilder.LimitClause(1)}";
             return sql;
         }
     }
