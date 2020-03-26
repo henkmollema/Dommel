@@ -15,7 +15,7 @@ namespace Dommel
         Update,
         Delete,
         DeleteAll,
-        Any
+        Any,
     }
 
     internal struct QueryCacheKey : IEquatable<QueryCacheKey>

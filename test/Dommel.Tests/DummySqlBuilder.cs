@@ -22,6 +22,6 @@ namespace Dommel.Tests
         }
 
         /// <inheritdoc/>
-        public string LimitClause(int count) => $"LIMIT {count}";
+        public string LimitClause(int count) => $"limit {count}";
     }
 }

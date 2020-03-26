@@ -42,6 +42,5 @@ namespace Dommel
 
         /// <inheritdoc/>
         public string LimitClause(int count) => $"limit {count}";
-
     }
 }

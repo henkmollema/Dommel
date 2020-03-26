@@ -25,6 +25,6 @@ namespace Dommel
         public string QuoteIdentifier(string identifier) => identifier;
 
         /// <inheritdoc/>
-        public string LimitClause(int count) => $"LIMIT {count}";
+        public string LimitClause(int count) => $"limit {count}";
     }
 }

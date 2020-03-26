@@ -40,12 +40,11 @@ namespace Dommel
         /// <returns>The quoted <paramref name="identifier"/>.</returns>
         string QuoteIdentifier(string identifier);
 
-
         /// <summary>
-        /// Add a limit clause to query
+        /// Adds a limit clause to query.
         /// </summary>
-        /// <param name="count"></param>
-        /// <returns>DB Specific limit clause</returns>
+        /// <param name="count">The count of limit clause.</param>
+        /// <returns>A limit clause of the specified count.</returns>
         string LimitClause(int count);
     }
 }

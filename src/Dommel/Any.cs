@@ -9,12 +9,12 @@ namespace Dommel
     public static partial class DommelMapper
     {
         /// <summary>
-        /// Check if there's any entities on database.
+        /// Determines whether there's any entity of type <typeparamref name="TEntity"/> in the database.
         /// </summary>
         /// <typeparam name="TEntity">The type of the entity.</typeparam>
         /// <param name="connection">The connection to the database. This can either be open or closed.</param>
         /// <param name="transaction">Optional transaction for the command.</param>
-        /// <returns>True if there's at least one entity on database.</returns>
+        /// <returns><c>true</c> if there's at least one entity in the database; otherwise, <c>false</c>.</returns>
         public static bool Any<TEntity>(this IDbConnection connection, IDbTransaction? transaction = null)
         {
             var sql = BuildAnyAllSql(GetSqlBuilder(connection), typeof(TEntity));
@@ -23,12 +23,12 @@ namespace Dommel
         }
 
         /// <summary>
-        /// Check if there's any entities on database.
+        /// Determines whether there's any entity of type <typeparamref name="TEntity"/> in the database.
         /// </summary>
         /// <typeparam name="TEntity">The type of the entity.</typeparam>
         /// <param name="connection">The connection to the database. This can either be open or closed.</param>
         /// <param name="transaction">Optional transaction for the command.</param>
-        /// <returns>True if there's at least one entity on database.</returns>
+        /// <returns><c>true</c> if there's at least one entity in the database; otherwise, <c>false</c>.</returns>
         public static Task<bool> AnyAsync<TEntity>(this IDbConnection connection, IDbTransaction? transaction = null)
         {
             var sql = BuildAnyAllSql(GetSqlBuilder(connection), typeof(TEntity));
@@ -37,13 +37,13 @@ namespace Dommel
         }
 
         /// <summary>
-        /// Check if there's any entities matching the specified predicate.
+        /// Determines whether there's any entity of type <typeparamref name="TEntity"/> matching the specified predicate in the database.
         /// </summary>
         /// <typeparam name="TEntity">The type of the entity.</typeparam>
         /// <param name="connection">The connection to the database. This can either be open or closed.</param>
         /// <param name="predicate">A predicate to filter the results.</param>
         /// <param name="transaction">Optional transaction for the command.</param>
-        /// <returns>True if there's at least one entity that match the specified predicate.</returns>
+        /// <returns><c>true</c> if there's at least one entity in the database that matches the specified predicate; otherwise, <c>false</c>.</returns>
         public static bool Any<TEntity>(this IDbConnection connection, Expression<Func<TEntity, bool>> predicate, IDbTransaction? transaction = null)
         {
             var sql = BuildAnySql(GetSqlBuilder(connection), predicate, out var parameters);
@@ -52,13 +52,13 @@ namespace Dommel
         }
 
         /// <summary>
-        /// Check if there's any entities matching the specified predicate.
+        /// Determines whether there's any entity of type <typeparamref name="TEntity"/> matching the specified predicate in the database.
         /// </summary>
         /// <typeparam name="TEntity">The type of the entity.</typeparam>
         /// <param name="connection">The connection to the database. This can either be open or closed.</param>
         /// <param name="predicate">A predicate to filter the results.</param>
         /// <param name="transaction">Optional transaction for the command.</param>
-        /// <returns>True if there's at least one entity that match the specified predicate.</returns>
+        /// <returns><c>true</c> if there's at least one entity in the database that matches the specified predicate; otherwise, <c>false</c>.</returns>
         public static Task<bool> AnyAsync<TEntity>(this IDbConnection connection, Expression<Func<TEntity, bool>> predicate, IDbTransaction? transaction = null)
         {
             var sql = BuildAnySql(GetSqlBuilder(connection), predicate, out var parameters);
@@ -84,6 +84,7 @@ namespace Dommel
             var sql = $"{BuildAnyPredicate(sqlBuilder, type)} {sqlBuilder.LimitClause(1)}";
             return sql;
         }
+
         internal static string BuildAnySql<TEntity>(ISqlBuilder sqlBuilder, Expression<Func<TEntity, bool>> predicate, out DynamicParameters parameters)
         {
             var sql = BuildAnyPredicate(sqlBuilder, typeof(TEntity));
