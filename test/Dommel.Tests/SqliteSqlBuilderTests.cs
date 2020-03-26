@@ -28,5 +28,14 @@ namespace Dommel.Tests
 
         [Fact]
         public void QuoteIdentifier() => Assert.Equal("Foo", _builder.QuoteIdentifier("Foo"));
+
+        [Theory]
+        [InlineData(1)]
+        [InlineData(5)]
+        public void LimitClause(int count)
+        {
+            var sql = _builder.LimitClause(count);
+            Assert.Equal($"limit {count}", sql);
+        }
     }
 }

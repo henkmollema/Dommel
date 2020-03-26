@@ -39,5 +39,12 @@ namespace Dommel
         /// <param name="identifier">The identifier add quotes around. E.g. a table or column name.</param>
         /// <returns>The quoted <paramref name="identifier"/>.</returns>
         string QuoteIdentifier(string identifier);
+
+        /// <summary>
+        /// Adds a limit clause to query.
+        /// </summary>
+        /// <param name="count">The count of limit clause.</param>
+        /// <returns>A limit clause of the specified count.</returns>
+        string LimitClause(int count);
     }
 }
