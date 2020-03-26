@@ -56,5 +56,14 @@ namespace Dommel.Tests
             var builder = new PostgresSqlBuilder();
             Assert.Throws<ArgumentNullException>("type", () => builder.BuildInsert(null!, null!, null!, null!));
         }
+
+        [Theory]
+        [InlineData(1)]
+        [InlineData(5)]
+        public void LimitClause(int count)
+        {
+            var sql = _builder.LimitClause(count);
+            Assert.Equal($"limit {count}", sql);
+        }
     }
 }
