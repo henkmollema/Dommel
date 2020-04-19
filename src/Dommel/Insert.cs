@@ -77,7 +77,7 @@ namespace Dommel
                 var tableName = Resolvers.Table(type, connection);
                 var keyProperties = Resolvers.KeyProperties(type);
 
-                // Use all non-generated properties for updates
+                // Use all non-generated properties for inserts
                 var typeProperties = Resolvers.Properties(type)
                     .Except(keyProperties.Where(p => p.IsGenerated).Select(p => p.Property));
 
