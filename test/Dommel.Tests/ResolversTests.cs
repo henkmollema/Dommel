@@ -8,6 +8,13 @@ namespace Dommel.Tests
         private readonly ISqlBuilder _sqlBuilder = new SqlServerSqlBuilder();
 
         [Fact]
+        public void Table_WithSchema()
+        {
+            Assert.Equal("[dbo].[Qux]", Resolvers.Table(typeof(FooQux), _sqlBuilder));
+            Assert.Equal("[foo].[dbo].[Qux]", Resolvers.Table(typeof(FooDboQux), _sqlBuilder));
+        }
+
+        [Fact]
         public void Table_NoCacheConflictNestedClass()
         {
             Assert.Equal("[BarA]", Resolvers.Table(typeof(Foo.Bar), _sqlBuilder));
@@ -68,6 +75,18 @@ namespace Dommel.Tests
             {
                 public int BarId { get; set; }
             }
+        }
+
+        [Table("Qux", Schema = "foo.dbo")]
+        public class FooDboQux
+        {
+            public int Id { get; set; }
+        }
+
+        [Table("Qux", Schema = "dbo")]
+        public class FooQux
+        {
+            public int Id { get; set; }
         }
     }
 }
