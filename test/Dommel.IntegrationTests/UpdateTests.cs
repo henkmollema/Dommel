@@ -15,10 +15,12 @@ namespace Dommel.IntegrationTests
             Assert.NotNull(product);
 
             product.Name = "Test";
+            product.SetSlug("test");
             con.Update(product);
 
             var newProduct = con.Get<Product>(1);
             Assert.Equal("Test", newProduct.Name);
+            Assert.Equal("test", newProduct.Slug);
         }
 
         [Theory]
@@ -30,10 +32,12 @@ namespace Dommel.IntegrationTests
             Assert.NotNull(product);
 
             product.Name = "Test";
+            product.SetSlug("test");
             await con.UpdateAsync(product);
 
             var newProduct = await con.GetAsync<Product>(1);
             Assert.Equal("Test", newProduct.Name);
+            Assert.Equal("test", newProduct.Slug);
         }
     }
 }

@@ -77,20 +77,9 @@ namespace Dommel
                 var tableName = Resolvers.Table(type, connection);
                 var keyProperties = Resolvers.KeyProperties(type);
 
-                var typeProperties = new List<PropertyInfo>();
-                foreach (var typeProperty in Resolvers.Properties(type))
-                {
-                    if (keyProperties.Any(p => p.IsGenerated && p.Property == typeProperty))
-                    {
-                        // Skip key properties marked as database generated
-                        continue;
-                    }
-
-                    if (typeProperty.GetSetMethod() != null)
-                    {
-                        typeProperties.Add(typeProperty);
-                    }
-                }
+                // Use all non-generated properties for updates
+                var typeProperties = Resolvers.Properties(type)
+                    .Except(keyProperties.Where(p => p.IsGenerated).Select(p => p.Property));
 
                 var columnNames = typeProperties.Select(p => Resolvers.Column(p, sqlBuilder)).ToArray();
                 var paramNames = typeProperties.Select(p => "@" + p.Name).ToArray();
