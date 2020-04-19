@@ -100,7 +100,21 @@ namespace Dommel
             var key = $"{sqlBuilder.GetType()}.{type}";
             if (!TypeTableNameCache.TryGetValue(key, out var name))
             {
-                name = sqlBuilder.QuoteIdentifier(DommelMapper.TableNameResolver.ResolveTableName(type));
+                var tableName = DommelMapper.TableNameResolver.ResolveTableName(type);
+
+                // Dots are used to define a schema which should be quoted separately
+                if (tableName.Contains('.'))
+                {
+                    name = string.Join(".", DommelMapper.TableNameResolver
+                        .ResolveTableName(type)
+                        .Split('.')
+                        .Select(x => sqlBuilder.QuoteIdentifier(x)));
+                }
+                else
+                {
+                    name = sqlBuilder.QuoteIdentifier(tableName);
+                }
+
                 TypeTableNameCache.TryAdd(key, name);
             }
 
