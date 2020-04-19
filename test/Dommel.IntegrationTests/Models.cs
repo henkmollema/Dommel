@@ -13,6 +13,10 @@ namespace Dommel.IntegrationTests
 
         public string? Name { get; set; }
 
+        public string? Slug { get; private set; }
+
+        public void SetSlug(string slug) => Slug = slug;
+
         // The foreign key to Categories table
         public int CategoryId { get; set; }
 

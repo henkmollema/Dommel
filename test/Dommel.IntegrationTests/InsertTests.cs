@@ -13,24 +13,40 @@ namespace Dommel.IntegrationTests
         [ClassData(typeof(DatabaseTestData))]
         public void Insert(DatabaseDriver database)
         {
+            // Arrange
             using var con = database.GetConnection();
-            var id = Convert.ToInt32(con.Insert(new Product { Name = "blah" }));
+            var productToInsert = new Product { Name = "Foo Product" };
+            productToInsert.SetSlug("foo-product");
+
+            // Act
+            var id = Convert.ToInt32(con.Insert(productToInsert));
+
+            // Assert
             var product = con.Get<Product>(id);
             Assert.NotNull(product);
-            Assert.Equal("blah", product.Name);
             Assert.Equal(id, product.ProductId);
+            Assert.Equal("Foo Product", product.Name);
+            Assert.Equal("foo-product", product.Slug);
         }
 
         [Theory]
         [ClassData(typeof(DatabaseTestData))]
         public async Task InsertAsync(DatabaseDriver database)
         {
+            // Arrange
             using var con = database.GetConnection();
-            var id = Convert.ToInt32(await con.InsertAsync(new Product { Name = "blah" }));
+            var productToInsert = new Product { Name = "Foo Product" };
+            productToInsert.SetSlug("foo-product");
+
+            // Act
+            var id = Convert.ToInt32(await con.InsertAsync(productToInsert));
+
+            // Assert
             var product = await con.GetAsync<Product>(id);
             Assert.NotNull(product);
-            Assert.Equal("blah", product.Name);
             Assert.Equal(id, product.ProductId);
+            Assert.Equal("Foo Product", product.Name);
+            Assert.Equal("foo-product", product.Slug);
         }
 
         [Theory]

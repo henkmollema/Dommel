@@ -49,11 +49,9 @@ namespace Dommel
                 var tableName = Resolvers.Table(type, sqlBuilder);
                 var keyProperties = Resolvers.KeyProperties(type);
 
-                // Use all properties which are settable.
+                // Use all non-generated properties for updates
                 var typeProperties = Resolvers.Properties(type)
-                                              .Except(keyProperties.Where(p => p.IsGenerated).Select(p => p.Property))
-                                              .Where(p => p.GetSetMethod() != null)
-                                              .ToArray();
+                    .Except(keyProperties.Where(p => p.IsGenerated).Select(p => p.Property));
 
                 var columnNames = typeProperties.Select(p => $"{Resolvers.Column(p, sqlBuilder)} = {sqlBuilder.PrefixParameter(p.Name)}").ToArray();
                 var whereClauses = keyProperties.Select(p => $"{Resolvers.Column(p.Property, sqlBuilder)} = {sqlBuilder.PrefixParameter(p.Property.Name)}");
