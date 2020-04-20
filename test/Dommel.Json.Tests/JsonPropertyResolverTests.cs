@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using Xunit;
 
 namespace Dommel.Json.Tests
@@ -14,7 +15,7 @@ namespace Dommel.Json.Tests
             var resolver = new JsonPropertyResolver(Array.Empty<Type>());
 
             // Act
-            var props = resolver.ResolveProperties(LeadType);
+            var props = resolver.ResolveProperties(LeadType).Select(x => x.Property);
 
             // Assert
             Assert.Collection(
@@ -32,7 +33,7 @@ namespace Dommel.Json.Tests
             var resolver = new JsonPropertyResolver(new[] { typeof(LeadData) });
 
             // Act
-            var props = resolver.ResolveProperties(LeadType);
+            var props = resolver.ResolveProperties(LeadType).Select(x => x.Property);
 
             // Assert
             Assert.Collection(

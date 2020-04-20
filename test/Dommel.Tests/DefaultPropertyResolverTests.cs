@@ -15,7 +15,7 @@ namespace Dommel.Tests
             var type = typeof(Foo);
 
             // Act
-            var props = resolver.ResolveProperties(type).ToArray();
+            var props = resolver.ResolveProperties(type).Select(x => x.Property);
 
             // Assert
             Assert.Collection(props,
@@ -42,7 +42,7 @@ namespace Dommel.Tests
             var type = typeof(Foo);
 
             // Act
-            var props = resolver.ResolveProperties(type).ToArray();
+            var props = resolver.ResolveProperties(type).Select(x => x.Property);
 
             // Assert
             Assert.Collection(props,
@@ -68,7 +68,7 @@ namespace Dommel.Tests
             var type = typeof(Bar);
 
             // Act
-            var props = resolver.ResolveProperties(type).ToArray();
+            var props = resolver.ResolveProperties(type).Select(x => x.Property);
 
             // Assert
             var prop = Assert.Single(props);
