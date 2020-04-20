@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 
 namespace Dommel
@@ -11,27 +10,34 @@ namespace Dommel
     public class DefaultPropertyResolver : IPropertyResolver
     {
         private static readonly HashSet<Type> PrimitiveTypesSet = new HashSet<Type>
-            {
-                typeof(object),
-                typeof(string),
-                typeof(Guid),
-                typeof(decimal),
-                typeof(double),
-                typeof(float),
-                typeof(DateTime),
-                typeof(DateTimeOffset),
-                typeof(TimeSpan),
-                typeof(byte[])
-            };
+        {
+            typeof(object),
+            typeof(string),
+            typeof(Guid),
+            typeof(decimal),
+            typeof(double),
+            typeof(float),
+            typeof(DateTime),
+            typeof(DateTimeOffset),
+            typeof(TimeSpan),
+            typeof(byte[]),
+        };
 
         /// <summary>
         /// Resolves the properties to be mapped for the specified type.
         /// </summary>
         /// <param name="type">The type to resolve the properties to be mapped for.</param>
         /// <returns>A collection of <see cref="PropertyInfo"/>'s of the <paramref name="type"/>.</returns>
-        public virtual IEnumerable<PropertyInfo> ResolveProperties(Type type) =>
-            FilterComplexTypes(type.GetRuntimeProperties())
-                .Where(p => !p.IsDefined(typeof(IgnoreAttribute)));
+        public virtual IEnumerable<ColumnPropertyInfo> ResolveProperties(Type type)
+        {
+            foreach (var property in FilterComplexTypes(type.GetRuntimeProperties()))
+            {
+                if (!property.IsDefined(typeof(IgnoreAttribute)))
+                {
+                    yield return new ColumnPropertyInfo(property);
+                }
+            }
+        }
 
         /// <summary>
         /// Gets a collection of types that are considered 'primitive' for Dommel but are not for the CLR.

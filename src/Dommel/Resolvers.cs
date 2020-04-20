@@ -14,8 +14,8 @@ namespace Dommel
     {
         private static readonly ConcurrentDictionary<string, string> TypeTableNameCache = new ConcurrentDictionary<string, string>();
         private static readonly ConcurrentDictionary<string, string> ColumnNameCache = new ConcurrentDictionary<string, string>();
-        private static readonly ConcurrentDictionary<Type, KeyPropertyInfo[]> TypeKeyPropertiesCache = new ConcurrentDictionary<Type, KeyPropertyInfo[]>();
-        private static readonly ConcurrentDictionary<Type, PropertyInfo[]> TypePropertiesCache = new ConcurrentDictionary<Type, PropertyInfo[]>();
+        private static readonly ConcurrentDictionary<Type, ColumnPropertyInfo[]> TypeKeyPropertiesCache = new ConcurrentDictionary<Type, ColumnPropertyInfo[]>();
+        private static readonly ConcurrentDictionary<Type, ColumnPropertyInfo[]> TypePropertiesCache = new ConcurrentDictionary<Type, ColumnPropertyInfo[]>();
         private static readonly ConcurrentDictionary<string, ForeignKeyInfo> TypeForeignKeyPropertyCache = new ConcurrentDictionary<string, ForeignKeyInfo>();
 
         /// <summary>
@@ -23,7 +23,7 @@ namespace Dommel
         /// </summary>
         /// <param name="type">The <see cref="Type"/> to get the key properties for.</param>
         /// <returns>The key properties for <paramref name="type"/>.</returns>
-        public static KeyPropertyInfo[] KeyProperties(Type type)
+        public static ColumnPropertyInfo[] KeyProperties(Type type)
         {
             if (!TypeKeyPropertiesCache.TryGetValue(type, out var keyProperties))
             {
@@ -68,7 +68,7 @@ namespace Dommel
         /// </summary>
         /// <param name="type">The <see cref="Type"/> to get the properties from.</param>
         /// <returns>>The collection of to be mapped properties of <paramref name="type"/>.</returns>
-        public static IEnumerable<PropertyInfo> Properties(Type type)
+        public static IEnumerable<ColumnPropertyInfo> Properties(Type type)
         {
             if (!TypePropertiesCache.TryGetValue(type, out var properties))
             {

@@ -97,8 +97,10 @@ namespace Dommel
             {
                 var tableName = Resolvers.Table(type, sqlBuilder);
                 var properties = Resolvers.Properties(type)
-                                              .Where(p => p.GetSetMethod() != null)
-                                              .Select(p => Resolvers.Column(p, sqlBuilder));
+                    .Where(x => !x.IsGenerated)
+                    .Select(x => x.Property)
+                    .Where(p => p.GetSetMethod() != null)
+                    .Select(p => Resolvers.Column(p, sqlBuilder));
 
                 sql = $"select {string.Join(", ", properties)} from {tableName}";
                 QueryCache.TryAdd(cacheKey, sql);
