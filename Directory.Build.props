@@ -1,0 +1,18 @@
+<Project>
+  <PropertyGroup>
+    <Copyright>Copyright © Henk Mollema 2020</Copyright>
+    <VersionPrefix>2.0.0-beta8</VersionPrefix>
+    <Authors>Henk Mollema</Authors>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <LangVersion>8.0</LangVersion>
+    <Nullable>enable</Nullable>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <PackageProjectUrl>https://github.com/henkmollema/Dommel</PackageProjectUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/henkmollema/Dommel</RepositoryUrl>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>embedded</DebugType>
+  </PropertyGroup>
+</Project>

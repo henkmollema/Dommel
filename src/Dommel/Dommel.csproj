@@ -1,22 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <Description>Simple CRUD operations for Dapper.</Description>
-    <Copyright>Copyright © Henk Mollema 2020</Copyright>
-    <AssemblyTitle>Dommel</AssemblyTitle>
-    <VersionPrefix>2.0.0-beta7</VersionPrefix>
-    <Authors>Henk Mollema</Authors>
-    <TargetFramework>netstandard2.0</TargetFramework>
-    <LangVersion>8.0</LangVersion>
-    <Nullable>enable</Nullable>
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <PackageTags>dommel;crud;dapper;database;orm</PackageTags>
-    <PackageProjectUrl>https://github.com/henkmollema/Dommel</PackageProjectUrl>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <RepositoryType>git</RepositoryType>
-    <RepositoryUrl>https://github.com/henkmollema/Dommel</RepositoryUrl>
-    <PublishRepositoryUrl>true</PublishRepositoryUrl>
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>embedded</DebugType>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Dapper" Version="2.0.35" />
