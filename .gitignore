@@ -22,3 +22,4 @@ nuget.exe
 coveragereport/
 coverage*.opencover.xml
 coverage*.json
+.idea/
