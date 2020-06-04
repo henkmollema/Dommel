@@ -49,6 +49,17 @@ namespace Dommel.IntegrationTests
 
         [Theory]
         [ClassData(typeof(DatabaseTestData))]
+        public async Task WithJoin(DatabaseDriver database)
+        {
+            using var con = database.GetConnection();
+            var products = await con.FromAsync<Product, Category, Product>(sql =>
+                sql.Select());
+            Assert.NotEmpty(products);
+            Assert.All(products, p => Assert.NotNull(p.Category));
+        }
+
+        [Theory]
+        [ClassData(typeof(DatabaseTestData))]
         public async Task Select_Where(DatabaseDriver database)
         {
             using var con = database.GetConnection();
@@ -97,6 +108,25 @@ namespace Dommel.IntegrationTests
                     .Page(1, 5));
 
             Assert.Equal(5, products.Count());
+        }
+
+        [Theory]
+        [ClassData(typeof(DatabaseTestData))]
+        public async Task KitchenSinkWithJoin(DatabaseDriver database)
+        {
+            using var con = database.GetConnection();
+            var products = await con.FromAsync<Product, Category, Product>(sql =>
+                sql.Select()
+                    // TODO: Fix joins with ambigious column names
+                    //.Where(p => p.Name!.StartsWith("Chai") && p.CategoryId == 1)
+                    //.OrWhere(p => p.Name != null)
+                    //.AndWhere(p => p.CategoryId != 0)
+                    //.OrderBy(p => p.CategoryId)
+                    //.OrderByDescending(p => p.Name)
+                    .Page(1, 5));
+
+            Assert.Equal(5, products.Count());
+            Assert.All(products, p => Assert.NotNull(p.Category));
         }
     }
 }

@@ -563,7 +563,7 @@ namespace Dommel
                     buffered);
 
         internal static Delegate CreateMapDelegate<T1, T2, T3, T4, T5, T6, T7, TReturn>()
-            where T1 : class, TReturn
+            where T1 : TReturn
         {
             var includeTypes = new[]
             {
@@ -678,9 +678,13 @@ namespace Dommel
             }
         }
 
-        private static void MapValueToTarget<T>(PropertyInfo[] props, object target, T instance)
+        private static void MapValueToTarget<T>(PropertyInfo[] props, object? target, T instance)
         {
-            if (instance == null)
+            if (target is null)
+            {
+                throw new ArgumentNullException(nameof(target));
+            }
+            if (instance is null)
             {
                 // Nothing to add
                 return;

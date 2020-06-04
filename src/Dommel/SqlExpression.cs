@@ -21,6 +21,7 @@ namespace Dommel
         private readonly DynamicParameters _parameters = new DynamicParameters();
         private string? _selectQuery;
         private string? _pagingQuery;
+        private string? _joinSql;
         private int _parameterIndex;
 
         /// <summary>
@@ -249,6 +250,12 @@ namespace Dommel
             {
                 _orderByBuilder.Append($", {column} {direction}");
             }
+        }
+
+        internal SqlExpression<TEntity> Join(string sql)
+        {
+            _joinSql = sql;
+            return this;
         }
 
         /// <summary>
@@ -624,6 +631,10 @@ namespace Dommel
             if (!string.IsNullOrEmpty(_selectQuery))
             {
                 query += _selectQuery;
+            }
+            if (!string.IsNullOrEmpty(_joinSql))
+            {
+                query += _joinSql;
             }
             if (!string.IsNullOrEmpty(where))
             {
