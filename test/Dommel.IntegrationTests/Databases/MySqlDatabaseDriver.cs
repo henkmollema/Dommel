@@ -1,7 +1,7 @@
 ﻿using System.Data.Common;
 using System.Threading.Tasks;
 using Dapper;
-using MySql.Data.MySqlClient;
+using MySqlConnector;
 
 namespace Dommel.IntegrationTests
 {
