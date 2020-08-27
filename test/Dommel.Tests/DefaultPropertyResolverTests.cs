@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using Xunit;
 
@@ -75,6 +76,21 @@ namespace Dommel.Tests
             Assert.Equal(type.GetProperty("Id"), prop);
         }
 
+        [Fact]
+        public void IgnoresNotMappedAttribute()
+        {
+            // Arrange
+            var resolver = new DefaultPropertyResolver();
+            var type = typeof(Baz);
+
+            // Act
+            var props = resolver.ResolveProperties(type).Select(x => x.Property);
+
+            // Assert
+            var prop = Assert.Single(props);
+            Assert.Equal(type.GetProperty("Id"), prop);
+        }
+
         private class CustomResolver : DefaultPropertyResolver
         {
             // Create a new hashset without the object type.
@@ -121,6 +137,14 @@ namespace Dommel.Tests
             public int Id { get; set; }
 
             [Ignore]
+            public DateTime Timestamp { get; set; }
+        }
+
+        private class Baz
+        {
+            public int Id { get; set; }
+
+            [NotMapped]
             public DateTime Timestamp { get; set; }
         }
     }

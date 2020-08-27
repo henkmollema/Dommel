@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Reflection;
 
 namespace Dommel
@@ -32,7 +33,7 @@ namespace Dommel
         {
             foreach (var property in FilterComplexTypes(type.GetRuntimeProperties()))
             {
-                if (!property.IsDefined(typeof(IgnoreAttribute)))
+                if (!property.IsDefined(typeof(IgnoreAttribute)) && !property.IsDefined(typeof(NotMappedAttribute)))
                 {
                     yield return new ColumnPropertyInfo(property);
                 }
