@@ -58,7 +58,7 @@ namespace Dommel.IntegrationTests
                 await connection.InsertAsync(new ProductOption { ProductId = productId });
 
                 // Order 1
-                var orderId = Convert.ToInt32(await connection.InsertAsync(new Order()));
+                var orderId = Convert.ToInt32(await connection.InsertAsync(new Order { Created = new DateTime(2011, 1, 1) }));
                 var orderLines = new List<OrderLine>
                     {
                         new OrderLine { OrderId = orderId, Line = "Line 1"},
@@ -68,7 +68,7 @@ namespace Dommel.IntegrationTests
                 await connection.InsertAllAsync(orderLines);
 
                 // Order 2
-                _ = await connection.InsertAsync(new Order());
+                _ = await connection.InsertAsync(new Order { Created = new DateTime(2012, 2, 2) });
 
                 // Foo's and Bar's for delete queries
                 await connection.InsertAllAsync(Enumerable.Range(0, 5).Select(_ => new Foo()));

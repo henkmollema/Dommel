@@ -1,4 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using System;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -12,7 +14,21 @@ namespace Dommel.IntegrationTests
         public void Get_OneToOne(DatabaseDriver database)
         {
             using var con = database.GetConnection();
-            var product = con.Get<Product, Category, Product>(1);
+            var products = con.GetAll<Product>();
+            var product = con.Get<Product, Category, Product>(products.First().ProductId);
+            Assert.NotNull(product);
+            Assert.NotNull(product.Category);
+            Assert.Equal("Food", product.Category?.Name);
+            Assert.Equal(product.CategoryId, product.Category?.CategoryId);
+        }
+
+        [Theory]
+        [ClassData(typeof(DatabaseTestData))]
+        public async Task GetAsync_OneToOne(DatabaseDriver database)
+        {
+            using var con = database.GetConnection();
+            var products = await con.GetAllAsync<Product>();
+            var product = await con.GetAsync<Product, Category, Product>(products.First().ProductId);
             Assert.NotNull(product);
             Assert.NotNull(product.Category);
             Assert.Equal("Food", product.Category?.Name);
@@ -24,12 +40,27 @@ namespace Dommel.IntegrationTests
         public void Get_OneToOneOneToMany(DatabaseDriver database)
         {
             using var con = database.GetConnection();
-            var product = con.Get<Product, Category, ProductOption, Product>(1);
+            var products = con.GetAll<Product>();
+            var product = con.Get<Product, Category, ProductOption, Product>(products.First().ProductId);
             Assert.NotNull(product);
             Assert.NotNull(product.Category);
             Assert.Equal("Food", product.Category?.Name);
             Assert.Equal(product.CategoryId, product.Category?.CategoryId);
-            Assert.NotEmpty(product.Options);
+            Assert.Single(product.Options);
+        }
+
+        [Theory]
+        [ClassData(typeof(DatabaseTestData))]
+        public async Task GetAsync_OneToOneOneToMany(DatabaseDriver database)
+        {
+            using var con = database.GetConnection();
+            var products = await con.GetAllAsync<Product>();
+            var product = await con.GetAsync<Product, Category, ProductOption, Product>(products.First().ProductId);
+            Assert.NotNull(product);
+            Assert.NotNull(product.Category);
+            Assert.Equal("Food", product.Category?.Name);
+            Assert.Equal(product.CategoryId, product.Category?.CategoryId);
+            Assert.Single(product.Options);
         }
 
         [Theory]
@@ -37,7 +68,21 @@ namespace Dommel.IntegrationTests
         public void Get_OneToOneNotExisting(DatabaseDriver database)
         {
             using var con = database.GetConnection();
-            var product = con.Get<Product, Category, Product>(11);
+            var fooProduct = con.FirstOrDefault<Product>(x => x.Name == "Foo");
+            Assert.NotNull(fooProduct);
+            var product = con.Get<Product, Category, Product>(fooProduct.ProductId);
+            Assert.NotNull(product);
+            Assert.Null(product.Category);
+        }
+
+        [Theory]
+        [ClassData(typeof(DatabaseTestData))]
+        public async Task GetAsync_OneToOneNotExisting(DatabaseDriver database)
+        {
+            using var con = database.GetConnection();
+            var fooProduct = await con.FirstOrDefaultAsync<Product>(x => x.Name == "Foo");
+            Assert.NotNull(fooProduct);
+            var product = await con.GetAsync<Product, Category, Product>(fooProduct.ProductId);
             Assert.NotNull(product);
             Assert.Null(product.Category);
         }
@@ -47,7 +92,20 @@ namespace Dommel.IntegrationTests
         public void Get_OneToMany(DatabaseDriver database)
         {
             using var con = database.GetConnection();
-            var order = con.Get<Order, OrderLine, Order>(1);
+            var orders = con.GetAll<Order>();
+            var order = con.Get<Order, OrderLine, Order>(orders.First().Id);
+            Assert.NotNull(order);
+            Assert.NotNull(order.OrderLines);
+            Assert.Equal(3, order.OrderLines?.Count);
+        }
+
+        [Theory]
+        [ClassData(typeof(DatabaseTestData))]
+        public async Task GetAsync_OneToMany(DatabaseDriver database)
+        {
+            using var con = database.GetConnection();
+            var orders = await con.GetAllAsync<Order>();
+            var order = await con.GetAsync<Order, OrderLine, Order>(orders.First().Id);
             Assert.NotNull(order);
             Assert.NotNull(order.OrderLines);
             Assert.Equal(3, order.OrderLines?.Count);
@@ -61,52 +119,6 @@ namespace Dommel.IntegrationTests
             var order = con.Get<Order, OrderLine, Order>(2);
             Assert.NotNull(order);
             Assert.Null(order.OrderLines);
-        }
-
-        [Theory]
-        [ClassData(typeof(DatabaseTestData))]
-        public async Task GetAsync_OneToOne(DatabaseDriver database)
-        {
-            using var con = database.GetConnection();
-            var product = await con.GetAsync<Product, Category, Product>(1);
-            Assert.NotNull(product);
-            Assert.NotNull(product.Category);
-            Assert.Equal("Food", product.Category?.Name);
-            Assert.Equal(product.CategoryId, product.Category?.CategoryId);
-        }
-
-        [Theory]
-        [ClassData(typeof(DatabaseTestData))]
-        public async Task GetAsync_OneToOneOneToMany(DatabaseDriver database)
-        {
-            using var con = database.GetConnection();
-            var product = await con.GetAsync<Product, Category, ProductOption, Product>(1);
-            Assert.NotNull(product);
-            Assert.NotNull(product.Category);
-            Assert.Equal("Food", product.Category?.Name);
-            Assert.Equal(product.CategoryId, product.Category?.CategoryId);
-            Assert.NotEmpty(product.Options);
-        }
-
-        [Theory]
-        [ClassData(typeof(DatabaseTestData))]
-        public async Task GetAsync_OneToOneNotExisting(DatabaseDriver database)
-        {
-            using var con = database.GetConnection();
-            var product = await con.GetAsync<Product, Category, Product>(11);
-            Assert.NotNull(product);
-            Assert.Null(product.Category);
-        }
-
-        [Theory]
-        [ClassData(typeof(DatabaseTestData))]
-        public async Task GetAsync_OneToMany(DatabaseDriver database)
-        {
-            using var con = database.GetConnection();
-            var order = await con.GetAsync<Order, OrderLine, Order>(1);
-            Assert.NotNull(order);
-            Assert.NotNull(order.OrderLines);
-            Assert.Equal(3, order.OrderLines?.Count);
         }
 
         [Theory]
@@ -126,15 +138,7 @@ namespace Dommel.IntegrationTests
             using var con = database.GetConnection();
             var products = con.GetAll<Product, Category, Product>();
             Assert.NotEmpty(products);
-        }
-
-        [Theory]
-        [ClassData(typeof(DatabaseTestData))]
-        public void GetAll_OneToMany(DatabaseDriver database)
-        {
-            using var con = database.GetConnection();
-            var orders = con.GetAll<Order, OrderLine, Order>();
-            Assert.NotEmpty(orders);
+            Assert.Equal(products.Select(x => x.Name).Distinct(), products.Select(x => x.Name));
         }
 
         [Theory]
@@ -144,6 +148,26 @@ namespace Dommel.IntegrationTests
             using var con = database.GetConnection();
             var products = await con.GetAllAsync<Product, Category, Product>();
             Assert.NotEmpty(products);
+            Assert.Equal(products.Select(x => x.Name).Distinct(), products.Select(x => x.Name));
+        }
+
+        [Theory]
+        [ClassData(typeof(DatabaseTestData))]
+        public void GetAll_OneToMany(DatabaseDriver database)
+        {
+            using var con = database.GetConnection();
+            var orders = con.GetAll<Order, OrderLine, Order>();
+            Assert.Collection(orders,
+                x =>
+                {
+                    Assert.Equal(new DateTime(2011, 1, 1), x.Created);
+                    Assert.NotEmpty(x.OrderLines);
+                },
+                x =>
+                {
+                    Assert.Equal(new DateTime(2012, 2, 2), x.Created);
+                    Assert.Null(x.OrderLines);
+                });
         }
 
         [Theory]
@@ -152,7 +176,17 @@ namespace Dommel.IntegrationTests
         {
             using var con = database.GetConnection();
             var orders = await con.GetAllAsync<Order, OrderLine, Order>();
-            Assert.NotEmpty(orders);
+            Assert.Collection(orders,
+                x =>
+                {
+                    Assert.Equal(new DateTime(2011, 1, 1), x.Created);
+                    Assert.NotEmpty(x.OrderLines);
+                },
+                x =>
+                {
+                    Assert.Equal(new DateTime(2012, 2, 2), x.Created);
+                    Assert.Null(x.OrderLines);
+                });
         }
     }
 
