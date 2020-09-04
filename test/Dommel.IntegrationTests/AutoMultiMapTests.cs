@@ -17,7 +17,7 @@ namespace Dommel.IntegrationTests
             var products = con.GetAll<Product>();
             var product = con.Get<Product, Category, Product>(products.First().ProductId);
             Assert.NotNull(product);
-            Assert.NotNull(product.Category);
+            Assert.NotNull(product!.Category);
             Assert.Equal("Food", product.Category?.Name);
             Assert.Equal(product.CategoryId, product.Category?.CategoryId);
         }
@@ -30,7 +30,7 @@ namespace Dommel.IntegrationTests
             var products = await con.GetAllAsync<Product>();
             var product = await con.GetAsync<Product, Category, Product>(products.First().ProductId);
             Assert.NotNull(product);
-            Assert.NotNull(product.Category);
+            Assert.NotNull(product!.Category);
             Assert.Equal("Food", product.Category?.Name);
             Assert.Equal(product.CategoryId, product.Category?.CategoryId);
         }
@@ -43,7 +43,7 @@ namespace Dommel.IntegrationTests
             var products = con.GetAll<Product>();
             var product = con.Get<Product, Category, ProductOption, Product>(products.First().ProductId);
             Assert.NotNull(product);
-            Assert.NotNull(product.Category);
+            Assert.NotNull(product!.Category);
             Assert.Equal("Food", product.Category?.Name);
             Assert.Equal(product.CategoryId, product.Category?.CategoryId);
             Assert.Single(product.Options);
@@ -57,7 +57,7 @@ namespace Dommel.IntegrationTests
             var products = await con.GetAllAsync<Product>();
             var product = await con.GetAsync<Product, Category, ProductOption, Product>(products.First().ProductId);
             Assert.NotNull(product);
-            Assert.NotNull(product.Category);
+            Assert.NotNull(product!.Category);
             Assert.Equal("Food", product.Category?.Name);
             Assert.Equal(product.CategoryId, product.Category?.CategoryId);
             Assert.Single(product.Options);
@@ -70,9 +70,9 @@ namespace Dommel.IntegrationTests
             using var con = database.GetConnection();
             var fooProduct = con.FirstOrDefault<Product>(x => x.Name == "Foo");
             Assert.NotNull(fooProduct);
-            var product = con.Get<Product, Category, Product>(fooProduct.ProductId);
+            var product = con.Get<Product, Category, Product>(fooProduct!.ProductId);
             Assert.NotNull(product);
-            Assert.Null(product.Category);
+            Assert.Null(product!.Category);
         }
 
         [Theory]
@@ -82,9 +82,9 @@ namespace Dommel.IntegrationTests
             using var con = database.GetConnection();
             var fooProduct = await con.FirstOrDefaultAsync<Product>(x => x.Name == "Foo");
             Assert.NotNull(fooProduct);
-            var product = await con.GetAsync<Product, Category, Product>(fooProduct.ProductId);
+            var product = await con.GetAsync<Product, Category, Product>(fooProduct!.ProductId);
             Assert.NotNull(product);
-            Assert.Null(product.Category);
+            Assert.Null(product!.Category);
         }
 
         [Theory]
@@ -95,7 +95,7 @@ namespace Dommel.IntegrationTests
             var orders = con.GetAll<Order>();
             var order = con.Get<Order, OrderLine, Order>(orders.First().Id);
             Assert.NotNull(order);
-            Assert.NotNull(order.OrderLines);
+            Assert.NotNull(order!.OrderLines);
             Assert.Equal(3, order.OrderLines?.Count);
         }
 
@@ -107,7 +107,7 @@ namespace Dommel.IntegrationTests
             var orders = await con.GetAllAsync<Order>();
             var order = await con.GetAsync<Order, OrderLine, Order>(orders.First().Id);
             Assert.NotNull(order);
-            Assert.NotNull(order.OrderLines);
+            Assert.NotNull(order!.OrderLines);
             Assert.Equal(3, order.OrderLines?.Count);
         }
 
@@ -118,7 +118,7 @@ namespace Dommel.IntegrationTests
             using var con = database.GetConnection();
             var order = con.Get<Order, OrderLine, Order>(2);
             Assert.NotNull(order);
-            Assert.Null(order.OrderLines);
+            Assert.Null(order!.OrderLines);
         }
 
         [Theory]
@@ -128,7 +128,7 @@ namespace Dommel.IntegrationTests
             using var con = database.GetConnection();
             var order = await con.GetAsync<Order, OrderLine, Order>(2);
             Assert.NotNull(order);
-            Assert.Null(order.OrderLines);
+            Assert.Null(order!.OrderLines);
         }
 
         [Theory]

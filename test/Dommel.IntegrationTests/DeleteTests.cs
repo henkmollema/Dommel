@@ -17,7 +17,7 @@ namespace Dommel.IntegrationTests
             var id = Convert.ToInt32(con.Insert(new Product { Name = "blah" }));
             var product = con.Get<Product>(id);
             Assert.NotNull(product);
-            Assert.Equal("blah", product.Name);
+            Assert.Equal("blah", product!.Name);
             Assert.Equal(id, product.ProductId);
 
             con.Delete(product);
@@ -32,7 +32,7 @@ namespace Dommel.IntegrationTests
             var id = Convert.ToInt32(await con.InsertAsync(new Product { Name = "blah" }));
             var product = await con.GetAsync<Product>(id);
             Assert.NotNull(product);
-            Assert.Equal("blah", product.Name);
+            Assert.Equal("blah", product!.Name);
             Assert.Equal(id, product.ProductId);
 
             await con.DeleteAsync(product);

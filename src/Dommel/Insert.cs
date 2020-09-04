@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using System.Reflection;
 using System.Threading.Tasks;
 using Dapper;
 
@@ -18,7 +17,8 @@ namespace Dommel
         /// <param name="entity">The entity to be inserted.</param>
         /// <param name="transaction">Optional transaction for the command.</param>
         /// <returns>The ID of the inserted entity.</returns>
-        public static object Insert<TEntity>(this IDbConnection connection, TEntity entity, IDbTransaction? transaction = null) where TEntity : class
+        public static object Insert<TEntity>(this IDbConnection connection, TEntity entity, IDbTransaction? transaction = null)
+            where TEntity : class
         {
             var sql = BuildInsertQuery(connection, typeof(TEntity));
             LogQuery<TEntity>(sql);
@@ -33,7 +33,8 @@ namespace Dommel
         /// <param name="entity">The entity to be inserted.</param>
         /// <param name="transaction">Optional transaction for the command.</param>
         /// <returns>The ID of the inserted entity.</returns>
-        public static Task<object> InsertAsync<TEntity>(this IDbConnection connection, TEntity entity, IDbTransaction? transaction = null) where TEntity : class
+        public static Task<object> InsertAsync<TEntity>(this IDbConnection connection, TEntity entity, IDbTransaction? transaction = null)
+            where TEntity : class
         {
             var sql = BuildInsertQuery(connection, typeof(TEntity));
             LogQuery<TEntity>(sql);
@@ -47,7 +48,8 @@ namespace Dommel
         /// <param name="connection">The connection to the database. This can either be open or closed.</param>
         /// <param name="entities">The entities to be inserted.</param>
         /// <param name="transaction">Optional transaction for the command.</param>
-        public static void InsertAll<TEntity>(this IDbConnection connection, IEnumerable<TEntity> entities, IDbTransaction? transaction = null) where TEntity : class
+        public static void InsertAll<TEntity>(this IDbConnection connection, IEnumerable<TEntity> entities, IDbTransaction? transaction = null)
+            where TEntity : class
         {
             var sql = BuildInsertQuery(connection, typeof(TEntity));
             LogQuery<TEntity>(sql);
@@ -61,7 +63,8 @@ namespace Dommel
         /// <param name="connection">The connection to the database. This can either be open or closed.</param>
         /// <param name="entities">The entities to be inserted.</param>
         /// <param name="transaction">Optional transaction for the command.</param>
-        public static Task InsertAllAsync<TEntity>(this IDbConnection connection, IEnumerable<TEntity> entities, IDbTransaction? transaction = null) where TEntity : class
+        public static Task InsertAllAsync<TEntity>(this IDbConnection connection, IEnumerable<TEntity> entities, IDbTransaction? transaction = null)
+            where TEntity : class
         {
             var sql = BuildInsertQuery(connection, typeof(TEntity));
             LogQuery<TEntity>(sql);

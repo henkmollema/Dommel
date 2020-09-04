@@ -14,7 +14,8 @@ namespace Dommel.IntegrationTests
         {
             using var con = database.GetConnection();
             var p = con.Project<ProductSmall>(1);
-            Assert.NotEqual(0, p.ProductId);
+            Assert.NotNull(p);
+            Assert.NotEqual(0, p!.ProductId);
             Assert.NotNull(p.Name);
         }
 
@@ -24,7 +25,8 @@ namespace Dommel.IntegrationTests
         {
             using var con = database.GetConnection();
             var p = await con.ProjectAsync<ProductSmall>(1);
-            Assert.NotEqual(0, p.ProductId);
+            Assert.NotNull(p);
+            Assert.NotEqual(0, p!.ProductId);
             Assert.NotNull(p.Name);
         }
 

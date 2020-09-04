@@ -22,7 +22,7 @@ namespace Dommel.Json.IntegrationTests
 
             var lead = con.Get<Lead>(id);
             Assert.NotNull(lead);
-            Assert.Null(lead.Data);
+            Assert.Null(lead!.Data);
         }
 
         [Theory]
@@ -38,7 +38,7 @@ namespace Dommel.Json.IntegrationTests
 
             var lead = await con.GetAsync<Lead>(id);
             Assert.NotNull(lead);
-            Assert.Null(lead.Data);
+            Assert.Null(lead!.Data);
         }
 
         [Theory]
@@ -54,7 +54,7 @@ namespace Dommel.Json.IntegrationTests
 
             var lead = con.Get<Lead>(id);
             Assert.NotNull(lead);
-            Assert.NotNull(lead.Data);
+            Assert.NotNull(lead!.Data);
             Assert.Null(lead.Data?.FirstName);
         }
 
@@ -71,7 +71,7 @@ namespace Dommel.Json.IntegrationTests
 
             var lead = await con.GetAsync<Lead>(id);
             Assert.NotNull(lead);
-            Assert.NotNull(lead.Data);
+            Assert.NotNull(lead!.Data);
             Assert.Null(lead.Data?.FirstName);
         }
 
@@ -94,7 +94,7 @@ namespace Dommel.Json.IntegrationTests
 
             var lead = con.Get<Lead>(id);
             Assert.NotNull(lead);
-            Assert.NotNull(lead.Data);
+            Assert.NotNull(lead!.Data);
             Assert.NotNull(lead.Data?.FirstName);
         }
 
@@ -117,7 +117,7 @@ namespace Dommel.Json.IntegrationTests
 
             var lead = await con.GetAsync<Lead>(id);
             Assert.NotNull(lead);
-            Assert.NotNull(lead.Data);
+            Assert.NotNull(lead!.Data);
             Assert.NotNull(lead.Data?.FirstName);
         }
 
@@ -138,7 +138,7 @@ namespace Dommel.Json.IntegrationTests
 
             var lead = con.Get<Lead>(id);
             Assert.NotNull(lead);
-            Assert.NotNull(lead.Metadata);
+            Assert.NotNull(lead!.Metadata);
             Assert.Equal("Bar", Assert.Contains("Foo", lead.Metadata));
             Assert.Contains("DateModified", lead.Metadata);
         }
@@ -160,7 +160,7 @@ namespace Dommel.Json.IntegrationTests
 
             var lead = await con.GetAsync<Lead>(id);
             Assert.NotNull(lead);
-            Assert.NotNull(lead.Metadata);
+            Assert.NotNull(lead!.Metadata);
             Assert.Equal("Bar", Assert.Contains("Foo", lead.Metadata));
             Assert.Contains("DateModified", lead.Metadata);
         }

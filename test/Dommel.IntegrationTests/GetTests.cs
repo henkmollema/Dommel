@@ -16,7 +16,7 @@ namespace Dommel.IntegrationTests
             using var con = database.GetConnection();
             var product = con.Get<Product>(1);
             Assert.NotNull(product);
-            Assert.NotEmpty(product.Name);
+            Assert.NotEmpty(product!.Name);
         }
 
         [Theory]
@@ -26,7 +26,7 @@ namespace Dommel.IntegrationTests
             using var con = database.GetConnection();
             var product = await con.GetAsync<Product>(1);
             Assert.NotNull(product);
-            Assert.NotEmpty(product.Name);
+            Assert.NotEmpty(product!.Name);
         }
 
         [Theory]
@@ -36,7 +36,7 @@ namespace Dommel.IntegrationTests
             using var con = database.GetConnection();
             var product = con.Get<Product>(new object[] { 1 });
             Assert.NotNull(product);
-            Assert.NotEmpty(product.Name);
+            Assert.NotEmpty(product!.Name);
         }
 
         [Theory]
@@ -46,7 +46,7 @@ namespace Dommel.IntegrationTests
             using var con = database.GetConnection();
             var product = await con.GetAsync<Product>(new object[] { 1 });
             Assert.NotNull(product);
-            Assert.NotEmpty(product.Name);
+            Assert.NotEmpty(product!.Name);
         }
 
         [Theory]
@@ -74,7 +74,7 @@ namespace Dommel.IntegrationTests
             using var con = database.GetConnection();
             var product = con.Get<ProductsCategories>(1, 1);
             Assert.NotNull(product);
-            Assert.Equal(1, product.ProductId);
+            Assert.Equal(1, product!.ProductId);
             Assert.Equal(1, product.CategoryId);
         }
 
@@ -85,7 +85,7 @@ namespace Dommel.IntegrationTests
             using var con = database.GetConnection();
             var product = await con.GetAsync<ProductsCategories>(1, 1);
             Assert.NotNull(product);
-            Assert.Equal(1, product.ProductId);
+            Assert.Equal(1, product!.ProductId);
             Assert.Equal(1, product.CategoryId);
         }
 

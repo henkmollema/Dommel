@@ -12,13 +12,13 @@ namespace Dommel.IntegrationTests
         {
             using var con = database.GetConnection();
             var product = con.Get<Product, Category, Product>(1, (p, c) =>
-{
-p.Category = c;
-return p;
-});
+            {
+                p.Category = c;
+                return p;
+            });
 
             Assert.NotNull(product);
-            Assert.NotEmpty(product.Name);
+            Assert.NotEmpty(product!.Name);
             Assert.NotNull(product.Category);
             Assert.NotNull(product.Category?.Name);
         }
@@ -29,13 +29,13 @@ return p;
         {
             using var con = database.GetConnection();
             var product = await con.GetAsync<Product, Category, Product>(1, (p, c) =>
-{
-p.Category = c;
-return p;
-});
+            {
+                p.Category = c;
+                return p;
+            });
 
             Assert.NotNull(product);
-            Assert.NotEmpty(product.Name);
+            Assert.NotEmpty(product!.Name);
             Assert.NotNull(product.Category);
             Assert.NotNull(product.Category?.Name);
         }

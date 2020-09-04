@@ -17,7 +17,7 @@ namespace Dommel
         /// <param name="id">The id of the entity in the database.</param>
         /// <param name="transaction">Optional transaction for the command.</param>
         /// <returns>The entity with the corresponding id.</returns>
-        public static TEntity Project<TEntity>(this IDbConnection connection, object id, IDbTransaction? transaction = null) where TEntity : class
+        public static TEntity? Project<TEntity>(this IDbConnection connection, object id, IDbTransaction? transaction = null) where TEntity : class
         {
             var sql = BuildProjectById(GetSqlBuilder(connection), typeof(TEntity), id, out var parameters);
             LogQuery<TEntity>(sql);
@@ -32,11 +32,11 @@ namespace Dommel
         /// <param name="id">The id of the entity in the database.</param>
         /// <param name="transaction">Optional transaction for the command.</param>
         /// <returns>The entity with the corresponding id.</returns>
-        public static Task<TEntity> ProjectAsync<TEntity>(this IDbConnection connection, object id, IDbTransaction? transaction = null) where TEntity : class
+        public static async Task<TEntity?> ProjectAsync<TEntity>(this IDbConnection connection, object id, IDbTransaction? transaction = null) where TEntity : class
         {
             var sql = BuildProjectById(GetSqlBuilder(connection), typeof(TEntity), id, out var parameters);
             LogQuery<TEntity>(sql);
-            return connection.QueryFirstOrDefaultAsync<TEntity>(sql, parameters, transaction);
+            return await connection.QueryFirstOrDefaultAsync<TEntity>(sql, parameters, transaction);
         }
 
         internal static string BuildProjectById(ISqlBuilder sqlBuilder, Type type, object id, out DynamicParameters parameters)

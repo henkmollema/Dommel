@@ -54,7 +54,7 @@ namespace Dommel.IntegrationTests
 
                 await connection.InsertAllAsync(products);
 
-                var productId = (await connection.FirstOrDefaultAsync<Product>(x => x.Name == "Chai")).ProductId;
+                var productId = (await connection.FirstOrDefaultAsync<Product>(x => x.Name == "Chai"))!.ProductId;
                 await connection.InsertAsync(new ProductOption { ProductId = productId });
 
                 // Order 1

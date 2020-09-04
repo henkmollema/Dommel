@@ -50,7 +50,7 @@ namespace Dommel.IntegrationTests
                 var id = Assert.IsType<Guid>(identity);
                 var baz = await con.GetAsync<Qux>(id);
                 Assert.NotNull(baz);
-                Assert.Equal("blah", baz.Name);
+                Assert.Equal("blah", baz!.Name);
                 Assert.Equal(id, baz.Id);
             }
             finally

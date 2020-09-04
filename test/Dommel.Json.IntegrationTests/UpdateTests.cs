@@ -1,5 +1,4 @@
-﻿using System;
-using System.Data.Common;
+﻿using System.Data.Common;
 using System.Threading.Tasks;
 using Dommel.IntegrationTests;
 using Xunit;
@@ -18,10 +17,10 @@ namespace Dommel.Json.IntegrationTests
                     FirstName = "Foo",
                 }
             });
-            return con.Get<Lead>(id);
+            return con.Get<Lead>(id)!;
         }
 
-        private async Task<object> InsertLeadAsync(DbConnection con)
+        private async Task<Lead> InsertLeadAsync(DbConnection con)
         {
             var id = await con.InsertAsync(new Lead
             {
@@ -30,7 +29,7 @@ namespace Dommel.Json.IntegrationTests
                     FirstName = "Foo",
                 }
             });
-            return await con.GetAsync<Lead>(id);
+            return (await con.GetAsync<Lead>(id))!;
         }
 
         [Theory]
@@ -47,7 +46,8 @@ namespace Dommel.Json.IntegrationTests
 
             // Assert
             var updatedLead = con.Get<Lead>(lead.Id);
-            Assert.Equal("Bar", updatedLead.Data?.FirstName);
+            Assert.NotNull(updatedLead);
+            Assert.Equal("Bar", updatedLead!.Data?.FirstName);
         }
 
         [Theory]
@@ -55,7 +55,18 @@ namespace Dommel.Json.IntegrationTests
         public async Task SelectSingleStatementAsync(DatabaseDriver database)
         {
             using var con = database.GetConnection();
+
+            // Arrange
             var lead = await InsertLeadAsync(con);
+
+            // Act
+            lead.Data!.FirstName = "Bar";
+            con.Update(lead);
+
+            // Assert
+            var updatedLead = con.Get<Lead>(lead.Id);
+            Assert.NotNull(updatedLead);
+            Assert.Equal("Bar", updatedLead!.Data?.FirstName);
         }
     }
 }

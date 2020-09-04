@@ -21,14 +21,8 @@ namespace Dommel
         /// <param name="map">The mapping to perform on the entities in the result set.</param>
         /// <param name="transaction">Optional transaction for the command.</param>
         /// <returns>The entity with the corresponding id joined with the specified types.</returns>
-        public static TReturn Get<T1, T2, TReturn>(
-            this IDbConnection connection,
-            object id,
-            Func<T1, T2, TReturn> map,
-            IDbTransaction? transaction = null)
-        {
-            return MultiMap<T1, T2, DontMap, DontMap, DontMap, DontMap, DontMap, TReturn>(connection, map, id, transaction).FirstOrDefault();
-        }
+        public static TReturn? Get<T1, T2, TReturn>(this IDbConnection connection, object id, Func<T1, T2, TReturn> map, IDbTransaction? transaction = null) where TReturn : class
+            => MultiMap<T1, T2, DontMap, DontMap, DontMap, DontMap, DontMap, TReturn>(connection, map, id, transaction).FirstOrDefault();
 
         /// <summary>
         /// Retrieves the entity of type <typeparamref name="TReturn"/> with the specified id
@@ -42,14 +36,8 @@ namespace Dommel
         /// <param name="map">The mapping to perform on the entities in the result set.</param>
         /// <param name="transaction">Optional transaction for the command.</param>
         /// <returns>The entity with the corresponding id joined with the specified types.</returns>
-        public static async Task<TReturn> GetAsync<T1, T2, TReturn>(
-            this IDbConnection connection,
-            object id,
-            Func<T1, T2, TReturn> map,
-            IDbTransaction? transaction = null)
-        {
-            return (await MultiMapAsync<T1, T2, DontMap, DontMap, DontMap, DontMap, DontMap, TReturn>(connection, map, id, transaction)).FirstOrDefault();
-        }
+        public static async Task<TReturn?> GetAsync<T1, T2, TReturn>(this IDbConnection connection, object id, Func<T1, T2, TReturn> map, IDbTransaction? transaction = null) where TReturn : class
+            => (await MultiMapAsync<T1, T2, DontMap, DontMap, DontMap, DontMap, DontMap, TReturn>(connection, map, id, transaction)).FirstOrDefault();
 
         /// <summary>
         /// Retrieves the entity of type <typeparamref name="TReturn"/> with the specified id
@@ -64,14 +52,8 @@ namespace Dommel
         /// <param name="map">The mapping to perform on the entities in the result set.</param>
         /// <param name="transaction">Optional transaction for the command.</param>
         /// <returns>The entity with the corresponding id joined with the specified types.</returns>
-        public static TReturn Get<T1, T2, T3, TReturn>(
-            this IDbConnection connection,
-            object id,
-            Func<T1, T2, T3, TReturn> map,
-            IDbTransaction? transaction = null)
-        {
-            return MultiMap<T1, T2, T3, DontMap, DontMap, DontMap, DontMap, TReturn>(connection, map, id, transaction).FirstOrDefault();
-        }
+        public static TReturn? Get<T1, T2, T3, TReturn>(this IDbConnection connection, object id, Func<T1, T2, T3, TReturn> map, IDbTransaction? transaction = null) where TReturn : class
+            => MultiMap<T1, T2, T3, DontMap, DontMap, DontMap, DontMap, TReturn>(connection, map, id, transaction).FirstOrDefault();
 
         /// <summary>
         /// Retrieves the entity of type <typeparamref name="TReturn"/> with the specified id
@@ -86,14 +68,8 @@ namespace Dommel
         /// <param name="map">The mapping to perform on the entities in the result set.</param>
         /// <param name="transaction">Optional transaction for the command.</param>
         /// <returns>The entity with the corresponding id joined with the specified types.</returns>
-        public static async Task<TReturn> GetAsync<T1, T2, T3, TReturn>(
-            this IDbConnection connection,
-            object id,
-            Func<T1, T2, T3, TReturn> map,
-            IDbTransaction? transaction = null)
-        {
-            return (await MultiMapAsync<T1, T2, T3, DontMap, DontMap, DontMap, DontMap, TReturn>(connection, map, id, transaction)).FirstOrDefault();
-        }
+        public static async Task<TReturn?> GetAsync<T1, T2, T3, TReturn>(this IDbConnection connection, object id, Func<T1, T2, T3, TReturn> map, IDbTransaction? transaction = null) where TReturn : class
+            => (await MultiMapAsync<T1, T2, T3, DontMap, DontMap, DontMap, DontMap, TReturn>(connection, map, id, transaction)).FirstOrDefault();
 
         /// <summary>
         /// Retrieves the entity of type <typeparamref name="TReturn"/> with the specified id
@@ -109,14 +85,8 @@ namespace Dommel
         /// <param name="map">The mapping to perform on the entities in the result set.</param>
         /// <param name="transaction">Optional transaction for the command.</param>
         /// <returns>The entity with the corresponding id joined with the specified types.</returns>
-        public static TReturn Get<T1, T2, T3, T4, TReturn>(
-            this IDbConnection connection,
-            object id,
-            Func<T1, T2, T3, T4, TReturn> map,
-            IDbTransaction? transaction = null)
-        {
-            return MultiMap<T1, T2, T3, T4, DontMap, DontMap, DontMap, TReturn>(connection, map, id, transaction).FirstOrDefault();
-        }
+        public static TReturn? Get<T1, T2, T3, T4, TReturn>(this IDbConnection connection, object id, Func<T1, T2, T3, T4, TReturn> map, IDbTransaction? transaction = null) where TReturn : class
+            => MultiMap<T1, T2, T3, T4, DontMap, DontMap, DontMap, TReturn>(connection, map, id, transaction).FirstOrDefault();
 
         /// <summary>
         /// Retrieves the entity of type <typeparamref name="TReturn"/> with the specified id
@@ -132,14 +102,8 @@ namespace Dommel
         /// <param name="map">The mapping to perform on the entities in the result set.</param>
         /// <param name="transaction">Optional transaction for the command.</param>
         /// <returns>The entity with the corresponding id joined with the specified types.</returns>
-        public static async Task<TReturn> GetAsync<T1, T2, T3, T4, TReturn>(
-            this IDbConnection connection,
-            object id,
-            Func<T1, T2, T3, T4, TReturn> map,
-            IDbTransaction? transaction = null)
-        {
-            return (await MultiMapAsync<T1, T2, T3, T4, DontMap, DontMap, DontMap, TReturn>(connection, map, id, transaction)).FirstOrDefault();
-        }
+        public static async Task<TReturn?> GetAsync<T1, T2, T3, T4, TReturn>(this IDbConnection connection, object id, Func<T1, T2, T3, T4, TReturn> map, IDbTransaction? transaction = null) where TReturn : class
+            => (await MultiMapAsync<T1, T2, T3, T4, DontMap, DontMap, DontMap, TReturn>(connection, map, id, transaction)).FirstOrDefault();
 
         /// <summary>
         /// Retrieves the entity of type <typeparamref name="TReturn"/> with the specified id
@@ -156,14 +120,9 @@ namespace Dommel
         /// <param name="map">The mapping to perform on the entities in the result set.</param>
         /// <param name="transaction">Optional transaction for the command.</param>
         /// <returns>The entity with the corresponding id joined with the specified types.</returns>
-        public static TReturn Get<T1, T2, T3, T4, T5, TReturn>(
-            this IDbConnection connection,
-            object id,
-            Func<T1, T2, T3, T4, T5, TReturn> map,
-            IDbTransaction? transaction = null)
-        {
-            return MultiMap<T1, T2, T3, T4, T5, DontMap, DontMap, TReturn>(connection, map, id, transaction).FirstOrDefault();
-        }
+        public static TReturn? Get<T1, T2, T3, T4, T5, TReturn>(this IDbConnection connection, object id, Func<T1, T2, T3, T4, T5, TReturn> map,
+            IDbTransaction? transaction = null) where TReturn : class
+            => MultiMap<T1, T2, T3, T4, T5, DontMap, DontMap, TReturn>(connection, map, id, transaction).FirstOrDefault();
 
         /// <summary>
         /// Retrieves the entity of type <typeparamref name="TReturn"/> with the specified id
@@ -180,14 +139,8 @@ namespace Dommel
         /// <param name="map">The mapping to perform on the entities in the result set.</param>
         /// <param name="transaction">Optional transaction for the command.</param>
         /// <returns>The entity with the corresponding id joined with the specified types.</returns>
-        public static async Task<TReturn> GetAsync<T1, T2, T3, T4, T5, TReturn>(
-            this IDbConnection connection,
-            object id,
-            Func<T1, T2, T3, T4, T5, TReturn> map,
-            IDbTransaction? transaction = null)
-        {
-            return (await MultiMapAsync<T1, T2, T3, T4, T5, DontMap, DontMap, TReturn>(connection, map, id, transaction)).FirstOrDefault();
-        }
+        public static async Task<TReturn?> GetAsync<T1, T2, T3, T4, T5, TReturn>(this IDbConnection connection, object id, Func<T1, T2, T3, T4, T5, TReturn> map, IDbTransaction? transaction = null) where TReturn : class
+            => (await MultiMapAsync<T1, T2, T3, T4, T5, DontMap, DontMap, TReturn>(connection, map, id, transaction)).FirstOrDefault();
 
         /// <summary>
         /// Retrieves the entity of type <typeparamref name="TReturn"/> with the specified id
@@ -205,14 +158,8 @@ namespace Dommel
         /// <param name="map">The mapping to perform on the entities in the result set.</param>
         /// <param name="transaction">Optional transaction for the command.</param>
         /// <returns>The entity with the corresponding id joined with the specified types.</returns>
-        public static TReturn Get<T1, T2, T3, T4, T5, T6, TReturn>(
-            this IDbConnection connection,
-            object id,
-            Func<T1, T2, T3, T4, T5, T6, TReturn> map,
-            IDbTransaction? transaction = null)
-        {
-            return MultiMap<T1, T2, T3, T4, T5, T6, DontMap, TReturn>(connection, map, id, transaction).FirstOrDefault();
-        }
+        public static TReturn? Get<T1, T2, T3, T4, T5, T6, TReturn>(this IDbConnection connection, object id, Func<T1, T2, T3, T4, T5, T6, TReturn> map, IDbTransaction? transaction = null) where TReturn : class
+            => MultiMap<T1, T2, T3, T4, T5, T6, DontMap, TReturn>(connection, map, id, transaction).FirstOrDefault();
 
         /// <summary>
         /// Retrieves the entity of type <typeparamref name="TReturn"/> with the specified id
@@ -234,10 +181,7 @@ namespace Dommel
             this IDbConnection connection,
             object id,
             Func<T1, T2, T3, T4, T5, T6, TReturn> map,
-            IDbTransaction? transaction = null)
-        {
-            return (await MultiMapAsync<T1, T2, T3, T4, T5, T6, DontMap, TReturn>(connection, map, id, transaction)).FirstOrDefault();
-        }
+            IDbTransaction? transaction = null) => (await MultiMapAsync<T1, T2, T3, T4, T5, T6, DontMap, TReturn>(connection, map, id, transaction)).FirstOrDefault();
 
         /// <summary>
         /// Retrieves the entity of type <typeparamref name="TReturn"/> with the specified id
@@ -256,14 +200,8 @@ namespace Dommel
         /// <param name="map">The mapping to perform on the entities in the result set.</param>
         /// <param name="transaction">Optional transaction for the command.</param>
         /// <returns>The entity with the corresponding id joined with the specified types.</returns>
-        public static TReturn Get<T1, T2, T3, T4, T5, T6, T7, TReturn>(
-            this IDbConnection connection,
-            object id,
-            Func<T1, T2, T3, T4, T5, T6, T7, TReturn> map,
-            IDbTransaction? transaction = null)
-        {
-            return MultiMap<T1, T2, T3, T4, T5, T6, T7, TReturn>(connection, map, id, transaction).FirstOrDefault();
-        }
+        public static TReturn? Get<T1, T2, T3, T4, T5, T6, T7, TReturn>(this IDbConnection connection, object id, Func<T1, T2, T3, T4, T5, T6, T7, TReturn> map, IDbTransaction? transaction = null) where TReturn : class
+            => MultiMap<T1, T2, T3, T4, T5, T6, T7, TReturn>(connection, map, id, transaction).FirstOrDefault();
 
         /// <summary>
         /// Retrieves the entity of type <typeparamref name="TReturn"/> with the specified id
@@ -282,14 +220,8 @@ namespace Dommel
         /// <param name="map">The mapping to perform on the entities in the result set.</param>
         /// <param name="transaction">Optional transaction for the command.</param>
         /// <returns>The entity with the corresponding id joined with the specified types.</returns>
-        public static async Task<TReturn> GetAsync<T1, T2, T3, T4, T5, T6, T7, TReturn>(
-            this IDbConnection connection,
-            object id,
-            Func<T1, T2, T3, T4, T5, T6, T7, TReturn> map,
-            IDbTransaction? transaction = null)
-        {
-            return (await MultiMapAsync<T1, T2, T3, T4, T5, T6, T7, TReturn>(connection, map, id, transaction)).FirstOrDefault();
-        }
+        public static async Task<TReturn?> GetAsync<T1, T2, T3, T4, T5, T6, T7, TReturn>(this IDbConnection connection, object id, Func<T1, T2, T3, T4, T5, T6, T7, TReturn> map, IDbTransaction? transaction = null) where TReturn : class
+            => (await MultiMapAsync<T1, T2, T3, T4, T5, T6, T7, TReturn>(connection, map, id, transaction)).FirstOrDefault();
 
         /// <summary>
         /// Retrieves all the entities of type <typeparamref name="TReturn"/>
@@ -313,10 +245,7 @@ namespace Dommel
             this IDbConnection connection,
             Func<T1, T2, TReturn> map,
             IDbTransaction? transaction = null,
-            bool buffered = true)
-        {
-            return MultiMap<T1, T2, DontMap, DontMap, DontMap, DontMap, DontMap, TReturn>(connection, map, id: null, transaction, buffered);
-        }
+            bool buffered = true) => MultiMap<T1, T2, DontMap, DontMap, DontMap, DontMap, DontMap, TReturn>(connection, map, id: null, transaction, buffered);
 
         /// <summary>
         /// Retrieves all the entities of type <typeparamref name="TReturn"/>
@@ -340,10 +269,7 @@ namespace Dommel
             this IDbConnection connection,
             Func<T1, T2, TReturn> map,
             IDbTransaction? transaction = null,
-            bool buffered = true)
-        {
-            return MultiMapAsync<T1, T2, DontMap, DontMap, DontMap, DontMap, DontMap, TReturn>(connection, map, id: null, transaction, buffered);
-        }
+            bool buffered = true) => MultiMapAsync<T1, T2, DontMap, DontMap, DontMap, DontMap, DontMap, TReturn>(connection, map, id: null, transaction, buffered);
 
         /// <summary>
         /// Retrieves all the entities of type <typeparamref name="TReturn"/>
@@ -368,10 +294,7 @@ namespace Dommel
             this IDbConnection connection,
             Func<T1, T2, T3, TReturn> map,
             IDbTransaction? transaction = null,
-            bool buffered = true)
-        {
-            return MultiMap<T1, T2, T3, DontMap, DontMap, DontMap, DontMap, TReturn>(connection, map, id: null, transaction, buffered);
-        }
+            bool buffered = true) => MultiMap<T1, T2, T3, DontMap, DontMap, DontMap, DontMap, TReturn>(connection, map, id: null, transaction, buffered);
 
         /// <summary>
         /// Retrieves all the entities of type <typeparamref name="TReturn"/>
@@ -396,10 +319,7 @@ namespace Dommel
             this IDbConnection connection,
             Func<T1, T2, T3, TReturn> map,
             IDbTransaction? transaction = null,
-            bool buffered = true)
-        {
-            return MultiMapAsync<T1, T2, T3, DontMap, DontMap, DontMap, DontMap, TReturn>(connection, map, id: null, transaction, buffered);
-        }
+            bool buffered = true) => MultiMapAsync<T1, T2, T3, DontMap, DontMap, DontMap, DontMap, TReturn>(connection, map, id: null, transaction, buffered);
 
         /// <summary>
         /// Retrieves all the entities of type <typeparamref name="TReturn"/>
@@ -425,10 +345,7 @@ namespace Dommel
             this IDbConnection connection,
             Func<T1, T2, T3, T4, TReturn> map,
             IDbTransaction? transaction = null,
-            bool buffered = true)
-        {
-            return MultiMap<T1, T2, T3, T4, DontMap, DontMap, DontMap, TReturn>(connection, map, id: null, transaction, buffered);
-        }
+            bool buffered = true) => MultiMap<T1, T2, T3, T4, DontMap, DontMap, DontMap, TReturn>(connection, map, id: null, transaction, buffered);
 
         /// <summary>
         /// Retrieves all the entities of type <typeparamref name="TReturn"/>
@@ -454,10 +371,7 @@ namespace Dommel
             this IDbConnection connection,
             Func<T1, T2, T3, T4, TReturn> map,
             IDbTransaction? transaction = null,
-            bool buffered = true)
-        {
-            return MultiMapAsync<T1, T2, T3, T4, DontMap, DontMap, DontMap, TReturn>(connection, map, id: null, transaction, buffered);
-        }
+            bool buffered = true) => MultiMapAsync<T1, T2, T3, T4, DontMap, DontMap, DontMap, TReturn>(connection, map, id: null, transaction, buffered);
 
         /// <summary>
         /// Retrieves all the entities of type <typeparamref name="TReturn"/>
@@ -484,10 +398,7 @@ namespace Dommel
             this IDbConnection connection,
             Func<T1, T2, T3, T4, T5, TReturn> map,
             IDbTransaction? transaction = null,
-            bool buffered = true)
-        {
-            return MultiMap<T1, T2, T3, T4, T5, DontMap, DontMap, TReturn>(connection, map, id: null, transaction, buffered);
-        }
+            bool buffered = true) => MultiMap<T1, T2, T3, T4, T5, DontMap, DontMap, TReturn>(connection, map, id: null, transaction, buffered);
 
         /// <summary>
         /// Retrieves all the entities of type <typeparamref name="TReturn"/>
@@ -514,10 +425,7 @@ namespace Dommel
             this IDbConnection connection,
             Func<T1, T2, T3, T4, T5, TReturn> map,
             IDbTransaction? transaction = null,
-            bool buffered = true)
-        {
-            return MultiMapAsync<T1, T2, T3, T4, T5, DontMap, DontMap, TReturn>(connection, map, id: null, transaction, buffered);
-        }
+            bool buffered = true) => MultiMapAsync<T1, T2, T3, T4, T5, DontMap, DontMap, TReturn>(connection, map, id: null, transaction, buffered);
 
         /// <summary>
         /// Retrieves all the entities of type <typeparamref name="TReturn"/>
@@ -545,10 +453,7 @@ namespace Dommel
             this IDbConnection connection,
             Func<T1, T2, T3, T4, T5, T6, TReturn> map,
             IDbTransaction? transaction = null,
-            bool buffered = true)
-        {
-            return MultiMap<T1, T2, T3, T4, T5, T6, DontMap, TReturn>(connection, map, id: null, transaction, buffered);
-        }
+            bool buffered = true) => MultiMap<T1, T2, T3, T4, T5, T6, DontMap, TReturn>(connection, map, id: null, transaction, buffered);
 
         /// <summary>
         /// Retrieves all the entities of type <typeparamref name="TReturn"/>
@@ -576,10 +481,7 @@ namespace Dommel
             this IDbConnection connection,
             Func<T1, T2, T3, T4, T5, T6, TReturn> map,
             IDbTransaction? transaction = null,
-            bool buffered = true)
-        {
-            return MultiMapAsync<T1, T2, T3, T4, T5, T6, DontMap, TReturn>(connection, map, id: null, transaction, buffered);
-        }
+            bool buffered = true) => MultiMapAsync<T1, T2, T3, T4, T5, T6, DontMap, TReturn>(connection, map, id: null, transaction, buffered);
 
         /// <summary>
         /// Retrieves all the entities of type <typeparamref name="TReturn"/>
@@ -608,10 +510,7 @@ namespace Dommel
             this IDbConnection connection,
             Func<T1, T2, T3, T4, T5, T6, T7, TReturn> map,
             IDbTransaction? transaction = null,
-            bool buffered = true)
-        {
-            return MultiMap<T1, T2, T3, T4, T5, T6, T7, TReturn>(connection, map, id: null, transaction, buffered);
-        }
+            bool buffered = true) => MultiMap<T1, T2, T3, T4, T5, T6, T7, TReturn>(connection, map, id: null, transaction, buffered);
 
         /// <summary>
         /// Retrieves all the entities of type <typeparamref name="TReturn"/>
@@ -640,10 +539,7 @@ namespace Dommel
             this IDbConnection connection,
             Func<T1, T2, T3, T4, T5, T6, T7, TReturn> map,
             IDbTransaction? transaction = null,
-            bool buffered = true)
-        {
-            return MultiMapAsync<T1, T2, T3, T4, T5, T6, T7, TReturn>(connection, map, id: null, transaction, buffered);
-        }
+            bool buffered = true) => MultiMapAsync<T1, T2, T3, T4, T5, T6, T7, TReturn>(connection, map, id: null, transaction, buffered);
 
         private static IEnumerable<TReturn> MultiMap<T1, T2, T3, T4, T5, T6, T7, TReturn>(IDbConnection connection, Delegate map, object? id, IDbTransaction? transaction = null, bool buffered = true)
         {

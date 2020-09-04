@@ -61,7 +61,8 @@ namespace Dommel
         /// A instance of type <typeparamref name="TEntity"/> matching the specified
         /// <paramref name="predicate"/>.
         /// </returns>
-        public static TEntity FirstOrDefault<TEntity>(this IDbConnection connection, Expression<Func<TEntity, bool>> predicate, IDbTransaction? transaction = null)
+        public static TEntity? FirstOrDefault<TEntity>(this IDbConnection connection, Expression<Func<TEntity, bool>> predicate, IDbTransaction? transaction = null)
+            where TEntity : class
         {
             var sql = BuildSelectSql(connection, predicate, out var parameters);
             LogQuery<TEntity>(sql);
@@ -79,11 +80,12 @@ namespace Dommel
         /// A instance of type <typeparamref name="TEntity"/> matching the specified
         /// <paramref name="predicate"/>.
         /// </returns>
-        public static Task<TEntity> FirstOrDefaultAsync<TEntity>(this IDbConnection connection, Expression<Func<TEntity, bool>> predicate, IDbTransaction? transaction = null)
+        public static async Task<TEntity?> FirstOrDefaultAsync<TEntity>(this IDbConnection connection, Expression<Func<TEntity, bool>> predicate, IDbTransaction? transaction = null)
+            where TEntity : class
         {
             var sql = BuildSelectSql(connection, predicate, out var parameters);
             LogQuery<TEntity>(sql);
-            return connection.QueryFirstOrDefaultAsync<TEntity>(sql, parameters, transaction);
+            return await connection.QueryFirstOrDefaultAsync<TEntity>(sql, parameters, transaction);
         }
 
         private static string BuildSelectSql<TEntity>(IDbConnection connection, Expression<Func<TEntity, bool>> predicate, out DynamicParameters parameters)
@@ -149,7 +151,7 @@ namespace Dommel
             // Start with the select query part
             var sql = BuildSelectSql(connection, predicate, out parameters);
 
-            // Append  the paging part including the order by
+            // Append the paging part including the order by
             var keyColumns = Resolvers.KeyProperties(typeof(TEntity)).Select(p => Resolvers.Column(p.Property, connection));
             var orderBy = "order by " + string.Join(", ", keyColumns);
             sql += GetSqlBuilder(connection).BuildPaging(orderBy, pageNumber, pageSize);

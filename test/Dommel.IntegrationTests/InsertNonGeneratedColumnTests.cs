@@ -21,7 +21,7 @@ namespace Dommel.IntegrationTests
             // Assert
             var product = await con.GetAsync<Baz>(generatedId);
             Assert.NotNull(product);
-            Assert.Equal(generatedId, product.BazId);
+            Assert.Equal(generatedId, product!.BazId);
             Assert.Equal("Baz", product.Name);
         }
     }
