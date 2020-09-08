@@ -65,7 +65,7 @@ Pop-Location
 #
 # Create artifacts
 if ($env:APPVEYOR_BUILD_NUMBER) {
-    $versionSuffix = "beta8-{0:00000}" -f [convert]::ToInt32("0" + $env:APPVEYOR_BUILD_NUMBER, 10)
+    $versionSuffix = "beta.{0:00000}" -f [convert]::ToInt32("0" + $env:APPVEYOR_BUILD_NUMBER, 10)
 }
 else {
     $versionSuffix = $suffix
