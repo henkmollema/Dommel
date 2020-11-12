@@ -141,7 +141,7 @@ namespace Dommel
         /// <returns>The column name in the database for <paramref name="propertyInfo"/>.</returns>
         public static string Column(PropertyInfo propertyInfo, ISqlBuilder sqlBuilder)
         {
-            var key = $"{sqlBuilder.GetType()}.{propertyInfo.DeclaringType}.{propertyInfo.Name}";
+            var key = $"{sqlBuilder.GetType()}.{propertyInfo.ReflectedType}.{propertyInfo.Name}";
             if (!ColumnNameCache.TryGetValue(key, out var columnName))
             {
                 columnName = sqlBuilder.QuoteIdentifier(DommelMapper.ColumnNameResolver.ResolveColumnName(propertyInfo));
