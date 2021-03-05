@@ -280,7 +280,7 @@ namespace Dommel
             Func<T1, T2, TReturn> map,
             IDbTransaction? transaction = null,
             bool buffered = true,
-              CancellationTokenSource? cancellationToken = null) => MultiMapAsync<T1, T2, DontMap, DontMap, DontMap, DontMap, DontMap, TReturn>(connection, map, id: null, transaction, buffered);
+              CancellationTokenSource? cancellationToken = null) => MultiMapAsync<T1, T2, DontMap, DontMap, DontMap, DontMap, DontMap, TReturn>(connection, map, id: null, transaction, buffered, cancellationToken: cancellationToken);
 
         /// <summary>
         /// Retrieves all the entities of type <typeparamref name="TReturn"/>
@@ -332,7 +332,7 @@ namespace Dommel
             Func<T1, T2, T3, TReturn> map,
             IDbTransaction? transaction = null,
             bool buffered = true,
-              CancellationTokenSource? cancellationToken = null) => MultiMapAsync<T1, T2, T3, DontMap, DontMap, DontMap, DontMap, TReturn>(connection, map, id: null, transaction, buffered);
+              CancellationTokenSource? cancellationToken = null) => MultiMapAsync<T1, T2, T3, DontMap, DontMap, DontMap, DontMap, TReturn>(connection, map, id: null, transaction, buffered, cancellationToken: cancellationToken);
 
         /// <summary>
         /// Retrieves all the entities of type <typeparamref name="TReturn"/>
@@ -386,7 +386,7 @@ namespace Dommel
             Func<T1, T2, T3, T4, TReturn> map,
             IDbTransaction? transaction = null,
             bool buffered = true,
-              CancellationTokenSource? cancellationToken = null) => MultiMapAsync<T1, T2, T3, T4, DontMap, DontMap, DontMap, TReturn>(connection, map, id: null, transaction, buffered);
+              CancellationTokenSource? cancellationToken = null) => MultiMapAsync<T1, T2, T3, T4, DontMap, DontMap, DontMap, TReturn>(connection, map, id: null, transaction, buffered, cancellationToken: cancellationToken);
 
         /// <summary>
         /// Retrieves all the entities of type <typeparamref name="TReturn"/>
