@@ -8,7 +8,7 @@ namespace Dommel.Json
 {
     internal class JsonObjectTypeHandler : SqlMapper.ITypeHandler
     {
-        private static readonly JsonSerializerOptions JsonOptions = new()
+        private static readonly JsonSerializerOptions JsonOptions = new JsonSerializerOptions()
         {
             AllowTrailingCommas = true,
             ReadCommentHandling = JsonCommentHandling.Skip,
@@ -18,7 +18,7 @@ namespace Dommel.Json
         public void SetValue(IDbDataParameter parameter, object? value)
         {
             parameter.Value = value is null || value is DBNull
-                ? DBNull.Value
+                ? (object)DBNull.Value
                 : JsonSerializer.Serialize(value, JsonOptions);
             parameter.DbType = DbType.String;
         }
