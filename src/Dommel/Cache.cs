@@ -20,19 +20,19 @@ namespace Dommel
 
     internal struct QueryCacheKey : IEquatable<QueryCacheKey>
     {
-        public QueryCacheKey(QueryCacheType cacheType, ISqlBuilder sqlBuilder, Type entityType)
+        public QueryCacheKey(QueryCacheType cacheType, ISqlBuilder sqlBuilder, MemberInfo memberInfo)
         {
             SqlBuilderType = sqlBuilder.GetType();
             CacheType = cacheType;
-            EntityType = entityType;
+            MemberInfo = memberInfo;
         }
 
         public QueryCacheType CacheType { get; }
 
         public Type SqlBuilderType { get; }
 
-        public Type EntityType { get; }
+        public MemberInfo MemberInfo { get; }
 
-        public bool Equals(QueryCacheKey other) => CacheType == other.CacheType && SqlBuilderType == other.SqlBuilderType && EntityType == other.EntityType;
+        public bool Equals(QueryCacheKey other) => CacheType == other.CacheType && SqlBuilderType == other.SqlBuilderType && MemberInfo == other.MemberInfo;
     }
 }
