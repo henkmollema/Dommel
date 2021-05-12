@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -438,6 +438,29 @@ namespace Dommel
             return VisitExpression(epxression.Body);
         }
 
+
+        /// <summary>
+        /// Verify if a particular <paramref name="expression"/> needs to be enclosed in parentheses
+        /// given the <paramref name="parentExpression"/> 
+        /// </summary>
+        /// <param name="expression">The expression</param>
+        /// <param name="parentExpression">The parent expression of <paramref name="expression"/></param>
+        /// <returns>True if parentheses are required</returns>
+        private static bool ShouldHaveParentheses(Expression expression, BinaryExpression parentExpression)
+        {
+            if (expression is not BinaryExpression binaryExpression) 
+                return false;
+
+            var isParentAndAlso = parentExpression.NodeType == ExpressionType.AndAlso;
+            var isParentOrElse = parentExpression.NodeType == ExpressionType.OrElse;
+
+            var isAndAlso = binaryExpression.NodeType == ExpressionType.AndAlso;
+            var isOrElse = binaryExpression.NodeType == ExpressionType.OrElse;
+
+            return isAndAlso && isParentOrElse || isOrElse && isParentAndAlso;
+        }
+
+
         /// <summary>
         /// Processes a binary expression.
         /// </summary>
@@ -460,6 +483,9 @@ namespace Dommel
                 else
                 {
                     left = VisitExpression(expression.Left);
+                    if (ShouldHaveParentheses(expression.Left, expression))
+                        left = $"({left})";
+
                 }
 
                 if (expression.Right is MemberExpression rightMember && rightMember.Expression?.NodeType == ExpressionType.Parameter)
@@ -469,6 +495,9 @@ namespace Dommel
                 else
                 {
                     right = VisitExpression(expression.Right);
+                    if (ShouldHaveParentheses(expression.Right, expression))
+                        right = $"({right})";
+
                 }
             }
             else
