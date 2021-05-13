@@ -15,16 +15,16 @@ namespace Dommel.Json
 
         public new IJsonSqlBuilder SqlBuilder => (IJsonSqlBuilder)base.SqlBuilder;
 
-        protected override object VisitMemberAccess(MemberExpression expression)
+        protected override VisitResult VisitMemberAccess(MemberExpression expression)
         {
             if (expression.Member is PropertyInfo jsonValue &&
                 expression.Expression is MemberExpression jsonContainerExpr &&
                 jsonContainerExpr.Member is PropertyInfo jsonContainer &&
                 jsonContainer.IsDefined(_options.JsonDataAttributeType))
             {
-                return SqlBuilder.JsonValue(
-                    VisitMemberAccess(jsonContainerExpr).ToString(),
-                    ColumnNameResolver.ResolveColumnName(jsonValue));
+                var memberAccessResult = VisitMemberAccess(jsonContainerExpr);
+                return new VisitResult(SqlBuilder.JsonValue(memberAccessResult.Result.ToString(),
+                    ColumnNameResolver.ResolveColumnName(jsonValue)));
             }
 
             return base.VisitMemberAccess(expression);

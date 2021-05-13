@@ -100,7 +100,7 @@ namespace Dommel.Tests
             var sql = new SqlExpression<Foo>(new SqlServerSqlBuilder())
                 .Where(f => f.Bar == "test" && (f.Baz || f.Qux) || f.Bar == null)
                 .ToSql();
-                Assert.Equal(" where (([Bar] = @p1 and ([Baz] = '1' or [Qux] = '1')) or [Bar] is null)", sql);
+                Assert.Equal(" where ([Bar] = @p1 and ([Baz] = '1' or [Qux] = '1') or [Bar] is null)", sql);
         }
 
         [Fact]
@@ -109,7 +109,7 @@ namespace Dommel.Tests
             var sql = new SqlExpression<Foo>(new SqlServerSqlBuilder())
                 .Where(f => f.Bar == "test" && f.Baz || f.Qux || f.Bar == null)
                 .ToSql();
-            Assert.Equal(" where (([Bar] = @p1 and [Baz] = '1') or [Qux] = '1' or [Bar] is null)", sql);
+            Assert.Equal(" where ([Bar] = @p1 and [Baz] = '1' or [Qux] = '1' or [Bar] is null)", sql);
         }
 
         public class Foo

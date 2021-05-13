@@ -65,12 +65,12 @@ namespace Dommel.Tests
         [Fact]
         public void InExpression()
         {
-            var ids = new[] { 1, 2 };
-            var idList = new ArrayList { "1", "2" };
+            var ids = new[] {1, 2};
+            var idList = new ArrayList {"1", "2"};
             var guid1 = Guid.Parse("11111111-1111-1111-1111-111111111111");
             var guid2 = Guid.Parse("22222222-2222-2222-2222-222222222222");
-            var guidList = new List<Guid> { guid1, guid2 };
-            var decimalList = new List<decimal> { 1.0m, 2.0m };
+            var guidList = new List<Guid> {guid1, guid2};
+            var decimalList = new List<decimal> {1.0m, 2.0m};
             Expression<Func<Foo, bool>> expression = p =>
                 ids.Contains(p.Id) || idList.Contains(p.StringId) ||
                 decimalList.Contains(p.DecimalId) || guidList.Contains(p.Guid) ||
@@ -79,7 +79,9 @@ namespace Dommel.Tests
             var dommelExpression = _sqlExpression.Where(expression);
             var sql = dommelExpression.ToSql(out var dynamicParameters);
 
-            Assert.Equal("where ([Id] in (@p1,@p2) or [StringId] in (@p3,@p4) or [DecimalId] in (@p5,@p6) or [Guid] in (@p7,@p8) or lower([Bar]) like lower(@p9))", sql.Trim());
+            Assert.Equal(
+                "where ([Id] in (@p1,@p2) or [StringId] in (@p3,@p4) or [DecimalId] in (@p5,@p6) or [Guid] in (@p7,@p8) or lower([Bar]) like lower(@p9))",
+                sql.Trim());
             Assert.Equal(1, dynamicParameters.Get<int>("p1"));
             Assert.Equal(2, dynamicParameters.Get<int>("p2"));
             Assert.Equal("1", dynamicParameters.Get<string>("p3"));
@@ -89,7 +91,22 @@ namespace Dommel.Tests
             Assert.Equal(guid1, dynamicParameters.Get<Guid>("p7"));
             Assert.Equal(guid2, dynamicParameters.Get<Guid>("p8"));
             Assert.Equal("%testIn%", dynamicParameters.Get<string>("p9"));
+        }
+        
+        [Fact]
+        public void InWithEmptyArray()
+        {
+            var ids = new int[] {};
+            Expression<Func<Foo, bool>> expression = p =>
+                ids.Contains(p.Id);
 
+            var dommelExpression = _sqlExpression.Where(expression);
+            var sql = dommelExpression.ToSql(out var dynamicParameters);
+
+            Assert.Equal(
+                "where ([Id] in (null))",
+                sql.Trim());
+           
         }
 
         [Table("tblFoo")]
