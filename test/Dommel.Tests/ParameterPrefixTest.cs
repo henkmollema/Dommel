@@ -31,6 +31,13 @@ namespace Dommel.Tests
         }
 
         [Fact]
+        public void TestInsert()
+        {
+            var sql = BuildInsertQuery(SqlBuilder, typeof(Foo));
+            Assert.Equal("insert into Foos (Bar) values (#Bar); select last_insert_rowid() id", sql);
+        }
+
+        [Fact]
         public void TestUpdate()
         {
             var sql = BuildUpdateQuery(SqlBuilder, typeof(Foo));
