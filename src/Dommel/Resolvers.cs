@@ -84,6 +84,16 @@ namespace Dommel
         /// using the configured <see cref="ITableNameResolver"/>.
         /// </summary>
         /// <param name="type">The <see cref="Type"/> to get the table name for.</param>
+        /// <param name="connection">The database connection instance.</param>
+        /// <returns>The table name in the database for <paramref name="type"/>.</returns>
+        public static string Table(Type type, IDbConnection connection) =>
+            Table(type, DommelMapper.GetSqlBuilder(connection));
+
+        /// <summary>
+        /// Gets the name of the table in the database for the specified type,
+        /// using the configured <see cref="ITableNameResolver"/>.
+        /// </summary>
+        /// <param name="type">The <see cref="Type"/> to get the table name for.</param>
         /// <param name="sqlBuilder">The SQL builder instance.</param>
         /// <returns>The table name in the database for <paramref name="type"/>.</returns>
         public static string Table(Type type, ISqlBuilder sqlBuilder)
