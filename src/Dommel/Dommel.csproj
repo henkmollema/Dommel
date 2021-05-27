@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <Description>Simple CRUD operations for Dapper.</Description>
-    <PackageTags>dommel;crud;dapper;database;orm</PackageTags>
+    <PackageTags>para</PackageTags>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Dapper" Version="2.0.35" />

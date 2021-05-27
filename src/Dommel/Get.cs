@@ -36,13 +36,12 @@ namespace Dommel
         /// <param name="transaction">Optional transaction for the command.</param>
         ///  <param name="cancellationToken">Optional cancellationToken for the command.</param>
         /// <returns>The entity with the corresponding id.</returns>
-        public static async Task<TEntity?> GetAsync<TEntity>(this IDbConnection connection, object id, IDbTransaction? transaction = null, CancellationTokenSource? cancellationToken = null)
+        public static async Task<TEntity?> GetAsync<TEntity>(this IDbConnection connection, object id, IDbTransaction? transaction = null, CancellationToken? cancellationToken = null)
             where TEntity : class
         {
             var sql = BuildGetById(GetSqlBuilder(connection), typeof(TEntity), id, out var parameters);
             LogQuery<TEntity>(sql);
-            CancellationToken token = cancellationToken?.Token ?? default;
-            return await connection.QueryFirstOrDefaultAsync<TEntity>(new CommandDefinition(sql, parameters, transaction: transaction, cancellationToken: token));
+            return await connection.QueryFirstOrDefaultAsync<TEntity>(new CommandDefinition(sql, parameters, transaction: transaction, cancellationToken: cancellationToken ?? default));
         }
 
         internal static string BuildGetById(ISqlBuilder sqlBuilder, Type type, object id, out DynamicParameters parameters)
@@ -118,7 +117,7 @@ namespace Dommel
         /// <param name="transaction">Optional transaction for the command.</param>
         /// <param name="cancellationToken">Optional cancellationToken for the command.</param>
         /// <returns>The entity with the corresponding id.</returns>
-        public static async Task<TEntity?> GetAsync<TEntity>(this IDbConnection connection, object[] ids, IDbTransaction? transaction = null, CancellationTokenSource? cancellationToken = null)
+        public static async Task<TEntity?> GetAsync<TEntity>(this IDbConnection connection, object[] ids, IDbTransaction? transaction = null, CancellationToken? cancellationToken = null)
             where TEntity : class
         {
             if (ids.Length == 1)
@@ -128,8 +127,7 @@ namespace Dommel
 
             var sql = BuildGetByIds(connection, typeof(TEntity), ids, out var parameters);
             LogQuery<TEntity>(sql);
-            CancellationToken token = cancellationToken?.Token ?? default;
-            return await connection.QueryFirstOrDefaultAsync<TEntity>(new CommandDefinition(sql, parameters, transaction, cancellationToken: token));
+            return await connection.QueryFirstOrDefaultAsync<TEntity>(new CommandDefinition(sql, parameters, transaction, cancellationToken: cancellationToken ?? default));
         }
 
         internal static string BuildGetByIds(IDbConnection connection, Type type, object[] ids, out DynamicParameters parameters)
@@ -198,12 +196,11 @@ namespace Dommel
         /// <param name="transaction">Optional transaction for the command.</param>
         /// <param name="cancellationToken">Optional cancellationToken for the command.</param>
         /// <returns>A collection of entities of type <typeparamref name="TEntity"/>.</returns>
-        public static Task<IEnumerable<TEntity>> GetAllAsync<TEntity>(this IDbConnection connection, IDbTransaction? transaction = null, CancellationTokenSource? cancellationToken = null) where TEntity : class
+        public static Task<IEnumerable<TEntity>> GetAllAsync<TEntity>(this IDbConnection connection, IDbTransaction? transaction = null, CancellationToken? cancellationToken = null) where TEntity : class
         {
             var sql = BuildGetAllQuery(connection, typeof(TEntity));
             LogQuery<TEntity>(sql);
-            CancellationToken token = cancellationToken?.Token ?? default;
-            return connection.QueryAsync<TEntity>(new CommandDefinition(sql, transaction: transaction, cancellationToken: token));
+            return connection.QueryAsync<TEntity>(new CommandDefinition(sql, transaction: transaction, cancellationToken: cancellationToken ?? default));
         }
 
         internal static string BuildGetAllQuery(IDbConnection connection, Type type)
@@ -249,12 +246,11 @@ namespace Dommel
         /// <param name="transaction">Optional transaction for the command.</param>
         /// <param name="cancellationToken">Optional cancellationToken for the command.</param>
         /// <returns>A paged collection of entities of type <typeparamref name="TEntity"/>.</returns>
-        public static Task<IEnumerable<TEntity>> GetPagedAsync<TEntity>(this IDbConnection connection, int pageNumber, int pageSize, IDbTransaction? transaction = null, CancellationTokenSource? cancellationToken = null) where TEntity : class
+        public static Task<IEnumerable<TEntity>> GetPagedAsync<TEntity>(this IDbConnection connection, int pageNumber, int pageSize, IDbTransaction? transaction = null, CancellationToken? cancellationToken = null) where TEntity : class
         {
             var sql = BuildPagedQuery(connection, typeof(TEntity), pageNumber, pageSize);
             LogQuery<TEntity>(sql);
-            CancellationToken token = cancellationToken?.Token ?? default;
-            return connection.QueryAsync<TEntity>(new CommandDefinition(sql, transaction: transaction, cancellationToken: token));
+            return connection.QueryAsync<TEntity>(new CommandDefinition(sql, transaction: transaction, cancellationToken: cancellationToken ?? default));
         }
 
         internal static string BuildPagedQuery(IDbConnection connection, Type type, int pageNumber, int pageSize)

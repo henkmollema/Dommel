@@ -35,13 +35,12 @@ namespace Dommel
         /// <param name="transaction">Optional transaction for the command.</param>
         /// <param name="cancellationToken">Optional cancellationToken for the command.</param>
         /// <returns>The ID of the inserted entity.</returns>
-        public static Task<object> InsertAsync<TEntity>(this IDbConnection connection, TEntity entity, IDbTransaction? transaction = null, CancellationTokenSource? cancellationToken = null)
+        public static Task<object> InsertAsync<TEntity>(this IDbConnection connection, TEntity entity, IDbTransaction? transaction = null, CancellationToken? cancellationToken = null)
             where TEntity : class
         {
             var sql = BuildInsertQuery(connection, typeof(TEntity));
             LogQuery<TEntity>(sql);
-            CancellationToken token = cancellationToken?.Token ?? default;
-            return connection.ExecuteScalarAsync(new CommandDefinition(sql, entity, transaction: transaction, cancellationToken: token));
+            return connection.ExecuteScalarAsync(new CommandDefinition(sql, entity, transaction: transaction, cancellationToken: cancellationToken ?? default));
         }
 
         /// <summary>
@@ -67,13 +66,12 @@ namespace Dommel
         /// <param name="entities">The entities to be inserted.</param>
         /// <param name="transaction">Optional transaction for the command.</param>
         /// <param name="cancellationToken">Optional cancellationToken for the command.</param>
-        public static Task InsertAllAsync<TEntity>(this IDbConnection connection, IEnumerable<TEntity> entities, IDbTransaction? transaction = null, CancellationTokenSource? cancellationToken = null)
+        public static Task InsertAllAsync<TEntity>(this IDbConnection connection, IEnumerable<TEntity> entities, IDbTransaction? transaction = null, CancellationToken? cancellationToken = null)
             where TEntity : class
         {
             var sql = BuildInsertQuery(connection, typeof(TEntity));
             LogQuery<TEntity>(sql);
-            CancellationToken token = cancellationToken?.Token ?? default;
-            return connection.ExecuteAsync(new CommandDefinition(sql, entities, transaction: transaction, cancellationToken: token));
+            return connection.ExecuteAsync(new CommandDefinition(sql, entities, transaction: transaction, cancellationToken: cancellationToken ?? default));
         }
 
         private static string BuildInsertQuery(IDbConnection connection, Type type)
