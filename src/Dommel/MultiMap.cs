@@ -614,7 +614,8 @@ namespace Dommel
             LogQuery<TReturn>(sql);
             var splitOn = CreateSplitOn(includeTypes);
 
-            //with CommandDefinition we can pass also the the cancellation token 
+            //with CommandDefinition we can pass also the the cancellation token
+            //for further informations https://github.com/DapperLib/Dapper/blob/main/Dapper/CommandDefinition.cs
             CommandDefinition commandDefinition = new CommandDefinition(sql, parameters, transaction, flags: buffered ? CommandFlags.Buffered : CommandFlags.None, cancellationToken: cancellationToken);
 
             return includeTypes.Length switch
