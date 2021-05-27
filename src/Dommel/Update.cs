@@ -33,13 +33,14 @@ namespace Dommel
         /// <param name="connection">The connection to the database. This can either be open or closed.</param>
         /// <param name="entity">The entity in the database.</param>
         /// <param name="transaction">Optional transaction for the command.</param>
-        /// <param name="cancellationToken">Optional cancellationToken for the command.</param>
+        /// <param name="cancellationToken">Optional cancellation token for the command.</param>
         /// <returns>A value indicating whether the update operation succeeded.</returns>
-        public static async Task<bool> UpdateAsync<TEntity>(this IDbConnection connection, TEntity entity, IDbTransaction? transaction = null, CancellationToken? cancellationToken = null)
+        public static async Task<bool> UpdateAsync<TEntity>(this IDbConnection connection, TEntity entity, IDbTransaction? transaction = null, CancellationToken cancellationToken = default)
         {
             var sql = BuildUpdateQuery(GetSqlBuilder(connection), typeof(TEntity));
             LogQuery<TEntity>(sql);
-            return await connection.ExecuteAsync(new CommandDefinition(sql, entity, transaction: transaction, cancellationToken: cancellationToken ?? default)) > 0;
+            //with CommandDefinition we can pass also the the cancellation token 
+            return await connection.ExecuteAsync(new CommandDefinition(sql, entity, transaction: transaction, cancellationToken: cancellationToken)) > 0;
         }
 
         internal static string BuildUpdateQuery(ISqlBuilder sqlBuilder, Type type)
