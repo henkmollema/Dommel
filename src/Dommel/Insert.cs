@@ -20,7 +20,7 @@ namespace Dommel
         public static object Insert<TEntity>(this IDbConnection connection, TEntity entity, IDbTransaction? transaction = null)
             where TEntity : class
         {
-            var sql = BuildInsertQuery(connection, typeof(TEntity));
+            var sql = BuildInsertQuery(GetSqlBuilder(connection), typeof(TEntity));
             LogQuery<TEntity>(sql);
             return connection.ExecuteScalar(sql, entity, transaction);
         }
@@ -36,7 +36,7 @@ namespace Dommel
         public static Task<object> InsertAsync<TEntity>(this IDbConnection connection, TEntity entity, IDbTransaction? transaction = null)
             where TEntity : class
         {
-            var sql = BuildInsertQuery(connection, typeof(TEntity));
+            var sql = BuildInsertQuery(GetSqlBuilder(connection), typeof(TEntity));
             LogQuery<TEntity>(sql);
             return connection.ExecuteScalarAsync(sql, entity, transaction);
         }
@@ -51,7 +51,7 @@ namespace Dommel
         public static void InsertAll<TEntity>(this IDbConnection connection, IEnumerable<TEntity> entities, IDbTransaction? transaction = null)
             where TEntity : class
         {
-            var sql = BuildInsertQuery(connection, typeof(TEntity));
+            var sql = BuildInsertQuery(GetSqlBuilder(connection), typeof(TEntity));
             LogQuery<TEntity>(sql);
             connection.Execute(sql, entities, transaction);
         }
@@ -66,18 +66,17 @@ namespace Dommel
         public static Task InsertAllAsync<TEntity>(this IDbConnection connection, IEnumerable<TEntity> entities, IDbTransaction? transaction = null)
             where TEntity : class
         {
-            var sql = BuildInsertQuery(connection, typeof(TEntity));
+            var sql = BuildInsertQuery(GetSqlBuilder(connection), typeof(TEntity));
             LogQuery<TEntity>(sql);
             return connection.ExecuteAsync(sql, entities, transaction);
         }
 
-        private static string BuildInsertQuery(IDbConnection connection, Type type)
+        internal static string BuildInsertQuery(ISqlBuilder sqlBuilder, Type type)
         {
-            var sqlBuilder = GetSqlBuilder(connection);
             var cacheKey = new QueryCacheKey(QueryCacheType.Insert, sqlBuilder, type);
             if (!QueryCache.TryGetValue(cacheKey, out var sql))
             {
-                var tableName = Resolvers.Table(type, connection);
+                var tableName = Resolvers.Table(type, sqlBuilder);
 
                 // Use all non-key and non-generated properties for inserts
                 var keyProperties = Resolvers.KeyProperties(type);
@@ -87,7 +86,7 @@ namespace Dommel
                     .Except(keyProperties.Where(p => p.IsGenerated).Select(p => p.Property));
 
                 var columnNames = typeProperties.Select(p => Resolvers.Column(p, sqlBuilder)).ToArray();
-                var paramNames = typeProperties.Select(p => "@" + p.Name).ToArray();
+                var paramNames = typeProperties.Select(p => sqlBuilder.PrefixParameter(p.Name)).ToArray();
 
                 sql = sqlBuilder.BuildInsert(type, tableName, columnNames, paramNames);
 

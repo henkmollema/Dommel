@@ -78,6 +78,7 @@ namespace Dommel
 
             return properties;
         }
+
         /// <summary>
         /// Gets the name of the table in the database for the specified type,
         /// using the configured <see cref="ITableNameResolver"/>.
