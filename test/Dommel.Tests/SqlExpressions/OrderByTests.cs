@@ -8,7 +8,6 @@ namespace Dommel.Tests
 {
     public class OrderByTests
     {
-        
         [Fact]
         public void Asc()
         {

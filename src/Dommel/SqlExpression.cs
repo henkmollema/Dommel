@@ -400,8 +400,7 @@ namespace Dommel
             }
 
             var inClause = new StringBuilder("(");
-            foreach (var value in (System.Collections.IEnumerable) (VisitMemberAccess((MemberExpression) collection))
-                .Result)
+            foreach (var value in (System.Collections.IEnumerable) (VisitMemberAccess((MemberExpression) collection)).Result)
             {
                 AddParameter(value, out var paramName);
                 inClause.Append($"{paramName},");
@@ -426,7 +425,7 @@ namespace Dommel
         protected virtual VisitResult VisitContainsExpression(MethodCallExpression expression, TextSearch textSearch)
         {
             var column = VisitExpression(expression.Object);
-            if (expression.Arguments is {Count: 0 or > 1})
+            if (expression.Arguments.Count != 1)
             {
                 throw new ArgumentException("Contains-expression should contain exactly one argument.",
                     nameof(expression));
@@ -438,8 +437,7 @@ namespace Dommel
                 TextSearch.Contains => $"%{value}%",
                 TextSearch.StartsWith => $"{value}%",
                 TextSearch.EndsWith => $"%{value}",
-                _ => throw new ArgumentOutOfRangeException($"Invalid TextSearch value '{textSearch}'.",
-                    nameof(textSearch)),
+                _ => throw new ArgumentOutOfRangeException($"Invalid TextSearch value '{textSearch}'.", nameof(textSearch))
             };
             AddParameter(textLike, out var paramName);
 
@@ -466,7 +464,6 @@ namespace Dommel
             return VisitExpression(epxression.Body);
         }
 
-
         /// <summary>
         /// Verify if a particular <paramref name="expression"/> needs to be enclosed in parentheses
         /// given the <paramref name="parentExpression"/> 
@@ -477,14 +474,15 @@ namespace Dommel
         private static bool ShouldHaveParentheses(Expression expression, BinaryExpression parentExpression)
         {
             if (expression is not (BinaryExpression or UnaryExpression))
+            {
                 return false;
+            }
             var expressionOperatorLevel = GetOperatorPrecedence(expression.NodeType);
             var parentExpressionOperatorLevel = GetOperatorPrecedence(parentExpression.NodeType);
 
 
             return expressionOperatorLevel > parentExpressionOperatorLevel;
         }
-
 
         /// <summary>
         /// Processes a binary expression.
@@ -730,8 +728,7 @@ namespace Dommel
                 {
                     // When we're paging we'll need an order to guarantee consistent paging results, when
                     // the user did not specified an order themself we'll order on the PKs of the table.
-                    var keyColumns = Resolvers.KeyProperties(typeof(TEntity))
-                        .Select(p => Resolvers.Column(p.Property, SqlBuilder));
+                    var keyColumns = Resolvers.KeyProperties(typeof(TEntity)).Select(p => Resolvers.Column(p.Property, SqlBuilder));
                     AppendOrderBy(string.Join(", ", keyColumns), direction: "asc", prepend: true);
                     query += _orderByBuilder.ToString();
                 }

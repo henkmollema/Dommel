@@ -20,7 +20,6 @@ namespace Dommel.Tests
             Assert.Single(dynamicParameters.ParameterNames);
             Assert.Equal("%test%", dynamicParameters.Get<string>("p1"));
         }
-        
 
         [Fact]
         public void LikeOperandContainsVariable()
