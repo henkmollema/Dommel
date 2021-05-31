@@ -480,7 +480,6 @@ namespace Dommel
             var expressionOperatorLevel = GetOperatorPrecedence(expression.NodeType);
             var parentExpressionOperatorLevel = GetOperatorPrecedence(parentExpression.NodeType);
 
-
             return expressionOperatorLevel > parentExpressionOperatorLevel;
         }
 
