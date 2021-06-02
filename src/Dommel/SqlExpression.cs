@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -14,8 +14,10 @@ namespace Dommel
     public class SqlExpression<TEntity>
     {
         private static readonly Type EntityType = typeof(TEntity);
+
         private static readonly Func<TEntity> NewEntityFunc = Expression.Lambda<Func<TEntity>>(
             Expression.New(typeof(TEntity).GetConstructors()[0])).Compile();
+
         private readonly StringBuilder _whereBuilder = new StringBuilder();
         private readonly StringBuilder _orderByBuilder = new StringBuilder();
         private readonly DynamicParameters _parameters = new DynamicParameters();
@@ -73,7 +75,8 @@ namespace Dommel
             var props = obj.GetType().GetProperties();
             if (props.Length == 0)
             {
-                throw new ArgumentException($"Projection over type '{typeof(TEntity).Name}' yielded no properties.", nameof(selector));
+                throw new ArgumentException($"Projection over type '{typeof(TEntity).Name}' yielded no properties.",
+                    nameof(selector));
             }
 
             var columns = props.Select(p => Resolvers.Column(p, SqlBuilder));
@@ -119,10 +122,12 @@ namespace Dommel
             {
                 throw new InvalidOperationException("Start the where statement with the 'Where' method.");
             }
+
             if (expression != null)
             {
                 AppendToWhere("and", expression);
             }
+
             return this;
         }
 
@@ -137,10 +142,12 @@ namespace Dommel
             {
                 throw new InvalidOperationException("Start the where statement with the 'Where' method.");
             }
+
             if (expression != null)
             {
                 AppendToWhere("or", expression);
             }
+
             return this;
         }
 
@@ -189,6 +196,11 @@ namespace Dommel
         /// <returns>The current <see cref="SqlExpression{TEntity}"/> instance.</returns>
         public virtual SqlExpression<TEntity> OrderBy(PropertyInfo property)
         {
+            if (property == null)
+            {
+                throw new ArgumentNullException(nameof(property));
+            }
+
             AppendOrderBy(Resolvers.Column(property, SqlBuilder), direction: "asc");
             return this;
         }
@@ -211,6 +223,11 @@ namespace Dommel
         /// <returns>The current <see cref="SqlExpression{TEntity}"/> instance.</returns>
         public virtual SqlExpression<TEntity> OrderByDescending(PropertyInfo property)
         {
+            if (property == null)
+            {
+                throw new ArgumentNullException(nameof(property));
+            }
+
             AppendOrderBy(Resolvers.Column(property, SqlBuilder), direction: "desc");
             return this;
         }
@@ -222,7 +239,7 @@ namespace Dommel
                 throw new ArgumentNullException(nameof(selector));
             }
 
-            var column = VisitExpression(selector.Body) as string;
+            var column = VisitExpression(selector.Body).ToString();
             AppendOrderBy(column, direction);
         }
 
@@ -232,10 +249,12 @@ namespace Dommel
             {
                 throw new ArgumentNullException(nameof(column));
             }
+
             if (string.IsNullOrEmpty(direction))
             {
                 throw new ArgumentNullException(nameof(direction));
             }
+
             if (_orderByBuilder.Length == 0)
             {
                 _orderByBuilder.Append($" order by {column} {direction}");
@@ -256,12 +275,12 @@ namespace Dommel
         /// </summary>
         /// <param name="expression">The expression to visit.</param>
         /// <returns>The result of the visit.</returns>
-        protected virtual object VisitExpression(Expression expression)
+        protected virtual VisitResult VisitExpression(Expression expression)
         {
             switch (expression.NodeType)
             {
                 case ExpressionType.Lambda:
-                    return VisitLambda((LambdaExpression)expression);
+                    return VisitLambda((LambdaExpression) expression);
 
                 case ExpressionType.LessThan:
                 case ExpressionType.LessThanOrEqual:
@@ -273,27 +292,33 @@ namespace Dommel
                 case ExpressionType.AndAlso:
                 case ExpressionType.Or:
                 case ExpressionType.OrElse:
-                    return VisitBinary((BinaryExpression)expression);
+                case ExpressionType.Add:
+                case ExpressionType.Subtract:
+                case ExpressionType.Multiply:
+                case ExpressionType.Divide:
+                case ExpressionType.Modulo:
+                    return VisitBinary((BinaryExpression) expression);
 
                 case ExpressionType.Convert:
+                case ExpressionType.Negate:
                 case ExpressionType.Not:
-                    return VisitUnary((UnaryExpression)expression);
+                    return VisitUnary((UnaryExpression) expression);
 
                 case ExpressionType.New:
-                    return VisitNew((NewExpression)expression);
+                    return VisitNew((NewExpression) expression);
 
                 case ExpressionType.MemberAccess:
-                    return VisitMemberAccess((MemberExpression)expression);
+                    return VisitMemberAccess((MemberExpression) expression);
 
                 case ExpressionType.Constant:
-                    return VisitConstantExpression((ConstantExpression)expression);
+                    return VisitConstantExpression((ConstantExpression) expression);
                 case ExpressionType.Call:
-                    return VisitCallExpression((MethodCallExpression)expression);
+                    return VisitCallExpression((MethodCallExpression) expression);
                 case ExpressionType.Invoke:
-                    return VisitExpression(((InvocationExpression)expression).Expression);
+                    return VisitExpression(((InvocationExpression) expression).Expression);
             }
 
-            return expression;
+            return new VisitResult(expression);
         }
 
         /// <summary>
@@ -322,7 +347,7 @@ namespace Dommel
         /// </summary>
         /// <param name="expression">The method call expression.</param>
         /// <returns>The result of the processing.</returns>
-        protected virtual object VisitCallExpression(MethodCallExpression expression)
+        protected virtual VisitResult VisitCallExpression(MethodCallExpression expression)
         {
             var method = expression.Method.Name.ToLower();
             switch (method)
@@ -341,11 +366,9 @@ namespace Dommel
                     return VisitContainsExpression(expression, TextSearch.StartsWith);
                 case "endswith":
                     return VisitContainsExpression(expression, TextSearch.EndsWith);
-                default:
-                    break;
             }
 
-            return expression;
+            return new VisitResult(expression);
         }
 
         /// <summary>
@@ -353,7 +376,7 @@ namespace Dommel
         /// </summary>
         /// <param name="expression">The method call expression.</param>
         /// <returns>The result of the processing.</returns>
-        protected virtual object VisitInExpression(MethodCallExpression expression)
+        protected virtual VisitResult VisitInExpression(MethodCallExpression expression)
         {
             Expression collection;
             Expression property;
@@ -377,18 +400,20 @@ namespace Dommel
             }
 
             var inClause = new StringBuilder("(");
-            foreach (var value in (System.Collections.IEnumerable)VisitMemberAccess((MemberExpression)collection))
+            foreach (var value in (System.Collections.IEnumerable) (VisitMemberAccess((MemberExpression) collection)).Result)
             {
                 AddParameter(value, out var paramName);
                 inClause.Append($"{paramName},");
             }
+
             if (inClause.Length == 1)
             {
                 inClause.Append("null,");
             }
+
             inClause[inClause.Length - 1] = ')';
 
-            return $"{VisitExpression(property)} in {inClause}";
+            return new VisitResult($"{VisitExpression(property).Result} in {inClause}");
         }
 
         /// <summary>
@@ -397,12 +422,13 @@ namespace Dommel
         /// <param name="expression">The method call expression.</param>
         /// <param name="textSearch">Type of search.</param>
         /// <returns>The result of the processing.</returns>
-        protected virtual object VisitContainsExpression(MethodCallExpression expression, TextSearch textSearch)
+        protected virtual VisitResult VisitContainsExpression(MethodCallExpression expression, TextSearch textSearch)
         {
             var column = VisitExpression(expression.Object);
-            if (expression.Arguments.Count == 0 || expression.Arguments.Count > 1)
+            if (expression.Arguments.Count != 1)
             {
-                throw new ArgumentException("Contains-expression should contain exactly one argument.", nameof(expression));
+                throw new ArgumentException("Contains-expression should contain exactly one argument.",
+                    nameof(expression));
             }
 
             var value = VisitExpression(expression.Arguments[0]);
@@ -411,12 +437,12 @@ namespace Dommel
                 TextSearch.Contains => $"%{value}%",
                 TextSearch.StartsWith => $"{value}%",
                 TextSearch.EndsWith => $"%{value}",
-                _ => throw new ArgumentOutOfRangeException($"Invalid TextSearch value '{textSearch}'.", nameof(textSearch)),
+                _ => throw new ArgumentOutOfRangeException($"Invalid TextSearch value '{textSearch}'.", nameof(textSearch))
             };
             AddParameter(textLike, out var paramName);
 
             // Use lower() to make the queries case-insensitive
-            return $"lower({column}) like lower({paramName})";
+            return new VisitResult($"lower({column}) like lower({paramName})");
         }
 
         /// <summary>
@@ -424,14 +450,14 @@ namespace Dommel
         /// </summary>
         /// <param name="epxression">The lambda expression.</param>
         /// <returns>The result of the processing.</returns>
-        protected virtual object VisitLambda(LambdaExpression epxression)
+        protected virtual VisitResult VisitLambda(LambdaExpression epxression)
         {
             if (epxression.Body.NodeType == ExpressionType.MemberAccess)
             {
                 var member = epxression.Body as MemberExpression;
                 if (member?.Expression != null)
                 {
-                    return $"{VisitMemberAccess(member)} = '1'";
+                    return new VisitResult($"{VisitMemberAccess(member)} = '1'");
                 }
             }
 
@@ -439,62 +465,115 @@ namespace Dommel
         }
 
         /// <summary>
+        /// Verify if a particular <paramref name="expression"/> needs to be enclosed in parentheses
+        /// given the <paramref name="parentExpression"/> 
+        /// </summary>
+        /// <param name="expression">The expression</param>
+        /// <param name="parentExpression">The parent expression of <paramref name="expression"/></param>
+        /// <returns>True if parentheses are required</returns>
+        private static bool ShouldHaveParentheses(Expression expression, BinaryExpression parentExpression)
+        {
+            if (expression is not (BinaryExpression or UnaryExpression))
+            {
+                return false;
+            }
+            var expressionOperatorLevel = GetOperatorPrecedence(expression.NodeType);
+            var parentExpressionOperatorLevel = GetOperatorPrecedence(parentExpression.NodeType);
+
+            return expressionOperatorLevel > parentExpressionOperatorLevel;
+        }
+
+        /// <summary>
         /// Processes a binary expression.
         /// </summary>
         /// <param name="expression">The binary expression.</param>
         /// <returns>The result of the processing.</returns>
-        protected virtual object VisitBinary(BinaryExpression expression)
+        protected virtual VisitResult VisitBinary(BinaryExpression expression)
         {
-            object left, right;
             var operand = GetOperant(expression.NodeType);
-            if (operand == "and" || operand == "or")
-            {
-                // Process left and right side of the "and/or" expression, e.g.:
-                // Foo == 42    or      Bar == 42
-                //   left    operand     right
-                //
-                if (expression.Left is MemberExpression leftMember && leftMember.Expression?.NodeType == ExpressionType.Parameter)
-                {
-                    left = $"{VisitMemberAccess(leftMember)} = '1'";
-                }
-                else
-                {
-                    left = VisitExpression(expression.Left);
-                }
 
-                if (expression.Right is MemberExpression rightMember && rightMember.Expression?.NodeType == ExpressionType.Parameter)
-                {
-                    right = $"{VisitMemberAccess(rightMember)} = '1'";
-                }
-                else
-                {
-                    right = VisitExpression(expression.Right);
-                }
+            var andAlsoOrOrElse = operand is "and" or "or";
+
+            VisitResult left, right;
+
+            if (andAlsoOrOrElse && expression.Left is MemberExpression leftMember &&
+                leftMember.Expression?.NodeType == ExpressionType.Parameter)
+            {
+                left = new VisitResult($"{VisitMemberAccess(leftMember).Result} = '1'");
             }
             else
             {
-                // It's a single expression, e.g. Foo == 42
                 left = VisitExpression(expression.Left);
-                right = VisitExpression(expression.Right);
-
-                if (right == null)
-                {
-                    // Special case 'is (not) null' syntax
-                    if (expression.NodeType == ExpressionType.Equal)
-                    {
-                        return $"{left} is null";
-                    }
-                    else
-                    {
-                        return $"{left} is not null";
-                    }
-                }
-
-                AddParameter(right, out var paramName);
-                return $"{left} {operand} {paramName}";
             }
 
-            return $"{left} {operand} {right}";
+            if (andAlsoOrOrElse && expression.Right is MemberExpression rightMember &&
+                rightMember.Expression?.NodeType == ExpressionType.Parameter)
+            {
+                right = new VisitResult($"{VisitMemberAccess(rightMember).Result} = '1'");
+            }
+            else
+            {
+                right = VisitExpression(expression.Right);
+            }
+
+            var resultBuilder = new StringBuilder();
+
+            if (left.Result == null)
+            {
+                // Special case 'is (not) null' syntax
+                resultBuilder.Append(expression.NodeType == ExpressionType.Equal
+                    ? $"{right.Result} is null"
+                    : $"{right.Result} is not null");
+
+                return new VisitResult(resultBuilder.ToString());
+            }
+
+            if (right.Result == null)
+            {
+                // Special case 'is (not) null' syntax
+                resultBuilder.Append(expression.NodeType == ExpressionType.Equal
+                    ? $"{left.Result} is null"
+                    : $"{left.Result} is not null");
+                return new VisitResult(resultBuilder.ToString());
+            }
+
+            if (!(left.IsConstantValue || right.IsConstantValue))
+            {
+                var leftNeedsParentheses = ShouldHaveParentheses(expression.Left, expression);
+                var rightNeedsParentheses = ShouldHaveParentheses(expression.Right, expression);
+                if (leftNeedsParentheses)
+                    resultBuilder.Append("(");
+
+                resultBuilder.Append(left.Result);
+
+                if (leftNeedsParentheses)
+                    resultBuilder.Append(")");
+
+                resultBuilder.Append($" {operand} ");
+
+                if (rightNeedsParentheses)
+                    resultBuilder.Append("(");
+
+                resultBuilder.Append(right.Result);
+
+                if (rightNeedsParentheses)
+                    resultBuilder.Append(")");
+
+                return new VisitResult(resultBuilder.ToString());
+            }
+
+            string paramName;
+            if (left.IsConstantValue)
+            {
+                AddParameter(left.Result, out paramName);
+
+                resultBuilder.Append($"{paramName} {operand} {right.Result}");
+                return new VisitResult(resultBuilder.ToString());
+            }
+
+            AddParameter(right.Result, out paramName);
+            resultBuilder.Append($"{left.Result} {operand} {paramName}");
+            return new VisitResult(resultBuilder.ToString());
         }
 
         /// <summary>
@@ -502,28 +581,33 @@ namespace Dommel
         /// </summary>
         /// <param name="expression">The unary expression.</param>
         /// <returns>The result of the processing.</returns>
-        protected virtual object VisitUnary(UnaryExpression expression)
+        protected virtual VisitResult VisitUnary(UnaryExpression expression)
         {
             switch (expression.NodeType)
             {
+                case ExpressionType.Negate:
+                    return new VisitResult($"-{VisitExpression(expression.Operand).Result}");
                 case ExpressionType.Not:
-                    var o = VisitExpression(expression.Operand);
+                    var visitResult = VisitExpression(expression.Operand);
+                    object o = visitResult.Result;
                     if (!(o is string))
                     {
-                        return !(bool)o;
+                        return new VisitResult(!(bool) o);
                     }
 
-                    if (expression.Operand is MemberExpression)
+                    if (expression.Operand is MemberExpression memberExpression &&
+                        memberExpression.Type == typeof(bool))
                     {
-                        o = $"{o} = '1'";
+                        o = $"({o} = '1')";
                     }
 
-                    return $"not ({o})";
+                    return new VisitResult($"not {o}");
                 case ExpressionType.Convert:
                     if (expression.Method != null)
                     {
-                        return Expression.Lambda(expression).Compile().DynamicInvoke();
+                        return new VisitResult(Expression.Lambda(expression).Compile().DynamicInvoke());
                     }
+
                     break;
             }
 
@@ -535,12 +619,12 @@ namespace Dommel
         /// </summary>
         /// <param name="expression">The new expression.</param>
         /// <returns>The result of the processing.</returns>
-        protected virtual object VisitNew(NewExpression expression)
+        protected virtual VisitResult VisitNew(NewExpression expression)
         {
             var member = Expression.Convert(expression, typeof(object));
             var lambda = Expression.Lambda<Func<object>>(member);
             var getter = lambda.Compile();
-            return getter();
+            return new VisitResult(getter(), true);
         }
 
         /// <summary>
@@ -548,17 +632,17 @@ namespace Dommel
         /// </summary>
         /// <param name="expression">The member access expression.</param>
         /// <returns>The result of the processing.</returns>
-        protected virtual object VisitMemberAccess(MemberExpression expression)
+        protected virtual VisitResult VisitMemberAccess(MemberExpression expression)
         {
             if (expression.Expression?.NodeType == ExpressionType.Parameter)
             {
-                return MemberToColumn(expression);
+                return new VisitResult(MemberToColumn(expression));
             }
 
             var member = Expression.Convert(expression, typeof(object));
             var lambda = Expression.Lambda<Func<object>>(member);
             var getter = lambda.Compile();
-            return getter();
+            return new VisitResult(getter());
         }
 
         /// <summary>
@@ -566,7 +650,8 @@ namespace Dommel
         /// </summary>
         /// <param name="expression">The constant expression.</param>
         /// <returns>The result of the processing.</returns>
-        protected virtual object VisitConstantExpression(ConstantExpression expression) => expression.Value;
+        protected virtual VisitResult VisitConstantExpression(ConstantExpression expression) =>
+            new VisitResult(expression.Value, true);
 
         /// <summary>
         /// Proccesses a member expression.
@@ -574,7 +659,7 @@ namespace Dommel
         /// <param name="expression">The member expression.</param>
         /// <returns>The result of the processing.</returns>
         protected virtual string MemberToColumn(MemberExpression expression) =>
-            Resolvers.Column((PropertyInfo)expression.Member, SqlBuilder);
+            Resolvers.Column((PropertyInfo) expression.Member, SqlBuilder);
 
         /// <summary>
         /// Returns the expression operant for the specified expression type.
@@ -625,14 +710,17 @@ namespace Dommel
             {
                 query += _selectQuery;
             }
+
             if (!string.IsNullOrEmpty(where))
             {
                 query += where;
             }
+
             if (!string.IsNullOrEmpty(orderBy))
             {
                 query += orderBy;
             }
+
             if (!string.IsNullOrEmpty(_pagingQuery))
             {
                 if (string.IsNullOrEmpty(orderBy))
@@ -646,6 +734,7 @@ namespace Dommel
 
                 query += _pagingQuery;
             }
+
             return query;
         }
 
@@ -665,5 +754,64 @@ namespace Dommel
         /// </summary>
         /// <returns>The current SQL query.</returns>
         public override string ToString() => ToSql();
+
+        protected static short GetOperatorPrecedence(ExpressionType expressionType)
+        {
+            switch (expressionType)
+            {
+                case ExpressionType.Negate:
+                    return 1;
+                case ExpressionType.Multiply:
+                case ExpressionType.Divide:
+                case ExpressionType.Modulo:
+                    return 2;
+                case ExpressionType.Add:
+                case ExpressionType.Subtract:
+                case ExpressionType.Or:
+                case ExpressionType.And:
+                    return 3;
+                case ExpressionType.LessThan:
+                case ExpressionType.LessThanOrEqual:
+                case ExpressionType.GreaterThan:
+                case ExpressionType.GreaterThanOrEqual:
+                case ExpressionType.Equal:
+                case ExpressionType.NotEqual:
+                    return 4;
+                case ExpressionType.Not:
+                    return 5;
+                case ExpressionType.AndAlso:
+                    return 6;
+                case ExpressionType.OrElse:
+                    return 7;
+                default:
+                    return 8;
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        protected struct VisitResult
+        {
+            public object Result { get; private set; }
+
+            public bool IsConstantValue { get; private set; }
+
+            public VisitResult(object result)
+            {
+                Result = result;
+                IsConstantValue = false;
+            }
+
+            public VisitResult(object result, bool isConstantValue) : this(result)
+            {
+                IsConstantValue = isConstantValue;
+            }
+
+            public override string ToString()
+            {
+                return Result.ToString();
+            }
+        }
     }
 }
