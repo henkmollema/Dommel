@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Threading;
 using System.Threading.Tasks;
 using Dapper;
 
@@ -39,15 +40,16 @@ namespace Dommel
         /// <param name="connection">The connection to the database. This can either be open or closed.</param>
         /// <param name="predicate">A predicate to filter the results.</param>
         /// <param name="transaction">Optional transaction for the command.</param>
+        /// <param name="cancellationToken">Optional cancellation token for the command.</param>
         /// <returns>
         /// A collection of entities of type <typeparamref name="TEntity"/> matching the specified
         /// <paramref name="predicate"/>.
         /// </returns>
-        public static Task<IEnumerable<TEntity>> SelectAsync<TEntity>(this IDbConnection connection, Expression<Func<TEntity, bool>> predicate, IDbTransaction? transaction = null)
+        public static Task<IEnumerable<TEntity>> SelectAsync<TEntity>(this IDbConnection connection, Expression<Func<TEntity, bool>> predicate, IDbTransaction? transaction = null, CancellationToken cancellationToken = default)
         {
             var sql = BuildSelectSql(connection, predicate, out var parameters);
             LogQuery<TEntity>(sql);
-            return connection.QueryAsync<TEntity>(sql, parameters, transaction);
+            return connection.QueryAsync<TEntity>(new CommandDefinition(sql, parameters, transaction: transaction, cancellationToken: cancellationToken));
         }
 
         /// <summary>
@@ -76,16 +78,17 @@ namespace Dommel
         /// <param name="connection">The connection to the database. This can either be open or closed.</param>
         /// <param name="predicate">A predicate to filter the results.</param>
         /// <param name="transaction">Optional transaction for the command.</param>
+        /// <param name="cancellationToken">Optional cancellation token for the command.</param>
         /// <returns>
         /// A instance of type <typeparamref name="TEntity"/> matching the specified
         /// <paramref name="predicate"/>.
         /// </returns>
-        public static async Task<TEntity?> FirstOrDefaultAsync<TEntity>(this IDbConnection connection, Expression<Func<TEntity, bool>> predicate, IDbTransaction? transaction = null)
+        public static async Task<TEntity?> FirstOrDefaultAsync<TEntity>(this IDbConnection connection, Expression<Func<TEntity, bool>> predicate, IDbTransaction? transaction = null, CancellationToken cancellationToken = default)
             where TEntity : class
         {
             var sql = BuildSelectSql(connection, predicate, out var parameters);
             LogQuery<TEntity>(sql);
-            return await connection.QueryFirstOrDefaultAsync<TEntity>(sql, parameters, transaction);
+            return await connection.QueryFirstOrDefaultAsync<TEntity>(new CommandDefinition(sql, parameters, transaction, cancellationToken: cancellationToken));
         }
 
         private static string BuildSelectSql<TEntity>(IDbConnection connection, Expression<Func<TEntity, bool>> predicate, out DynamicParameters parameters)
@@ -135,15 +138,16 @@ namespace Dommel
         /// <param name="pageNumber">The number of the page to fetch, starting at 1.</param>
         /// <param name="pageSize">The page size.</param>
         /// <param name="transaction">Optional transaction for the command.</param>
+        /// <param name="cancellationToken">Optional cancellation token for the command.</param>
         /// <returns>
         /// A collection of entities of type <typeparamref name="TEntity"/> matching the specified
         /// <paramref name="predicate"/>.
         /// </returns>
-        public static Task<IEnumerable<TEntity>> SelectPagedAsync<TEntity>(this IDbConnection connection, Expression<Func<TEntity, bool>> predicate, int pageNumber, int pageSize, IDbTransaction? transaction = null)
+        public static Task<IEnumerable<TEntity>> SelectPagedAsync<TEntity>(this IDbConnection connection, Expression<Func<TEntity, bool>> predicate, int pageNumber, int pageSize, IDbTransaction? transaction = null, CancellationToken cancellationToken = default)
         {
             var sql = BuildSelectPagedQuery(connection, predicate, pageNumber, pageSize, out var parameters);
             LogQuery<TEntity>(sql);
-            return connection.QueryAsync<TEntity>(sql, parameters, transaction);
+            return connection.QueryAsync<TEntity>(new CommandDefinition(sql, parameters, transaction, cancellationToken: cancellationToken));
         }
 
         private static string BuildSelectPagedQuery<TEntity>(IDbConnection connection, Expression<Func<TEntity, bool>> predicate, int pageNumber, int pageSize, out DynamicParameters parameters)
