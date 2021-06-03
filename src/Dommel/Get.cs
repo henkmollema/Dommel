@@ -41,8 +41,6 @@ namespace Dommel
         {
             var sql = BuildGetById(GetSqlBuilder(connection), typeof(TEntity), id, out var parameters);
             LogQuery<TEntity>(sql);
-            //with CommandDefinition we can pass also the the cancellation token 
-            //for further informations https://github.com/DapperLib/Dapper/blob/main/Dapper/CommandDefinition.cs
             return await connection.QueryFirstOrDefaultAsync<TEntity>(new CommandDefinition(sql, parameters, transaction: transaction, cancellationToken: cancellationToken));
         }
 
@@ -129,8 +127,6 @@ namespace Dommel
 
             var sql = BuildGetByIds(connection, typeof(TEntity), ids, out var parameters);
             LogQuery<TEntity>(sql);
-            //with CommandDefinition we can pass also the the cancellation token 
-            //for further informations https://github.com/DapperLib/Dapper/blob/main/Dapper/CommandDefinition.cs
             return await connection.QueryFirstOrDefaultAsync<TEntity>(new CommandDefinition(sql, parameters, transaction, cancellationToken: cancellationToken));
         }
 
@@ -204,8 +200,6 @@ namespace Dommel
         {
             var sql = BuildGetAllQuery(connection, typeof(TEntity));
             LogQuery<TEntity>(sql);
-            //with CommandDefinition we can pass also the the cancellation token 
-            //for further informations https://github.com/DapperLib/Dapper/blob/main/Dapper/CommandDefinition.cs
             return connection.QueryAsync<TEntity>(new CommandDefinition(sql, transaction: transaction, cancellationToken: cancellationToken));
         }
 
@@ -256,8 +250,6 @@ namespace Dommel
         {
             var sql = BuildPagedQuery(connection, typeof(TEntity), pageNumber, pageSize);
             LogQuery<TEntity>(sql);
-            //with CommandDefinition we can pass also the the cancellation token 
-            //for further informations https://github.com/DapperLib/Dapper/blob/main/Dapper/CommandDefinition.cs
             return connection.QueryAsync<TEntity>(new CommandDefinition(sql, transaction: transaction, cancellationToken: cancellationToken));
         }
 

@@ -39,8 +39,6 @@ namespace Dommel
         {
             var sql = BuildUpdateQuery(GetSqlBuilder(connection), typeof(TEntity));
             LogQuery<TEntity>(sql);
-            //with CommandDefinition we can pass also the the cancellation token 
-            //for further informations https://github.com/DapperLib/Dapper/blob/main/Dapper/CommandDefinition.cs
             return await connection.ExecuteAsync(new CommandDefinition(sql, entity, transaction: transaction, cancellationToken: cancellationToken)) > 0;
         }
 

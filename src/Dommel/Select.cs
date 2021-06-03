@@ -49,8 +49,6 @@ namespace Dommel
         {
             var sql = BuildSelectSql(connection, predicate, out var parameters);
             LogQuery<TEntity>(sql);
-            //with CommandDefinition we can pass also the the cancellation token 
-            //for further informations https://github.com/DapperLib/Dapper/blob/main/Dapper/CommandDefinition.cs
             return connection.QueryAsync<TEntity>(new CommandDefinition(sql, parameters, transaction: transaction, cancellationToken: cancellationToken));
         }
 
@@ -90,8 +88,6 @@ namespace Dommel
         {
             var sql = BuildSelectSql(connection, predicate, out var parameters);
             LogQuery<TEntity>(sql);
-            //with CommandDefinition we can pass also the the cancellation token 
-            //for further informations https://github.com/DapperLib/Dapper/blob/main/Dapper/CommandDefinition.cs
             return await connection.QueryFirstOrDefaultAsync<TEntity>(new CommandDefinition(sql, parameters, transaction, cancellationToken: cancellationToken));
         }
 
@@ -151,8 +147,6 @@ namespace Dommel
         {
             var sql = BuildSelectPagedQuery(connection, predicate, pageNumber, pageSize, out var parameters);
             LogQuery<TEntity>(sql);
-            //with CommandDefinition we can pass also the the cancellation token 
-            //for further informations https://github.com/DapperLib/Dapper/blob/main/Dapper/CommandDefinition.cs
             return connection.QueryAsync<TEntity>(new CommandDefinition(sql, parameters, transaction, cancellationToken: cancellationToken));
         }
 
