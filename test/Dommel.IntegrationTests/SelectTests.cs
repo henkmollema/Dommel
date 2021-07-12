@@ -9,7 +9,7 @@ namespace Dommel.IntegrationTests
     {
         [Theory]
         [ClassData(typeof(DatabaseTestData))]
-        public void Select_Equals(DatabaseDriver database)
+        public void Select_Equals_Const(DatabaseDriver database)
         {
             using var con = database.GetConnection();
             var products = con.Select<Product>(p => p.CategoryId == 1);
@@ -18,11 +18,56 @@ namespace Dommel.IntegrationTests
 
         [Theory]
         [ClassData(typeof(DatabaseTestData))]
-        public async Task SelectAsync_Equals(DatabaseDriver database)
+        public async Task SelectAsync_Equals_Const(DatabaseDriver database)
         {
             using var con = database.GetConnection();
             var products = await con.SelectAsync<Product>(p => p.CategoryId == 1);
             Assert.Equal(10, products.Count());
+        }
+
+        [Theory]
+        [ClassData(typeof(DatabaseTestData))]
+        public void Select_Equals_LocalVar(DatabaseDriver database)
+        {
+            var filter = new FooBar { ProductName = "Chef Anton's Cajun Seasoning" };
+            using var con = database.GetConnection();
+            var products = con.Select<Product>(p => p.Name == filter.ProductName);
+            Assert.Single(products);
+        }
+
+        [Theory]
+        [ClassData(typeof(DatabaseTestData))]
+        public async Task SelectAsync_Equals_LocalVar(DatabaseDriver database)
+        {
+            var filter = new FooBar { ProductName = "Chef Anton's Cajun Seasoning" };
+            using var con = database.GetConnection();
+            var products = await con.SelectAsync<Product>(p => p.Name == filter.ProductName);
+            Assert.Single(products);
+        }
+
+        private class FooBar
+        {
+            public string? ProductName { get; set; }
+        }
+
+        [Theory]
+        [ClassData(typeof(DatabaseTestData))]
+        public void Select_Equals_MemberAccess(DatabaseDriver database)
+        {
+            var filter = new FooBar { ProductName = "Chef Anton's Cajun Seasoning" };
+            using var con = database.GetConnection();
+            var products = con.Select<Product>(p => p.Name == filter.ProductName);
+            Assert.Single(products);
+        }
+
+        [Theory]
+        [ClassData(typeof(DatabaseTestData))]
+        public async Task SelectAsync_Equals_MemberAccess(DatabaseDriver database)
+        {
+            var filter = new FooBar { ProductName = "Chef Anton's Cajun Seasoning" };
+            using var con = database.GetConnection();
+            var products = await con.SelectAsync<Product>(p => p.Name == filter.ProductName);
+            Assert.Single(products);
         }
 
         [Theory]
