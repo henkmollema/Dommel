@@ -639,12 +639,10 @@ namespace Dommel
                 return new VisitResult(MemberToColumn(expression));
             }
 
-            var isConstant = expression.Expression?.NodeType == ExpressionType.Constant;
-
             var member = Expression.Convert(expression, typeof(object));
             var lambda = Expression.Lambda<Func<object>>(member);
             var getter = lambda.Compile();
-            return new VisitResult(getter(), isConstant);
+            return new VisitResult(getter());
         }
 
         /// <summary>
