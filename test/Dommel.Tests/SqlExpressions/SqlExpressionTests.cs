@@ -29,7 +29,7 @@ namespace Dommel.Tests
         {
             var sqlExpression = new SqlExpression<Product>(new SqlServerSqlBuilder());
             var ex = Assert.Throws<ArgumentException>(() => sqlExpression.Where(p => p.CategoryId.ToString("n2") == "1"));
-            Assert.Equal("ToString-expression should not contain any argument.", ex.Message);
+            Assert.Contains("ToString-expression should not contain any argument.", ex.Message);
         }
     }
 }
