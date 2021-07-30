@@ -422,9 +422,8 @@ namespace Dommel
         }
 
         /// <summary>
-        /// Processes ToString expression to CAST columns into Char before comparison.
+        /// Processes ToString expression to CAST columns into CHAR before comparison.
         /// </summary>
-        /// <param name="expression"></param>
         /// <returns></returns>
         protected virtual object VisitToStringExpression(MethodCallExpression expression)
         {
