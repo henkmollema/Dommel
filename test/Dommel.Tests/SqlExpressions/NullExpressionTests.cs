@@ -5,7 +5,7 @@ namespace Dommel.Tests
     public class NullExpressionTests
     {
         [Fact]
-        public void IsNullLeft()
+        public void GeneratesCorrectIsEqualSyntax()
         {
             var sql = new SqlExpression<Foo>(new SqlServerSqlBuilder())
                 .Where(f => f.Bar == null)
@@ -14,7 +14,7 @@ namespace Dommel.Tests
         }
 
         [Fact]
-        public void IsNotNullLeft()
+        public void GeneratesCorrectIsNotEqualSyntax()
         {
             var sql = new SqlExpression<Foo>(new SqlServerSqlBuilder())
                 .Where(f => f.Bar != null)
@@ -23,21 +23,21 @@ namespace Dommel.Tests
         }
 
         [Fact]
-        public void IsNullRight()
+        public void GeneratesInvalidIsEqualSyntaxForInvalidExpression()
         {
             var sql = new SqlExpression<Foo>(new SqlServerSqlBuilder())
                 .Where(f => null == f.Bar)
                 .ToSql();
-            Assert.Equal(" where ([Bar] is null)", sql);
+            Assert.Equal(" where ( = @p1)", sql);
         }
 
         [Fact]
-        public void IsNotNullRight()
+        public void GeneratesInvalidIsNotEqualSyntaxForInvalidExpression()
         {
             var sql = new SqlExpression<Foo>(new SqlServerSqlBuilder())
                 .Where(f => null != f.Bar)
                 .ToSql();
-            Assert.Equal(" where ([Bar] is not null)", sql);
+            Assert.Equal(" where ( <> @p1)", sql);
         }
 
         public class Foo

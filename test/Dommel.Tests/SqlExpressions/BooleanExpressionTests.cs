@@ -39,15 +39,6 @@ namespace Dommel.Tests
                 .ToSql();
             Assert.Equal(" where ([Baz] = '1' or [Qux] = '1')", sql);
         }
-        
-        [Fact]
-        public void MultipleOr()
-        {
-            var sql = new SqlExpression<Foo>(new SqlServerSqlBuilder())
-                .Where(f => f.Baz || f.Qux || f.Fuzz)
-                .ToSql();
-            Assert.Equal(" where ([Baz] = '1' or [Qux] = '1' or [Fuzz] = '1')", sql);
-        }
 
         [Fact]
         public void OrWithNot()
@@ -65,15 +56,6 @@ namespace Dommel.Tests
                 .Where(f => f.Baz && f.Qux)
                 .ToSql();
             Assert.Equal(" where ([Baz] = '1' and [Qux] = '1')", sql);
-        }
-        
-        [Fact]
-        public void MultipleAnd()
-        {
-            var sql = new SqlExpression<Foo>(new SqlServerSqlBuilder())
-                .Where(f => f.Baz && f.Qux && f.Fuzz)
-                .ToSql();
-            Assert.Equal(" where ([Baz] = '1' and [Qux] = '1' and [Fuzz] = '1')", sql);
         }
 
         [Fact]
@@ -94,24 +76,6 @@ namespace Dommel.Tests
             Assert.Equal(" where ([Bar] = @p1 or [Baz] = '1')", sql);
         }
 
-        [Fact]
-        public void CombinedWithMultipleStatementsWithParentheses()
-        {
-            var sql = new SqlExpression<Foo>(new SqlServerSqlBuilder())
-                .Where(f => f.Bar == "test" && (f.Baz || f.Qux) || f.Bar == null)
-                .ToSql();
-                Assert.Equal(" where ([Bar] = @p1 and ([Baz] = '1' or [Qux] = '1') or [Bar] is null)", sql);
-        }
-
-        [Fact]
-        public void CombineWithMultipleStatementsWithoutParentheses()
-        { 
-            var sql = new SqlExpression<Foo>(new SqlServerSqlBuilder())
-                .Where(f => f.Bar == "test" && f.Baz || f.Qux || f.Bar == null)
-                .ToSql();
-            Assert.Equal(" where ([Bar] = @p1 and [Baz] = '1' or [Qux] = '1' or [Bar] is null)", sql);
-        }
-
         public class Foo
         {
             public string? Bar { get; set; }
@@ -119,8 +83,6 @@ namespace Dommel.Tests
             public bool Baz { get; set; }
 
             public bool Qux { get; set; }
-
-            public bool Fuzz { get; set; }
         }
     }
 }
