@@ -639,8 +639,8 @@ namespace Dommel
                 return new VisitResult(MemberToColumn(expression));
             }
 
-            var isConstant = expression.Expression?.NodeType == ExpressionType.Constant;
-
+            var isConstant = IsOperatorConstant(expression.Expression?.NodeType);
+            
             var member = Expression.Convert(expression, typeof(object));
             var lambda = Expression.Lambda<Func<object>>(member);
             var getter = lambda.Compile();
@@ -787,6 +787,19 @@ namespace Dommel
                     return 7;
                 default:
                     return 8;
+            }
+        }
+
+        private static bool IsOperatorConstant(ExpressionType? expressionType)
+        {
+            if (expressionType == null) return false;
+            switch (expressionType)
+            {
+                case ExpressionType.Constant:
+                case ExpressionType.MemberAccess:
+                    return true;
+                default:
+                    return false;
             }
         }
 

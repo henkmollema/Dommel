@@ -14,8 +14,8 @@ namespace Dommel.IntegrationTests
                 Add(new SqlServerDatabaseDriver());
             }
 
-            Add(new MySqlDatabaseDriver());
-            Add(new PostgresDatabaseDriver());
+           // Add(new MySqlDatabaseDriver());
+           // Add(new PostgresDatabaseDriver());
         }
     }
 }

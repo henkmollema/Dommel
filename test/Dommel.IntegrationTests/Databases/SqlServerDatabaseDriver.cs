@@ -9,9 +9,12 @@ namespace Dommel.IntegrationTests
     {
         public override DbConnection GetConnection(string databaseName)
         {
-            var connectionString = CI.IsAppVeyor
-                ? $"Server=(local)\\SQL2017;Database={databaseName};User ID=sa;Password=Password12!"
-                : $"Server=(LocalDb)\\mssqllocaldb;Database={databaseName};User ID=dommel;Password=dommel";
+            /* var connectionString = CI.IsAppVeyor
+                 ? $"Server=(local)\\SQL2017;Database={databaseName};User ID=sa;Password=Password12!"
+                 : $"Server=(LocalDb)\\mssqllocaldb;Database={databaseName};User ID=dommel;Password=dommel";*/
+
+            var connectionString = $"Server=10.1.1.6;Database={databaseName};User ID=sa;Password=skystore";
+
 
             return new SqlConnection(connectionString);
         }
