@@ -10,8 +10,8 @@ namespace Dommel.IntegrationTests
         public override DbConnection GetConnection(string databaseName)
         {
             var connectionString = CI.IsAppVeyor
-                 ? $"Server=(local)\\SQL2017;Database={databaseName};User ID=sa;Password=Password12!"
-                 : $"Server=(LocalDb)\\mssqllocaldb;Database={databaseName};User ID=dommel;Password=dommel";
+                ? $"Server=(local)\\SQL2017;Database={databaseName};User ID=sa;Password=Password12!"
+                : $"Server=(LocalDb)\\mssqllocaldb;Database={databaseName};User ID=dommel;Password=dommel";
 
             return new SqlConnection(connectionString);
         }
