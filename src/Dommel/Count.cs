@@ -68,10 +68,10 @@ namespace Dommel
 
         internal static string BuildCountAllSql(ISqlBuilder sqlBuilder, Type type)
         {
-            var cacheKey = new QueryCacheKey(QueryCacheType.Count, sqlBuilder, type);
+            var tableName = Resolvers.Table(type, sqlBuilder);
+            var cacheKey = new QueryCacheKey(QueryCacheType.Count, sqlBuilder, type, tableName);
             if (!QueryCache.TryGetValue(cacheKey, out var sql))
             {
-                var tableName = Resolvers.Table(type, sqlBuilder);
                 sql = $"select count(*) from {tableName}";
                 QueryCache.TryAdd(cacheKey, sql);
             }

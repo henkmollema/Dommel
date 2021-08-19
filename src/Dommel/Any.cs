@@ -68,10 +68,10 @@ namespace Dommel
 
         private static string BuildAnyPredicate(ISqlBuilder sqlBuilder, Type type)
         {
-            var cacheKey = new QueryCacheKey(QueryCacheType.Any, sqlBuilder, type);
+            var tableName = Resolvers.Table(type, sqlBuilder);
+            var cacheKey = new QueryCacheKey(QueryCacheType.Any, sqlBuilder, type, tableName);
             if (!QueryCache.TryGetValue(cacheKey, out var sql))
             {
-                var tableName = Resolvers.Table(type, sqlBuilder);
                 sql = $"select 1 from {tableName}";
                 QueryCache.TryAdd(cacheKey, sql);
             }

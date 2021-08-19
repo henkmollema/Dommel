@@ -41,7 +41,8 @@ namespace Dommel
 
         internal static string BuildProjectById(ISqlBuilder sqlBuilder, Type type, object id, out DynamicParameters parameters)
         {
-            var cacheKey = new QueryCacheKey(QueryCacheType.Project, sqlBuilder, type);
+            var tableName = Resolvers.Table(type, sqlBuilder);
+            var cacheKey = new QueryCacheKey(QueryCacheType.Project, sqlBuilder, type, tableName);
             if (!QueryCache.TryGetValue(cacheKey, out var sql))
             {
                 var keyProperty = Resolvers.KeyProperties(type).Single().Property;
@@ -92,10 +93,10 @@ namespace Dommel
 
         internal static string BuildProjectAllQuery(ISqlBuilder sqlBuilder, Type type)
         {
-            var cacheKey = new QueryCacheKey(QueryCacheType.ProjectAll, sqlBuilder, type);
+            var tableName = Resolvers.Table(type, sqlBuilder);
+            var cacheKey = new QueryCacheKey(QueryCacheType.ProjectAll, sqlBuilder, type, tableName);
             if (!QueryCache.TryGetValue(cacheKey, out var sql))
             {
-                var tableName = Resolvers.Table(type, sqlBuilder);
                 var properties = Resolvers.Properties(type)
                     .Where(x => !x.IsGenerated)
                     .Select(x => x.Property)

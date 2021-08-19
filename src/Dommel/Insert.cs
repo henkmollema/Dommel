@@ -76,11 +76,10 @@ namespace Dommel
 
         internal static string BuildInsertQuery(ISqlBuilder sqlBuilder, Type type)
         {
-            var cacheKey = new QueryCacheKey(QueryCacheType.Insert, sqlBuilder, type);
+            var tableName = Resolvers.Table(type, sqlBuilder);
+            var cacheKey = new QueryCacheKey(QueryCacheType.Insert, sqlBuilder, type, tableName);
             if (!QueryCache.TryGetValue(cacheKey, out var sql))
             {
-                var tableName = Resolvers.Table(type, sqlBuilder);
-
                 // Use all non-key and non-generated properties for inserts
                 var keyProperties = Resolvers.KeyProperties(type);
                 var typeProperties = Resolvers.Properties(type)

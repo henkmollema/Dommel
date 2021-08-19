@@ -44,10 +44,10 @@ namespace Dommel
 
         internal static string BuildUpdateQuery(ISqlBuilder sqlBuilder, Type type)
         {
-            var cacheKey = new QueryCacheKey(QueryCacheType.Update, sqlBuilder, type);
+            var tableName = Resolvers.Table(type, sqlBuilder);
+            var cacheKey = new QueryCacheKey(QueryCacheType.Update, sqlBuilder, type, tableName);
             if (!QueryCache.TryGetValue(cacheKey, out var sql))
             {
-                var tableName = Resolvers.Table(type, sqlBuilder);
 
                 // Use all non-key and non-generated properties for updates
                 var keyProperties = Resolvers.KeyProperties(type);

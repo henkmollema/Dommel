@@ -46,10 +46,10 @@ namespace Dommel
 
         internal static string BuildGetById(ISqlBuilder sqlBuilder, Type type, object id, out DynamicParameters parameters)
         {
-            var cacheKey = new QueryCacheKey(QueryCacheType.Get, sqlBuilder, type);
+            var tableName = Resolvers.Table(type, sqlBuilder);
+            var cacheKey = new QueryCacheKey(QueryCacheType.Get, sqlBuilder, type, tableName);
             if (!QueryCache.TryGetValue(cacheKey, out var sql))
             {
-                var tableName = Resolvers.Table(type, sqlBuilder);
                 var keyProperties = Resolvers.KeyProperties(type);
                 if (keyProperties.Length > 1)
                 {
@@ -133,10 +133,10 @@ namespace Dommel
         internal static string BuildGetByIds(IDbConnection connection, Type type, object[] ids, out DynamicParameters parameters)
         {
             var sqlBuilder = GetSqlBuilder(connection);
-            var cacheKey = new QueryCacheKey(QueryCacheType.GetByMultipleIds, sqlBuilder, type);
+                var tableName = Resolvers.Table(type, sqlBuilder);
+            var cacheKey = new QueryCacheKey(QueryCacheType.GetByMultipleIds, sqlBuilder, type, tableName);
             if (!QueryCache.TryGetValue(cacheKey, out var sql))
             {
-                var tableName = Resolvers.Table(type, sqlBuilder);
                 var keyProperties = Resolvers.KeyProperties(type);
                 var keyColumnNames = keyProperties.Select(p => Resolvers.Column(p.Property, sqlBuilder)).ToArray();
                 if (keyColumnNames.Length != ids.Length)
@@ -206,10 +206,11 @@ namespace Dommel
         internal static string BuildGetAllQuery(IDbConnection connection, Type type)
         {
             var sqlBuilder = GetSqlBuilder(connection);
-            var cacheKey = new QueryCacheKey(QueryCacheType.GetAll, sqlBuilder, type);
+            var tableName = Resolvers.Table(type, sqlBuilder);
+            var cacheKey = new QueryCacheKey(QueryCacheType.GetAll, sqlBuilder, type, tableName);
             if (!QueryCache.TryGetValue(cacheKey, out var sql))
             {
-                sql = "select * from " + Resolvers.Table(type, sqlBuilder);
+                sql = "select * from " + tableName;
                 QueryCache.TryAdd(cacheKey, sql);
             }
 
