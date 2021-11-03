@@ -2,6 +2,7 @@ using System;
 using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Threading;
 using System.Threading.Tasks;
 using Dapper;
 
@@ -33,12 +34,13 @@ namespace Dommel
         /// <param name="connection">The connection to the database. This can either be open or closed.</param>
         /// <param name="entity">The entity to be deleted.</param>
         /// <param name="transaction">Optional transaction for the command.</param>
+        /// <param name="cancellationToken">Optional cancellation token for the command.</param>
         /// <returns>A value indicating whether the delete operation succeeded.</returns>
-        public static async Task<bool> DeleteAsync<TEntity>(this IDbConnection connection, TEntity entity, IDbTransaction? transaction = null)
+        public static async Task<bool> DeleteAsync<TEntity>(this IDbConnection connection, TEntity entity, IDbTransaction? transaction = null, CancellationToken cancellationToken = default)
         {
             var sql = BuildDeleteQuery(GetSqlBuilder(connection), typeof(TEntity));
             LogQuery<TEntity>(sql);
-            return await connection.ExecuteAsync(sql, entity, transaction) > 0;
+            return await connection.ExecuteAsync(new CommandDefinition(sql, entity, transaction: transaction, cancellationToken: cancellationToken)) > 0;
         }
 
         internal static string BuildDeleteQuery(ISqlBuilder sqlBuilder, Type type)
@@ -81,13 +83,14 @@ namespace Dommel
         /// <typeparam name="TEntity">The type of the entity.</typeparam>
         /// <param name="connection">The connection to the database. This can either be open or closed.</param>
         /// <param name="predicate">A predicate to filter which entities are deleted.</param>
-        /// <param name="transaction">Optional transaction for the command.</param>
+        /// <param name="transaction">Optional transaction for the command.</param> 
+        /// <param name="cancellationToken">Optional cancellation token for the command.</param>
         /// <returns>The number of rows affected.</returns>
-        public static async Task<int> DeleteMultipleAsync<TEntity>(this IDbConnection connection, Expression<Func<TEntity, bool>> predicate, IDbTransaction? transaction = null)
+        public static async Task<int> DeleteMultipleAsync<TEntity>(this IDbConnection connection, Expression<Func<TEntity, bool>> predicate, IDbTransaction? transaction = null, CancellationToken cancellationToken = default)
         {
             var sql = BuildDeleteMultipleQuery(GetSqlBuilder(connection), predicate, out var parameters);
             LogQuery<TEntity>(sql);
-            return await connection.ExecuteAsync(sql, parameters, transaction);
+            return await connection.ExecuteAsync(new CommandDefinition(sql, parameters, transaction: transaction, cancellationToken: cancellationToken));
         }
 
         private static string BuildDeleteMultipleQuery<TEntity>(ISqlBuilder sqlBuilder, Expression<Func<TEntity, bool>> predicate, out DynamicParameters parameters)
@@ -125,12 +128,13 @@ namespace Dommel
         /// <typeparam name="TEntity">The type of the entity.</typeparam>
         /// <param name="connection">The connection to the database. This can either be open or closed.</param>
         /// <param name="transaction">Optional transaction for the command.</param>
+        /// <param name="cancellationToken">Optional cancellation token for the command.</param>
         /// <returns>The number of rows affected.</returns>
-        public static async Task<int> DeleteAllAsync<TEntity>(this IDbConnection connection, IDbTransaction? transaction = null)
+        public static async Task<int> DeleteAllAsync<TEntity>(this IDbConnection connection, IDbTransaction? transaction = null, CancellationToken cancellationToken = default)
         {
             var sql = BuildDeleteAllQuery(GetSqlBuilder(connection), typeof(TEntity));
             LogQuery<TEntity>(sql);
-            return await connection.ExecuteAsync(sql, transaction: transaction);
+            return await connection.ExecuteAsync(new CommandDefinition(sql, transaction: transaction, cancellationToken: cancellationToken));
         }
 
         internal static string BuildDeleteAllQuery(ISqlBuilder sqlBuilder, Type type)
