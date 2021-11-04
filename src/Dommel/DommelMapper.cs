@@ -3,7 +3,6 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Data;
-using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using Dapper;
@@ -15,10 +14,9 @@ namespace Dommel
     /// </summary>
     public static partial class DommelMapper
     {
-        private static readonly ConcurrentDictionary<string, PropertyInfo?> ColumnNameCache = new ConcurrentDictionary<string, PropertyInfo?>();
+        private static readonly Func<Type, SqlMapper.ITypeMap> DefaultTypeMapProvider;
 
         internal static ConcurrentDictionary<QueryCacheKey, string> QueryCache { get; } = new ConcurrentDictionary<QueryCacheKey, string>();
-
         internal static IPropertyResolver PropertyResolver = new DefaultPropertyResolver();
         internal static IKeyPropertyResolver KeyPropertyResolver = new DefaultKeyPropertyResolver();
         internal static IForeignKeyPropertyResolver ForeignKeyPropertyResolver = new DefaultForeignKeyPropertyResolver();
@@ -37,24 +35,20 @@ namespace Dommel
         static DommelMapper()
         {
             // Type mapper for [Column] attribute
+            DefaultTypeMapProvider = SqlMapper.TypeMapProvider;
             SqlMapper.TypeMapProvider = type => CreateMap(type);
 
             static SqlMapper.ITypeMap CreateMap(Type t) => new CustomPropertyTypeMap(t,
                 (type, columnName) =>
                 {
-                    var cacheKey = type + columnName;
-                    if (!ColumnNameCache.TryGetValue(cacheKey, out var propertyInfo))
+                    foreach (var property in type.GetProperties())
                     {
-                        propertyInfo = type.GetProperties().FirstOrDefault(p => p.GetCustomAttribute<ColumnAttribute>()?.Name == columnName || p.Name == columnName);
-                        if (propertyInfo is null)
+                        if (property.GetCustomAttribute<ColumnAttribute>()?.Name == columnName)
                         {
-                            // Fallback to the default type mapping strategy of Dapper
-                            propertyInfo = new DefaultTypeMap(type).GetMember(columnName)?.Property;
+                            return property;
                         }
-                        ColumnNameCache.TryAdd(cacheKey, propertyInfo);
                     }
-
-                    return propertyInfo;
+                    return DefaultTypeMapProvider(type)?.GetMember(columnName)?.Property;
                 });
         }
 
@@ -65,6 +59,12 @@ namespace Dommel
 
         private static void LogQuery<T>(string query, [CallerMemberName]string? method = null)
             => LogReceived?.Invoke(method != null ? $"{method}<{typeof(T).Name}>: {query}" : query);
+
+        /// <summary>
+        /// Use the default <see cref="SqlMapper.ITypeMap"/> provided by Dapper instead
+        /// of the custom Dommel type map which supports <see cref="ColumnAttribute"/>.
+        /// </summary>
+        public static void UseDefaultTypeMap() => SqlMapper.TypeMapProvider = DefaultTypeMapProvider;
 
         /// <summary>
         /// Sets the <see cref="IPropertyResolver"/> implementation for resolving key of entities.
