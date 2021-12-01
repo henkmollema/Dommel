@@ -647,7 +647,6 @@ namespace Dommel
 
             // Determine the table to join with.
             var sourceType = includeTypes[0];
-            var sourceTableName = Resolvers.Table(sourceType, sqlBuilder);
             for (var i = 1; i < includeTypes.Length; i++)
             {
                 // Determine the table name of the joined table.
@@ -662,20 +661,20 @@ namespace Dommel
                 {
                     // Determine the primary key of the foreign key table.
                     var foreignKeyTableKeyColumName = Resolvers.Column(Resolvers.KeyProperties(includeType).Single().Property, sqlBuilder);
-                    sql += $" left join {foreignKeyTableName} on {sourceTableName}.{foreignKeyPropertyName} = {foreignKeyTableName}.{foreignKeyTableKeyColumName}";
+                    sql += $" left join {foreignKeyTableName} on {foreignKeyPropertyName} = {foreignKeyTableKeyColumName}";
                 }
                 else if (relation == ForeignKeyRelation.OneToMany)
                 {
                     // Determine the primary key of the source table.
                     var sourceKeyColumnName = Resolvers.Column(Resolvers.KeyProperties(sourceType).Single().Property, sqlBuilder);
-                    sql += $" left join {foreignKeyTableName} on {sourceTableName}.{sourceKeyColumnName} = {foreignKeyTableName}.{foreignKeyPropertyName}";
+                    sql += $" left join {foreignKeyTableName} on {sourceKeyColumnName} = {foreignKeyPropertyName}";
                 }
             }
 
             parameters = null;
             if (id != null)
             {
-                sql += $" where {resultTableName}.{resultTableKeyColumnName} = {sqlBuilder.PrefixParameter("Id")}";
+                sql += $" where {resultTableKeyColumnName} = {sqlBuilder.PrefixParameter("Id")}";
 
                 parameters = new DynamicParameters();
                 parameters.Add("Id", id);
