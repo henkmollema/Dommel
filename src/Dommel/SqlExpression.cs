@@ -341,6 +341,8 @@ namespace Dommel
                     return VisitContainsExpression(expression, TextSearch.StartsWith);
                 case "endswith":
                     return VisitContainsExpression(expression, TextSearch.EndsWith);
+                case "tostring":
+                    return VisitToStringExpression(expression);
                 default:
                     break;
             }
@@ -417,6 +419,21 @@ namespace Dommel
 
             // Use lower() to make the queries case-insensitive
             return $"lower({column}) like lower({paramName})";
+        }
+
+        /// <summary>
+        /// Processes ToString expression to CAST columns into CHAR before comparison.
+        /// </summary>
+        /// <returns></returns>
+        protected virtual object VisitToStringExpression(MethodCallExpression expression)
+        {
+            var column = VisitExpression(expression.Object);
+            if (expression.Arguments.Count >= 1)
+            {
+                throw new ArgumentException("ToString-expression should not contain any argument.", nameof(expression));
+            }
+
+            return $"CAST({column} AS CHAR)";
         }
 
         /// <summary>
