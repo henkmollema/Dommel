@@ -5,7 +5,7 @@ namespace Dommel.Tests
 {
     public class WhereExpressionTests
     {
-        private readonly SqlExpression<Product> _sqlExpression = new SqlExpression<Product>(new SqlServerSqlBuilder());
+        private readonly SqlExpression<Product> _sqlExpression = new(new SqlServerSqlBuilder());
 
         [Fact]
         public void Where_AllowsNullExpression()
@@ -32,7 +32,7 @@ namespace Dommel.Tests
         public void Where_GeneratesSql()
         {
             var sql = _sqlExpression.Where(p => p.Name == "Chai").ToSql();
-            Assert.Equal(" where ([Name] = @p1)", sql);
+            Assert.Equal(" where ([Products].[Name] = @p1)", sql);
         }
 
         [Fact]
@@ -42,7 +42,7 @@ namespace Dommel.Tests
                 .Where(p => p.Name == "Chai")
                 .Where(p => p.CategoryId == 1)
                 .ToSql();
-            Assert.Equal(" where ([Name] = @p1) and ([CategoryId] = @p2)", sql);
+            Assert.Equal(" where ([Products].[Name] = @p1) and ([Products].[CategoryId] = @p2)", sql);
         }
 
         [Fact]
@@ -52,7 +52,7 @@ namespace Dommel.Tests
                 .Where(p => p.Name == "Chai")
                 .AndWhere(p => p.CategoryId == 1)
                 .ToSql();
-            Assert.Equal(" where ([Name] = @p1) and ([CategoryId] = @p2)", sql);
+            Assert.Equal(" where ([Products].[Name] = @p1) and ([Products].[CategoryId] = @p2)", sql);
         }
 
         [Fact]
@@ -62,7 +62,7 @@ namespace Dommel.Tests
                 .Where(p => p.Name == "Chai")
                 .OrWhere(p => p.CategoryId == 1)
                 .ToSql();
-            Assert.Equal(" where ([Name] = @p1) or ([CategoryId] = @p2)", sql);
+            Assert.Equal(" where ([Products].[Name] = @p1) or ([Products].[CategoryId] = @p2)", sql);
         }
     }
 }

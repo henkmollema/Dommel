@@ -12,7 +12,7 @@ namespace Dommel.Tests
         public void ProjectById()
         {
             var sql = BuildProjectById(SqlBuilder, typeof(ProjectedFoo), 42, out var parameters);
-            Assert.Equal("select [Id], [Name], [DateUpdated] from [ProjectedFoos] where [Id] = @Id", sql);
+            Assert.Equal("select [ProjectedFoos].[Id], [ProjectedFoos].[Name], [ProjectedFoos].[DateUpdated] from [ProjectedFoos] where [ProjectedFoos].[Id] = @Id", sql);
             Assert.NotNull(parameters);
         }
 
@@ -20,14 +20,14 @@ namespace Dommel.Tests
         public void ProjectAll()
         {
             var sql = BuildProjectAllQuery(SqlBuilder, typeof(ProjectedFoo));
-            Assert.Equal("select [Id], [Name], [DateUpdated] from [ProjectedFoos]", sql);
+            Assert.Equal("select [ProjectedFoos].[Id], [ProjectedFoos].[Name], [ProjectedFoos].[DateUpdated] from [ProjectedFoos]", sql);
         }
 
         [Fact]
         public void ProjectPaged()
         {
             var sql = BuildProjectPagedQuery(SqlBuilder, typeof(ProjectedFoo), 1, 5);
-            Assert.Equal("select [Id], [Name], [DateUpdated] from [ProjectedFoos] order by [Id] offset 0 rows fetch next 5 rows only", sql);
+            Assert.Equal("select [ProjectedFoos].[Id], [ProjectedFoos].[Name], [ProjectedFoos].[DateUpdated] from [ProjectedFoos] order by [ProjectedFoos].[Id] offset 0 rows fetch next 5 rows only", sql);
         }
 
         public class ProjectedFoo

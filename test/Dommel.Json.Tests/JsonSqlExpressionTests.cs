@@ -14,7 +14,7 @@ namespace Dommel.Json.Tests
             var str = sql.Where(p => p.Data.LastName == "Foo").ToSql(out var parameters);
 
             // Assert
-            Assert.Equal(" where (`Data`->'$.LastName' = @p1)", str);
+            Assert.Equal(" where (`Leads`.`Data`->'$.LastName' = @p1)", str);
             Assert.Equal("p1", Assert.Single(parameters.ParameterNames));
         }
 
@@ -28,7 +28,7 @@ namespace Dommel.Json.Tests
             var str = sql.Where(p => p.Data.LastName == "Foo").ToSql(out var parameters);
 
             // Assert
-            Assert.Equal(" where (JSON_VALUE([Data], '$.LastName') = @p1)", str);
+            Assert.Equal(" where (JSON_VALUE([Leads].[Data], '$.LastName') = @p1)", str);
             Assert.Equal("p1", Assert.Single(parameters.ParameterNames));
         }
 
@@ -42,7 +42,7 @@ namespace Dommel.Json.Tests
             var str = sql.Where(p => p.Data.LastName == "Foo").ToSql(out var parameters);
 
             // Assert
-            Assert.Equal(" where (JSON_EXTRACT(Data, '$.LastName') = @p1)", str);
+            Assert.Equal(" where (JSON_EXTRACT(Leads.Data, '$.LastName') = @p1)", str);
             Assert.Equal("p1", Assert.Single(parameters.ParameterNames));
         }
 
@@ -56,7 +56,7 @@ namespace Dommel.Json.Tests
             var str = sql.Where(p => p.Data.LastName == "Foo").ToSql(out var parameters);
 
             // Assert
-            Assert.Equal(" where (JSON_VALUE([Data], '$.LastName') = @p1)", str);
+            Assert.Equal(" where (JSON_VALUE([Leads].[Data], '$.LastName') = @p1)", str);
             Assert.Equal("p1", Assert.Single(parameters.ParameterNames));
         }
 
@@ -70,7 +70,7 @@ namespace Dommel.Json.Tests
             var str = sql.Where(p => p.Data.LastName == "Foo").ToSql(out var parameters);
 
             // Assert
-            Assert.Equal(" where (\"Data\"->>'LastName' = @p1)", str);
+            Assert.Equal(" where (\"Leads\".\"Data\"->>'LastName' = @p1)", str);
             Assert.Equal("p1", Assert.Single(parameters.ParameterNames));
         }
     }

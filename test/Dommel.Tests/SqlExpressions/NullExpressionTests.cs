@@ -10,7 +10,7 @@ namespace Dommel.Tests
             var sql = new SqlExpression<Foo>(new SqlServerSqlBuilder())
                 .Where(f => f.Bar == null)
                 .ToSql();
-            Assert.Equal(" where ([Bar] is null)", sql);
+            Assert.Equal(" where ([Foos].[Bar] is null)", sql);
         }
 
         [Fact]
@@ -19,7 +19,7 @@ namespace Dommel.Tests
             var sql = new SqlExpression<Foo>(new SqlServerSqlBuilder())
                 .Where(f => f.Bar != null)
                 .ToSql();
-            Assert.Equal(" where ([Bar] is not null)", sql);
+            Assert.Equal(" where ([Foos].[Bar] is not null)", sql);
         }
 
         [Fact]

@@ -10,7 +10,7 @@ namespace Dommel.Tests
         {
             // Arrange
             DefaultTypeMap.MatchNamesWithUnderscores = true;
-            DommelMapper.QueryCache.Clear(); // Reference any method to make sure the static ctor runs
+            _ = DommelMapper.QueryCache; // Reference anything from DommelMapper to make sure the static ctor runs
 
             // Act
             var typeMap = SqlMapper.TypeMapProvider(typeof(Poco));

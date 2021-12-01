@@ -10,7 +10,7 @@ namespace Dommel.Tests
             var sql = new SqlExpression<Foo>(new SqlServerSqlBuilder())
                 .Where(f => f.Baz)
                 .ToSql();
-            Assert.Equal(" where ([Baz] = '1')", sql);
+            Assert.Equal(" where ([Foos].[Baz] = '1')", sql);
         }
 
         [Fact]
@@ -19,7 +19,7 @@ namespace Dommel.Tests
             var sql = new SqlExpression<Foo>(new SqlServerSqlBuilder())
                 .Where(f => !f.Baz)
                 .ToSql();
-            Assert.Equal(" where (not ([Baz] = '1'))", sql);
+            Assert.Equal(" where (not ([Foos].[Baz] = '1'))", sql);
         }
 
         [Fact]
@@ -28,7 +28,7 @@ namespace Dommel.Tests
             var sql = new SqlExpression<Foo>(new SqlServerSqlBuilder())
                 .Where(f => f.Baz == true)
                 .ToSql();
-            Assert.Equal(" where ([Baz] = @p1)", sql);
+            Assert.Equal(" where ([Foos].[Baz] = @p1)", sql);
         }
 
         [Fact]
@@ -37,7 +37,7 @@ namespace Dommel.Tests
             var sql = new SqlExpression<Foo>(new SqlServerSqlBuilder())
                 .Where(f => f.Baz || f.Qux)
                 .ToSql();
-            Assert.Equal(" where ([Baz] = '1' or [Qux] = '1')", sql);
+            Assert.Equal(" where ([Foos].[Baz] = '1' or [Foos].[Qux] = '1')", sql);
         }
 
         [Fact]
@@ -46,7 +46,7 @@ namespace Dommel.Tests
             var sql = new SqlExpression<Foo>(new SqlServerSqlBuilder())
                 .Where(f => f.Baz || !f.Qux)
                 .ToSql();
-            Assert.Equal(" where ([Baz] = '1' or not ([Qux] = '1'))", sql);
+            Assert.Equal(" where ([Foos].[Baz] = '1' or not ([Foos].[Qux] = '1'))", sql);
         }
 
         [Fact]
@@ -55,7 +55,7 @@ namespace Dommel.Tests
             var sql = new SqlExpression<Foo>(new SqlServerSqlBuilder())
                 .Where(f => f.Baz && f.Qux)
                 .ToSql();
-            Assert.Equal(" where ([Baz] = '1' and [Qux] = '1')", sql);
+            Assert.Equal(" where ([Foos].[Baz] = '1' and [Foos].[Qux] = '1')", sql);
         }
 
         [Fact]
@@ -64,7 +64,7 @@ namespace Dommel.Tests
             var sql = new SqlExpression<Foo>(new SqlServerSqlBuilder())
                 .Where(f => !f.Baz && f.Qux)
                 .ToSql();
-            Assert.Equal(" where (not ([Baz] = '1') and [Qux] = '1')", sql);
+            Assert.Equal(" where (not ([Foos].[Baz] = '1') and [Foos].[Qux] = '1')", sql);
         }
 
         [Fact]
@@ -73,7 +73,7 @@ namespace Dommel.Tests
             var sql = new SqlExpression<Foo>(new SqlServerSqlBuilder())
                 .Where(f => f.Bar == "test" || f.Baz)
                 .ToSql();
-            Assert.Equal(" where ([Bar] = @p1 or [Baz] = '1')", sql);
+            Assert.Equal(" where ([Foos].[Bar] = @p1 or [Foos].[Baz] = '1')", sql);
         }
 
         public class Foo

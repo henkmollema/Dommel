@@ -18,7 +18,7 @@ namespace Dommel.Tests
         public void GeneratesAnySql()
         {
             var sql = BuildAnySql<Foo>(SqlBuilder, x => x.Bar == "Baz", out var parameters);
-            Assert.Equal($"select 1 from [Foos] where ([Bar] = @p1) {SqlBuilder.LimitClause(1)}", sql);
+            Assert.Equal($"select 1 from [Foos] where ([Foos].[Bar] = @p1) {SqlBuilder.LimitClause(1)}", sql);
             Assert.Single(parameters.ParameterNames);
         }
 

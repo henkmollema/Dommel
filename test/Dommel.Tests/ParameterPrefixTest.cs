@@ -11,7 +11,7 @@ namespace Dommel.Tests
         public void Get()
         {
             var sql = BuildGetById(SqlBuilder, typeof(Foo), new[] { (object)1 }, out var parameters);
-            Assert.Equal("select * from Foos where Id = #Id", sql);
+            Assert.Equal("select * from Foos where Foos.Id = #Id", sql);
             Assert.Single(parameters.ParameterNames);
         }
 
@@ -26,7 +26,7 @@ namespace Dommel.Tests
             var sql = sqlExpression.Where(p => p.Id == 1).ToSql(out var dynamicParameters);
 
             // Assert
-            Assert.Equal("where (Id = #p1)", sql.Trim());
+            Assert.Equal("where (Foos.Id = #p1)", sql.Trim());
             Assert.Single(dynamicParameters.ParameterNames);
         }
 
@@ -34,21 +34,21 @@ namespace Dommel.Tests
         public void TestInsert()
         {
             var sql = BuildInsertQuery(SqlBuilder, typeof(Foo));
-            Assert.Equal("insert into Foos (Bar) values (#Bar); select last_insert_rowid() id", sql);
+            Assert.Equal("insert into Foos (Foos.Bar) values (#Bar); select last_insert_rowid() id", sql);
         }
 
         [Fact]
         public void TestUpdate()
         {
             var sql = BuildUpdateQuery(SqlBuilder, typeof(Foo));
-            Assert.Equal("update Foos set Bar = #Bar where Id = #Id", sql);
+            Assert.Equal("update Foos set Foos.Bar = #Bar where Foos.Id = #Id", sql);
         }
 
         [Fact]
         public void TestDelete()
         {
             var sql = BuildDeleteQuery(SqlBuilder, typeof(Foo));
-            Assert.Equal("delete from Foos where Id = #Id", sql);
+            Assert.Equal("delete from Foos where Foos.Id = #Id", sql);
         }
 
         public class Foo

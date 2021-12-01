@@ -24,8 +24,8 @@ namespace Dommel.Tests
         [Fact]
         public void Column_NoCacheConflictNestedClass()
         {
-            Assert.Equal("[BazA]", Resolvers.Column(typeof(Foo.Bar).GetProperty("Baz")!, _sqlBuilder));
-            Assert.Equal("[BazB]", Resolvers.Column(typeof(Baz.Bar).GetProperty("Baz")!, _sqlBuilder));
+            Assert.Equal("[BarA].[BazA]", Resolvers.Column(typeof(Foo.Bar).GetProperty("Baz")!, _sqlBuilder));
+            Assert.Equal("[BarB].[BazB]", Resolvers.Column(typeof(Baz.Bar).GetProperty("Baz")!, _sqlBuilder));
         }
 
         [Fact]

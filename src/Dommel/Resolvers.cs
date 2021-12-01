@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 
 namespace Dommel
 {
@@ -146,6 +147,12 @@ namespace Dommel
             if (!ColumnNameCache.TryGetValue(key, out var columnName))
             {
                 columnName = sqlBuilder.QuoteIdentifier(DommelMapper.ColumnNameResolver.ResolveColumnName(propertyInfo));
+                if (!propertyInfo.ReflectedType.IsDefined(typeof(CompilerGeneratedAttribute)))
+                {
+                    // Include the table name for unambiguity, except for anonymyes types e.g. x => new { x.Id, x.Name }
+                    var tableName = Table(propertyInfo.ReflectedType, sqlBuilder);
+                    columnName = $"{tableName}.{columnName}";
+                }
                 ColumnNameCache.TryAdd(key, columnName);
             }
 
