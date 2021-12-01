@@ -50,7 +50,7 @@ namespace Dommel
             {
                 var tableName = Resolvers.Table(type, sqlBuilder);
                 var keyProperties = Resolvers.KeyProperties(type);
-                var whereClauses = keyProperties.Select(p => $"{Resolvers.Column(p.Property, sqlBuilder)} = {sqlBuilder.PrefixParameter(p.Property.Name)}");
+                var whereClauses = keyProperties.Select(p => $"{Resolvers.Column(p.Property, sqlBuilder, false)} = {sqlBuilder.PrefixParameter(p.Property.Name)}");
 
                 sql = $"delete from {tableName} where {string.Join(" and ", whereClauses)}";
 

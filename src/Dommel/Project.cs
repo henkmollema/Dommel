@@ -100,7 +100,7 @@ namespace Dommel
                     .Where(x => !x.IsGenerated)
                     .Select(x => x.Property)
                     .Where(p => p.GetSetMethod() != null)
-                    .Select(p => Resolvers.Column(p, sqlBuilder));
+                    .Select(p => Resolvers.Column(p, sqlBuilder, false));
 
                 sql = $"select {string.Join(", ", properties)} from {tableName}";
                 QueryCache.TryAdd(cacheKey, sql);

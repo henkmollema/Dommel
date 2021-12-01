@@ -9,7 +9,7 @@ namespace Dommel.IntegrationTests
     {
         public override DbConnection GetConnection(string databaseName)
         {
-            var connectionString = $"Server=localhost;Port=5432;Database={databaseName};Uid=postgres;Pwd=root;";
+            var connectionString = $"Server=localhost;Port=5432;Database={databaseName};Uid=postgres;Pwd=postgres;";
             if (CI.IsAppVeyor)
             {
                 connectionString = $"Server=localhost;Port=5432;Database={databaseName};Uid=postgres;Pwd=Password12!;";

@@ -18,7 +18,7 @@ namespace Dommel
 
             var sql = $"insert into {tableName} ({string.Join(", ", columnNames)}) values ({string.Join(", ", paramNames)}) ";
 
-            var keyColumns = Resolvers.KeyProperties(type).Where(p => p.IsGenerated).Select(p => Resolvers.Column(p.Property, this));
+            var keyColumns = Resolvers.KeyProperties(type).Where(p => p.IsGenerated).Select(p => Resolvers.Column(p.Property, this, false));
             if (keyColumns.Any())
             {
                 sql += $"returning ({string.Join(", ", keyColumns)})";

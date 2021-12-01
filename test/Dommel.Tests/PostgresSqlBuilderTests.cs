@@ -13,14 +13,14 @@ namespace Dommel.Tests
         public void BuildInsert()
         {
             var sql = _builder.BuildInsert(typeof(Product), "Foos", new[] { "Name", "Bar" }, new[] { "@Name", "@Bar" });
-            Assert.Equal("insert into Foos (Name, Bar) values (@Name, @Bar) returning (\"Products\".\"Id\")", sql);
+            Assert.Equal("insert into Foos (Name, Bar) values (@Name, @Bar) returning (\"Id\")", sql);
         }
 
         [Fact]
         public void BuildInsert_Returning2()
         {
             var sql = _builder.BuildInsert(typeof(Foo), "Foos", new[] { "Name", "Bar" }, new[] { "@Name", "@Bar" });
-            Assert.Equal("insert into Foos (Name, Bar) values (@Name, @Bar) returning (\"Foos\".\"Id1\", \"Foos\".\"Id2\")", sql);
+            Assert.Equal("insert into Foos (Name, Bar) values (@Name, @Bar) returning (\"Id1\", \"Id2\")", sql);
         }
 
         private class Foo

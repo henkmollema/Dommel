@@ -34,21 +34,21 @@ namespace Dommel.Tests
         public void TestInsert()
         {
             var sql = BuildInsertQuery(SqlBuilder, typeof(Foo));
-            Assert.Equal("insert into Foos (Foos.Bar) values (#Bar); select last_insert_rowid() id", sql);
+            Assert.Equal("insert into Foos (Bar) values (#Bar); select last_insert_rowid() id", sql);
         }
 
         [Fact]
         public void TestUpdate()
         {
             var sql = BuildUpdateQuery(SqlBuilder, typeof(Foo));
-            Assert.Equal("update Foos set Foos.Bar = #Bar where Foos.Id = #Id", sql);
+            Assert.Equal("update Foos set Bar = #Bar where Id = #Id", sql);
         }
 
         [Fact]
         public void TestDelete()
         {
             var sql = BuildDeleteQuery(SqlBuilder, typeof(Foo));
-            Assert.Equal("delete from Foos where Foos.Id = #Id", sql);
+            Assert.Equal("delete from Foos where Id = #Id", sql);
         }
 
         public class Foo

@@ -88,7 +88,7 @@ namespace Dommel
                     .Select(x => x.Property)
                     .Except(keyProperties.Where(p => p.IsGenerated).Select(p => p.Property));
 
-                var columnNames = typeProperties.Select(p => Resolvers.Column(p, sqlBuilder)).ToArray();
+                var columnNames = typeProperties.Select(p => Resolvers.Column(p, sqlBuilder, false)).ToArray();
                 var paramNames = typeProperties.Select(p => sqlBuilder.PrefixParameter(p.Name)).ToArray();
 
                 sql = sqlBuilder.BuildInsert(type, tableName, columnNames, paramNames);

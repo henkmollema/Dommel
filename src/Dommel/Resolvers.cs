@@ -140,14 +140,15 @@ namespace Dommel
         /// </summary>
         /// <param name="propertyInfo">The <see cref="PropertyInfo"/> to get the column name for.</param>
         /// <param name="sqlBuilder">The SQL builder instance.</param>
+        /// <param name="includeTableName">Whether to include table name with the column name for unambiguity. E.g. <c>[Products].[Name]</c>.</param>
         /// <returns>The column name in the database for <paramref name="propertyInfo"/>.</returns>
-        public static string Column(PropertyInfo propertyInfo, ISqlBuilder sqlBuilder)
+        public static string Column(PropertyInfo propertyInfo, ISqlBuilder sqlBuilder, bool includeTableName = true)
         {
-            var key = $"{sqlBuilder.GetType()}.{propertyInfo.ReflectedType}.{propertyInfo.Name}";
+            var key = $"{sqlBuilder.GetType()}.{propertyInfo.ReflectedType}.{propertyInfo.Name}.{includeTableName}";
             if (!ColumnNameCache.TryGetValue(key, out var columnName))
             {
                 columnName = sqlBuilder.QuoteIdentifier(DommelMapper.ColumnNameResolver.ResolveColumnName(propertyInfo));
-                if (!propertyInfo.ReflectedType.IsDefined(typeof(CompilerGeneratedAttribute)))
+                if (includeTableName && !propertyInfo.ReflectedType.IsDefined(typeof(CompilerGeneratedAttribute)))
                 {
                     // Include the table name for unambiguity, except for anonymyes types e.g. x => new { x.Id, x.Name }
                     var tableName = Table(propertyInfo.ReflectedType, sqlBuilder);

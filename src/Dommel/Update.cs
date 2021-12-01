@@ -56,8 +56,8 @@ namespace Dommel
                     .Select(x => x.Property)
                     .Except(keyProperties.Where(p => p.IsGenerated).Select(p => p.Property));
 
-                var columnNames = typeProperties.Select(p => $"{Resolvers.Column(p, sqlBuilder)} = {sqlBuilder.PrefixParameter(p.Name)}").ToArray();
-                var whereClauses = keyProperties.Select(p => $"{Resolvers.Column(p.Property, sqlBuilder)} = {sqlBuilder.PrefixParameter(p.Property.Name)}");
+                var columnNames = typeProperties.Select(p => $"{Resolvers.Column(p, sqlBuilder, false)} = {sqlBuilder.PrefixParameter(p.Name)}").ToArray();
+                var whereClauses = keyProperties.Select(p => $"{Resolvers.Column(p.Property, sqlBuilder,  false)} = {sqlBuilder.PrefixParameter(p.Property.Name)}");
                 sql = $"update {tableName} set {string.Join(", ", columnNames)} where {string.Join(" and ", whereClauses)}";
 
                 QueryCache.TryAdd(cacheKey, sql);
