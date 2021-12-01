@@ -25,6 +25,7 @@ namespace Dommel
             var sqlExpression = CreateSqlExpression<TEntity>(GetSqlBuilder(con));
             sqlBuilder(sqlExpression);
             var sql = sqlExpression.ToSql(out var parameters);
+            LogReceived?.Invoke(sql);
             return con.Query<TEntity>(sql, parameters, transaction, buffered);
         }
 
@@ -41,6 +42,7 @@ namespace Dommel
             var sqlExpression = CreateSqlExpression<TEntity>(GetSqlBuilder(con));
             sqlBuilder(sqlExpression);
             var sql = sqlExpression.ToSql(out var parameters);
+            LogReceived?.Invoke(sql);
             return await con.QueryAsync<TEntity>(sql, parameters, transaction);
         }
     }
