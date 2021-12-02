@@ -1,77 +1,76 @@
 ﻿using Xunit;
 
-namespace Dommel.Json.Tests
+namespace Dommel.Json.Tests;
+
+public class JsonSqlExpressionTests
 {
-    public class JsonSqlExpressionTests
+    [Fact]
+    public void GeneratesMySqlJsonValue()
     {
-        [Fact]
-        public void GeneratesMySqlJsonValue()
-        {
-            // Arrange
-            var sql = new JsonSqlExpression<Lead>(new MySqlSqlBuilder(), new DommelJsonOptions());
+        // Arrange
+        var sql = new JsonSqlExpression<Lead>(new MySqlSqlBuilder(), new DommelJsonOptions());
 
-            // Act
-            var str = sql.Where(p => p.Data.LastName == "Foo").ToSql(out var parameters);
+        // Act
+        var str = sql.Where(p => p.Data.LastName == "Foo").ToSql(out var parameters);
 
-            // Assert
-            Assert.Equal(" where (`Leads`.`Data`->'$.LastName' = @p1)", str);
-            Assert.Equal("p1", Assert.Single(parameters.ParameterNames));
-        }
+        // Assert
+        Assert.Equal(" where (`Leads`.`Data`->'$.LastName' = @p1)", str);
+        Assert.Equal("p1", Assert.Single(parameters.ParameterNames));
+    }
 
-        [Fact]
-        public void GeneratesSqlServerJsonValue()
-        {
-            // Arrange
-            var sql = new JsonSqlExpression<Lead>(new SqlServerSqlBuilder(), new DommelJsonOptions());
+    [Fact]
+    public void GeneratesSqlServerJsonValue()
+    {
+        // Arrange
+        var sql = new JsonSqlExpression<Lead>(new SqlServerSqlBuilder(), new DommelJsonOptions());
 
-            // Act
-            var str = sql.Where(p => p.Data.LastName == "Foo").ToSql(out var parameters);
+        // Act
+        var str = sql.Where(p => p.Data.LastName == "Foo").ToSql(out var parameters);
 
-            // Assert
-            Assert.Equal(" where (JSON_VALUE([Leads].[Data], '$.LastName') = @p1)", str);
-            Assert.Equal("p1", Assert.Single(parameters.ParameterNames));
-        }
+        // Assert
+        Assert.Equal(" where (JSON_VALUE([Leads].[Data], '$.LastName') = @p1)", str);
+        Assert.Equal("p1", Assert.Single(parameters.ParameterNames));
+    }
 
-        [Fact]
-        public void GeneratesSqliteJsonValue()
-        {
-            // Arrange
-            var sql = new JsonSqlExpression<Lead>(new SqliteSqlBuilder(), new DommelJsonOptions());
+    [Fact]
+    public void GeneratesSqliteJsonValue()
+    {
+        // Arrange
+        var sql = new JsonSqlExpression<Lead>(new SqliteSqlBuilder(), new DommelJsonOptions());
 
-            // Act
-            var str = sql.Where(p => p.Data.LastName == "Foo").ToSql(out var parameters);
+        // Act
+        var str = sql.Where(p => p.Data.LastName == "Foo").ToSql(out var parameters);
 
-            // Assert
-            Assert.Equal(" where (JSON_EXTRACT(Leads.Data, '$.LastName') = @p1)", str);
-            Assert.Equal("p1", Assert.Single(parameters.ParameterNames));
-        }
+        // Assert
+        Assert.Equal(" where (JSON_EXTRACT(Leads.Data, '$.LastName') = @p1)", str);
+        Assert.Equal("p1", Assert.Single(parameters.ParameterNames));
+    }
 
-        [Fact]
-        public void GeneratesSqlServerCeJsonValue()
-        {
-            // Arrange
-            var sql = new JsonSqlExpression<Lead>(new SqlServerCeSqlBuilder(), new DommelJsonOptions());
+    [Fact]
+    public void GeneratesSqlServerCeJsonValue()
+    {
+        // Arrange
+        var sql = new JsonSqlExpression<Lead>(new SqlServerCeSqlBuilder(), new DommelJsonOptions());
 
-            // Act
-            var str = sql.Where(p => p.Data.LastName == "Foo").ToSql(out var parameters);
+        // Act
+        var str = sql.Where(p => p.Data.LastName == "Foo").ToSql(out var parameters);
 
-            // Assert
-            Assert.Equal(" where (JSON_VALUE([Leads].[Data], '$.LastName') = @p1)", str);
-            Assert.Equal("p1", Assert.Single(parameters.ParameterNames));
-        }
+        // Assert
+        Assert.Equal(" where (JSON_VALUE([Leads].[Data], '$.LastName') = @p1)", str);
+        Assert.Equal("p1", Assert.Single(parameters.ParameterNames));
+    }
 
-        [Fact]
-        public void GeneratesPostgresJsonValue()
-        {
-            // Arrange
-            var sql = new JsonSqlExpression<Lead>(new PostgresSqlBuilder(), new DommelJsonOptions());
+    [Fact]
+    public void GeneratesPostgresJsonValue()
+    {
+        // Arrange
+        var sql = new JsonSqlExpression<Lead>(new PostgresSqlBuilder(), new DommelJsonOptions());
 
-            // Act
-            var str = sql.Where(p => p.Data.LastName == "Foo").ToSql(out var parameters);
+        // Act
+        var str = sql.Where(p => p.Data.LastName == "Foo").ToSql(out var parameters);
 
-            // Assert
-            Assert.Equal(" where (\"Leads\".\"Data\"->>'LastName' = @p1)", str);
-            Assert.Equal("p1", Assert.Single(parameters.ParameterNames));
-        }
+        // Assert
+        Assert.Equal(" where (\"Leads\".\"Data\"->>'LastName' = @p1)", str);
+        Assert.Equal("p1", Assert.Single(parameters.ParameterNames));
     }
 }

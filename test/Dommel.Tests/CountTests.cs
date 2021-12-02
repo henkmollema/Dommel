@@ -1,30 +1,29 @@
 ﻿using Xunit;
 using static Dommel.DommelMapper;
 
-namespace Dommel.Tests
+namespace Dommel.Tests;
+
+public class CountTests
 {
-    public class CountTests
+    private static readonly ISqlBuilder SqlBuilder = new SqlServerSqlBuilder();
+
+    [Fact]
+    public void GeneratesCountAllSql()
     {
-        private static readonly ISqlBuilder SqlBuilder = new SqlServerSqlBuilder();
+        var sql = BuildCountAllSql(SqlBuilder, typeof(Foo));
+        Assert.Equal("select count(*) from [Foos]", sql);
+    }
 
-        [Fact]
-        public void GeneratesCountAllSql()
-        {
-            var sql = BuildCountAllSql(SqlBuilder, typeof(Foo));
-            Assert.Equal("select count(*) from [Foos]", sql);
-        }
+    [Fact]
+    public void GeneratesCountSql()
+    {
+        var sql = BuildCountSql<Foo>(SqlBuilder, x => x.Bar == "Baz", out var parameters);
+        Assert.Equal("select count(*) from [Foos] where ([Foos].[Bar] = @p1)", sql);
+        Assert.Single(parameters.ParameterNames);
+    }
 
-        [Fact]
-        public void GeneratesCountSql()
-        {
-            var sql = BuildCountSql<Foo>(SqlBuilder, x => x.Bar == "Baz", out var parameters);
-            Assert.Equal("select count(*) from [Foos] where ([Foos].[Bar] = @p1)", sql);
-            Assert.Single(parameters.ParameterNames);
-        }
-
-        private class Foo
-        {
-            public string? Bar { get; set; }
-        }
+    private class Foo
+    {
+        public string? Bar { get; set; }
     }
 }

@@ -1,21 +1,20 @@
 ﻿using Xunit;
 
-namespace Dommel.Json.Tests
+namespace Dommel.Json.Tests;
+
+public class DommelJsonOptionsTests
 {
-    public class DommelJsonOptionsTests
+    [Fact]
+    public void SetsEntityAssemblies()
     {
-        [Fact]
-        public void SetsEntityAssemblies()
-        {
-            // Arrange
-            var assemblies = new[] { typeof(DommelJsonOptions).Assembly };
+        // Arrange
+        var assemblies = new[] { typeof(DommelJsonOptions).Assembly };
 
-            // Act
-            var options = new DommelJsonOptions { EntityAssemblies = assemblies };
+        // Act
+        var options = new DommelJsonOptions { EntityAssemblies = assemblies };
 
-            // Assert
-            Assert.Equal(assemblies, options.EntityAssemblies);
-            Assert.Null(options.JsonTypeHandler);
-        }
+        // Assert
+        Assert.Equal(assemblies, options.EntityAssemblies);
+        Assert.Null(options.JsonTypeHandler);
     }
 }

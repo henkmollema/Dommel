@@ -2,17 +2,17 @@
 using Dapper;
 using Dommel.IntegrationTests;
 
-namespace Dommel.Json.IntegrationTests
-{
-    public class JsonPostgresDatabaseDriver : PostgresDatabaseDriver
-    {
-        public override string DefaultDatabaseName => "dommeljsontests";
+namespace Dommel.Json.IntegrationTests;
 
-        protected override async Task<bool> CreateTables()
+public class JsonPostgresDatabaseDriver : PostgresDatabaseDriver
+{
+    public override string DefaultDatabaseName => "dommeljsontests";
+
+    protected override async Task<bool> CreateTables()
+    {
+        using (var con = GetConnection(DefaultDatabaseName))
         {
-            using (var con = GetConnection(DefaultDatabaseName))
-            {
-                var sql = @"
+            var sql = @"
 create table if not exists ""Leads"" (
     ""Id"" serial primary key,
     ""DateCreated"" timestamp,
@@ -20,19 +20,18 @@ create table if not exists ""Leads"" (
     ""Data"" json,
     ""Metadata"" json
 );";
-                await con.ExecuteScalarAsync(sql);
-            }
-
-            return await base.CreateTables();
+            await con.ExecuteScalarAsync(sql);
         }
 
-        protected override async Task DropTables()
+        return await base.CreateTables();
+    }
+
+    protected override async Task DropTables()
+    {
+        using (var con = GetConnection(DefaultDatabaseName))
         {
-            using (var con = GetConnection(DefaultDatabaseName))
-            {
-                await con.ExecuteScalarAsync(@"drop table ""Leads""");
-            }
-            await base.DropTables();
+            await con.ExecuteScalarAsync(@"drop table ""Leads""");
         }
+        await base.DropTables();
     }
 }

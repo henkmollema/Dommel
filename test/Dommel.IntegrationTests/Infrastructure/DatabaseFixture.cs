@@ -3,47 +3,46 @@ using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
 
-namespace Dommel.IntegrationTests
+namespace Dommel.IntegrationTests;
+
+public class DatabaseFixture : DatabaseFixtureBase
 {
-    public class DatabaseFixture : DatabaseFixtureBase
+    protected override TheoryData<DatabaseDriver> Drivers => new DatabaseTestData();
+}
+
+public abstract class DatabaseFixtureBase : IAsyncLifetime
+{
+    private readonly DatabaseDriver[] _databases;
+
+    public DatabaseFixtureBase()
     {
-        protected override TheoryData<DatabaseDriver> Drivers => new DatabaseTestData();
+        // Extract the database drivers from the test data
+        _databases = Drivers
+            .Select(x => x[0])
+            .OfType<DatabaseDriver>()
+            .ToArray();
+
+        if (_databases.Length == 0)
+        {
+            throw new InvalidOperationException($"No databases defined in {nameof(DatabaseTestData)} theory data.");
+        }
     }
 
-    public abstract class DatabaseFixtureBase : IAsyncLifetime
+    protected abstract TheoryData<DatabaseDriver> Drivers { get; }
+
+    public async Task InitializeAsync()
     {
-        private readonly DatabaseDriver[] _databases;
-
-        public DatabaseFixtureBase()
+        foreach (var database in _databases)
         {
-            // Extract the database drivers from the test data
-            _databases = Drivers
-                .Select(x => x[0])
-                .OfType<DatabaseDriver>()
-                .ToArray();
-
-            if (_databases.Length == 0)
-            {
-                throw new InvalidOperationException($"No databases defined in {nameof(DatabaseTestData)} theory data.");
-            }
+            await database.InitializeAsync();
         }
+    }
 
-        protected abstract TheoryData<DatabaseDriver> Drivers { get; }
-
-        public async Task InitializeAsync()
+    public async Task DisposeAsync()
+    {
+        foreach (var database in _databases)
         {
-            foreach (var database in _databases)
-            {
-                await database.InitializeAsync();
-            }
-        }
-
-        public async Task DisposeAsync()
-        {
-            foreach (var database in _databases)
-            {
-                await database.DisposeAsync();
-            }
+            await database.DisposeAsync();
         }
     }
 }

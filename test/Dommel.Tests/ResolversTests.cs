@@ -1,92 +1,91 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using Xunit;
 
-namespace Dommel.Tests
+namespace Dommel.Tests;
+
+public class ResolversTests
 {
-    public class ResolversTests
+    private readonly ISqlBuilder _sqlBuilder = new SqlServerSqlBuilder();
+
+    [Fact]
+    public void Table_WithSchema()
     {
-        private readonly ISqlBuilder _sqlBuilder = new SqlServerSqlBuilder();
+        Assert.Equal("[dbo].[Qux]", Resolvers.Table(typeof(FooQux), _sqlBuilder));
+        Assert.Equal("[foo].[dbo].[Qux]", Resolvers.Table(typeof(FooDboQux), _sqlBuilder));
+    }
 
-        [Fact]
-        public void Table_WithSchema()
+    [Fact]
+    public void Table_NoCacheConflictNestedClass()
+    {
+        Assert.Equal("[BarA]", Resolvers.Table(typeof(Foo.Bar), _sqlBuilder));
+        Assert.Equal("[BarB]", Resolvers.Table(typeof(Baz.Bar), _sqlBuilder));
+    }
+
+    [Fact]
+    public void Column_NoCacheConflictNestedClass()
+    {
+        Assert.Equal("[BarA].[BazA]", Resolvers.Column(typeof(Foo.Bar).GetProperty("Baz")!, _sqlBuilder));
+        Assert.Equal("[BarB].[BazB]", Resolvers.Column(typeof(Baz.Bar).GetProperty("Baz")!, _sqlBuilder));
+    }
+
+    [Fact]
+    public void ForeignKey_NoCacheConflictNestedClass()
+    {
+        var foreignKeyA = Resolvers.ForeignKeyProperty(typeof(Foo.BarChild), typeof(Foo.Bar), out _);
+        var foreignKeyB = Resolvers.ForeignKeyProperty(typeof(Baz.BarChild), typeof(Baz.Bar), out _);
+
+        Assert.Equal(typeof(Foo.BarChild).GetProperty("BarId"), foreignKeyA);
+        Assert.Equal(typeof(Baz.BarChild).GetProperty("BarId"), foreignKeyB);
+    }
+
+    [Fact]
+    public void KeyProperty()
+    {
+        var key = Assert.Single(Resolvers.KeyProperties(typeof(Product)));
+        Assert.Equal(typeof(Product).GetProperty("Id"), key.Property);
+    }
+
+    public class Foo
+    {
+        [Table("BarA")]
+        public class Bar
         {
-            Assert.Equal("[dbo].[Qux]", Resolvers.Table(typeof(FooQux), _sqlBuilder));
-            Assert.Equal("[foo].[dbo].[Qux]", Resolvers.Table(typeof(FooDboQux), _sqlBuilder));
+            [Column("BazA")]
+            public string? Baz { get; set; }
         }
 
-        [Fact]
-        public void Table_NoCacheConflictNestedClass()
+        [Table("BarA")]
+        public class BarChild
         {
-            Assert.Equal("[BarA]", Resolvers.Table(typeof(Foo.Bar), _sqlBuilder));
-            Assert.Equal("[BarB]", Resolvers.Table(typeof(Baz.Bar), _sqlBuilder));
+            public int BarId { get; set; }
+        }
+    }
+
+    public class Baz
+    {
+        [Table("BarB")]
+        public class Bar
+        {
+            [Column("BazB")]
+            public string? Baz { get; set; }
         }
 
-        [Fact]
-        public void Column_NoCacheConflictNestedClass()
+        [Table("BarA")]
+        public class BarChild
         {
-            Assert.Equal("[BarA].[BazA]", Resolvers.Column(typeof(Foo.Bar).GetProperty("Baz")!, _sqlBuilder));
-            Assert.Equal("[BarB].[BazB]", Resolvers.Column(typeof(Baz.Bar).GetProperty("Baz")!, _sqlBuilder));
+            public int BarId { get; set; }
         }
+    }
 
-        [Fact]
-        public void ForeignKey_NoCacheConflictNestedClass()
-        {
-            var foreignKeyA = Resolvers.ForeignKeyProperty(typeof(Foo.BarChild), typeof(Foo.Bar), out _);
-            var foreignKeyB = Resolvers.ForeignKeyProperty(typeof(Baz.BarChild), typeof(Baz.Bar), out _);
+    [Table("Qux", Schema = "foo.dbo")]
+    public class FooDboQux
+    {
+        public int Id { get; set; }
+    }
 
-            Assert.Equal(typeof(Foo.BarChild).GetProperty("BarId"), foreignKeyA);
-            Assert.Equal(typeof(Baz.BarChild).GetProperty("BarId"), foreignKeyB);
-        }
-
-        [Fact]
-        public void KeyProperty()
-        {
-            var key = Assert.Single(Resolvers.KeyProperties(typeof(Product)));
-            Assert.Equal(typeof(Product).GetProperty("Id"), key.Property);
-        }
-
-        public class Foo
-        {
-            [Table("BarA")]
-            public class Bar
-            {
-                [Column("BazA")]
-                public string? Baz { get; set; }
-            }
-
-            [Table("BarA")]
-            public class BarChild
-            {
-                public int BarId { get; set; }
-            }
-        }
-
-        public class Baz
-        {
-            [Table("BarB")]
-            public class Bar
-            {
-                [Column("BazB")]
-                public string? Baz { get; set; }
-            }
-
-            [Table("BarA")]
-            public class BarChild
-            {
-                public int BarId { get; set; }
-            }
-        }
-
-        [Table("Qux", Schema = "foo.dbo")]
-        public class FooDboQux
-        {
-            public int Id { get; set; }
-        }
-
-        [Table("Qux", Schema = "dbo")]
-        public class FooQux
-        {
-            public int Id { get; set; }
-        }
+    [Table("Qux", Schema = "dbo")]
+    public class FooQux
+    {
+        public int Id { get; set; }
     }
 }
