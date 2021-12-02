@@ -31,21 +31,22 @@ namespace Dommel.IntegrationTests
                 using var connection = GetConnection();
                 await connection.OpenAsync();
 
-                var categoryId = Convert.ToInt32(await connection.InsertAsync(new Category { Name = "Food" }));
+                var categoryId1 = Convert.ToInt32(await connection.InsertAsync(new Category { Name = "Food" }));
+                var categoryId2 = Convert.ToInt32(await connection.InsertAsync(new Category { Name = "Food 2" }));
 
                 var products = new List<Product>
                 {
-                    new Product { CategoryId = categoryId, Name = "Chai" },
-                    new Product { CategoryId = categoryId, Name = "Chang" },
-                    new Product { CategoryId = categoryId, Name = "Aniseed Syrup" },
-                    new Product { CategoryId = categoryId, Name = "Chef Anton's Cajun Seasoning" },
-                    new Product { CategoryId = categoryId, Name = "Chef Anton's Gumbo Mix" },
+                    new Product { CategoryId = categoryId1, Name = "Chai" },
+                    new Product { CategoryId = categoryId1, Name = "Chang" },
+                    new Product { CategoryId = categoryId1, Name = "Aniseed Syrup" },
+                    new Product { CategoryId = categoryId1, Name = "Chef Anton's Cajun Seasoning" },
+                    new Product { CategoryId = categoryId1, Name = "Chef Anton's Gumbo Mix" },
 
-                    new Product { CategoryId = categoryId, Name = "Chai 2" },
-                    new Product { CategoryId = categoryId, Name = "Chang 2" },
-                    new Product { CategoryId = categoryId, Name = "Aniseed Syrup 2" },
-                    new Product { CategoryId = categoryId, Name = "Chef Anton's Cajun Seasoning 2" },
-                    new Product { CategoryId = categoryId, Name = "Chef Anton's Gumbo Mix 2" },
+                    new Product { CategoryId = categoryId2, Name = "Chai 2" },
+                    new Product { CategoryId = categoryId2, Name = "Chang 2" },
+                    new Product { CategoryId = categoryId2, Name = "Aniseed Syrup 2" },
+                    new Product { CategoryId = categoryId2, Name = "Chef Anton's Cajun Seasoning 2" },
+                    new Product { CategoryId = categoryId2, Name = "Chef Anton's Gumbo Mix 2" },
 
                     new Product { Name = "Foo" }, // 11
                     new Product { Name = "Bar" }, // 12

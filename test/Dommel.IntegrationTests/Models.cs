@@ -24,24 +24,28 @@ namespace Dommel.IntegrationTests
         public Category? Category { get; set; }
 
         // One Product has many Options
-        public List<ProductOption>? Options { get; set; }
+        public ICollection<ProductOption> Options { get; set; } = new List<ProductOption>();
     }
 
-    public class Category
+    public class Category : IEquatable<Category>
     {
         [Key]
         public int CategoryId { get; set; }
 
         public string? Name { get; set; }
+
+        public bool Equals(Category? other) => CategoryId == other?.CategoryId;
     }
 
-    public class ProductOption
+    public class ProductOption : IEquatable<ProductOption>
     {
         public int Id { get; set; }
 
         // One ProductOption has one Product (no navigation)
         // Represents the foreign key to the product table
         public int ProductId { get; set; }
+
+        public bool Equals(ProductOption? other) => Id == other?.Id;
     }
 
     public class Order

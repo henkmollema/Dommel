@@ -13,7 +13,7 @@ namespace Dommel.IntegrationTests
         {
             using var con = database.GetConnection();
             var products = con.Select<Product>(p => p.CategoryId == 1);
-            Assert.Equal(10, products.Count());
+            Assert.Equal(5, products.Count());
         }
 
         [Theory]
@@ -22,7 +22,7 @@ namespace Dommel.IntegrationTests
         {
             using var con = database.GetConnection();
             var products = await con.SelectAsync<Product>(p => p.CategoryId == 1);
-            Assert.Equal(10, products.Count());
+            Assert.Equal(5, products.Count());
         }
 
         [Theory]
