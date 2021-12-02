@@ -11,88 +11,71 @@ Dommel provides a convenient API for CRUD operations using extension methods on 
 
 There are several extensibility points available to change the behavior of resolving table names, column names, the key property and POCO properties. See [Extensibility](https://github.com/henkmollema/Dommel#extensibility) for more details.
 
-## Download
+## Installing Dommel
 
-Dommel is available on [NuGet](https://www.nuget.org/packages/Dommel):
+Dommel is available on [NuGet](https://www.nuget.org/packages/Dommel).
 
-Using the .NET Core CLI:
-#### `dotnet add package Dommel`
+### Install using the .NET CLI:
+```
+dotnet add package Dommel
+```
 
-Using the NuGet Package Manager:
-#### `PM> Install-Package Dommel`
+### Install using the NuGet Package Manager:
+```
+Install-Package Dommel
+```
 
-## API
+## Using Dommel
 
 ### Retrieving entities by ID
-```csharp
-using (var con = new SqlConnection())
-{
-   var product = con.Get<Product>(1);
-}
+```cs
+var product = await connection.GetAsync<Product>(1);
 ```
 
 ### Retrieving all entities in a table
-```csharp
-using (var con = new SqlConnection())
-{
-   var products = con.GetAll<Product>().ToList();
-}
+```cs
+var products = await connection.GetAllAsync<Product>();
 ```
 
 ### Selecting entities using a predicate
 Dommel allows you to specify a predicate which is being translated into a SQL expression. The arguments in the lambda expression are added as parameters to the command.
-```csharp
-using (var con = new SqlConnection())
-{
-   var products = con.Select<Product>(p => p.Name == "Awesome bike");
-
-   var products = con.Select<Product>(p => p.Created < new DateTime(2014, 12, 31) && p.InStock > 5);
-}
+```cs
+var products = await connection.SelectAsync<Product>(p => p.Name == "Awesome bike" && p.Created < new DateTime(2014, 12, 31) && p.InStock > 5);
 ```
+
+There is also a `FirstOrDefaultAsync<T>(...)` method available to select the entity matching the predicate.
 
 #### Like-queries
 It is possible to generate `LIKE`-queries using `Contains()`, `StartsWith()` or `EndsWith()` on string properties:
 
 ```cs
-using (var con = new SqlConnection())
-{
-   var products = con.Select<Product>(p => p.Name.Contains("bike"));
-   var products = con.Select<Product>(p => p.Name.StartsWith("bike"));
-   var products = con.Select<Product>(p => p.Name.EndsWith("bike"));
-}
+var products = await connection.SelectAsync<Product>(p => p.Name.Contains("bike"));
+var products = await connection.SelectAsync<Product>(p => p.Name.StartsWith("bike"));
+var products = await connection.SelectAsync<Product>(p => p.Name.EndsWith("bike"));
 ```
 
 ### Inserting entities
-```csharp
-using (var con = new SqlConnection())
-{
-   var product = new Product { Name = "Awesome bike", InStock = 4 };
-   int id = con.Insert(product);
-}
+```cs
+var product = new Product { Name = "Awesome bike", InStock = 4 };
+var id = await connection.InsertAsync(product);
 ```
 
 ### Updating entities
-```csharp
-using (var con = new SqlConnection())
-{
-   var product = con.Get<Product>(1);
-   product.LastUpdate = DateTime.UtcNow;
-   con.Update(product);
-}
+```cs
+var product = await connection.GetAsync<Product>(1);
+product.Name = "New name";
+await connection.UpdateAsync(product);
 ```
 
 ### Removing entities
-```csharp
-using (var con = new SqlConnection())
-{
-   var product = con.Get<Product>(1);
-   con.Delete(product);
-}
+```cs
+var product = await connection.GetAsync<Product>(1);
+await connection.DeleteAsync(product);
 ```
 
 ### Multi mapping
 
-### One-to-one relations
+#### One-to-one relations
 
 Dommel is able to generate join-queries based on the specified multi mapping function. Consider the following POCO's:
 
@@ -122,18 +105,18 @@ public class Category
 The `Product` with its associated `Category` can be queried toegether using the `Get<T1, T2, ..., TResult>()` method:
 
 ```cs
-var product = product.Get<Product, Category, Product>(1, (product, category) =>
+var product = await product.GetAsync<Product, Category, Product>(1, (product, category) =>
 {
     product.Category = category;
     return product;
 });
 ```
 
-#### Foreign key columns
+##### Foreign key columns
 
 `CategoryId` is automatically used as foreign key between `Product` and `Category`. This follows a simple convention: joining table name + `Id` (`Category` + `Id`). You can override this behavior by using the `[ForeignKey("ForeignKeyColumnName")]` attribute or by implementing your own `IForeignKeyPropertyResolver`.
 
-### One-to-many relations
+#### One-to-many relations
 
 One-to-many relationships work in a similar way, expect that the foreign key is defined on the _joined_ type rather than the _source_ type. For example:
 
@@ -160,7 +143,7 @@ public class OrderLine
 The `Order` with its child `OrderLine`'s can be queried toegether using the `Get<T1, T2, ..., TResult>()` method:
 
 ```cs
-var product = product.Get<Order, OrderLine, Order>(1, (order, line) =>
+var product = await product.GetAsync<Order, OrderLine, Order>(1, (order, line) =>
 {
     // Naive mapping example, in reality it requires more gymnastics
     order.OrderLines.Add(line);
@@ -202,14 +185,32 @@ public class OrderLine : IEquatable<OrderLine>
 }
 ```
 
-## Async
-All Dommel methods have an async counterparts, such as as `GetAsync`, `GetAllAsync`, `SelectAsync`, `InsertAsync`, `UpdateAsync`, `DeleteAsync`, etc.
+### Combining `Select` and multi-mapping
+It's possible to combine `Select` queries and multi-mapping. For example:
+```cs
+var products = await connection.SelectAsync<Product, Category, Product>(x => x.Name.StartsWith("bike"));
+```
+This is applicable for `Select`, `SelectAsync`, `FirstOrDefault` and `FirstOrDefaultAsync`. Both with manual and automatic multi-mapping.
+
+### From-queries
+With `From`-queries you can create more complex queries on a certain table by providing access to the `SqlExpression<T>`. For example:
+```cs
+var products = await connection.FromAsync<Product>(sql => sql
+    .Where(x => x.Name.StartsWith("bike") && x.DeletedOn == null)
+    .OrWhere(x => x.InStock > 5)
+    .OrderBy(x => x.DateCreated)
+    .Page(1, 25)
+    .Select()));
+```
+
+## Async and non-async
+All Dommel methods have async and non-async variants, such as as `Get` & `GetAsync`, `GetAll` & `GetAllAsync`, `Select` & `SelectAsync`, `Insert` & `InsertAsync`, `Update` & `UpdateAsync`, `Delete` & `DeleteAsync`, etc.
 
 ## Query builders
 
 Dommel supports building specialized queries for a certain RDBMS. By default, query builders for the following RDMBS are included: SQL Server, SQL Server CE, SQLite, MySQL and Postgres. The query builder to be used is determined by the connection type. To add or overwrite an existing query builder, use the `AddSqlBuilder()`  method:
 
-```csharp
+```cs
 DommelMapper.AddSqlBuilder(typeof(SqlConnection), new CustomSqlBuilder());
 ```
 
@@ -219,8 +220,8 @@ DommelMapper.AddSqlBuilder(typeof(SqlConnection), new CustomSqlBuilder());
 #### `ITableNameResolver`
 Implement this interface if you want to customize the resolving of table names when building SQL queries.
 
-```csharp
-public class CustomTableNameResolver : DommelMapper.ITableNameResolver
+```cs
+public class CustomTableNameResolver : ITableNameResolver
 {
     public string ResolveTableName(Type type)
     {
@@ -231,8 +232,8 @@ public class CustomTableNameResolver : DommelMapper.ITableNameResolver
 ```
 
 Use the `SetTableNameResolver()` method to register the custom implementation:
-```csharp
-DommelMapper.SetTableNameResolver(new CustomTableNameResolver());
+```cs
+SetTableNameResolver(new CustomTableNameResolver());
 ```
 
 #### `IKeyPropertyResolver`
@@ -240,19 +241,19 @@ Implement this interface if you want to customize the resolving of the key prope
 
 If you, for example, have the naming convention of `{TypeName}Id` for key properties, you would implement the `IKeyPropertyResolver` like this:
 
-```csharp
-public class CustomKeyPropertyResolver : DommelMapper.IKeyPropertyResolver
+```cs
+public class CustomKeyPropertyResolver : IKeyPropertyResolver
 {
-    public PropertyInfo ResolveKeyProperty(Type type)
+    public ColumnPropertyInfo[] ResolveKeyProperties(Type type)
     {
-        return type.GetProperties().Single(p => p.Name == $"{type.Name}Id");
+        return new [] { new ColumnPropertyInfo(type.GetProperties().Single(p => p.Name == $"{type.Name}Id"), isKey: true) };
     }
 }
 ```
 
 Use the `SetKeyPropertyResolver()` method to register the custom implementation:
 
-```csharp
+```cs
 DommelMapper.SetKeyPropertyResolver(new CustomKeyPropertyResolver());
 ```
 
@@ -263,15 +264,15 @@ Implement this interface if you want to customize the resolving of the foreign k
 
 Use the `SetForeignKeyPropertyResolver()` method to register the custom implementation:
 
-```csharp
+```cs
 DommelMapper.SetForeignKeyPropertyResolver(new CustomForeignKeyPropertyResolver());
 ```
 
 #### `IColumnNameResolver`
 Implement this interface if you want to customize the resolving of column names for when building SQL queries. This is useful when your naming conventions for database columns are different than your POCO properties.
 
-```csharp
-public class CustomColumnNameResolver : DommelMapper.IColumnNameResolver
+```cs
+public class CustomColumnNameResolver : IColumnNameResolver
 {
     public string ResolveColumnName(PropertyInfo propertyInfo)
     {
@@ -283,7 +284,7 @@ public class CustomColumnNameResolver : DommelMapper.IColumnNameResolver
 
 Use the `SetColumnNameResolver()` method to register the custom implementation:
 
-```csharp
+```cs
 DommelMapper.SetColumnNameResolver(new CustomColumnNameResolver());
 ```
 
