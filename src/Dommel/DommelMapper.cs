@@ -23,7 +23,7 @@ namespace Dommel
         internal static ITableNameResolver TableNameResolver = new DefaultTableNameResolver();
         internal static IColumnNameResolver ColumnNameResolver = new DefaultColumnNameResolver();
 
-        internal static readonly Dictionary<string, ISqlBuilder> SqlBuilders = new Dictionary<string, ISqlBuilder>
+        internal static readonly Dictionary<string, ISqlBuilder> SqlBuilders = new()
         {
             ["sqlconnection"] = new SqlServerSqlBuilder(),
             ["sqlceconnection"] = new SqlServerCeSqlBuilder(),
@@ -134,7 +134,7 @@ namespace Dommel
         public static Func<Type, ISqlBuilder, object> SqlExpressionFactory = (type, sqlBuilder) =>
         {
             var expr = typeof(SqlExpression<>).MakeGenericType(type);
-            return Activator.CreateInstance(expr, sqlBuilder);
+            return Activator.CreateInstance(expr, sqlBuilder)!;
         };
 
         internal static SqlExpression<TEntity> CreateSqlExpression<TEntity>(ISqlBuilder sqlBuilder)

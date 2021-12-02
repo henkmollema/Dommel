@@ -16,9 +16,9 @@ namespace Dommel
         private static readonly Type EntityType = typeof(TEntity);
         private static readonly Func<TEntity> NewEntityFunc = Expression.Lambda<Func<TEntity>>(
             Expression.New(typeof(TEntity).GetConstructors()[0])).Compile();
-        private readonly StringBuilder _whereBuilder = new StringBuilder();
-        private readonly StringBuilder _orderByBuilder = new StringBuilder();
-        private readonly DynamicParameters _parameters = new DynamicParameters();
+        private readonly StringBuilder _whereBuilder = new();
+        private readonly StringBuilder _orderByBuilder = new();
+        private readonly DynamicParameters _parameters = new();
         private string? _selectQuery;
         private string? _pagingQuery;
         private int _parameterIndex;
@@ -167,7 +167,7 @@ namespace Dommel
         /// <returns>The current <see cref="SqlExpression{TEntity}"/> instance.</returns>
         public virtual SqlExpression<TEntity> Page(int pageNumber, int pageSize)
         {
-            _pagingQuery = SqlBuilder.BuildPaging(null, pageNumber, pageSize).Substring(1);
+            _pagingQuery = SqlBuilder.BuildPaging(null, pageNumber, pageSize)[1..];
             return this;
         }
 
@@ -256,45 +256,21 @@ namespace Dommel
         /// </summary>
         /// <param name="expression">The expression to visit.</param>
         /// <returns>The result of the visit.</returns>
-        protected virtual object VisitExpression(Expression expression)
+        protected virtual object VisitExpression(Expression expression) => expression.NodeType switch
         {
-            switch (expression.NodeType)
-            {
-                case ExpressionType.Lambda:
-                    return VisitLambda((LambdaExpression)expression);
-
-                case ExpressionType.LessThan:
-                case ExpressionType.LessThanOrEqual:
-                case ExpressionType.GreaterThan:
-                case ExpressionType.GreaterThanOrEqual:
-                case ExpressionType.Equal:
-                case ExpressionType.NotEqual:
-                case ExpressionType.And:
-                case ExpressionType.AndAlso:
-                case ExpressionType.Or:
-                case ExpressionType.OrElse:
-                    return VisitBinary((BinaryExpression)expression);
-
-                case ExpressionType.Convert:
-                case ExpressionType.Not:
-                    return VisitUnary((UnaryExpression)expression);
-
-                case ExpressionType.New:
-                    return VisitNew((NewExpression)expression);
-
-                case ExpressionType.MemberAccess:
-                    return VisitMemberAccess((MemberExpression)expression);
-
-                case ExpressionType.Constant:
-                    return VisitConstantExpression((ConstantExpression)expression);
-                case ExpressionType.Call:
-                    return VisitCallExpression((MethodCallExpression)expression);
-                case ExpressionType.Invoke:
-                    return VisitExpression(((InvocationExpression)expression).Expression);
-            }
-
-            return expression;
-        }
+            ExpressionType.Lambda => VisitLambda((LambdaExpression)expression),
+            ExpressionType.LessThan or ExpressionType.LessThanOrEqual or ExpressionType.GreaterThan or 
+            ExpressionType.GreaterThanOrEqual or ExpressionType.Equal or ExpressionType.NotEqual or
+            ExpressionType.And or ExpressionType.AndAlso or ExpressionType.Or or ExpressionType.OrElse 
+                => VisitBinary((BinaryExpression)expression),
+            ExpressionType.Convert or ExpressionType.Not => VisitUnary((UnaryExpression)expression),
+            ExpressionType.New => VisitNew((NewExpression)expression),
+            ExpressionType.MemberAccess => VisitMemberAccess((MemberExpression)expression),
+            ExpressionType.Constant => VisitConstantExpression((ConstantExpression)expression),
+            ExpressionType.Call => VisitCallExpression((MethodCallExpression)expression),
+            ExpressionType.Invoke => VisitExpression(((InvocationExpression)expression).Expression),
+            _ => expression,
+        };
 
         /// <summary>
         /// Specifies the type of text search to use.
@@ -388,7 +364,7 @@ namespace Dommel
             {
                 inClause.Append("null,");
             }
-            inClause[inClause.Length - 1] = ')';
+            inClause[^1] = ')';
 
             return $"{VisitExpression(property)} in {inClause}";
         }
@@ -401,7 +377,7 @@ namespace Dommel
         /// <returns>The result of the processing.</returns>
         protected virtual object VisitContainsExpression(MethodCallExpression expression, TextSearch textSearch)
         {
-            var column = VisitExpression(expression.Object);
+            var column = VisitExpression(expression.Object!);
             if (expression.Arguments.Count == 0 || expression.Arguments.Count > 1)
             {
                 throw new ArgumentException("Contains-expression should contain exactly one argument.", nameof(expression));
@@ -413,7 +389,7 @@ namespace Dommel
                 TextSearch.Contains => $"%{value}%",
                 TextSearch.StartsWith => $"{value}%",
                 TextSearch.EndsWith => $"%{value}",
-                _ => throw new ArgumentOutOfRangeException($"Invalid TextSearch value '{textSearch}'.", nameof(textSearch)),
+                _ => throw new ArgumentOutOfRangeException(nameof(textSearch), $"Invalid TextSearch value '{textSearch}'."),
             };
             AddParameter(textLike, out var paramName);
 
@@ -427,7 +403,7 @@ namespace Dommel
         /// <returns></returns>
         protected virtual object VisitToStringExpression(MethodCallExpression expression)
         {
-            var column = VisitExpression(expression.Object);
+            var column = VisitExpression(expression.Object!);
             if (expression.Arguments.Count >= 1)
             {
                 throw new ArgumentException("ToString-expression should not contain any argument.", nameof(expression));
@@ -525,7 +501,7 @@ namespace Dommel
             {
                 case ExpressionType.Not:
                     var o = VisitExpression(expression.Operand);
-                    if (!(o is string))
+                    if (o is not string)
                     {
                         return !(bool)o;
                     }
@@ -539,7 +515,7 @@ namespace Dommel
                 case ExpressionType.Convert:
                     if (expression.Method != null)
                     {
-                        return Expression.Lambda(expression).Compile().DynamicInvoke();
+                        return Expression.Lambda(expression).Compile()!.DynamicInvoke()!;
                     }
                     break;
             }
@@ -583,7 +559,7 @@ namespace Dommel
         /// </summary>
         /// <param name="expression">The constant expression.</param>
         /// <returns>The result of the processing.</returns>
-        protected virtual object VisitConstantExpression(ConstantExpression expression) => expression.Value;
+        protected virtual object VisitConstantExpression(ConstantExpression expression) => expression.Value!;
 
         /// <summary>
         /// Proccesses a member expression.

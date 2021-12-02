@@ -15,12 +15,7 @@ namespace Dommel
         public virtual string ResolveColumnName(PropertyInfo propertyInfo)
         {
             var columnAttr = propertyInfo.GetCustomAttribute<ColumnAttribute>();
-            if (columnAttr != null)
-            {
-                return columnAttr.Name;
-            }
-
-            return propertyInfo.Name;
+            return columnAttr?.Name ?? propertyInfo.Name;
         }
     }
 }

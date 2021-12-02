@@ -13,11 +13,11 @@ namespace Dommel
     /// </summary>
     public static class Resolvers
     {
-        private static readonly ConcurrentDictionary<string, string> TypeTableNameCache = new ConcurrentDictionary<string, string>();
-        private static readonly ConcurrentDictionary<string, string> ColumnNameCache = new ConcurrentDictionary<string, string>();
-        private static readonly ConcurrentDictionary<Type, ColumnPropertyInfo[]> TypeKeyPropertiesCache = new ConcurrentDictionary<Type, ColumnPropertyInfo[]>();
-        private static readonly ConcurrentDictionary<Type, ColumnPropertyInfo[]> TypePropertiesCache = new ConcurrentDictionary<Type, ColumnPropertyInfo[]>();
-        private static readonly ConcurrentDictionary<string, ForeignKeyInfo> TypeForeignKeyPropertyCache = new ConcurrentDictionary<string, ForeignKeyInfo>();
+        private static readonly ConcurrentDictionary<string, string> TypeTableNameCache = new();
+        private static readonly ConcurrentDictionary<string, string> ColumnNameCache = new();
+        private static readonly ConcurrentDictionary<Type, ColumnPropertyInfo[]> TypeKeyPropertiesCache = new();
+        private static readonly ConcurrentDictionary<Type, ColumnPropertyInfo[]> TypePropertiesCache = new();
+        private static readonly ConcurrentDictionary<string, ForeignKeyInfo> TypeForeignKeyPropertyCache = new();
 
         /// <summary>
         /// Gets the key properties for the specified type, using the configured <see cref="IKeyPropertyResolver"/>.
@@ -148,7 +148,7 @@ namespace Dommel
             if (!ColumnNameCache.TryGetValue(key, out var columnName))
             {
                 columnName = sqlBuilder.QuoteIdentifier(DommelMapper.ColumnNameResolver.ResolveColumnName(propertyInfo));
-                if (includeTableName && !propertyInfo.ReflectedType.IsDefined(typeof(CompilerGeneratedAttribute)))
+                if (includeTableName && propertyInfo.ReflectedType?.IsDefined(typeof(CompilerGeneratedAttribute)) == false)
                 {
                     // Include the table name for unambiguity, except for anonymyes types e.g. x => new { x.Id, x.Name }
                     var tableName = Table(propertyInfo.ReflectedType, sqlBuilder);

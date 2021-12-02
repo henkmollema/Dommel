@@ -10,7 +10,7 @@ namespace Dommel
     /// </summary>
     public class DefaultPropertyResolver : IPropertyResolver
     {
-        private static readonly HashSet<Type> PrimitiveTypesSet = new HashSet<Type>
+        private static readonly HashSet<Type> PrimitiveTypesSet = new()
         {
             typeof(object),
             typeof(string),

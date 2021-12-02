@@ -713,7 +713,7 @@ namespace Dommel
                 // of the value of the primary key property. This way multi mapping
                 // one-to-many relations don't produce multiple instances of the
                 // same parent record.
-                var id = keyProperty!.GetValue(target).GetHashCode();
+                var id = keyProperty!.GetValue(target)!.GetHashCode();
                 if (!results.TryGetValue(id, out var cachedItem))
                 {
                     cachedItem = target;
