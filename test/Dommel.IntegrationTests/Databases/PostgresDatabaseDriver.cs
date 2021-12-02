@@ -3,46 +3,46 @@ using System.Threading.Tasks;
 using Dapper;
 using Npgsql;
 
-namespace Dommel.IntegrationTests
+namespace Dommel.IntegrationTests;
+
+public class PostgresDatabaseDriver : DatabaseDriver
 {
-    public class PostgresDatabaseDriver : DatabaseDriver
+    public override DbConnection GetConnection(string databaseName)
     {
-        public override DbConnection GetConnection(string databaseName)
+        var connectionString = $"Server=localhost;Port=5432;Database={databaseName};Uid=postgres;Pwd=postgres;";
+        if (CI.IsAppVeyor)
         {
-            var connectionString = $"Server=localhost;Port=5432;Database={databaseName};Uid=postgres;Pwd=postgres;";
-            if (CI.IsAppVeyor)
-            {
-                connectionString = $"Server=localhost;Port=5432;Database={databaseName};Uid=postgres;Pwd=Password12!;";
-            }
-            else if (CI.IsTravis)
-            {
-                connectionString = $"Server=localhost;Port=5432;Database={databaseName};Uid=postgres;Pwd=;";
-            }
-
-            return new NpgsqlConnection(connectionString);
+            connectionString = $"Server=localhost;Port=5432;Database={databaseName};Uid=postgres;Pwd=Password12!;";
+        }
+        else if (CI.IsTravis)
+        {
+            connectionString = $"Server=localhost;Port=5432;Database={databaseName};Uid=postgres;Pwd=;";
         }
 
-        public override string TempDbDatabaseName => "postgres";
+        return new NpgsqlConnection(connectionString);
+    }
 
-        protected override async Task CreateDatabase()
+    public override string TempDbDatabaseName => "postgres";
+
+    protected override async Task CreateDatabase()
+    {
+        using var con = GetConnection(TempDbDatabaseName);
+        try
         {
-            using var con = GetConnection(TempDbDatabaseName);
-            try
-            {
-                // Always try to create the database as you'll run into
-                // race conditions when tests run in parallel.
-                await con.ExecuteAsync($"CREATE DATABASE {DefaultDatabaseName}");
-            }
-            catch (PostgresException pex) when (pex.SqlState == "42P04")
-            {
-                // Ignore errors that the database already exists
-            }
+            // Always try to create the database as you'll run into
+            // race conditions when tests run in parallel.
+            await con.ExecuteAsync($"CREATE DATABASE {DefaultDatabaseName}");
         }
-
-        protected override async Task<bool> CreateTables()
+        catch (PostgresException pex) when (pex.SqlState == "42P04")
         {
-            using var con = GetConnection(DefaultDatabaseName);
-            var sql = @"
+            // Ignore errors that the database already exists
+        }
+    }
+
+    protected override async Task<bool> CreateTables()
+    {
+        using var con = GetConnection(DefaultDatabaseName);
+        var sql = @"
 SELECT * FROM information_schema.tables WHERE table_name = 'Products' LIMIT 1;
 CREATE TABLE IF NOT EXISTS ""Categories"" (""CategoryId"" SERIAL PRIMARY KEY, ""Name"" VARCHAR(255));
 CREATE TABLE IF NOT EXISTS ""Products"" (""ProductId"" SERIAL PRIMARY KEY, ""CategoryId"" INT, ""Name"" VARCHAR(255), ""Slug"" VARCHAR(255));
@@ -53,10 +53,9 @@ CREATE TABLE IF NOT EXISTS ""OrderLines"" (""Id"" SERIAL PRIMARY KEY, ""OrderId"
 CREATE TABLE IF NOT EXISTS ""Foos"" (""Id"" SERIAL PRIMARY KEY, ""Name"" VARCHAR(255));
 CREATE TABLE IF NOT EXISTS ""Bars"" (""Id"" SERIAL PRIMARY KEY, ""Name"" VARCHAR(255));
 CREATE TABLE IF NOT EXISTS ""Bazs"" (""BazId"" UUID primary key, ""Name"" VARCHAR(255));";
-            var created = await con.ExecuteScalarAsync(sql);
+        var created = await con.ExecuteScalarAsync(sql);
 
-            // No result means the tables were just created
-            return created == null;
-        }
+        // No result means the tables were just created
+        return created == null;
     }
 }

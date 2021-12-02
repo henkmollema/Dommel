@@ -1,48 +1,47 @@
 ﻿using Xunit;
 
-namespace Dommel.Tests
+namespace Dommel.Tests;
+
+public class NullExpressionTests
 {
-    public class NullExpressionTests
+    [Fact]
+    public void GeneratesCorrectIsEqualSyntax()
     {
-        [Fact]
-        public void GeneratesCorrectIsEqualSyntax()
-        {
-            var sql = new SqlExpression<Foo>(new SqlServerSqlBuilder())
-                .Where(f => f.Bar == null)
-                .ToSql();
-            Assert.Equal(" where ([Foos].[Bar] is null)", sql);
-        }
+        var sql = new SqlExpression<Foo>(new SqlServerSqlBuilder())
+            .Where(f => f.Bar == null)
+            .ToSql();
+        Assert.Equal(" where ([Foos].[Bar] is null)", sql);
+    }
 
-        [Fact]
-        public void GeneratesCorrectIsNotEqualSyntax()
-        {
-            var sql = new SqlExpression<Foo>(new SqlServerSqlBuilder())
-                .Where(f => f.Bar != null)
-                .ToSql();
-            Assert.Equal(" where ([Foos].[Bar] is not null)", sql);
-        }
+    [Fact]
+    public void GeneratesCorrectIsNotEqualSyntax()
+    {
+        var sql = new SqlExpression<Foo>(new SqlServerSqlBuilder())
+            .Where(f => f.Bar != null)
+            .ToSql();
+        Assert.Equal(" where ([Foos].[Bar] is not null)", sql);
+    }
 
-        [Fact]
-        public void GeneratesInvalidIsEqualSyntaxForInvalidExpression()
-        {
-            var sql = new SqlExpression<Foo>(new SqlServerSqlBuilder())
-                .Where(f => null == f.Bar)
-                .ToSql();
-            Assert.Equal(" where ( = @p1)", sql);
-        }
+    [Fact]
+    public void GeneratesInvalidIsEqualSyntaxForInvalidExpression()
+    {
+        var sql = new SqlExpression<Foo>(new SqlServerSqlBuilder())
+            .Where(f => null == f.Bar)
+            .ToSql();
+        Assert.Equal(" where ( = @p1)", sql);
+    }
 
-        [Fact]
-        public void GeneratesInvalidIsNotEqualSyntaxForInvalidExpression()
-        {
-            var sql = new SqlExpression<Foo>(new SqlServerSqlBuilder())
-                .Where(f => null != f.Bar)
-                .ToSql();
-            Assert.Equal(" where ( <> @p1)", sql);
-        }
+    [Fact]
+    public void GeneratesInvalidIsNotEqualSyntaxForInvalidExpression()
+    {
+        var sql = new SqlExpression<Foo>(new SqlServerSqlBuilder())
+            .Where(f => null != f.Bar)
+            .ToSql();
+        Assert.Equal(" where ( <> @p1)", sql);
+    }
 
-        public class Foo
-        {
-            public string? Bar { get; set; }
-        }
+    public class Foo
+    {
+        public string? Bar { get; set; }
     }
 }

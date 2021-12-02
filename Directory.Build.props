@@ -3,10 +3,8 @@
     <Copyright>Copyright © Henk Mollema 2014</Copyright>
     <VersionPrefix>2.4.0</VersionPrefix>
     <Authors>Henk Mollema</Authors>
-    <TargetFramework>netstandard2.0</TargetFramework>
     <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <PackageProjectUrl>https://github.com/henkmollema/Dommel</PackageProjectUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <RepositoryType>git</RepositoryType>

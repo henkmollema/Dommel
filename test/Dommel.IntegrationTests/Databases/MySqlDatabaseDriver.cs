@@ -3,37 +3,37 @@ using System.Threading.Tasks;
 using Dapper;
 using MySqlConnector;
 
-namespace Dommel.IntegrationTests
+namespace Dommel.IntegrationTests;
+
+public class MySqlDatabaseDriver : DatabaseDriver
 {
-    public class MySqlDatabaseDriver : DatabaseDriver
+    public override DbConnection GetConnection(string databaseName)
     {
-        public override DbConnection GetConnection(string databaseName)
+        var connectionString = $"Server=localhost;Database={databaseName};Uid=dommeltest;Pwd=test;";
+        if (CI.IsAppVeyor)
         {
-            var connectionString = $"Server=localhost;Database={databaseName};Uid=dommeltest;Pwd=test;";
-            if (CI.IsAppVeyor)
-            {
-                connectionString = $"Server=localhost;Database={databaseName};Uid=root;Pwd=Password12!;";
-            }
-            else if (CI.IsTravis)
-            {
-                connectionString = $"Server=localhost;Database={databaseName};Uid=root;Pwd=;";
-            }
-
-            return new MySqlConnection(connectionString);
+            connectionString = $"Server=localhost;Database={databaseName};Uid=root;Pwd=Password12!;";
+        }
+        else if (CI.IsTravis)
+        {
+            connectionString = $"Server=localhost;Database={databaseName};Uid=root;Pwd=;";
         }
 
-        public override string TempDbDatabaseName => "mysql";
+        return new MySqlConnection(connectionString);
+    }
 
-        protected override async Task CreateDatabase()
-        {
-            using var con = GetConnection(TempDbDatabaseName);
-            await con.ExecuteAsync($"CREATE DATABASE IF NOT EXISTS {DefaultDatabaseName}");
-        }
+    public override string TempDbDatabaseName => "mysql";
 
-        protected override async Task<bool> CreateTables()
-        {
-            using var con = GetConnection(DefaultDatabaseName);
-            var sql = @"
+    protected override async Task CreateDatabase()
+    {
+        using var con = GetConnection(TempDbDatabaseName);
+        await con.ExecuteAsync($"CREATE DATABASE IF NOT EXISTS {DefaultDatabaseName}");
+    }
+
+    protected override async Task<bool> CreateTables()
+    {
+        using var con = GetConnection(DefaultDatabaseName);
+        var sql = @"
 SELECT * FROM information_schema.tables where table_name = 'Products' LIMIT 1;
 CREATE TABLE IF NOT EXISTS Categories (CategoryId INT AUTO_INCREMENT PRIMARY KEY, Name VARCHAR(255));
 CREATE TABLE IF NOT EXISTS ProductsCategories (ProductId INT, CategoryId INT, PRIMARY KEY (ProductId, CategoryId));
@@ -44,10 +44,9 @@ CREATE TABLE IF NOT EXISTS OrderLines (Id INT AUTO_INCREMENT PRIMARY KEY, OrderI
 CREATE TABLE IF NOT EXISTS Foos (Id INT AUTO_INCREMENT PRIMARY KEY, Name VARCHAR(255));
 CREATE TABLE IF NOT EXISTS Bars (Id INT AUTO_INCREMENT PRIMARY KEY, Name VARCHAR(255));
 CREATE TABLE IF NOT EXISTS Bazs (BazId CHAR(36) PRIMARY KEY, Name VARCHAR(255));";
-            var created = await con.ExecuteScalarAsync(sql);
+        var created = await con.ExecuteScalarAsync(sql);
 
-            // No result means the tables were just created
-            return created == null;
-        }
+        // No result means the tables were just created
+        return created == null;
     }
 }

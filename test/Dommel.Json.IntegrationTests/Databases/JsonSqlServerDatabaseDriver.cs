@@ -2,17 +2,17 @@
 using Dapper;
 using Dommel.IntegrationTests;
 
-namespace Dommel.Json.IntegrationTests
-{
-    public class JsonSqlServerDatabaseDriver : SqlServerDatabaseDriver
-    {
-        public override string DefaultDatabaseName => "dommeljsontests";
+namespace Dommel.Json.IntegrationTests;
 
-        protected override async Task<bool> CreateTables()
+public class JsonSqlServerDatabaseDriver : SqlServerDatabaseDriver
+{
+    public override string DefaultDatabaseName => "dommeljsontests";
+
+    protected override async Task<bool> CreateTables()
+    {
+        using (var con = GetConnection(DefaultDatabaseName))
         {
-            using (var con = GetConnection(DefaultDatabaseName))
-            {
-                var sql = @"
+            var sql = @"
 CREATE TABLE Leads (
     Id INT IDENTITY(1,1) PRIMARY KEY,
     DateCreated DATETIME,
@@ -20,19 +20,18 @@ CREATE TABLE Leads (
     Data NVARCHAR(MAX),
     Metadata NVARCHAR(MAX)
 );";
-                await con.ExecuteScalarAsync(sql);
-            }
-
-            return await base.CreateTables();
+            await con.ExecuteScalarAsync(sql);
         }
 
-        protected override async Task DropTables()
+        return await base.CreateTables();
+    }
+
+    protected override async Task DropTables()
+    {
+        using (var con = GetConnection(DefaultDatabaseName))
         {
-            using (var con = GetConnection(DefaultDatabaseName))
-            {
-                await con.ExecuteScalarAsync("DROP TABLE Leads");
-            }
-            await base.DropTables();
+            await con.ExecuteScalarAsync("DROP TABLE Leads");
         }
+        await base.DropTables();
     }
 }

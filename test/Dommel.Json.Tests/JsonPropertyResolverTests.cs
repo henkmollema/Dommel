@@ -2,47 +2,46 @@
 using System.Linq;
 using Xunit;
 
-namespace Dommel.Json.Tests
+namespace Dommel.Json.Tests;
+
+public class JsonPropertyResolverTests
 {
-    public class JsonPropertyResolverTests
+    private static readonly Type LeadType = typeof(Lead);
+
+    [Fact]
+    public void DefaultBehavior()
     {
-        private static readonly Type LeadType = typeof(Lead);
+        // Arrange
+        var resolver = new JsonPropertyResolver(Array.Empty<Type>());
 
-        [Fact]
-        public void DefaultBehavior()
-        {
-            // Arrange
-            var resolver = new JsonPropertyResolver(Array.Empty<Type>());
+        // Act
+        var props = resolver.ResolveProperties(LeadType).Select(x => x.Property);
 
-            // Act
-            var props = resolver.ResolveProperties(LeadType).Select(x => x.Property);
+        // Assert
+        Assert.Collection(
+            props,
+            p => Assert.Equal(p, LeadType.GetProperty("Id")),
+            p => Assert.Equal(p, LeadType.GetProperty("DateCreated")),
+            p => Assert.Equal(p, LeadType.GetProperty("Email"))
+        );
+    }
 
-            // Assert
-            Assert.Collection(
-                props,
-                p => Assert.Equal(p, LeadType.GetProperty("Id")),
-                p => Assert.Equal(p, LeadType.GetProperty("DateCreated")),
-                p => Assert.Equal(p, LeadType.GetProperty("Email"))
-            );
-        }
+    [Fact]
+    public void ResolvesComplexType()
+    {
+        // Arrange
+        var resolver = new JsonPropertyResolver(new[] { typeof(LeadData) });
 
-        [Fact]
-        public void ResolvesComplexType()
-        {
-            // Arrange
-            var resolver = new JsonPropertyResolver(new[] { typeof(LeadData) });
+        // Act
+        var props = resolver.ResolveProperties(LeadType).Select(x => x.Property);
 
-            // Act
-            var props = resolver.ResolveProperties(LeadType).Select(x => x.Property);
-
-            // Assert
-            Assert.Collection(
-                props,
-                p => Assert.Equal(p, LeadType.GetProperty("Id")),
-                p => Assert.Equal(p, LeadType.GetProperty("DateCreated")),
-                p => Assert.Equal(p, LeadType.GetProperty("Email")),
-                p => Assert.Equal(p, LeadType.GetProperty("Data"))
-            );
-        }
+        // Assert
+        Assert.Collection(
+            props,
+            p => Assert.Equal(p, LeadType.GetProperty("Id")),
+            p => Assert.Equal(p, LeadType.GetProperty("DateCreated")),
+            p => Assert.Equal(p, LeadType.GetProperty("Email")),
+            p => Assert.Equal(p, LeadType.GetProperty("Data"))
+        );
     }
 }
