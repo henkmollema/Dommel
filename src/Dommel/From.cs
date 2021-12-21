@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Threading;
 using System.Threading.Tasks;
 using Dapper;
 
@@ -44,5 +45,33 @@ public static partial class DommelMapper
         var sql = sqlExpression.ToSql(out var parameters);
         LogReceived?.Invoke(sql);
         return await con.QueryAsync<TEntity>(sql, parameters, transaction);
+    }
+
+    /// <summary>
+    /// Executes an expression to query data from <typeparamref name="TReturn"/>.
+    /// </summary>
+    /// <param name="con">The connection to query data from.</param>
+    /// <param name="sqlBuilder">A callback to build a <see cref="SqlExpression{TReturn}"/>.</param>
+    /// <param name="transaction">Optional transaction for the command.</param>
+    /// <returns>The collection of entities returned from the query.</returns>
+    public static async Task<IEnumerable<TReturn>> FromAsync<T1, T2, T3, TReturn>(
+        this IDbConnection con, Action<SqlExpression<TReturn>> sqlBuilder, IDbTransaction? transaction = null, CancellationToken cancellationToken = default)
+        where T1 : class, TReturn
+    {
+        var sqlExpression = CreateSqlExpression<TReturn>(GetSqlBuilder(con));
+        sqlBuilder(sqlExpression);
+        var sql = sqlExpression.ToSql(out var parameters);
+        LogReceived?.Invoke(sql);
+
+        var results = new Dictionary<int, T1>();
+        _ = await ExecuteMultiMapAsync<T1, T2, T3, DontMap, DontMap, DontMap, DontMap, TReturn>(
+            con,
+            sql,
+            parameters,
+            CreateMapDelegate<T1, T2, T3, DontMap, DontMap, DontMap, DontMap, TReturn>(results),
+            transaction,
+            cancellationToken);
+
+        return results.Values; ;
     }
 }

@@ -600,20 +600,53 @@ public static partial class DommelMapper
         };
     }
 
+    private static Task<IEnumerable<TReturn>> ExecuteMultiMapAsync<T1, T2, T3, T4, T5, T6, T7, TReturn>(
+        IDbConnection connection, string sql, DynamicParameters parameters, Delegate map, IDbTransaction? transaction = null, CancellationToken cancellationToken = default)
+    {
+        var resultType = typeof(TReturn);
+        var includeTypes = new[]
+        {
+            typeof(T1),
+            typeof(T2),
+            typeof(T3),
+            typeof(T4),
+            typeof(T5),
+            typeof(T6),
+            typeof(T7)
+        }
+        .Where(t => t != typeof(DontMap))
+        .ToArray();
+
+        LogQuery<TReturn>(sql);
+        var splitOn = CreateSplitOn(includeTypes);
+
+        var commandDefinition = new CommandDefinition(sql, parameters, transaction, cancellationToken: cancellationToken);
+        return includeTypes.Length switch
+        {
+            2 => connection.QueryAsync(commandDefinition, (Func<T1, T2, TReturn>)map, splitOn),
+            3 => connection.QueryAsync(commandDefinition, (Func<T1, T2, T3, TReturn>)map, splitOn),
+            4 => connection.QueryAsync(commandDefinition, (Func<T1, T2, T3, T4, TReturn>)map, splitOn),
+            5 => connection.QueryAsync(commandDefinition, (Func<T1, T2, T3, T4, T5, TReturn>)map, splitOn),
+            6 => connection.QueryAsync(commandDefinition, (Func<T1, T2, T3, T4, T5, T6, TReturn>)map, splitOn),
+            7 => connection.QueryAsync(commandDefinition, (Func<T1, T2, T3, T4, T5, T6, T7, TReturn>)map, splitOn),
+            _ => throw new InvalidOperationException($"Invalid amount of include types: {includeTypes.Length}."),
+        };
+    }
+
     private static Task<IEnumerable<TReturn>> MultiMapAsync<T1, T2, T3, T4, T5, T6, T7, TReturn>(
         IDbConnection connection, Delegate map, object? id, IDbTransaction? transaction = null, bool buffered = true, Func<DynamicParameters, string>? appendSql = null, CancellationToken cancellationToken = default)
     {
         var resultType = typeof(TReturn);
         var includeTypes = new[]
         {
-                typeof(T1),
-                typeof(T2),
-                typeof(T3),
-                typeof(T4),
-                typeof(T5),
-                typeof(T6),
-                typeof(T7)
-            }
+            typeof(T1),
+            typeof(T2),
+            typeof(T3),
+            typeof(T4),
+            typeof(T5),
+            typeof(T6),
+            typeof(T7)
+        }
         .Where(t => t != typeof(DontMap))
         .ToArray();
 

@@ -16,6 +16,6 @@ public class JsonDatabaseTestData : TheoryData<DatabaseDriver>
         }
 
         Add(new JsonMySqlDatabaseDriver());
-        //Add(new JsonPostgresDatabaseDriver());
+        Add(new JsonPostgresDatabaseDriver());
     }
 }

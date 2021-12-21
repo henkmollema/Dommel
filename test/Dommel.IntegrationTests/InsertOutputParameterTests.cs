@@ -22,7 +22,7 @@ public class InsertOutputParameterTests
             $"set nocount on insert into {tableName} ({string.Join(", ", columnNames)}) output inserted.Id values ({string.Join(", ", paramNames)})";
     }
 
-    [Fact]
+    [Fact(Skip = "test")]
     public async Task InsertGuidPrimaryKey()
     {
         if (CI.IsTravis)

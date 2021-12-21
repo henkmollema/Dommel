@@ -438,56 +438,40 @@ public class SqlExpression<TEntity>
     /// <returns>The result of the processing.</returns>
     protected virtual object VisitBinary(BinaryExpression expression)
     {
-        object left, right;
+        var left = VisitExpression(expression.Left);
+        var right = VisitExpression(expression.Right);
         var operand = GetOperant(expression.NodeType);
         if (operand == "and" || operand == "or")
         {
             // Process left and right side of the "and/or" expression, e.g.:
             // Foo == 42    or      Bar == 42
-            //   left    operand     right
-            //
-            if (expression.Left is MemberExpression leftMember && leftMember.Expression?.NodeType == ExpressionType.Parameter)
-            {
-                left = $"{VisitMemberAccess(leftMember)} = '1'";
-            }
-            else
-            {
-                left = VisitExpression(expression.Left);
-            }
-
-            if (expression.Right is MemberExpression rightMember && rightMember.Expression?.NodeType == ExpressionType.Parameter)
-            {
-                right = $"{VisitMemberAccess(rightMember)} = '1'";
-            }
-            else
-            {
-                right = VisitExpression(expression.Right);
-            }
+            //   left    operand      right
+            return $"{left} {operand} {right}";
         }
         else
         {
-            // It's a single expression, e.g. Foo == 42
-            left = VisitExpression(expression.Left);
-            right = VisitExpression(expression.Right);
-
-            if (right == null)
+            if (right is null)
             {
-                // Special case 'is (not) null' syntax
-                if (expression.NodeType == ExpressionType.Equal)
+                return expression.NodeType switch
                 {
-                    return $"{left} is null";
-                }
-                else
-                {
-                    return $"{left} is not null";
-                }
+                    ExpressionType.Equal => $"{left} is null",
+                    ExpressionType.NotEqual => $"{left} is not null",
+                    _ => throw new InvalidOperationException($"Node type '{expression.NodeType}' is not supported for a 'null' expression."),
+                };
             }
-
-            AddParameter(right, out var paramName);
-            return $"{left} {operand} {paramName}";
+            else if (expression.Right is MemberExpression rightMember &&
+                rightMember.Expression?.NodeType == ExpressionType.Parameter)
+            {
+                // Comparing two columns (e.g. Products.CategoryId = Category.Id)
+                return $"{left} {operand} {right}";
+            }
+            else
+            {
+                // Comparing a column against a parameter (e.g. Products.Name = @p1)
+                AddParameter(right, out var paramName);
+                return $"{left} {operand} {paramName}";
+            }
         }
-
-        return $"{left} {operand} {right}";
     }
 
     /// <summary>
@@ -611,12 +595,17 @@ public class SqlExpression<TEntity>
     /// <returns>The current SQL query.</returns>
     public string ToSql()
     {
+        var join = _joinBuilder.ToString();
         var where = _whereBuilder.ToString();
         var orderBy = _orderByBuilder.ToString();
         var query = "";
         if (!string.IsNullOrEmpty(_selectQuery))
         {
             query += _selectQuery;
+        }
+        if (!string.IsNullOrEmpty(join))
+        {
+            query += join;
         }
         if (!string.IsNullOrEmpty(where))
         {
@@ -642,6 +631,40 @@ public class SqlExpression<TEntity>
         return query;
     }
 
+    public SqlExpression<TEntity> AndWhere<T>(Expression<Func<T, bool>> where)
+    {
+        var x = VisitExpression(where);
+        AppendToWhere("and", where);
+        return this;
+    }
+
+    public SqlExpression<TEntity> OrWhere<T>(Expression<Func<T, bool>> where)
+    {
+        var x = VisitExpression(where);
+        AppendToWhere("or", where);
+        return this;
+    }
+
+    private readonly StringBuilder _joinBuilder = new();
+
+    public SqlExpression<TEntity> Join<T>(Expression<Func<TEntity, T, bool>> on) => Join<TEntity, T>(on);
+
+    public SqlExpression<TEntity> Join<T>(JoinType joinType, Expression<Func<TEntity, T, bool>> on) => Join<TEntity, T>(joinType, on);
+
+    public SqlExpression<TEntity> Join<TSource, TJoin>(Expression<Func<TSource, TJoin, bool>> on) => Join(JoinType.Left, on);
+
+    public SqlExpression<TEntity> Join<TSource, TJoin>(JoinType joinType, Expression<Func<TSource, TJoin, bool>> on)
+    {
+        var x = VisitExpression(on).ToString();
+        _joinBuilder
+            .Append(" left join ")
+            .Append(Resolvers.Table(typeof(TJoin), SqlBuilder))
+            .Append(" on ")
+            .Append(x)
+            .Append(' ');
+        return this;
+    }
+
     /// <summary>
     /// Returns the current SQL query.
     /// </summary>
@@ -658,4 +681,13 @@ public class SqlExpression<TEntity>
     /// </summary>
     /// <returns>The current SQL query.</returns>
     public override string ToString() => ToSql();
+}
+
+
+public enum JoinType
+{
+    Left,
+    Right,
+    Inner,
+    Outer,
 }

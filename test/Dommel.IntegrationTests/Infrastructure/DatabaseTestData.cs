@@ -11,7 +11,7 @@ public class DatabaseTestData : TheoryData<DatabaseDriver>
         // DatabaseFixture as well.
         if (!CI.IsTravis)
         {
-            Add(new SqlServerDatabaseDriver());
+            //Add(new SqlServerDatabaseDriver());
         }
 
         Add(new MySqlDatabaseDriver());

@@ -7,6 +7,18 @@ namespace Dommel.Tests;
 public class SqlExpressionTests
 {
     [Fact]
+    public void Join()
+    {
+        var sqlExpression = new SqlExpression<Product>(new SqlServerSqlBuilder());
+        var name = "foo";
+        sqlExpression.Join<Category>((x, y) => x.CategoryId == y.Id);
+        sqlExpression.Where(x => x.Name == name);
+        sqlExpression.AndWhere<Category>(x => x.Id > 5);
+        sqlExpression.Select();
+        var sql = sqlExpression.ToSql(out var param);
+    }
+
+    [Fact]
     public void ToString_ReturnsSql()
     {
         var sqlExpression = new SqlExpression<Product>(new SqlServerSqlBuilder());

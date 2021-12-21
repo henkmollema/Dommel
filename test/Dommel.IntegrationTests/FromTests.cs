@@ -18,6 +18,38 @@ public class FromTests
 
     [Theory]
     [ClassData(typeof(DatabaseTestData))]
+    public async Task SelectJoin(DatabaseDriver database)
+    {
+        using var con = database.GetConnection();
+
+        var productName = "chai";
+
+        var products = await con.FromAsync<Product, Category, ProductOption, Product>(sql =>
+        {
+            // Join with Product table
+            sql.Join<Category>((x, y) => x.CategoryId == y.CategoryId);
+            sql.Join<ProductOption>((x, y) => x.ProductId == y.ProductId);
+
+            // Join two other tables
+            sql.Join<Order, OrderLine>((x, y) => x.Id == y.OrderId);
+
+            // Filter on product
+            sql.Where(x => x.Name!.StartsWith(productName));
+
+            // Filter on another table
+            sql.AndWhere<Category>(x => x.Name == "Food");
+
+            // Select all columns
+            sql.Select();
+        });
+
+        var product = Assert.Single(products);
+        Assert.Equal("Food", product.Category?.Name);
+        Assert.Single(product.Options);
+    }
+
+    [Theory]
+    [ClassData(typeof(DatabaseTestData))]
     public void SelectProjectSync(DatabaseDriver database)
     {
         using var con = database.GetConnection();
