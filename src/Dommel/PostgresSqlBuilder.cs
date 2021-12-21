@@ -42,4 +42,7 @@ public class PostgresSqlBuilder : ISqlBuilder
 
     /// <inheritdoc/>
     public string LimitClause(int count) => $"limit {count}";
+
+    /// <inheritdoc/>
+    public string LikeExpression(string columnName, string parameterName) => $"{columnName} ilike {parameterName}";
 }

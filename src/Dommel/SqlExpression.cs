@@ -393,8 +393,7 @@ public class SqlExpression<TEntity>
         };
         AddParameter(textLike, out var paramName);
 
-        // Use lower() to make the queries case-insensitive
-        return $"lower({column}) like lower({paramName})";
+        return SqlBuilder.LikeExpression(column.ToString(), paramName);
     }
 
     /// <summary>

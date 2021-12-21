@@ -26,4 +26,7 @@ public class MySqlSqlBuilder : ISqlBuilder
 
     /// <inheritdoc/>
     public string LimitClause(int count) => $"limit {count}";
+
+    /// <inheritdoc/>
+    public string LikeExpression(string columnName, string parameterName) => $"{columnName} like {parameterName}";
 }

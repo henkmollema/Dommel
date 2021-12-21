@@ -26,4 +26,7 @@ public class SqlServerSqlBuilder : ISqlBuilder
 
     /// <inheritdoc/>
     public string LimitClause(int count) => $"order by 1 offset 0 rows fetch next {count} rows only";
+
+    /// <inheritdoc/>
+    public string LikeExpression(string columnName, string parameterName) => $"{columnName} like {parameterName}";
 }

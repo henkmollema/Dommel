@@ -12,10 +12,10 @@ public class JsonDatabaseTestData : TheoryData<DatabaseDriver>
         // DatabaseFixture as well.
         if (!CI.IsTravis)
         {
-            //Add(new JsonSqlServerDatabaseDriver());
+            Add(new JsonSqlServerDatabaseDriver());
         }
 
         Add(new JsonMySqlDatabaseDriver());
-        //Add(new JsonPostgresDatabaseDriver());
+        Add(new JsonPostgresDatabaseDriver());
     }
 }

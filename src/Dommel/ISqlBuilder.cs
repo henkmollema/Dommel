@@ -41,9 +41,17 @@ public interface ISqlBuilder
     string QuoteIdentifier(string identifier);
 
     /// <summary>
-    /// Adds a limit clause to query.
+    /// Returns a limit clause for the specified <paramref name="count"/>.
     /// </summary>
     /// <param name="count">The count of limit clause.</param>
     /// <returns>A limit clause of the specified count.</returns>
     string LimitClause(int count);
+
+    /// <summary>
+    /// Returns a like-expresion for the specified <paramref name="columnName"/> and <paramref name="parameterName"/>.
+    /// </summary>
+    /// <param name="columnName">The column name of the like-expression.</param>
+    /// <param name="parameterName">The parameter name of the like-expression.</param>
+    /// <returns>A like-expression.</returns>
+    string LikeExpression(string columnName, string parameterName);
 }
