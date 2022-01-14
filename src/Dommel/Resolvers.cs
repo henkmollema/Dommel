@@ -140,6 +140,16 @@ public static class Resolvers
     /// </summary>
     /// <param name="propertyInfo">The <see cref="PropertyInfo"/> to get the column name for.</param>
     /// <param name="sqlBuilder">The SQL builder instance.</param>
+    /// <returns>The column name in the database for <paramref name="propertyInfo"/>.</returns>
+    public static string Column(PropertyInfo propertyInfo, ISqlBuilder sqlBuilder)
+        => Column(propertyInfo, sqlBuilder, DommelMapper.IncludeTableNameInColumnName);
+
+    /// <summary>
+    /// Gets the name of the column in the database for the specified type,
+    /// using the configured <see cref="IColumnNameResolver"/>.
+    /// </summary>
+    /// <param name="propertyInfo">The <see cref="PropertyInfo"/> to get the column name for.</param>
+    /// <param name="sqlBuilder">The SQL builder instance.</param>
     /// <param name="includeTableName">Whether to include table name with the column name for unambiguity. E.g. <c>[Products].[Name]</c>.</param>
     /// <returns>The column name in the database for <paramref name="propertyInfo"/>.</returns>
     public static string Column(PropertyInfo propertyInfo, ISqlBuilder sqlBuilder, bool includeTableName = true)

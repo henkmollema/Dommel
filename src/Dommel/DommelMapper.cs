@@ -61,6 +61,11 @@ public static partial class DommelMapper
         => LogReceived?.Invoke(method != null ? $"{method}<{typeof(T).Name}>: {query}" : query);
 
     /// <summary>
+    /// Whether <see cref="Resolvers.Column(PropertyInfo, ISqlBuilder, bool)"/> should include the table name in the column name by default.
+    /// </summary>
+    public static bool IncludeTableNameInColumnName = true;
+
+    /// <summary>
     /// Use the default <see cref="SqlMapper.ITypeMap"/> provided by Dapper instead
     /// of the custom Dommel type map which supports <see cref="ColumnAttribute"/>.
     /// </summary>
