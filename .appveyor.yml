@@ -17,7 +17,7 @@ environment:
   CI: true
   APPVEYOR: true
 services:
-  - mssql2017
+  - mssql2019
   - mysql
   - postgresql101
 branches:
