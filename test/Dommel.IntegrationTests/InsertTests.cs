@@ -31,6 +31,26 @@ public class InsertTests
 
     [Theory]
     [ClassData(typeof(DatabaseTestData))]
+    public void InsertTypedReturn(DatabaseDriver database)
+    {
+        // Arrange
+        using var con = database.GetConnection();
+        var productToInsert = new Product { Name = "Foo Product" };
+        productToInsert.SetSlug("foo-product");
+
+        // Act
+        var id = con.Insert<Product, int>(productToInsert);
+
+        // Assert
+        var product = con.Get<Product>(id);
+        Assert.NotNull(product);
+        Assert.Equal(id, product!.ProductId);
+        Assert.Equal("Foo Product", product.Name);
+        Assert.Equal("foo-product", product.Slug);
+    }
+
+    [Theory]
+    [ClassData(typeof(DatabaseTestData))]
     public async Task InsertAsync(DatabaseDriver database)
     {
         // Arrange
@@ -40,6 +60,26 @@ public class InsertTests
 
         // Act
         var id = Convert.ToInt32(await con.InsertAsync(productToInsert));
+
+        // Assert
+        var product = await con.GetAsync<Product>(id);
+        Assert.NotNull(product);
+        Assert.Equal(id, product!.ProductId);
+        Assert.Equal("Foo Product", product.Name);
+        Assert.Equal("foo-product", product.Slug);
+    }
+
+    [Theory]
+    [ClassData(typeof(DatabaseTestData))]
+    public async Task InsertAsyncTypedReturn(DatabaseDriver database)
+    {
+        // Arrange
+        using var con = database.GetConnection();
+        var productToInsert = new Product { Name = "Foo Product" };
+        productToInsert.SetSlug("foo-product");
+
+        // Act
+        var id = await con.InsertAsync<Product, int>(productToInsert);
 
         // Assert
         var product = await con.GetAsync<Product>(id);

@@ -30,6 +30,23 @@ public static partial class DommelMapper
     /// Inserts the specified entity into the database and returns the ID.
     /// </summary>
     /// <typeparam name="TEntity">The type of the entity.</typeparam>
+    /// <typeparam name="TReturn">The return type.</typeparam>
+    /// <param name="connection">The connection to the database. This can either be open or closed.</param>
+    /// <param name="entity">The entity to be inserted.</param>
+    /// <param name="transaction">Optional transaction for the command.</param>
+    /// <returns>The ID of the inserted entity.</returns>
+    public static TReturn Insert<TEntity, TReturn>(this IDbConnection connection, TEntity entity, IDbTransaction? transaction = null)
+        where TEntity : class
+    {
+        var sql = BuildInsertQuery(GetSqlBuilder(connection), typeof(TEntity));
+        LogQuery<TEntity>(sql);
+        return connection.ExecuteScalar<TReturn>(sql, entity, transaction);
+    }
+
+    /// <summary>
+    /// Inserts the specified entity into the database and returns the ID.
+    /// </summary>
+    /// <typeparam name="TEntity">The type of the entity.</typeparam>
     /// <param name="connection">The connection to the database. This can either be open or closed.</param>
     /// <param name="entity">The entity to be inserted.</param>
     /// <param name="transaction">Optional transaction for the command.</param>
@@ -41,6 +58,25 @@ public static partial class DommelMapper
         var sql = BuildInsertQuery(GetSqlBuilder(connection), typeof(TEntity));
         LogQuery<TEntity>(sql);
         return connection.ExecuteScalarAsync(new CommandDefinition(sql, entity, transaction: transaction, cancellationToken: cancellationToken));
+    }
+
+
+    /// <summary>
+    /// Inserts the specified entity into the database and returns the ID.
+    /// </summary>
+    /// <typeparam name="TEntity">The type of the entity.</typeparam>
+    /// <typeparam name="TReturn">The return type.</typeparam>
+    /// <param name="connection">The connection to the database. This can either be open or closed.</param>
+    /// <param name="entity">The entity to be inserted.</param>
+    /// <param name="transaction">Optional transaction for the command.</param>
+    /// <param name="cancellationToken">Optional cancellation token for the command.</param>
+    /// <returns>The ID of the inserted entity.</returns>
+    public static Task<TReturn> InsertAsync<TEntity, TReturn>(this IDbConnection connection, TEntity entity, IDbTransaction? transaction = null, CancellationToken cancellationToken = default)
+        where TEntity : class
+    {
+        var sql = BuildInsertQuery(GetSqlBuilder(connection), typeof(TEntity));
+        LogQuery<TEntity>(sql);
+        return connection.ExecuteScalarAsync<TReturn>(new CommandDefinition(sql, entity, transaction: transaction, cancellationToken: cancellationToken));
     }
 
     /// <summary>
