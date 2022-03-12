@@ -45,7 +45,7 @@ public class PostgresDatabaseDriver : DatabaseDriver
         var sql = @"
 SELECT * FROM information_schema.tables WHERE table_name = 'Products' LIMIT 1;
 CREATE TABLE IF NOT EXISTS ""Categories"" (""CategoryId"" SERIAL PRIMARY KEY, ""Name"" VARCHAR(255));
-CREATE TABLE IF NOT EXISTS ""Products"" (""ProductId"" SERIAL PRIMARY KEY, ""CategoryId"" INT, ""Name"" VARCHAR(255), ""Slug"" VARCHAR(255));
+CREATE TABLE IF NOT EXISTS ""Products"" (""ProductId"" SERIAL PRIMARY KEY, ""CategoryId"" INT, ""FullName"" VARCHAR(255), ""Slug"" VARCHAR(255));
 CREATE TABLE IF NOT EXISTS ""ProductOptions"" (""Id"" SERIAL PRIMARY KEY, ""ProductId"" INT);
 CREATE TABLE IF NOT EXISTS ""ProductsCategories"" (""ProductId"" INT, ""CategoryId"" INT, PRIMARY KEY (""ProductId"", ""CategoryId""));
 CREATE TABLE IF NOT EXISTS ""Orders"" (""Id"" SERIAL PRIMARY KEY, ""Created"" TIMESTAMP NOT NULL);

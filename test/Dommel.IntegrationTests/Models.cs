@@ -11,6 +11,7 @@ public class Product
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int ProductId { get; set; }
 
+    [Column("FullName")]
     public string? Name { get; set; }
 
     public string? Slug { get; private set; }
