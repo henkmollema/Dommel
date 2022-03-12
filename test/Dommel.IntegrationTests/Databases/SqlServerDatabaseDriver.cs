@@ -9,9 +9,16 @@ public class SqlServerDatabaseDriver : DatabaseDriver
 {
     public override DbConnection GetConnection(string databaseName)
     {
-        var connectionString = CI.IsAppVeyor
-            ? $"Server=(local)\\SQL2017;Database={databaseName};User ID=sa;Password=Password12!"
-            : $"Server=(LocalDb)\\mssqllocaldb;Database={databaseName};User ID=dommel;Password=dommel";
+        var connectionString = $"Data Source=.;Initial Catalog={databaseName};Integrated Security=True;TrustServerCertificate=True";
+
+        if (CI.IsAppVeyor)
+        {
+            connectionString = $"Server=(local)\\SQL2017;Database={databaseName};User ID=sa;Password=Password12!";
+        }
+        else if(CI.IsTravis)
+        {
+            connectionString = $"Server=(LocalDb)\\mssqllocaldb;Database={databaseName};User ID=dommel;Password=dommel";
+        }
 
         return new SqlConnection(connectionString);
     }
