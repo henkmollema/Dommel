@@ -24,6 +24,6 @@ public class PageTests
     public void OrderBy_Page_OrderBy()
     {
         var sql = _sqlExpression.OrderBy(p => p.Name).Page(1, 5).OrderByDescending(p => p.CategoryId).ToSql();
-        Assert.Equal(" order by [Products].[Name] asc, [Products].[CategoryId] desc offset 0 rows fetch next 5 rows only", sql);
+        Assert.Equal(" order by [Products].[FullName] asc, [Products].[CategoryId] desc offset 0 rows fetch next 5 rows only", sql);
     }
 }

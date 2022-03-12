@@ -30,7 +30,7 @@ public class SqlServerDatabaseDriver : DatabaseDriver
         var sql = @"IF OBJECT_ID(N'dbo.Products', N'U') IS NULL
 BEGIN
     CREATE TABLE dbo.Categories (CategoryId INT IDENTITY(1,1) PRIMARY KEY, Name VARCHAR(255));
-    CREATE TABLE dbo.Products (ProductId INT IDENTITY(1,1) PRIMARY KEY, CategoryId int, Name VARCHAR(255), Slug VARCHAR(255));
+    CREATE TABLE dbo.Products (ProductId INT IDENTITY(1,1) PRIMARY KEY, CategoryId int, FullName VARCHAR(255), Slug VARCHAR(255));
     CREATE TABLE dbo.ProductOptions (Id INT IDENTITY(1,1) PRIMARY KEY, ProductId INT);
     CREATE TABLE dbo.ProductsCategories (ProductId INT, CategoryId INT, PRIMARY KEY (ProductId, CategoryId));
     CREATE TABLE dbo.Orders (Id INT IDENTITY(1,1) PRIMARY KEY, Created DATETIME NOT NULL);
