@@ -13,7 +13,7 @@ public class SqlServerDatabaseDriver : DatabaseDriver
 
         if (CI.IsAppVeyor)
         {
-            connectionString = $"Server=(local)\\SQL2017;Database={databaseName};User ID=sa;Password=Password12!";
+            connectionString = $"Server=(local)\\SQL2019;Database={databaseName};User ID=sa;Password=Password12!";
         }
         else if(CI.IsTravis)
         {
