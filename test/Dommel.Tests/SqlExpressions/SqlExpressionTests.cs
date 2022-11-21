@@ -11,7 +11,7 @@ public class SqlExpressionTests
     {
         var sqlExpression = new SqlExpression<Product>(new SqlServerSqlBuilder());
         var sql = sqlExpression.Where(p => p.Name == "Chai").ToSql();
-        Assert.Equal(" where ([Products].[Name] = @p1)", sql);
+        Assert.Equal(" where ([Products].[FullName] = @p1)", sql);
         Assert.Equal(sql, sqlExpression.ToString());
     }
 

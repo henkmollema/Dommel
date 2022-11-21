@@ -92,6 +92,7 @@ public class ProjectTests
         [Key]
         public int ProductId { get; set; }
 
+        [Column("FullName")]
         public string? Name { get; set; }
     }
 }

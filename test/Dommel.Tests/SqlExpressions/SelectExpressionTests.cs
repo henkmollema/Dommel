@@ -32,7 +32,7 @@ public class SelectExpressionTests
         var sql = _sqlExpression
             .Select(p => new { p.Id })
             .ToSql();
-        Assert.Equal("select [Id] from [Products]", sql);
+        Assert.Equal("select [Products].[Id] from [Products]", sql);
     }
 
     [Fact]
@@ -41,6 +41,6 @@ public class SelectExpressionTests
         var sql = _sqlExpression
             .Select(p => new { p.Id, p.Name })
             .ToSql();
-        Assert.Equal("select [Id], [Name] from [Products]", sql);
+        Assert.Equal("select [Products].[Id], [Products].[FullName] from [Products]", sql);
     }
 }
