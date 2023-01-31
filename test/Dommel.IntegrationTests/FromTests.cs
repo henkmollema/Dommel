@@ -1,5 +1,7 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Identity.Client;
 using Xunit;
 
 namespace Dommel.IntegrationTests;
@@ -94,6 +96,43 @@ public class FromTests
                 .AndWhere(p => p.CategoryId != 0)
                 .OrderBy(p => p.CategoryId)
                 .OrderByDescending(p => p.Name)
+                .Page(1, 5));
+
+        Assert.Equal(5, products.Count());
+    }
+
+    [Theory]
+    [ClassData(typeof(DatabaseTestData))]
+    public async Task OrdersBy(DatabaseDriver database)
+    {
+        var orders = new List<OrderableColumn<Product>>();
+        orders.Add(new(p=>p.CategoryId, SortDirectionEnum.Ascending));
+        orders.Add(new(p=>p.Name, SortDirectionEnum.Descending));
+
+        using var con = database.GetConnection();
+        var products = await con.FromAsync<Product>(sql =>
+            sql.Select(p => new { p.Name, p.CategoryId })
+                .Where(p => p.CategoryId == 1)
+                .OrderBy(orders)
+                .Page(1, 5));
+
+        Assert.Equal(5, products.Count());
+    }
+
+    [Theory]
+    [ClassData(typeof(DatabaseTestData))]
+    public async Task OrdersByProperty(DatabaseDriver database)
+    {
+        var product = new Product();
+        var orders = new List<OrderablePropertyInfo>();
+        orders.Add(new(typeof(Product).GetProperty("CategoryId"), SortDirectionEnum.Ascending));
+        orders.Add(new(typeof(Product).GetProperty("Name"), SortDirectionEnum.Descending));
+
+        using var con = database.GetConnection();
+        var products = await con.FromAsync<Product>(sql =>
+            sql.Select(p => new { p.Name, p.CategoryId })
+                .Where(p => p.CategoryId == 1)
+                .OrderBy(orders)
                 .Page(1, 5));
 
         Assert.Equal(5, products.Count());

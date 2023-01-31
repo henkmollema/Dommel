@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -191,6 +192,23 @@ public class SqlExpression<TEntity>
         return this;
     }
 
+
+    /// <summary>
+    /// Adds a listo of order-by-statement (ascending or descending) to the current expression.
+    /// </summary>
+    /// <param name="selectors">The list of columns to order by. E.g. <code>x => x.Name</code>.</param>
+    /// <returns>The current <see cref="SqlExpression{TEntity}"/> instance.</returns>
+    public virtual SqlExpression<TEntity> OrderBy(IEnumerable<OrderableColumn<TEntity>> selectors)
+    {
+        foreach(OrderableColumn<TEntity> column in selectors)
+        {
+            string direction = column.Direction == SortDirectionEnum.Ascending ? "asc" : "desc";
+
+            OrderByCore(column.Selector, direction);
+        }
+        return this;
+    }
+
     /// <summary>
     /// Adds an order-by-statement (ascending) to the current expression.
     /// </summary>
@@ -210,6 +228,22 @@ public class SqlExpression<TEntity>
     public virtual SqlExpression<TEntity> OrderBy(PropertyInfo property)
     {
         AppendOrderBy(Resolvers.Column(property, SqlBuilder), direction: "asc");
+        return this;
+    }
+
+    /// <summary>
+    /// Adds a listo of order-by-statement (ascending or descending) to the current expression.
+    /// </summary>
+    /// <param name="selectors">The list of columns to order by. E.g. <code>x => x.Name</code>.</param>
+    /// <returns>The current <see cref="SqlExpression{TEntity}"/> instance.</returns>
+    public virtual SqlExpression<TEntity> OrderBy(IEnumerable<OrderablePropertyInfo> properties)
+    {
+        foreach (OrderablePropertyInfo property in properties)
+        {
+            string direction = property.Direction == SortDirectionEnum.Ascending ? "asc" : "desc";
+
+            AppendOrderBy(Resolvers.Column(property.Property, SqlBuilder), direction);
+        }
         return this;
     }
 
