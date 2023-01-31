@@ -60,18 +60,38 @@ public class SqlExpression<TEntity>
     /// <param name="selector">The columns to select.
     /// E.g. <code>x => new { x.Foo, x.Bar }</code>.</param>
     /// <returns>The current <see cref="SqlExpression{TEntity}"/> instance.</returns>
-    public virtual SqlExpression<TEntity> Select(Func<TEntity, object> selector)
+    public virtual SqlExpression<TEntity> Select(Expression<Func<TEntity, object>> selector)
     {
         if (selector == null)
         {
             throw new ArgumentNullException(nameof(selector));
         }
 
-        // Invoke the selector expression to obtain an object instance of anonymous type
-        var obj = selector.Invoke(NewEntityFunc());
+        PropertyInfo[] props = null;
 
-        // Resolve properties of anonymous type
-        var props = obj.GetType().GetProperties();
+        // Get properties from expression
+        if(selector.NodeType == ExpressionType.Lambda && selector.Body?.NodeType == ExpressionType.New)
+        {
+            if (selector.Body is NewExpression newExpression)
+            {
+                props = newExpression.Arguments
+                    .Select(x => (x as MemberExpression)?.Member)
+                    .Where(x => x != null)
+                    .Cast<PropertyInfo>()
+                    .ToArray();
+            }
+        }
+
+        if (props?.Any() != true)
+        {
+            // Invoke the selector expression to obtain an object instance of anonymous type
+            var obj = selector.Compile().Invoke(NewEntityFunc());
+
+
+            // Resolve properties of anonymous type
+            props = obj.GetType().GetProperties();
+        }
+
         if (props.Length == 0)
         {
             throw new ArgumentException($"Projection over type '{typeof(TEntity).Name}' yielded no properties.", nameof(selector));

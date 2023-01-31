@@ -9,6 +9,7 @@ public class Product
 {
     public int Id { get; set; }
 
+    [Column("FullName")]
     public string? Name { get; set; }
 
     // One Product has one Category
