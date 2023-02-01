@@ -194,9 +194,9 @@ public class SqlExpression<TEntity>
 
 
     /// <summary>
-    /// Adds a listo of order-by-statement (ascending or descending) to the current expression.
+    /// Adds a list of order-by-statement (ascending or descending) to the current expression.
     /// </summary>
-    /// <param name="selectors">The list of columns to order by. E.g. <code>x => x.Name</code>.</param>
+    /// <param name="selectors">The list of columns to order by.</param>
     /// <returns>The current <see cref="SqlExpression{TEntity}"/> instance.</returns>
     public virtual SqlExpression<TEntity> OrderBy(IEnumerable<OrderableColumn<TEntity>> selectors)
     {
@@ -234,7 +234,7 @@ public class SqlExpression<TEntity>
     /// <summary>
     /// Adds a listo of order-by-statement (ascending or descending) to the current expression.
     /// </summary>
-    /// <param name="selectors">The list of columns to order by. E.g. <code>x => x.Name</code>.</param>
+    /// <param name="properties">The list of property info of the column to order by.</param>
     /// <returns>The current <see cref="SqlExpression{TEntity}"/> instance.</returns>
     public virtual SqlExpression<TEntity> OrderBy(IEnumerable<OrderablePropertyInfo> properties)
     {
