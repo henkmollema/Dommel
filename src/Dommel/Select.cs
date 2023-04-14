@@ -160,10 +160,13 @@ public static partial class DommelMapper
 
     private static string BuildSelectPagedQuery<TEntity>(IDbConnection connection, Expression<Func<TEntity, bool>> predicate, int pageNumber, int pageSize, IEnumerable<OrderableColumn<TEntity>>? orderableColumn, out DynamicParameters parameters)
     {
-        // Start with the select query part with where 
-        var sql = BuildSelectSql(connection, predicate, orderableColumn, out parameters);
+        if (orderableColumn == null)
+            orderableColumn = Resolvers.KeyProperties(typeof(TEntity)).Select(p => new OrderableColumn<TEntity>(r => p.Property.Name, SortDirectionEnum.Ascending));
 
-        sql += GetSqlBuilder(connection).BuildPaging("", pageNumber, pageSize);
+        // Start with the select query part with where 
+        string sql = BuildSelectSql(connection, predicate, orderableColumn, out parameters);
+
+        sql += GetSqlBuilder(connection).BuildPaging(null, pageNumber, pageSize);
         return sql;
     }
 }
