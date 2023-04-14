@@ -101,7 +101,8 @@ DROP TABLE {Quote("Orders")};
 DROP TABLE {Quote("OrderLines")};
 DROP TABLE {Quote("Foos")};
 DROP TABLE {Quote("Bars")};
-DROP TABLE {Quote("Bazs")};");
+DROP TABLE {Quote("Bazs")};
+DROP TABLE {Quote("Plufs")};");
     }
 
     public virtual async Task DisposeAsync() => await DropTables();

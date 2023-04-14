@@ -1,6 +1,7 @@
 using System;
 using System.Data;
 using System.Linq.Expressions;
+using System.Threading;
 using System.Threading.Tasks;
 using Dapper;
 
@@ -19,7 +20,7 @@ public static partial class DommelMapper
     {
         var sql = BuildCountAllSql(GetSqlBuilder(connection), typeof(TEntity));
         LogQuery<TEntity>(sql);
-        return connection.ExecuteScalar<long>(sql, transaction);
+        return connection.ExecuteScalar<long>(sql: sql, transaction: transaction);
     }
 
     /// <summary>
@@ -28,12 +29,13 @@ public static partial class DommelMapper
     /// <typeparam name="TEntity">The type of the entity.</typeparam>
     /// <param name="connection">The connection to the database. This can either be open or closed.</param>
     /// <param name="transaction">Optional transaction for the command.</param>
+    /// <param name="cancellationToken">Optional cancellation token for the command.</param>
     /// <returns>The number of entities matching the specified predicate.</returns>
-    public static Task<long> CountAsync<TEntity>(this IDbConnection connection, IDbTransaction? transaction = null)
+    public static Task<long> CountAsync<TEntity>(this IDbConnection connection, IDbTransaction? transaction = null, CancellationToken cancellationToken = default)
     {
         var sql = BuildCountAllSql(GetSqlBuilder(connection), typeof(TEntity));
         LogQuery<TEntity>(sql);
-        return connection.ExecuteScalarAsync<long>(sql, transaction);
+        return connection.ExecuteScalarAsync<long>(new CommandDefinition(commandText: sql, transaction: transaction, cancellationToken: cancellationToken));
     }
 
     /// <summary>
@@ -58,12 +60,13 @@ public static partial class DommelMapper
     /// <param name="connection">The connection to the database. This can either be open or closed.</param>
     /// <param name="predicate">A predicate to filter the results.</param>
     /// <param name="transaction">Optional transaction for the command.</param>
+    /// <param name="cancellationToken">Optional cancellation token for the command.</param>
     /// <returns>The number of entities matching the specified predicate.</returns>
-    public static Task<long> CountAsync<TEntity>(this IDbConnection connection, Expression<Func<TEntity, bool>> predicate, IDbTransaction? transaction = null)
+    public static Task<long> CountAsync<TEntity>(this IDbConnection connection, Expression<Func<TEntity, bool>> predicate, IDbTransaction? transaction = null, CancellationToken cancellationToken = default)
     {
         var sql = BuildCountSql(GetSqlBuilder(connection), predicate, out var parameters);
         LogQuery<TEntity>(sql);
-        return connection.ExecuteScalarAsync<long>(sql, parameters, transaction);
+        return connection.ExecuteScalarAsync<long>(new CommandDefinition(commandText: sql, parameters: parameters, transaction: transaction, cancellationToken: cancellationToken));
     }
 
     internal static string BuildCountAllSql(ISqlBuilder sqlBuilder, Type type)
