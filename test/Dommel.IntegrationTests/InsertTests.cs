@@ -11,6 +11,40 @@ public class InsertTests
 {
     [Theory]
     [ClassData(typeof(DatabaseTestData))]
+    public void Insert_key_no_identity(DatabaseDriver database)
+    {
+        // Arrange
+        using var con = database.GetConnection();
+        var plufToInsert = new Pluf { PlufId = 1, Name = "pluffffff" };
+
+        // Act
+        var id = Convert.ToInt32(con.Insert(plufToInsert));
+
+        // Assert
+        var pluf = con.Get<Pluf>(id);
+        Assert.NotNull(pluf);
+        Assert.Equal(id, pluf!.PlufId);
+        Assert.Equal("pluffffff", pluf.Name);
+    }
+    [Theory]
+    [ClassData(typeof(DatabaseTestData))]
+    public async Task InsertAsync_key_no_identity(DatabaseDriver database)
+    {
+        // Arrange
+        using var con = database.GetConnection();
+        var plufToInsert = new Pluf { PlufId = 2, Name = "pluffffff" };
+
+        // Act
+        var id = Convert.ToInt32(await con.InsertAsync(plufToInsert));
+
+        // Assert
+        var pluf = con.Get<Pluf>(id);
+        Assert.NotNull(pluf);
+        Assert.Equal(id, pluf!.PlufId);
+        Assert.Equal("pluffffff", pluf.Name);
+    }
+    [Theory]
+    [ClassData(typeof(DatabaseTestData))]
     public void Insert(DatabaseDriver database)
     {
         // Arrange

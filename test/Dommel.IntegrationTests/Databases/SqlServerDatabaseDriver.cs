@@ -9,9 +9,11 @@ public class SqlServerDatabaseDriver : DatabaseDriver
 {
     public override DbConnection GetConnection(string databaseName)
     {
-        var connectionString = CI.IsAppVeyor
-            ? $"Server=(local)\\SQL2019;Database={databaseName};User ID=sa;Password=Password12!"
-            : $"Server=(LocalDb)\\mssqllocaldb;Database={databaseName};User ID=dommel;Password=dommel";
+        //var connectionString = CI.IsAppVeyor
+        //    ? $"Server=(local)\\SQL2019;Database={databaseName};User ID=sa;Password=Password12!"
+        //    : $"Server=(LocalDb)\\mssqllocaldb;Database={databaseName};User ID=dommel;Password=dommel";
+
+        var connectionString = $"Server=10.1.1.1;Database={databaseName};User ID=dev;Password=skystore;TrustServerCertificate=True;";
 
         return new SqlConnection(connectionString);
     }
@@ -38,6 +40,7 @@ BEGIN
     CREATE TABLE dbo.Foos (Id INT IDENTITY(1,1) PRIMARY KEY, Name VARCHAR(255));
     CREATE TABLE dbo.Bars (Id INT IDENTITY(1,1) PRIMARY KEY, Name VARCHAR(255));
     CREATE TABLE dbo.Bazs (BazId UNIQUEIDENTIFIER  PRIMARY KEY, Name VARCHAR(255));
+    CREATE TABLE dbo.Plufs (PlufId INT PRIMARY KEY, Name VARCHAR(255));
     SELECT 1;
 END";
         var created = await con.ExecuteScalarAsync(sql);

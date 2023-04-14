@@ -52,7 +52,8 @@ CREATE TABLE IF NOT EXISTS ""Orders"" (""Id"" SERIAL PRIMARY KEY, ""Created"" TI
 CREATE TABLE IF NOT EXISTS ""OrderLines"" (""Id"" SERIAL PRIMARY KEY, ""OrderId"" INT, ""Line"" VARCHAR(255));
 CREATE TABLE IF NOT EXISTS ""Foos"" (""Id"" SERIAL PRIMARY KEY, ""Name"" VARCHAR(255));
 CREATE TABLE IF NOT EXISTS ""Bars"" (""Id"" SERIAL PRIMARY KEY, ""Name"" VARCHAR(255));
-CREATE TABLE IF NOT EXISTS ""Bazs"" (""BazId"" UUID primary key, ""Name"" VARCHAR(255));";
+CREATE TABLE IF NOT EXISTS ""Bazs"" (""BazId"" UUID primary key, ""Name"" VARCHAR(255));
+CREATE TABLE IF NOT EXISTS ""Plufs"" (""PlufId"" INT PRIMARY KEY, ""Name"" VARCHAR(255));";
         var created = await con.ExecuteScalarAsync(sql);
 
         // No result means the tables were just created

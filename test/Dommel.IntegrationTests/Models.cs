@@ -4,7 +4,14 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Dommel.IntegrationTests;
+public class Pluf
+{
+    [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.None)]
+    public int PlufId { get; set; }
 
+    public string? Name { get; set; }
+}
 public class Product
 {
     [Key]
