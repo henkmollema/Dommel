@@ -93,6 +93,11 @@ public static partial class DommelMapper
 
     private static string BuildSelectSql<TEntity>(IDbConnection connection, Expression<Func<TEntity, bool>> predicate, out DynamicParameters parameters)
     {
+        return BuildSelectSql(connection, predicate, null, out parameters);
+    }
+
+    private static string BuildSelectSql<TEntity>(IDbConnection connection, Expression<Func<TEntity, bool>> predicate, IEnumerable<OrderableColumn<TEntity>>? orderableColumns, out DynamicParameters parameters)
+    {
         var type = typeof(TEntity);
 
         // Build the select all part
@@ -101,6 +106,7 @@ public static partial class DommelMapper
         // Append the where statement
         sql += CreateSqlExpression<TEntity>(GetSqlBuilder(connection))
             .Where(predicate)
+            .OrderBy(orderableColumns)
             .ToSql(out parameters);
         return sql;
     }
@@ -118,13 +124,14 @@ public static partial class DommelMapper
     /// A value indicating whether the result of the query should be executed directly,
     /// or when the query is materialized (using <c>ToList()</c> for example).
     /// </param>
+    /// <param name="orderableColumn">Optional list of columns to order by.</param>
     /// <returns>
     /// A collection of entities of type <typeparamref name="TEntity"/> matching the specified
     /// <paramref name="predicate"/>.
     /// </returns>
-    public static IEnumerable<TEntity> SelectPaged<TEntity>(this IDbConnection connection, Expression<Func<TEntity, bool>> predicate, int pageNumber, int pageSize, IDbTransaction? transaction = null, bool buffered = true)
+    public static IEnumerable<TEntity> SelectPaged<TEntity>(this IDbConnection connection, Expression<Func<TEntity, bool>> predicate, int pageNumber, int pageSize, IDbTransaction? transaction = null, bool buffered = true, IEnumerable<OrderableColumn<TEntity>>? orderableColumn = null)
     {
-        var sql = BuildSelectPagedQuery(connection, predicate, pageNumber, pageSize, out var parameters);
+        var sql = BuildSelectPagedQuery(connection, predicate, pageNumber, pageSize, orderableColumn, out var parameters);
         LogQuery<TEntity>(sql);
         return connection.Query<TEntity>(sql, parameters, transaction, buffered);
     }
@@ -139,26 +146,24 @@ public static partial class DommelMapper
     /// <param name="pageSize">The page size.</param>
     /// <param name="transaction">Optional transaction for the command.</param>
     /// <param name="cancellationToken">Optional cancellation token for the command.</param>
+    /// <param name="orderableColumn">Optional list of columns to order by.</param>
     /// <returns>
     /// A collection of entities of type <typeparamref name="TEntity"/> matching the specified
     /// <paramref name="predicate"/>.
     /// </returns>
-    public static Task<IEnumerable<TEntity>> SelectPagedAsync<TEntity>(this IDbConnection connection, Expression<Func<TEntity, bool>> predicate, int pageNumber, int pageSize, IDbTransaction? transaction = null, CancellationToken cancellationToken = default)
+    public static Task<IEnumerable<TEntity>> SelectPagedAsync<TEntity>(this IDbConnection connection, Expression<Func<TEntity, bool>> predicate, int pageNumber, int pageSize, IDbTransaction? transaction = null, CancellationToken cancellationToken = default, IEnumerable<OrderableColumn<TEntity>>? orderableColumn = null)
     {
-        var sql = BuildSelectPagedQuery(connection, predicate, pageNumber, pageSize, out var parameters);
+        var sql = BuildSelectPagedQuery(connection, predicate, pageNumber, pageSize, orderableColumn, out var parameters);
         LogQuery<TEntity>(sql);
         return connection.QueryAsync<TEntity>(new CommandDefinition(sql, parameters, transaction, cancellationToken: cancellationToken));
     }
 
-    private static string BuildSelectPagedQuery<TEntity>(IDbConnection connection, Expression<Func<TEntity, bool>> predicate, int pageNumber, int pageSize, out DynamicParameters parameters)
+    private static string BuildSelectPagedQuery<TEntity>(IDbConnection connection, Expression<Func<TEntity, bool>> predicate, int pageNumber, int pageSize, IEnumerable<OrderableColumn<TEntity>>? orderableColumn, out DynamicParameters parameters)
     {
-        // Start with the select query part
-        var sql = BuildSelectSql(connection, predicate, out parameters);
+        // Start with the select query part with where 
+        var sql = BuildSelectSql(connection, predicate, orderableColumn, out parameters);
 
-        // Append the paging part including the order by
-        var keyColumns = Resolvers.KeyProperties(typeof(TEntity)).Select(p => Resolvers.Column(p.Property, connection));
-        var orderBy = "order by " + string.Join(", ", keyColumns);
-        sql += GetSqlBuilder(connection).BuildPaging(orderBy, pageNumber, pageSize);
+        sql += GetSqlBuilder(connection).BuildPaging("", pageNumber, pageSize);
         return sql;
     }
 }
