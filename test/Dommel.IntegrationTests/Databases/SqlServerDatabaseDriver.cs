@@ -38,6 +38,7 @@ BEGIN
     CREATE TABLE dbo.Foos (Id INT IDENTITY(1,1) PRIMARY KEY, Name VARCHAR(255));
     CREATE TABLE dbo.Bars (Id INT IDENTITY(1,1) PRIMARY KEY, Name VARCHAR(255));
     CREATE TABLE dbo.Bazs (BazId UNIQUEIDENTIFIER  PRIMARY KEY, Name VARCHAR(255));
+    CREATE TABLE dbo.Plufs (PlufId INT PRIMARY KEY, Name VARCHAR(255));
     SELECT 1;
 END";
         var created = await con.ExecuteScalarAsync(sql);
