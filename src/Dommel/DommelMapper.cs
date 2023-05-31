@@ -50,6 +50,11 @@ public static partial class DommelMapper
                 }
                 return DefaultTypeMapProvider(type)?.GetMember(columnName)?.Property;
             });
+
+#if NET6_0_OR_GREATER
+        SqlMapper.AddTypeHandler(new DateOnlyTypeHandler());
+        SqlMapper.AddTypeHandler(new TimeOnlyTypeHandler());
+#endif
     }
 
     /// <summary>
