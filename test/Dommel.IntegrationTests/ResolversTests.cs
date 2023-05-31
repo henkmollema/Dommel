@@ -6,20 +6,20 @@ namespace Dommel.Tests;
 
 public class ResolversTests
 {
-    private readonly SqlConnection sqlConnection = new SqlConnection();
+    private readonly SqlConnection _sqlConnection = new();
 
     [Fact]
     public void Table_WithSchema()
     {
-        Assert.Equal("[dbo].[Qux]", Resolvers.Table(typeof(FooQux), sqlConnection));
-        Assert.Equal("[foo].[dbo].[Qux]", Resolvers.Table(typeof(FooDboQux), sqlConnection));
+        Assert.Equal("[dbo].[Qux]", Resolvers.Table(typeof(FooQux), _sqlConnection));
+        Assert.Equal("[foo].[dbo].[Qux]", Resolvers.Table(typeof(FooDboQux), _sqlConnection));
     }
 
     [Fact]
     public void Table_NoCacheConflictNestedClass()
     {
-        Assert.Equal("[BarA]", Resolvers.Table(typeof(Foo.Bar), sqlConnection));
-        Assert.Equal("[BarB]", Resolvers.Table(typeof(Baz.Bar), sqlConnection));
+        Assert.Equal("[BarA]", Resolvers.Table(typeof(Foo.Bar), _sqlConnection));
+        Assert.Equal("[BarB]", Resolvers.Table(typeof(Baz.Bar), _sqlConnection));
     }
 
     public class Foo

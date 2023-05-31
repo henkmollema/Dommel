@@ -8,5 +8,5 @@ public static class CI
 
     public static bool IsTravis => EnvBool("TRAVIS");
 
-    private static bool EnvBool(string env) => bool.TryParse(Environment.GetEnvironmentVariable(env), out var b) ? b : false;
+    private static bool EnvBool(string env) => bool.TryParse(Environment.GetEnvironmentVariable(env), out var b) && b;
 }

@@ -94,7 +94,7 @@ public class DommelJsonMapperTests
     [Fact]
     public void ThrowsWhenEmptyEntityAssemblies()
     {
-        var ex = Assert.Throws<ArgumentException>("options", () => DommelJsonMapper.AddJson(new DommelJsonOptions { EntityAssemblies = new Assembly[0] }));
+        var ex = Assert.Throws<ArgumentException>("options", () => DommelJsonMapper.AddJson(new DommelJsonOptions { EntityAssemblies = Array.Empty<Assembly>() }));
         Assert.Equal(new ArgumentException("No entity assemblies specified.", "options").Message, ex.Message);
     }
 }

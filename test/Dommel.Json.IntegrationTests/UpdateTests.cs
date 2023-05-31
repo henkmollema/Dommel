@@ -8,7 +8,7 @@ namespace Dommel.Json.IntegrationTests;
 [Collection("JSON Database")]
 public class UpdateTests
 {
-    private Lead InsertLead(DbConnection con)
+    private static Lead InsertLead(DbConnection con)
     {
         var id = con.Insert(new Lead
         {
@@ -20,7 +20,7 @@ public class UpdateTests
         return con.Get<Lead>(id)!;
     }
 
-    private async Task<Lead> InsertLeadAsync(DbConnection con)
+    private static async Task<Lead> InsertLeadAsync(DbConnection con)
     {
         var id = await con.InsertAsync(new Lead
         {

@@ -24,7 +24,7 @@ public class JsonDatabaseFixture : DatabaseFixtureBase
 
     private class NpgJsonObjectTypeHandler : SqlMapper.ITypeHandler
     {
-        private readonly JsonObjectTypeHandler _defaultTypeHandler = new JsonObjectTypeHandler();
+        private readonly JsonObjectTypeHandler _defaultTypeHandler = new();
 
         public void SetValue(IDbDataParameter parameter, object value)
         {

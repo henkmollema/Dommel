@@ -4,7 +4,7 @@ namespace Dommel.Tests;
 
 public class SqlServerCeSqlBuilderTests
 {
-    private readonly SqlServerCeSqlBuilder _builder = new SqlServerCeSqlBuilder();
+    private readonly SqlServerCeSqlBuilder _builder = new();
 
     [Fact]
     public void BuildInsert()

@@ -106,7 +106,7 @@ public class DynamicExpressionTests
         public string Bar { get; set; } = "";
     }
 
-    public Expression<Func<T, bool>> And<T>(Expression<Func<T, bool>> left, Expression<Func<T, bool>> right)
+    private static Expression<Func<T, bool>> And<T>(Expression<Func<T, bool>> left, Expression<Func<T, bool>> right)
     {
         if (left == null)
         {
@@ -117,7 +117,7 @@ public class DynamicExpressionTests
         return (Expression.Lambda<Func<T, bool>>(Expression.AndAlso(left.Body, invokeExpression), left.Parameters));
     }
 
-    public Expression<Func<T, bool>> Or<T>(Expression<Func<T, bool>> left, Expression<Func<T, bool>> right)
+    private static Expression<Func<T, bool>> Or<T>(Expression<Func<T, bool>> left, Expression<Func<T, bool>> right)
     {
         if (left == null)
         {

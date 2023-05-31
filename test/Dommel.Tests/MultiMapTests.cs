@@ -5,7 +5,7 @@ namespace Dommel.Tests;
 
 public class MultiMapTests
 {
-    private readonly MySqlSqlBuilder _sqlBuilder = new MySqlSqlBuilder();
+    private readonly MySqlSqlBuilder _sqlBuilder = new();
 
     [Fact]
     public void BuildMultiMapQuery_OneToOne()
@@ -22,7 +22,7 @@ public class MultiMapTests
         var query = BuildMultiMapQuery(_sqlBuilder, typeof(Product), new[] { typeof(Product), typeof(Category) }, 1, out var parameters);
         var expectedQuery = "select * from `Products` left join `Categories` on `Products`.`CategoryId` = `Categories`.`Id` where `Products`.`Id` = @Id";
         Assert.Equal(expectedQuery, query);
-        Assert.Equal("Id", Assert.Single(parameters?.ParameterNames));
+        Assert.Equal("Id", Assert.Single(parameters?.ParameterNames!));
     }
 
     [Fact]
@@ -40,7 +40,7 @@ public class MultiMapTests
         var query = BuildMultiMapQuery(_sqlBuilder, typeof(Product), new[] { typeof(Product), typeof(ProductOption) }, 1, out var parameters);
         var expectedQuery = "select * from `Products` left join `ProductOptions` on `Products`.`Id` = `ProductOptions`.`ProductId` where `Products`.`Id` = @Id";
         Assert.Equal(expectedQuery, query);
-        Assert.Equal("Id", Assert.Single(parameters?.ParameterNames));
+        Assert.Equal("Id", Assert.Single(parameters?.ParameterNames!));
     }
 
     [Fact]
@@ -63,7 +63,7 @@ public class MultiMapTests
             "left join `ProductOptions` on `Products`.`Id` = `ProductOptions`.`ProductId` " +
             "where `Products`.`Id` = @Id";
         Assert.Equal(expectedQuery, query);
-        Assert.Equal("Id", Assert.Single(parameters?.ParameterNames));
+        Assert.Equal("Id", Assert.Single(parameters?.ParameterNames!));
     }
 
     [Fact]
@@ -86,6 +86,6 @@ public class MultiMapTests
             "left join `Categories` on `Products`.`CategoryId` = `Categories`.`Id` " +
             "where `Products`.`Id` = @Id";
         Assert.Equal(expectedQuery, query);
-        Assert.Equal("Id", Assert.Single(parameters?.ParameterNames));
+        Assert.Equal("Id", Assert.Single(parameters?.ParameterNames!));
     }
 }

@@ -13,7 +13,7 @@ public class GetAllTests
         using var con = database.GetConnection();
         var products = con.GetAll<Product>();
         Assert.NotEmpty(products);
-        Assert.All(products, p => Assert.NotEmpty(p.Name));
+        Assert.All(products, p => Assert.NotEmpty(p.Name!));
     }
 
     [Theory]
@@ -23,6 +23,6 @@ public class GetAllTests
         using var con = database.GetConnection();
         var products = await con.GetAllAsync<Product>();
         Assert.NotEmpty(products);
-        Assert.All(products, p => Assert.NotEmpty(p.Name));
+        Assert.All(products, p => Assert.NotEmpty(p.Name!));
     }
 }

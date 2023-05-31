@@ -94,7 +94,7 @@ public class DefaultPropertyResolverTests
     private class CustomResolver : DefaultPropertyResolver
     {
         // Create a new hashset without the object type.
-        protected override HashSet<Type> PrimitiveTypes => new HashSet<Type>(base.PrimitiveTypes.Skip(1));
+        protected override HashSet<Type> PrimitiveTypes => new(base.PrimitiveTypes.Skip(1));
     }
 
     private class Foo
