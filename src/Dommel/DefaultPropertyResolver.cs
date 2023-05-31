@@ -22,6 +22,10 @@ public class DefaultPropertyResolver : IPropertyResolver
         typeof(DateTimeOffset),
         typeof(TimeSpan),
         typeof(byte[]),
+#if NET6_0_OR_GREATER
+        typeof(DateOnly),
+        typeof(TimeOnly),
+#endif
     };
 
     /// <summary>
