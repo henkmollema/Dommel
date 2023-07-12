@@ -4,7 +4,7 @@ namespace Dommel.Tests;
 
 public class MySqlSqlBuilderTests
 {
-    private readonly MySqlSqlBuilder _builder = new MySqlSqlBuilder();
+    private readonly MySqlSqlBuilder _builder = new();
 
     [Fact]
     public void BuildInsert()

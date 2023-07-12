@@ -18,7 +18,7 @@ public class MultiMapTests
         });
 
         Assert.NotNull(product);
-        Assert.NotEmpty(product!.Name);
+        Assert.NotEmpty(product!.Name!);
         Assert.NotNull(product.Category);
         Assert.NotNull(product.Category?.Name);
     }
@@ -35,7 +35,7 @@ public class MultiMapTests
         });
 
         Assert.NotNull(product);
-        Assert.NotEmpty(product!.Name);
+        Assert.NotEmpty(product!.Name!);
         Assert.NotNull(product.Category);
         Assert.NotNull(product.Category?.Name);
     }

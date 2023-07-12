@@ -66,7 +66,7 @@ public class SqlExpression<TEntity>
             throw new ArgumentNullException(nameof(selector));
         }
 
-        PropertyInfo[] props = null;
+        PropertyInfo[]? props = null;
 
         // Get properties from expression
         if(selector.NodeType == ExpressionType.Lambda && selector.Body?.NodeType == ExpressionType.New)
@@ -85,7 +85,6 @@ public class SqlExpression<TEntity>
         {
             // Invoke the selector expression to obtain an object instance of anonymous type
             var obj = selector.Compile().Invoke(NewEntityFunc());
-
 
             // Resolve properties of anonymous type
             props = obj.GetType().GetProperties();
@@ -413,7 +412,7 @@ public class SqlExpression<TEntity>
         };
         AddParameter(textLike, out var paramName);
 
-        return SqlBuilder.LikeExpression(column.ToString(), paramName);
+        return SqlBuilder.LikeExpression(column.ToString()!, paramName);
     }
 
     /// <summary>

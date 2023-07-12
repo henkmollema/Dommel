@@ -18,7 +18,7 @@ internal enum QueryCacheType
     Any,
 }
 
-internal struct QueryCacheKey : IEquatable<QueryCacheKey>
+internal readonly struct QueryCacheKey : IEquatable<QueryCacheKey>
 {
     public QueryCacheKey(QueryCacheType cacheType, ISqlBuilder sqlBuilder, MemberInfo memberInfo)
     {
@@ -33,5 +33,9 @@ internal struct QueryCacheKey : IEquatable<QueryCacheKey>
 
     public MemberInfo MemberInfo { get; }
 
-    public bool Equals(QueryCacheKey other) => CacheType == other.CacheType && SqlBuilderType == other.SqlBuilderType && MemberInfo == other.MemberInfo;
+    public readonly bool Equals(QueryCacheKey other) => CacheType == other.CacheType && SqlBuilderType == other.SqlBuilderType && MemberInfo == other.MemberInfo;
+
+    public override bool Equals(object? obj) => obj is QueryCacheKey key && Equals(key);
+
+    public override int GetHashCode() => CacheType.GetHashCode() + SqlBuilderType.GetHashCode() + MemberInfo.GetHashCode();
 }

@@ -4,7 +4,7 @@ namespace Dommel.Tests;
 
 public class SqliteSqlBuilderTests
 {
-    private readonly SqliteSqlBuilder _builder = new SqliteSqlBuilder();
+    private readonly SqliteSqlBuilder _builder = new();
 
     [Fact]
     public void BuildInsert()

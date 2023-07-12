@@ -98,7 +98,7 @@ public class AutoMultiMapTests
                 Assert.Equal("Order1", x.Reference);
 
                     // Order lines
-                    Assert.Collection(x.OrderLines,
+                    Assert.Collection(x.OrderLines!,
                     x => Assert.Equal("Line1", x.Line),
                     x => Assert.Equal("Line2", x.Line),
                     x => Assert.Equal("Line3", x.Line));
@@ -116,7 +116,7 @@ public class AutoMultiMapTests
                 Assert.Equal("Order2", x.Reference);
 
                     // Order lines
-                    Assert.Equal("Line4", Assert.Single(x.OrderLines).Line);
+                    Assert.Equal("Line4", Assert.Single(x.OrderLines!).Line);
 
                 Assert.Null(x.Customer);
                 Assert.Null(x.PricingSettings);
@@ -165,7 +165,7 @@ public class AutoMultiMapTests
                 Assert.Equal("Order1", x.Reference);
 
                     // Order lines
-                    Assert.Collection(x.OrderLines,
+                    Assert.Collection(x.OrderLines!,
                     x => Assert.Equal("Line1", x.Line),
                     x => Assert.Equal("Line2", x.Line),
                     x => Assert.Equal("Line3", x.Line));
@@ -187,7 +187,7 @@ public class AutoMultiMapTests
                 Assert.Equal("Order2", x.Reference);
 
                     // Order lines
-                    Assert.Equal("Line4", Assert.Single(x.OrderLines).Line);
+                    Assert.Equal("Line4", Assert.Single(x.OrderLines!).Line);
 
                     // Customer
                     Assert.NotNull(x.Customer);
@@ -243,7 +243,7 @@ public class AutoMultiMapTests
                 Assert.Equal("Order1", x.Reference);
 
                     // Order lines
-                    Assert.Collection(x.OrderLines,
+                    Assert.Collection(x.OrderLines!,
                     x => Assert.Equal("Line1", x.Line),
                     x => Assert.Equal("Line2", x.Line),
                     x => Assert.Equal("Line3", x.Line));
@@ -268,7 +268,7 @@ public class AutoMultiMapTests
                 Assert.Equal("Order2", x.Reference);
 
                     // Order lines
-                    Assert.Equal("Line4", Assert.Single(x.OrderLines).Line);
+                    Assert.Equal("Line4", Assert.Single(x.OrderLines!).Line);
 
                     // Customer
                     Assert.NotNull(x.Customer);
@@ -330,7 +330,7 @@ public class AutoMultiMapTests
                 Assert.Equal("Order1", x.Reference);
 
                     // Order lines
-                    Assert.Collection(x.OrderLines,
+                    Assert.Collection(x.OrderLines!,
                     x => Assert.Equal("Line1", x.Line),
                     x => Assert.Equal("Line2", x.Line),
                     x => Assert.Equal("Line3", x.Line));
@@ -345,7 +345,7 @@ public class AutoMultiMapTests
                 Assert.Equal(x.PricingSettingsId, x.PricingSettings?.Id);
 
                     // Order logs
-                    Assert.Collection(x.Logs,
+                    Assert.Collection(x.Logs!,
                     x => Assert.Equal("A", x.Message),
                     x => Assert.Equal("B", x.Message),
                     x => Assert.Equal("C", x.Message),
@@ -362,7 +362,7 @@ public class AutoMultiMapTests
                 Assert.Equal("Order2", x.Reference);
 
                     // Order lines
-                    Assert.Equal("Line4", Assert.Single(x.OrderLines).Line);
+                    Assert.Equal("Line4", Assert.Single(x.OrderLines!).Line);
 
                     // Customer
                     Assert.NotNull(x.Customer);
@@ -374,7 +374,7 @@ public class AutoMultiMapTests
                 Assert.Equal(x.PricingSettingsId, x.PricingSettings?.Id);
 
                     // Order logs
-                    Assert.Collection(x.Logs,
+                    Assert.Collection(x.Logs!,
                     x => Assert.Equal("F", x.Message),
                     x => Assert.Equal("G", x.Message));
 
@@ -431,7 +431,7 @@ public class AutoMultiMapTests
                 Assert.Equal("Order1", x.Reference);
 
                     // Order lines
-                    Assert.Collection(x.OrderLines,
+                    Assert.Collection(x.OrderLines!,
                     x => Assert.Equal("Line1", x.Line),
                     x => Assert.Equal("Line2", x.Line),
                     x => Assert.Equal("Line3", x.Line));
@@ -446,7 +446,7 @@ public class AutoMultiMapTests
                 Assert.Equal(x.PricingSettingsId, x.PricingSettings?.Id);
 
                     // Order logs
-                    Assert.Collection(x.Logs,
+                    Assert.Collection(x.Logs!,
                     x => Assert.Equal("A", x.Message),
                     x => Assert.Equal("B", x.Message),
                     x => Assert.Equal("C", x.Message),
@@ -468,7 +468,7 @@ public class AutoMultiMapTests
                 Assert.Equal("Order2", x.Reference);
 
                     // Order lines
-                    Assert.Equal("Line4", Assert.Single(x.OrderLines).Line);
+                    Assert.Equal("Line4", Assert.Single(x.OrderLines!).Line);
 
                     // Customer
                     Assert.NotNull(x.Customer);
@@ -480,7 +480,7 @@ public class AutoMultiMapTests
                 Assert.Equal(x.PricingSettingsId, x.PricingSettings?.Id);
 
                     // Order logs
-                    Assert.Collection(x.Logs,
+                    Assert.Collection(x.Logs!,
                     x => Assert.Equal("F", x.Message),
                     x => Assert.Equal("G", x.Message));
 
@@ -542,7 +542,7 @@ public class AutoMultiMapTests
                 Assert.Equal("Order1", x.Reference);
 
                     // Order lines
-                    Assert.Collection(x.OrderLines,
+                    Assert.Collection(x.OrderLines!,
                     x => Assert.Equal("Line1", x.Line),
                     x => Assert.Equal("Line2", x.Line),
                     x => Assert.Equal("Line3", x.Line));
@@ -557,7 +557,7 @@ public class AutoMultiMapTests
                 Assert.Equal(x.PricingSettingsId, x.PricingSettings?.Id);
 
                     // Order logs
-                    Assert.Collection(x.Logs,
+                    Assert.Collection(x.Logs!,
                     x => Assert.Equal("A", x.Message),
                     x => Assert.Equal("B", x.Message),
                     x => Assert.Equal("C", x.Message),
@@ -570,7 +570,7 @@ public class AutoMultiMapTests
                 Assert.Equal("Sam", x.Employee.Name);
 
                     // Shipments
-                    Assert.Collection(x.Shipments,
+                    Assert.Collection(x.Shipments!,
                     x => Assert.Equal("Foo", x.Location),
                     x => Assert.Equal("Bar", x.Location));
             },
@@ -581,7 +581,7 @@ public class AutoMultiMapTests
                 Assert.Equal("Order2", x.Reference);
 
                     // Order lines
-                    Assert.Equal("Line4", Assert.Single(x.OrderLines).Line);
+                    Assert.Equal("Line4", Assert.Single(x.OrderLines!).Line);
 
                     // Customer
                     Assert.NotNull(x.Customer);
@@ -593,7 +593,7 @@ public class AutoMultiMapTests
                 Assert.Equal(x.PricingSettingsId, x.PricingSettings?.Id);
 
                     // Order logs
-                    Assert.Collection(x.Logs,
+                    Assert.Collection(x.Logs!,
                     x => Assert.Equal("F", x.Message),
                     x => Assert.Equal("G", x.Message));
 
@@ -603,7 +603,7 @@ public class AutoMultiMapTests
                 Assert.Equal("Sam", x.Employee.Name);
 
                     // Shipments
-                    Assert.Equal("Baz", Assert.Single(x.Shipments).Location);
+                    Assert.Equal("Baz", Assert.Single(x.Shipments!).Location);
             });
     }
 }

@@ -23,7 +23,7 @@ internal class JsonSqlExpression<T> : SqlExpression<T>
             jsonContainer.IsDefined(_options.JsonDataAttributeType))
         {
             return SqlBuilder.JsonValue(
-                VisitMemberAccess(jsonContainerExpr).ToString(),
+                VisitMemberAccess(jsonContainerExpr).ToString()!,
                 ColumnNameResolver.ResolveColumnName(jsonValue));
         }
 

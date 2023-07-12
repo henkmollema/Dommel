@@ -5,7 +5,7 @@ namespace Dommel.Tests;
 
 public class DefaultColumnNameResolverTests
 {
-    private static readonly DefaultColumnNameResolver Resolver = new DefaultColumnNameResolver();
+    private static readonly DefaultColumnNameResolver Resolver = new();
 
     [Fact]
     public void ResolvesName()

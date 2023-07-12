@@ -4,7 +4,7 @@ namespace Dommel.Tests;
 
 public class PageTests
 {
-    private readonly SqlExpression<Product> _sqlExpression = new SqlExpression<Product>(new SqlServerSqlBuilder());
+    private readonly SqlExpression<Product> _sqlExpression = new(new SqlServerSqlBuilder());
 
     [Fact]
     public void GeneratesSql()

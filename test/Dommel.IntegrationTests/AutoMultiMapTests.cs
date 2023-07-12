@@ -161,7 +161,7 @@ public class AutoMultiMapTests
             x =>
             {
                 Assert.Equal(new DateTime(2011, 1, 1), x.Created);
-                Assert.NotEmpty(x.OrderLines);
+                Assert.NotEmpty(x.OrderLines!);
             },
             x =>
             {
@@ -180,7 +180,7 @@ public class AutoMultiMapTests
             x =>
             {
                 Assert.Equal(new DateTime(2011, 1, 1), x.Created);
-                Assert.NotEmpty(x.OrderLines);
+                Assert.NotEmpty(x.OrderLines!);
             },
             x =>
             {

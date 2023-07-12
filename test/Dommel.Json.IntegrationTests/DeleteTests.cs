@@ -9,7 +9,7 @@ namespace Dommel.Json.IntegrationTests;
 [Collection("JSON Database")]
 public class DeleteTests
 {
-    private object InsertLead(DbConnection con)
+    private static object InsertLead(DbConnection con)
     {
         return con.Insert(new Lead
         {
@@ -24,7 +24,7 @@ public class DeleteTests
         });
     }
 
-    private async Task<object> InsertLeadAsync(DbConnection con)
+    private static async Task<object> InsertLeadAsync(DbConnection con)
     {
         return await con.InsertAsync(new Lead
         {

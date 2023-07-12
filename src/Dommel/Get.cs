@@ -122,7 +122,7 @@ public static partial class DommelMapper
     {
         if (ids.Length == 1)
         {
-            return await GetAsync<TEntity>(connection, ids[0], transaction);
+            return await GetAsync<TEntity>(connection, ids[0], transaction, cancellationToken);
         }
 
         var sql = BuildGetByIds(connection, typeof(TEntity), ids, out var parameters);
@@ -153,7 +153,7 @@ public static partial class DommelMapper
                     sb.Append(" and");
                 }
 
-                sb.Append(" ").Append(keyColumnName).Append($" = {sqlBuilder.PrefixParameter("Id")}").Append(i);
+                sb.Append(' ').Append(keyColumnName).Append($" = {sqlBuilder.PrefixParameter("Id")}").Append(i);
                 i++;
             }
 

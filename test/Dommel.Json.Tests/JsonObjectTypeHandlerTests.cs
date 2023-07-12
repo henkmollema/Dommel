@@ -8,7 +8,7 @@ namespace Dommel.Json.Tests;
 
 public class JsonObjectTypeHandlerTests
 {
-    private static readonly JsonObjectTypeHandler TypeHandler = new JsonObjectTypeHandler();
+    private static readonly JsonObjectTypeHandler TypeHandler = new();
 
     [Fact]
     public void SetValue_CreatesJsonString()
