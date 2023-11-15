@@ -23,7 +23,7 @@ public static partial class DommelMapper
     {
         var sql = BuildInsertQuery(GetSqlBuilder(connection), typeof(TEntity));
         LogQuery<TEntity>(sql);
-        return connection.ExecuteScalar(sql, entity, transaction);
+        return connection.ExecuteScalar(sql, entity, transaction)!;
     }
 
     /// <summary>
@@ -40,7 +40,7 @@ public static partial class DommelMapper
     {
         var sql = BuildInsertQuery(GetSqlBuilder(connection), typeof(TEntity));
         LogQuery<TEntity>(sql);
-        return connection.ExecuteScalarAsync(new CommandDefinition(sql, entity, transaction: transaction, cancellationToken: cancellationToken));
+        return connection.ExecuteScalarAsync(new CommandDefinition(sql, entity, transaction: transaction, cancellationToken: cancellationToken))!;
     }
 
     /// <summary>

@@ -48,7 +48,7 @@ public static partial class DommelMapper
                         return property;
                     }
                 }
-                return DefaultTypeMapProvider(type)?.GetMember(columnName)?.Property;
+                return DefaultTypeMapProvider(type)?.GetMember(columnName)?.Property!;
             });
 
 #if NET6_0_OR_GREATER
