@@ -9,7 +9,7 @@ public class MySqlDatabaseDriver : DatabaseDriver
 {
     public override DbConnection GetConnection(string databaseName)
     {
-        var connectionString = $"Server=localhost;Database={databaseName};Uid=dommeltest;Pwd=test;";
+        var connectionString = $"Server=localhost;Database={databaseName};Uid=root;Pwd=test;";
         if (CI.IsAppVeyor)
         {
             connectionString = $"Server=localhost;Database={databaseName};Uid=root;Pwd=Password12!;";
