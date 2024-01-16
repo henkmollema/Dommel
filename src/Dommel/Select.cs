@@ -28,7 +28,7 @@ public static partial class DommelMapper
     /// </returns>
     public static IEnumerable<TEntity> Select<TEntity>(this IDbConnection connection, Expression<Func<TEntity, bool>> predicate, IDbTransaction? transaction = null, bool buffered = true)
     {
-        var sql = BuildSelectSql(connection, predicate, out var parameters);
+        var sql = BuildSelectSql(connection, predicate, false, out var parameters);
         LogQuery<TEntity>(sql);
         return connection.Query<TEntity>(sql, parameters, transaction, buffered);
     }
@@ -47,7 +47,7 @@ public static partial class DommelMapper
     /// </returns>
     public static Task<IEnumerable<TEntity>> SelectAsync<TEntity>(this IDbConnection connection, Expression<Func<TEntity, bool>> predicate, IDbTransaction? transaction = null, CancellationToken cancellationToken = default)
     {
-        var sql = BuildSelectSql(connection, predicate, out var parameters);
+        var sql = BuildSelectSql(connection, predicate, false, out var parameters);
         LogQuery<TEntity>(sql);
         return connection.QueryAsync<TEntity>(new CommandDefinition(sql, parameters, transaction: transaction, cancellationToken: cancellationToken));
     }
@@ -66,7 +66,7 @@ public static partial class DommelMapper
     public static TEntity? FirstOrDefault<TEntity>(this IDbConnection connection, Expression<Func<TEntity, bool>> predicate, IDbTransaction? transaction = null)
         where TEntity : class
     {
-        var sql = BuildSelectSql(connection, predicate, out var parameters);
+        var sql = BuildSelectSql(connection, predicate, true, out var parameters);
         LogQuery<TEntity>(sql);
         return connection.QueryFirstOrDefault<TEntity>(sql, parameters, transaction);
     }
@@ -86,12 +86,12 @@ public static partial class DommelMapper
     public static async Task<TEntity?> FirstOrDefaultAsync<TEntity>(this IDbConnection connection, Expression<Func<TEntity, bool>> predicate, IDbTransaction? transaction = null, CancellationToken cancellationToken = default)
         where TEntity : class
     {
-        var sql = BuildSelectSql(connection, predicate, out var parameters);
+        var sql = BuildSelectSql(connection, predicate, true, out var parameters);
         LogQuery<TEntity>(sql);
         return await connection.QueryFirstOrDefaultAsync<TEntity>(new CommandDefinition(sql, parameters, transaction, cancellationToken: cancellationToken));
     }
 
-    private static string BuildSelectSql<TEntity>(IDbConnection connection, Expression<Func<TEntity, bool>> predicate, out DynamicParameters parameters)
+    private static string BuildSelectSql<TEntity>(IDbConnection connection, Expression<Func<TEntity, bool>> predicate, bool firstRecordOnly, out DynamicParameters parameters)
     {
         var type = typeof(TEntity);
 
@@ -99,9 +99,16 @@ public static partial class DommelMapper
         var sql = BuildGetAllQuery(connection, type);
 
         // Append the where statement
-        sql += CreateSqlExpression<TEntity>(GetSqlBuilder(connection))
-            .Where(predicate)
-            .ToSql(out parameters);
+        var sqlExpression = CreateSqlExpression<TEntity>(GetSqlBuilder(connection))
+            .Where(predicate);
+
+        if (firstRecordOnly)
+        {
+            // Only query the first result
+            sqlExpression.Page(1, 1);
+        }
+
+        sql += sqlExpression.ToSql(out parameters);
         return sql;
     }
 
@@ -153,7 +160,7 @@ public static partial class DommelMapper
     private static string BuildSelectPagedQuery<TEntity>(IDbConnection connection, Expression<Func<TEntity, bool>> predicate, int pageNumber, int pageSize, out DynamicParameters parameters)
     {
         // Start with the select query part
-        var sql = BuildSelectSql(connection, predicate, out parameters);
+        var sql = BuildSelectSql(connection, predicate, false, out parameters);
 
         // Append the paging part including the order by
         var keyColumns = Resolvers.KeyProperties(typeof(TEntity)).Select(p => Resolvers.Column(p.Property, connection));
