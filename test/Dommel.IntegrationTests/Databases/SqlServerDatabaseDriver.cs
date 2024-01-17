@@ -10,8 +10,8 @@ public class SqlServerDatabaseDriver : DatabaseDriver
     public override DbConnection GetConnection(string databaseName)
     {
         var connectionString = CI.IsAppVeyor
-            ? $"Server=(local)\\SQL2019;Database={databaseName};User ID=sa;Password=Password12!"
-            : $"Server=(LocalDb)\\mssqllocaldb;Database={databaseName};User ID=dommel;Password=dommel";
+            ? $"Server=(local)\\SQL2019;Database={databaseName};User ID=sa;Password=Password12!;Encrypt=False"
+            : $"Server=(LocalDb)\\mssqllocaldb;Database={databaseName};User ID=dommel;Password=dommel;Encrypt=False";
 
         return new SqlConnection(connectionString);
     }
