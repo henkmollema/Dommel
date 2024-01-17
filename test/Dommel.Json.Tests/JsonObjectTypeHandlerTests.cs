@@ -85,5 +85,5 @@ public class JsonObjectTypeHandlerTests
     [InlineData(null)]
     [InlineData(123)]
     [InlineData(123.4)]
-    public void Parse_ReturnsNullForNonString(object value) => Assert.Null(TypeHandler.Parse(typeof(LeadData), value));
+    public void Parse_ReturnsNullForNonString(object? value) => Assert.Null(TypeHandler.Parse(typeof(LeadData), value));
 }
