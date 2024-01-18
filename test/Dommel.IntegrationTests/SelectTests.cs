@@ -205,4 +205,13 @@ public class SelectTests
         var products = await con.SelectAsync<Product>(p => p.Name!.EndsWith(productName));
         Assert.Equal(5, products.Count());
     }
+
+    [Theory]
+    [ClassData(typeof(DatabaseTestData))]
+    public async Task SelectAsync_CombineAndOr(DatabaseDriver database)
+    {
+        using var con = database.GetConnection();
+        var products = await con.SelectAsync<Product>(p => p.CategoryId == 1 && (p.Name!.StartsWith("Chai") || p.Name!.StartsWith("Chef")));
+        Assert.Equal(3, products.Count());
+    }
 }
