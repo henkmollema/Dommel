@@ -15,10 +15,11 @@ public class DynamicExpressionTests
     [Fact]
     public void CommonAndExpression()
     {
-        var dommelExpression = _sqlExpression.Where(p => p.Id == 1 && p.Bar.Contains("test"));
-        var sql = dommelExpression.ToSql(out var dynamicParameters);
+        var sql = _sqlExpression
+            .Where(p => p.Id == 1 && p.Bar.Contains("test"))
+            .ToSql(out var dynamicParameters);
 
-        Assert.Equal("where ([tblFoo].[Id] = @p1 and [tblFoo].[Bar] like @p2)", sql.Trim());
+        Assert.Equal("where [tblFoo].[Id] = @p1 and [tblFoo].[Bar] like @p2", sql.Trim());
         Assert.Equal(1, dynamicParameters.Get<int>("p1"));
         Assert.Equal("%test%", dynamicParameters.Get<string>("p2"));
     }
@@ -32,7 +33,7 @@ public class DynamicExpressionTests
         var dommelExpression = _sqlExpression.Where(expression);
         var sql = dommelExpression.ToSql(out var dynamicParameters);
 
-        Assert.Equal("where ([tblFoo].[Id] = @p1 and [tblFoo].[Bar] like @p2)", sql.Trim());
+        Assert.Equal("where [tblFoo].[Id] = @p1 and [tblFoo].[Bar] like @p2", sql.Trim());
         Assert.Equal(1, dynamicParameters.Get<int>("p1"));
         Assert.Equal("%test%", dynamicParameters.Get<string>("p2"));
     }
@@ -40,10 +41,11 @@ public class DynamicExpressionTests
     [Fact]
     public void CommonOrExpression()
     {
-        var dommelExpression = _sqlExpression.Where(p => p.Id == 1 || p.Bar.Contains("testOr"));
-        var sql = dommelExpression.ToSql(out var dynamicParameters);
+        var sql = _sqlExpression
+            .Where(p => p.Id == 1 || p.Bar.Contains("testOr"))
+            .ToSql(out var dynamicParameters);
 
-        Assert.Equal("where ([tblFoo].[Id] = @p1 or [tblFoo].[Bar] like @p2)", sql.Trim());
+        Assert.Equal("where [tblFoo].[Id] = @p1 or [tblFoo].[Bar] like @p2", sql.Trim());
         Assert.Equal(1, dynamicParameters.Get<int>("p1"));
         Assert.Equal("%testOr%", dynamicParameters.Get<string>("p2"));
     }
@@ -57,7 +59,7 @@ public class DynamicExpressionTests
         var dommelExpression = _sqlExpression.Where(expression);
         var sql = dommelExpression.ToSql(out var dynamicParameters);
 
-        Assert.Equal("where ([tblFoo].[Id] = @p1 or [tblFoo].[Id] = @p2)", sql.Trim());
+        Assert.Equal("where [tblFoo].[Id] = @p1 or [tblFoo].[Id] = @p2", sql.Trim());
         Assert.Equal(1, dynamicParameters.Get<int>("p1"));
         Assert.Equal(2, dynamicParameters.Get<int>("p2"));
     }
@@ -79,7 +81,7 @@ public class DynamicExpressionTests
         var dommelExpression = _sqlExpression.Where(expression);
         var sql = dommelExpression.ToSql(out var dynamicParameters);
 
-        Assert.Equal("where ([tblFoo].[Id] in (@p1,@p2) or [tblFoo].[StringId] in (@p3,@p4) or [tblFoo].[DecimalId] in (@p5,@p6) or [tblFoo].[Guid] in (@p7,@p8) or [tblFoo].[Bar] like @p9)", sql.Trim());
+        Assert.Equal("where [tblFoo].[Id] in (@p1,@p2) or [tblFoo].[StringId] in (@p3,@p4) or [tblFoo].[DecimalId] in (@p5,@p6) or [tblFoo].[Guid] in (@p7,@p8) or [tblFoo].[Bar] like @p9", sql.Trim());
         Assert.Equal(1, dynamicParameters.Get<int>("p1"));
         Assert.Equal(2, dynamicParameters.Get<int>("p2"));
         Assert.Equal("1", dynamicParameters.Get<string>("p3"));

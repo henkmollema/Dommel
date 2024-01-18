@@ -10,7 +10,7 @@ public class BooleanExpressionTests
         var sql = new SqlExpression<Foo>(new SqlServerSqlBuilder())
             .Where(f => f.Baz)
             .ToSql();
-        Assert.Equal(" where ([Foos].[Baz] = '1')", sql);
+        Assert.Equal(" where [Foos].[Baz] = '1'", sql);
     }
 
     [Fact]
@@ -19,7 +19,7 @@ public class BooleanExpressionTests
         var sql = new SqlExpression<Foo>(new SqlServerSqlBuilder())
             .Where(f => !f.Baz)
             .ToSql();
-        Assert.Equal(" where (not ([Foos].[Baz] = '1'))", sql);
+        Assert.Equal(" where not ([Foos].[Baz] = '1')", sql);
     }
 
     [Fact]
@@ -28,16 +28,16 @@ public class BooleanExpressionTests
         var sql = new SqlExpression<Foo>(new SqlServerSqlBuilder())
             .Where(f => f.Baz == true)
             .ToSql();
-        Assert.Equal(" where ([Foos].[Baz] = @p1)", sql);
+        Assert.Equal(" where [Foos].[Baz] = @p1", sql);
     }
 
     [Fact]
     public void Or()
     {
         var sql = new SqlExpression<Foo>(new SqlServerSqlBuilder())
-            .Where(f => f.Baz || f.Qux)
+            .Where(f => f.Bar == "A" || f.Bar == "B" || f.Baz || f.Qux)
             .ToSql();
-        Assert.Equal(" where ([Foos].[Baz] = '1' or [Foos].[Qux] = '1')", sql);
+        Assert.Equal(" where [Foos].[Bar] = @p1 or [Foos].[Bar] = @p2 or [Foos].[Baz] = '1' or [Foos].[Qux] = '1'", sql);
     }
 
     [Fact]
@@ -46,7 +46,7 @@ public class BooleanExpressionTests
         var sql = new SqlExpression<Foo>(new SqlServerSqlBuilder())
             .Where(f => f.Baz || !f.Qux)
             .ToSql();
-        Assert.Equal(" where ([Foos].[Baz] = '1' or not ([Foos].[Qux] = '1'))", sql);
+        Assert.Equal(" where [Foos].[Baz] = '1' or not ([Foos].[Qux] = '1')", sql);
     }
 
     [Fact]
@@ -55,7 +55,7 @@ public class BooleanExpressionTests
         var sql = new SqlExpression<Foo>(new SqlServerSqlBuilder())
             .Where(f => f.Baz && f.Qux)
             .ToSql();
-        Assert.Equal(" where ([Foos].[Baz] = '1' and [Foos].[Qux] = '1')", sql);
+        Assert.Equal(" where [Foos].[Baz] = '1' and [Foos].[Qux] = '1'", sql);
     }
 
     [Fact]
@@ -64,7 +64,7 @@ public class BooleanExpressionTests
         var sql = new SqlExpression<Foo>(new SqlServerSqlBuilder())
             .Where(f => !f.Baz && f.Qux)
             .ToSql();
-        Assert.Equal(" where (not ([Foos].[Baz] = '1') and [Foos].[Qux] = '1')", sql);
+        Assert.Equal(" where not ([Foos].[Baz] = '1') and [Foos].[Qux] = '1'", sql);
     }
 
     [Fact]
@@ -73,7 +73,7 @@ public class BooleanExpressionTests
         var sql = new SqlExpression<Foo>(new SqlServerSqlBuilder())
             .Where(f => f.Bar == "test" || f.Baz)
             .ToSql();
-        Assert.Equal(" where ([Foos].[Bar] = @p1 or [Foos].[Baz] = '1')", sql);
+        Assert.Equal(" where [Foos].[Bar] = @p1 or [Foos].[Baz] = '1'", sql);
     }
 
     public class Foo

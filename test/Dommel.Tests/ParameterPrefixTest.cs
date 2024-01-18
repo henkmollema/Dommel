@@ -26,7 +26,7 @@ public class ParameterPrefixTest
         var sql = sqlExpression.Where(p => p.Id == 1).ToSql(out var dynamicParameters);
 
         // Assert
-        Assert.Equal("where (Foos.Id = #p1)", sql.Trim());
+        Assert.Equal("where Foos.Id = #p1", sql.Trim());
         Assert.Single(dynamicParameters.ParameterNames);
     }
 

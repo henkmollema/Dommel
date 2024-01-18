@@ -11,7 +11,7 @@ public class SqlExpressionTests
     {
         var sqlExpression = new SqlExpression<Product>(new SqlServerSqlBuilder());
         var sql = sqlExpression.Where(p => p.Name == "Chai").ToSql();
-        Assert.Equal(" where ([Products].[FullName] = @p1)", sql);
+        Assert.Equal(" where [Products].[FullName] = @p1", sql);
         Assert.Equal(sql, sqlExpression.ToString());
     }
 
@@ -20,7 +20,7 @@ public class SqlExpressionTests
     {
         var sqlExpression = new SqlExpression<Product>(new SqlServerSqlBuilder());
         var sql = sqlExpression.Where(p => p.CategoryId.ToString() == "1").ToSql();
-        Assert.Equal(" where (CAST([Products].[CategoryId] AS CHAR) = @p1)", sql);
+        Assert.Equal(" where CAST([Products].[CategoryId] AS CHAR) = @p1", sql);
         Assert.Equal(sql, sqlExpression.ToString());
     }
 

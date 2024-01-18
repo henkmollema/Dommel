@@ -10,7 +10,7 @@ public class NullExpressionTests
         var sql = new SqlExpression<Foo>(new SqlServerSqlBuilder())
             .Where(f => f.Bar == null)
             .ToSql();
-        Assert.Equal(" where ([Foos].[Bar] is null)", sql);
+        Assert.Equal(" where [Foos].[Bar] is null", sql);
     }
 
     [Fact]
@@ -19,7 +19,7 @@ public class NullExpressionTests
         var sql = new SqlExpression<Foo>(new SqlServerSqlBuilder())
             .Where(f => f.Bar != null)
             .ToSql();
-        Assert.Equal(" where ([Foos].[Bar] is not null)", sql);
+        Assert.Equal(" where [Foos].[Bar] is not null", sql);
     }
 
     [Fact]
@@ -28,7 +28,7 @@ public class NullExpressionTests
         var sql = new SqlExpression<Foo>(new SqlServerSqlBuilder())
             .Where(f => null == f.Bar)
             .ToSql();
-        Assert.Equal(" where ( = @p1)", sql);
+        Assert.Equal(" where  = @p1", sql);
     }
 
     [Fact]
@@ -37,7 +37,7 @@ public class NullExpressionTests
         var sql = new SqlExpression<Foo>(new SqlServerSqlBuilder())
             .Where(f => null != f.Bar)
             .ToSql();
-        Assert.Equal(" where ( <> @p1)", sql);
+        Assert.Equal(" where  <> @p1", sql);
     }
 
     public class Foo

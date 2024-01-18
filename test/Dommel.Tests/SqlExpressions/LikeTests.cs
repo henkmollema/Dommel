@@ -16,7 +16,7 @@ public class LikeTests
         var sql = expression.ToSql(out var dynamicParameters);
 
         // Assert
-        Assert.Equal("where ([tblFoo].[Bar] like @p1)", sql.Trim());
+        Assert.Equal("where [tblFoo].[Bar] like @p1", sql.Trim());
         Assert.Single(dynamicParameters.ParameterNames);
         Assert.Equal("%test%", dynamicParameters.Get<string>("p1"));
     }
@@ -33,7 +33,7 @@ public class LikeTests
         var sql = expression.ToSql(out var dynamicParameters);
 
         // Assert
-        Assert.Equal("where ([tblFoo].[Bar] like @p1)", sql.Trim());
+        Assert.Equal("where [tblFoo].[Bar] like @p1", sql.Trim());
         Assert.Single(dynamicParameters.ParameterNames);
         Assert.Equal("%test%", dynamicParameters.Get<string>("p1"));
     }
@@ -49,7 +49,7 @@ public class LikeTests
         var sql = expression.ToSql(out var dynamicParameters);
 
         // Assert
-        Assert.Equal("where ([tblFoo].[Bar] like @p1)", sql.Trim());
+        Assert.Equal("where [tblFoo].[Bar] like @p1", sql.Trim());
         Assert.Single(dynamicParameters.ParameterNames);
         Assert.Equal("test%", dynamicParameters.Get<string>("p1"));
     }
@@ -65,7 +65,7 @@ public class LikeTests
         var sql = expression.ToSql(out var dynamicParameters);
 
         // Assert
-        Assert.Equal("where ([tblFoo].[Bar] like @p1)", sql.Trim());
+        Assert.Equal("where [tblFoo].[Bar] like @p1", sql.Trim());
         Assert.Single(dynamicParameters.ParameterNames);
         Assert.Equal("%test", dynamicParameters.Get<string>("p1"));
     }
