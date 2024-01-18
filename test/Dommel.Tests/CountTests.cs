@@ -18,7 +18,7 @@ public class CountTests
     public void GeneratesCountSql()
     {
         var sql = BuildCountSql<Foo>(SqlBuilder, x => x.Bar == "Baz", out var parameters);
-        Assert.Equal("select count(*) from [Foos] where ([Foos].[Bar] = @p1)", sql);
+        Assert.Equal("select count(*) from [Foos] where [Foos].[Bar] = @p1", sql);
         Assert.Single(parameters.ParameterNames);
     }
 
