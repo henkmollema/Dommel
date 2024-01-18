@@ -99,16 +99,17 @@ public static partial class DommelMapper
         var sql = BuildGetAllQuery(connection, type);
 
         // Append the where statement
-        var sqlExpression = CreateSqlExpression<TEntity>(GetSqlBuilder(connection))
+        var sqlBuilder = GetSqlBuilder(connection);
+        var sqlExpression = CreateSqlExpression<TEntity>(sqlBuilder)
             .Where(predicate);
+
+        sql += sqlExpression.ToSql(out parameters);
 
         if (firstRecordOnly)
         {
-            // Only query the first result
-            sqlExpression.Page(1, 1);
+            sql += $" {sqlBuilder.LimitClause(1)}";
         }
 
-        sql += sqlExpression.ToSql(out parameters);
         return sql;
     }
 
