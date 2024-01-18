@@ -5,14 +5,22 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Dommel.IntegrationTests;
 
-public class Product
+public abstract class FullNamedEntity
+{
+    [Column("FullName")]
+    public string? Name { get; set; }
+}
+
+public abstract class NamedEntity
+{
+    public string? Name { get; set; }
+}
+
+public class Product : FullNamedEntity
 {
     [Key]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int ProductId { get; set; }
-
-    [Column("FullName")]
-    public string? Name { get; set; }
 
     public string? Slug { get; private set; }
 
@@ -28,12 +36,10 @@ public class Product
     public ICollection<ProductOption> Options { get; set; } = new List<ProductOption>();
 }
 
-public class Category : IEquatable<Category>
+public class Category : NamedEntity, IEquatable<Category>
 {
     [Key]
     public int CategoryId { get; set; }
-
-    public string? Name { get; set; }
 
     public bool Equals(Category? other) => CategoryId == other?.CategoryId;
 }
@@ -68,18 +74,24 @@ public class OrderLine
     public string? Line { get; set; }
 }
 
-public class Foo
+public class Foo : NamedEntity
 {
-    public int Id { get; set; }
+    public Foo()
+    {
+        Name = nameof(Foo);
+    }
 
-    public string? Name { get; set; } = nameof(Foo);
+    public int Id { get; set; }
 }
 
-public class Bar
+public class Bar : NamedEntity
 {
-    public int Id { get; set; }
+    public Bar()
+    {
+        Name = nameof(Bar);
+    }
 
-    public string? Name { get; set; } = nameof(Bar);
+    public int Id { get; set; }
 }
 
 public class Baz

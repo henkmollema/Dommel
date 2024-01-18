@@ -73,10 +73,10 @@ public class SqlExpression<TEntity>
         {
             if (selector.Body is NewExpression newExpression)
             {
-                props = newExpression.Arguments
-                    .Select(x => (x as MemberExpression)?.Member)
-                    .Where(x => x != null)
-                    .Cast<PropertyInfo>()
+                props = newExpression
+                    .Arguments
+                    .OfType<MemberExpression>()
+                    .Select(x => x.Expression?.Type.GetProperty(x.Member.Name)!)
                     .ToArray();
             }
         }
@@ -595,12 +595,12 @@ public class SqlExpression<TEntity>
     protected virtual object VisitConstantExpression(ConstantExpression expression) => expression.Value!;
 
     /// <summary>
-    /// Proccesses a member expression.
+    /// Processes a member expression.
     /// </summary>
     /// <param name="expression">The member expression.</param>
     /// <returns>The result of the processing.</returns>
     protected virtual string MemberToColumn(MemberExpression expression) =>
-        Resolvers.Column((PropertyInfo)expression.Member, SqlBuilder);
+        Resolvers.Column(expression.Expression!.Type.GetProperty(expression.Member.Name)!, SqlBuilder);
 
     /// <summary>
     /// Returns the expression operant for the specified expression type.
