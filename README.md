@@ -43,7 +43,22 @@ Dommel allows you to specify a predicate which is being translated into a SQL ex
 var products = await connection.SelectAsync<Product>(p => p.Name == "Awesome bike" && p.Created < new DateTime(2014, 12, 31) && p.InStock > 5);
 ```
 
-There is also a `FirstOrDefaultAsync<T>(...)` method available to select the entity matching the predicate.
+Which would translate in the following SQL:
+```sql
+select * from Products where Name = @p1 and Created < @p2 and InStock > @p3
+```
+
+You can add parentheses to combine `and` & `or` queries:
+```cs
+var products = await connection.SelectAsync<Product>(p => p.Name == "Awesome bike" && (p.Created < new DateTime(2014, 12, 31) || p.InStock > 5));
+```
+
+Which would translate in the following SQL:
+```sql
+select * from Products where Name = @p1 and (Created < @p2 or InStock > @p3)
+```
+
+There is also a `FirstOrDefaultAsync<T>(...)` method available to select the first entity matching the predicate.
 
 #### Like-queries
 It is possible to generate `LIKE`-queries using `Contains()`, `StartsWith()` or `EndsWith()` on string properties:
@@ -287,5 +302,3 @@ Use the `SetColumnNameResolver()` method to register the custom implementation:
 ```cs
 DommelMapper.SetColumnNameResolver(new CustomColumnNameResolver());
 ```
-
-The [Dapper.FluentMap.Dommel](https://www.nuget.org/packages/Dapper.FluentMap.Dommel) extension implements these interfaces using the configured mapping of Dapper.FluentMap. Also see: [Dapper.FluentMap](https://github.com/HenkMollema/Dapper-FluentMap#dommel).
