@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -16,7 +17,7 @@ public class SqlExpression<TEntity>
     private static readonly Type EntityType = typeof(TEntity);
     private static readonly Func<TEntity> NewEntityFunc = Expression.Lambda<Func<TEntity>>(
         Expression.New(typeof(TEntity).GetConstructors()[0])).Compile();
-    private readonly StringBuilder _whereBuilder = new();
+    private readonly List<(string, string?)> _whereStatements = [];
     private readonly StringBuilder _orderByBuilder = new();
     private readonly DynamicParameters _parameters = new();
     private string? _selectQuery;
@@ -112,16 +113,7 @@ public class SqlExpression<TEntity>
     {
         if (expression != null)
         {
-            if (_whereBuilder.Length == 0)
-            {
-                // Start a new where expression
-                AppendToWhere(null, expression);
-            }
-            else
-            {
-                // Append a where expression with the 'and' operator
-                AppendToWhere("and", expression);
-            }
+            AppendToWhere("and", expression);
         }
 
         return this;
@@ -134,7 +126,7 @@ public class SqlExpression<TEntity>
     /// <returns>The current <see cref="SqlExpression{TEntity}"/> instance.</returns>
     public virtual SqlExpression<TEntity> AndWhere(Expression<Func<TEntity, bool>>? expression)
     {
-        if (_whereBuilder.Length == 0)
+        if (_whereStatements.Count == 0)
         {
             throw new InvalidOperationException("Start the where statement with the 'Where' method.");
         }
@@ -152,7 +144,7 @@ public class SqlExpression<TEntity>
     /// <returns>The current <see cref="SqlExpression{TEntity}"/> instance.</returns>
     public virtual SqlExpression<TEntity> OrWhere(Expression<Func<TEntity, bool>>? expression)
     {
-        if (_whereBuilder.Length == 0)
+        if (_whereStatements.Count == 0)
         {
             throw new InvalidOperationException("Start the where statement with the 'Where' method.");
         }
@@ -165,20 +157,8 @@ public class SqlExpression<TEntity>
 
     private void AppendToWhere(string? conditionOperator, Expression expression)
     {
-        var sqlExpression = VisitExpression(expression).ToString();
-        if (_whereBuilder.Length == 0)
-        {
-            _whereBuilder.Append(" where ");
-        }
-        else
-        {
-            _whereBuilder.AppendFormat(" {0} ", conditionOperator);
-        }
-        if (conditionOperator != null)
-        {
-            sqlExpression = $"({sqlExpression})";
-        }
-        _whereBuilder.Append(sqlExpression);
+        var sqlExpression = VisitExpression(expression).ToString()!;
+        _whereStatements.Add((sqlExpression, _whereStatements.Count == 0 ? null : conditionOperator));
     }
 
     /// <summary>
@@ -644,21 +624,55 @@ public class SqlExpression<TEntity>
     /// <returns>The current SQL query.</returns>
     public string ToSql()
     {
-        var where = _whereBuilder.ToString();
-        var orderBy = _orderByBuilder.ToString();
         var query = "";
         if (!string.IsNullOrEmpty(_selectQuery))
         {
             query += _selectQuery;
         }
-        if (!string.IsNullOrEmpty(where))
+
+        if (_whereStatements.Count > 0)
         {
-            query += where;
+            var whereBuilder = new StringBuilder();
+            foreach (var (sql, conditionOperator) in _whereStatements)
+            {
+                if (whereBuilder.Length == 0)
+                {
+                    whereBuilder.Append(" where ");
+                }
+                else if (!string.IsNullOrEmpty(conditionOperator))
+                {
+                    whereBuilder.Append(' ').Append(conditionOperator).Append(' ');
+                }
+                else
+                {
+                    throw new Exception("Expected condition operator with multiple where statements.");
+                }
+
+                if (_whereStatements.Count > 1)
+                {
+                    whereBuilder.Append('(');
+                }
+
+                whereBuilder.Append(sql);
+
+                if (_whereStatements.Count > 1)
+                {
+                    whereBuilder.Append(')');
+                }
+            }
+
+            if (whereBuilder.Length > 0)
+            {
+                query += whereBuilder.ToString();
+            }
         }
+
+        var orderBy = _orderByBuilder.ToString();
         if (!string.IsNullOrEmpty(orderBy))
         {
             query += orderBy;
         }
+
         if (!string.IsNullOrEmpty(_pagingQuery))
         {
             if (string.IsNullOrEmpty(orderBy))
