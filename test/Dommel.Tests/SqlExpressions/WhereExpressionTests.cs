@@ -42,7 +42,7 @@ public class WhereExpressionTests
             .Where(p => p.Name == "Chai")
             .Where(p => p.CategoryId == 1 || p.CategoryId == 2 || p.CategoryId == 3)
             .ToSql();
-        Assert.Equal(" where [Products].[FullName] = @p1 and ([Products].[CategoryId] = @p2 or [Products].[CategoryId] = @p3 or [Products].[CategoryId] = @p4)", sql);
+        Assert.Equal(" where ([Products].[FullName] = @p1) and ([Products].[CategoryId] = @p2 or [Products].[CategoryId] = @p3 or [Products].[CategoryId] = @p4)", sql);
     }
 
     [Fact]
@@ -52,7 +52,27 @@ public class WhereExpressionTests
             .Where(p => p.Name == "Chai")
             .AndWhere(p => p.CategoryId == 1 || p.CategoryId == 2)
             .ToSql();
-        Assert.Equal(" where [Products].[FullName] = @p1 and ([Products].[CategoryId] = @p2 or [Products].[CategoryId] = @p3)", sql);
+        Assert.Equal(" where ([Products].[FullName] = @p1) and ([Products].[CategoryId] = @p2 or [Products].[CategoryId] = @p3)", sql);
+    }
+
+    [Fact]
+    public void Where_AndWhere_GeneratesSql2()
+    {
+        var sql = _sqlExpression
+            .Where(p => p.CategoryId == 1 || p.CategoryId == 2)
+            .AndWhere(p => p.Name == "Chai")
+            .ToSql();
+        Assert.Equal(" where ([Products].[CategoryId] = @p1 or [Products].[CategoryId] = @p2) and ([Products].[FullName] = @p3)", sql);
+    }
+
+    [Fact]
+    public void Where_AndWhereWithOr_GeneratesSql()
+    {
+        var sql = _sqlExpression
+            .Where(p => p.Name == "Chai" || p.Name == "Latte")
+            .AndWhere(p => p.CategoryId == 1 || p.CategoryId == 2)
+            .ToSql();
+        Assert.Equal(" where ([Products].[FullName] = @p1 or [Products].[FullName] = @p2) and ([Products].[CategoryId] = @p3 or [Products].[CategoryId] = @p4)", sql);
     }
 
     [Fact]
@@ -62,7 +82,7 @@ public class WhereExpressionTests
             .Where(p => p.Name == "Chai")
             .OrWhere(p => p.CategoryId == 1)
             .ToSql();
-        Assert.Equal(" where [Products].[FullName] = @p1 or ([Products].[CategoryId] = @p2)", sql);
+        Assert.Equal(" where ([Products].[FullName] = @p1) or ([Products].[CategoryId] = @p2)", sql);
     }
 
     [Fact]
@@ -72,7 +92,7 @@ public class WhereExpressionTests
             .Where(p => p.Name == "Chai")
             .OrWhere(p => p.CategoryId == 1 && p.Name == "Latte")
             .ToSql();
-        Assert.Equal(" where [Products].[FullName] = @p1 or ([Products].[CategoryId] = @p2 and [Products].[FullName] = @p3)", sql);
+        Assert.Equal(" where ([Products].[FullName] = @p1) or ([Products].[CategoryId] = @p2 and [Products].[FullName] = @p3)", sql);
     }
 
     [Fact]
