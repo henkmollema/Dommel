@@ -652,7 +652,6 @@ public static partial class DommelMapper
     internal static string BuildMultiMapQuery(ISqlBuilder sqlBuilder, Type resultType, Type[] includeTypes, object? id, out DynamicParameters? parameters)
     {
         var resultTableName = Resolvers.Table(resultType, sqlBuilder);
-        var resultTableKeyColumnName = Resolvers.Column(Resolvers.KeyProperties(resultType).Single().Property, sqlBuilder);
         var sql = $"select * from {resultTableName}";
 
         // Determine the table to join with.
@@ -684,6 +683,12 @@ public static partial class DommelMapper
         parameters = null;
         if (id != null)
         {
+            var keyProps = Resolvers.KeyProperties(resultType);
+            if (keyProps.Length != 1)
+            {
+                throw new InvalidOperationException($"Entity {resultType.FullName} must have exactly one key-property to be used with multi-mapping.");
+            }
+            var resultTableKeyColumnName = Resolvers.Column(keyProps.Single().Property, sqlBuilder);
             sql += $" where {resultTableKeyColumnName} = {sqlBuilder.PrefixParameter("Id")}";
 
             parameters = new DynamicParameters();
