@@ -705,19 +705,23 @@ public static partial class DommelMapper
         .ToArray();
 
         var targetProperties = typeof(T1).GetProperties();
-        var keyProperty = Resolvers.KeyProperties(typeof(T1)).First().Property;
+        var keyProperties = Resolvers.KeyProperties(typeof(T1)).Select(x => x.Property);
+
+        // Create unique number from two integers
+        // https://stackoverflow.com/a/14652569
+        static int Pair(int a, int b) => (int)(((a + b) * (a + b + 1) * 0.5) + b);
 
         T1 GetOrAdd(T1 target)
         {
-            // Populate the dictionary with cached items keyed by the hash code
-            // of the value of the primary key property. This way multi mapping
-            // one-to-many relations don't produce multiple instances of the
-            // same parent record.
-            var id = keyProperty!.GetValue(target)!.GetHashCode();
-            if (!results.TryGetValue(id, out var cachedItem))
+            // Populate the dictionary with cached items keyed by the hash code of
+            // the value of the primary key properties. This way multi mapping one-to-many
+            // relations don't produce multiple instances of the same parent record.
+            // Use paired hash codes of all key properties as cache key.
+            var cacheKey = keyProperties.Aggregate(0, (x, prop) => Pair(x, prop.GetValue(target)!.GetHashCode()));
+            if (!results.TryGetValue(cacheKey, out var cachedItem))
             {
                 cachedItem = target;
-                results[id] = cachedItem;
+                results[cacheKey] = cachedItem;
             }
             return cachedItem;
         }
