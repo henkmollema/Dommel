@@ -1,7 +1,7 @@
 <Project>
   <PropertyGroup>
     <Copyright>Copyright © Henk Mollema 2014</Copyright>
-    <VersionPrefix>3.3.1</VersionPrefix>
+    <VersionPrefix>3.3.2</VersionPrefix>
     <Authors>Henk Mollema</Authors>
     <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
