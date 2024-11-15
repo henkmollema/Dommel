@@ -18,7 +18,6 @@ public abstract class DatabaseFixtureBase : IAsyncLifetime
     {
         // Extract the database drivers from the test data
         _databases = Drivers
-            .Select(x => x[0])
             .OfType<DatabaseDriver>()
             .ToArray();
 
