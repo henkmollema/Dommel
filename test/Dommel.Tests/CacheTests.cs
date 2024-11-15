@@ -9,6 +9,7 @@ public class CacheTests
     [InlineData(QueryCacheType.GetByMultipleIds)]
     [InlineData(QueryCacheType.GetAll)]
     [InlineData(QueryCacheType.Project)]
+    [InlineData(QueryCacheType.ProjectByMultipleIds)]
     [InlineData(QueryCacheType.ProjectAll)]
     [InlineData(QueryCacheType.Count)]
     [InlineData(QueryCacheType.Insert)]
