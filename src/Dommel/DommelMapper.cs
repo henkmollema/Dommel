@@ -111,7 +111,7 @@ public static partial class DommelMapper
     /// for the specified ADO.NET connection type.
     /// </summary>
     /// <param name="connectionType">
-    /// The ADO.NET conncetion type to use the <paramref name="builder"/> with.
+    /// The ADO.NET connection type to use the <paramref name="builder"/> with.
     /// Example: <c>typeof(SqlConnection)</c>.
     /// </param>
     /// <param name="builder">An implementation of the <see cref="ISqlBuilder"/> interface.</param>

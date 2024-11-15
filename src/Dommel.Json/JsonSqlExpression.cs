@@ -3,12 +3,11 @@ using System.Reflection;
 
 namespace Dommel.Json;
 
-internal class JsonSqlExpression<T> : SqlExpression<T>
-    where T : class
+internal class JsonSqlVisitor : SqlVisitor
 {
     private readonly DommelJsonOptions _options;
 
-    public JsonSqlExpression(IJsonSqlBuilder sqlBuilder, DommelJsonOptions options) : base(sqlBuilder)
+    public JsonSqlVisitor(IJsonSqlBuilder sqlBuilder, DommelJsonOptions options) : base(sqlBuilder)
     {
         _options = options;
     }

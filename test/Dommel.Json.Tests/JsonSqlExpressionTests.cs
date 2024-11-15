@@ -8,10 +8,11 @@ public class JsonSqlExpressionTests
     public void GeneratesMySqlJsonValue()
     {
         // Arrange
-        var sql = new JsonSqlExpression<Lead>(new MySqlSqlBuilder(), new DommelJsonOptions());
+        var sqlBuilder = new MySqlSqlBuilder();
+        var sqlExpression = new SqlExpression<Lead>(sqlBuilder, new JsonSqlVisitor(sqlBuilder, new DommelJsonOptions()));
 
         // Act
-        var str = sql.Where(p => p.Data.LastName == "Foo").ToSql(out var parameters);
+        var str = sqlExpression.Where(p => p.Data.LastName == "Foo").ToSql(out var parameters);
 
         // Assert
         Assert.Equal(" where `Leads`.`Data`->'$.LastName' = @p1", str);
@@ -22,10 +23,11 @@ public class JsonSqlExpressionTests
     public void GeneratesSqlServerJsonValue()
     {
         // Arrange
-        var sql = new JsonSqlExpression<Lead>(new SqlServerSqlBuilder(), new DommelJsonOptions());
+        var sqlBuilder = new SqlServerSqlBuilder();
+        var sqlExpression = new SqlExpression<Lead>(sqlBuilder, new JsonSqlVisitor(sqlBuilder, new DommelJsonOptions()));
 
         // Act
-        var str = sql.Where(p => p.Data.LastName == "Foo").ToSql(out var parameters);
+        var str = sqlExpression.Where(p => p.Data.LastName == "Foo").ToSql(out var parameters);
 
         // Assert
         Assert.Equal(" where JSON_VALUE([Leads].[Data], '$.LastName') = @p1", str);
@@ -36,10 +38,11 @@ public class JsonSqlExpressionTests
     public void GeneratesSqliteJsonValue()
     {
         // Arrange
-        var sql = new JsonSqlExpression<Lead>(new SqliteSqlBuilder(), new DommelJsonOptions());
+        var sqlBuilder = new SqliteSqlBuilder();
+        var sqlExpression = new SqlExpression<Lead>(sqlBuilder, new JsonSqlVisitor(sqlBuilder, new DommelJsonOptions()));
 
         // Act
-        var str = sql.Where(p => p.Data.LastName == "Foo").ToSql(out var parameters);
+        var str = sqlExpression.Where(p => p.Data.LastName == "Foo").ToSql(out var parameters);
 
         // Assert
         Assert.Equal(" where JSON_EXTRACT(Leads.Data, '$.LastName') = @p1", str);
@@ -50,10 +53,11 @@ public class JsonSqlExpressionTests
     public void GeneratesSqlServerCeJsonValue()
     {
         // Arrange
-        var sql = new JsonSqlExpression<Lead>(new SqlServerCeSqlBuilder(), new DommelJsonOptions());
+        var sqlBuilder = new SqlServerCeSqlBuilder();
+        var sqlExpression = new SqlExpression<Lead>(sqlBuilder, new JsonSqlVisitor(sqlBuilder, new DommelJsonOptions()));
 
         // Act
-        var str = sql.Where(p => p.Data.LastName == "Foo").ToSql(out var parameters);
+        var str = sqlExpression.Where(p => p.Data.LastName == "Foo").ToSql(out var parameters);
 
         // Assert
         Assert.Equal(" where JSON_VALUE([Leads].[Data], '$.LastName') = @p1", str);
@@ -64,10 +68,11 @@ public class JsonSqlExpressionTests
     public void GeneratesPostgresJsonValue()
     {
         // Arrange
-        var sql = new JsonSqlExpression<Lead>(new PostgresSqlBuilder(), new DommelJsonOptions());
+        var sqlBuilder = new PostgresSqlBuilder();
+        var sqlExpression = new SqlExpression<Lead>(sqlBuilder, new JsonSqlVisitor(sqlBuilder, new DommelJsonOptions()));
 
         // Act
-        var str = sql.Where(p => p.Data.LastName == "Foo").ToSql(out var parameters);
+        var str = sqlExpression.Where(p => p.Data.LastName == "Foo").ToSql(out var parameters);
 
         // Assert
         Assert.Equal(" where \"Leads\".\"Data\"->>'LastName' = @p1", str);

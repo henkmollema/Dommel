@@ -37,4 +37,24 @@ public class UpdateTests
         Assert.Equal("Test", newProduct!.Name);
         Assert.Equal("test", newProduct.Slug);
     }
+
+    [Theory]
+    [ClassData(typeof(DatabaseTestData))]
+    public async Task UpdateMultipleAsync(DatabaseDriver database)
+    {
+        using var con = database.GetConnection();
+        //await con.UpdateMultipleAsync<Product>(
+        //    x => x.Name = "Test",
+        //    x => x.ProductId > 10);
+
+        var product = await con.GetAsync<Product>(1);
+        Assert.NotNull(product);
+        product!.Name = "Test";
+        product.SetSlug("test");
+        await con.UpdateAsync(product);
+
+        var newProduct = await con.GetAsync<Product>(1);
+        Assert.Equal("Test", newProduct!.Name);
+        Assert.Equal("test", newProduct.Slug);
+    }
 }

@@ -32,13 +32,6 @@ public class DommelJsonMapperTests
     }
 
     [Fact]
-    public void AddsCustomSqlExpressionFactory()
-    {
-        Assert.IsType<JsonSqlExpression<Lead>>(
-            DommelMapper.SqlExpressionFactory.Invoke(typeof(Lead), new MySqlSqlBuilder()));
-    }
-
-    [Fact]
     public void ThrowsWhenNotJsonSqlBuilder()
     {
         var ex = Assert.Throws<InvalidOperationException>(

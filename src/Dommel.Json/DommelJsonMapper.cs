@@ -41,13 +41,14 @@ public static class DommelJsonMapper
         // Add a custom SqlExpression<T> factory with JSON support
         DommelMapper.SqlExpressionFactory = (type, sqlBuilder) =>
         {
-            if (sqlBuilder is not IJsonSqlBuilder)
+            if (sqlBuilder is not IJsonSqlBuilder jsonSqlBuilder)
             {
                 throw new InvalidOperationException($"The specified SQL builder type should be assignable from {nameof(IJsonSqlBuilder)}.");
             }
 
-            var sqlExpression = typeof(JsonSqlExpression<>).MakeGenericType(type);
-            return Activator.CreateInstance(sqlExpression, sqlBuilder, options)!;
+            var sqlExpression = typeof(SqlExpression<>).MakeGenericType(type);
+            var sqlVisitor = new JsonSqlVisitor(jsonSqlBuilder, options);
+            return Activator.CreateInstance(sqlExpression, sqlBuilder, sqlVisitor)!;
         };
 
         // Add a Dapper type mapper with JSON support for
