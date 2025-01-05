@@ -34,6 +34,27 @@ public static partial class DommelMapper
     }
 
     /// <summary>
+    /// Selects all the entities matching the specified where clause.
+    /// </summary>
+    /// <typeparam name="TEntity">The type of the entity.</typeparam>
+    /// <param name="connection">The connection to the database. This can either be open or closed.</param>
+    /// <param name="whereClause">The specified where clause applied to the query</param>
+    /// <param name="transaction">Optional transaction for the command.</param>
+    /// <param name="buffered">
+    /// A value indicating whether the result of the query should be executed directly,
+    /// or when the query is materialized (using <c>ToList()</c> for example).
+    /// </param>
+    /// <returns>
+    /// A collection of entities of type <typeparamref name="TEntity"/> matching the specified
+    /// </returns>
+    public static IEnumerable<TEntity> Select<TEntity>(this IDbConnection connection, string whereClause, IDbTransaction? transaction = null, bool buffered = true)
+    {
+        var sql = BuildSelectSql<TEntity>(connection, whereClause, false, out var parameters);
+        LogQuery<TEntity>(sql);
+        return connection.Query<TEntity>(sql, parameters, transaction, buffered);
+    }
+
+    /// <summary>
     /// Selects all the entities matching the specified predicate.
     /// </summary>
     /// <typeparam name="TEntity">The type of the entity.</typeparam>
@@ -48,6 +69,24 @@ public static partial class DommelMapper
     public static Task<IEnumerable<TEntity>> SelectAsync<TEntity>(this IDbConnection connection, Expression<Func<TEntity, bool>> predicate, IDbTransaction? transaction = null, CancellationToken cancellationToken = default)
     {
         var sql = BuildSelectSql(connection, predicate, false, out var parameters);
+        LogQuery<TEntity>(sql);
+        return connection.QueryAsync<TEntity>(new CommandDefinition(sql, parameters, transaction: transaction, cancellationToken: cancellationToken));
+    }
+
+    /// <summary>
+    /// Selects all the entities matching the specified where clause.
+    /// </summary>
+    /// <typeparam name="TEntity">The type of the entity.</typeparam>
+    /// <param name="connection">The connection to the database. This can either be open or closed.</param>
+    /// <param name="whereClause">The specified where clause applied to the query</param>
+    /// <param name="transaction">Optional transaction for the command.</param>
+    /// <param name="cancellationToken">Optional cancellation token for the command.</param>
+    /// <returns>
+    /// A collection of entities of type <typeparamref name="TEntity"/> matching the specified
+    /// </returns>
+    public static Task<IEnumerable<TEntity>> SelectAsync<TEntity>(this IDbConnection connection, string whereClause, IDbTransaction? transaction = null, CancellationToken cancellationToken = default)
+    {
+        var sql = BuildSelectSql(connection, whereClause, false, out var parameters);
         LogQuery<TEntity>(sql);
         return connection.QueryAsync<TEntity>(new CommandDefinition(sql, parameters, transaction: transaction, cancellationToken: cancellationToken));
     }
@@ -104,6 +143,28 @@ public static partial class DommelMapper
             .Where(predicate);
 
         sql += sqlExpression.ToSql(out parameters);
+
+        if (firstRecordOnly)
+        {
+            sql += $" {sqlBuilder.LimitClause(1)}";
+        }
+
+        return sql;
+    }
+            
+    private static string BuildSelectSql<TEntity>(IDbConnection connection, string whereClause, bool firstRecordOnly, out DynamicParameters parameters)
+    {           
+        var type = typeof(TEntity);
+
+        // Build the select all part
+        var sql = BuildGetAllQuery(connection, type);
+
+        // Append the where statement
+        var sqlBuilder = GetSqlBuilder(connection);
+        var sqlExpression = CreateSqlExpression<TEntity>(sqlBuilder);
+
+        sql += sqlExpression.ToSql(out parameters);
+        sql += $" {whereClause.Trim()} ";
 
         if (firstRecordOnly)
         {
