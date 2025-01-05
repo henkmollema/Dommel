@@ -71,6 +71,16 @@ public class SelectTests
 
     [Theory]
     [ClassData(typeof(JsonDatabaseTestData))]
+    public void SelectAndStatementWithWhereClause(DatabaseDriver database)
+    {
+        using var con = database.GetConnection();
+        var id = InsertLead(con);
+        var leads = con.Select<Lead>("WHERE FirstName = 'Foo' AND LastName = 'Bar' AND Email = 'foo@example.com'");
+        Assert.NotEmpty(leads);
+    }
+
+    [Theory]
+    [ClassData(typeof(JsonDatabaseTestData))]
     public async Task SelectAndStatementAsync(DatabaseDriver database)
     {
         using var con = database.GetConnection();
@@ -81,11 +91,31 @@ public class SelectTests
 
     [Theory]
     [ClassData(typeof(JsonDatabaseTestData))]
+    public async Task SelectAndStatementWithWhereClauseAsync(DatabaseDriver database)
+    {
+        using var con = database.GetConnection();
+        var id = await InsertLeadAsync(con);
+        var leads = await con.SelectAsync<Lead>("WHERE FirstName = 'Foo' AND LastName = 'Bar' AND Email = 'foo@example.com'");
+        Assert.NotEmpty(leads);
+    }
+
+    [Theory]
+    [ClassData(typeof(JsonDatabaseTestData))]
     public void SelectOrStatement(DatabaseDriver database)
     {
         using var con = database.GetConnection();
         var id = InsertLead(con);
-        var leads = con.Select<Lead>(p => p.Data!.FirstName == "Foo" && p.Data.LastName == "Bar" || p.Email == "foo@example.com");
+        var leads = con.Select<Lead>(p => (p.Data!.FirstName == "Foo" && p.Data.LastName == "Bar") || p.Email == "foo@example.com");
+        Assert.NotEmpty(leads);
+    }
+
+    [Theory]
+    [ClassData(typeof(JsonDatabaseTestData))]
+    public void SelectOrStatementWithWhere(DatabaseDriver database)
+    {
+        using var con = database.GetConnection();
+        var id = InsertLead(con);
+        var leads = con.Select<Lead>("WHERE FirstName = 'Foo' AND LastName = 'Bar' OR Email = 'foo@example.com'");
         Assert.NotEmpty(leads);
     }
 
@@ -95,7 +125,17 @@ public class SelectTests
     {
         using var con = database.GetConnection();
         var id = await InsertLeadAsync(con);
-        var leads = await con.SelectAsync<Lead>(p => p.Data!.FirstName == "Foo" && p.Data.LastName == "Bar" || p.Email == "foo@example.com");
+        var leads = await con.SelectAsync<Lead>(p => (p.Data!.FirstName == "Foo" && p.Data.LastName == "Bar") || p.Email == "foo@example.com");
+        Assert.NotEmpty(leads);
+    }
+
+    [Theory]
+    [ClassData(typeof(JsonDatabaseTestData))]
+    public async Task SelectOrStatementWithWhereAsync(DatabaseDriver database)
+    {
+        using var con = database.GetConnection();
+        var id = await InsertLeadAsync(con);
+        var leads = await con.SelectAsync<Lead>("WHERE FirstName = 'Foo' AND LastName = 'Bar' OR Email = 'foo@example.com'");
         Assert.NotEmpty(leads);
     }
 }
