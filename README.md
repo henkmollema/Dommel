@@ -1,9 +1,9 @@
 # Dommel
 CRUD operations with Dapper made simple.
 
-| Windows | Linux | NuGet | MyGet | Test Coverage |
-| ------- | ----- | ----- | ----- | ------------- |
-| [![AppVeyor](https://img.shields.io/appveyor/ci/henkmollema/dommel/master.svg?style=flat-square)](https://ci.appveyor.com/project/henkmollema/dommel) | [![Travis](https://img.shields.io/travis/com/henkmollema/Dommel?style=flat-square)](https://app.travis-ci.com/github/henkmollema/Dommel) | [![NuGet](https://img.shields.io/nuget/vpre/Dommel.svg?style=flat-square)](https://www.nuget.org/packages/Dommel) | [![MyGet Pre Release](https://img.shields.io/myget/dommel-ci/vpre/Dommel.svg?style=flat-square)](https://www.myget.org/feed/dommel-ci/package/nuget/Dommel) | [![codecov](https://codecov.io/gh/henkmollema/Dommel/branch/master/graph/badge.svg)](https://codecov.io/gh/henkmollema/Dommel) |
+| Build | NuGet | MyGet | Test Coverage |
+| ----- | ----- | ----- | ------------- |
+| [![Travis](https://img.shields.io/travis/com/henkmollema/Dommel?style=flat-square)](https://app.travis-ci.com/github/henkmollema/Dommel) | [![NuGet](https://img.shields.io/nuget/vpre/Dommel.svg?style=flat-square)](https://www.nuget.org/packages/Dommel) | [![MyGet Pre Release](https://img.shields.io/myget/dommel-ci/vpre/Dommel.svg?style=flat-square)](https://www.myget.org/feed/dommel-ci/package/nuget/Dommel) | [![codecov](https://codecov.io/gh/henkmollema/Dommel/branch/master/graph/badge.svg)](https://codecov.io/gh/henkmollema/Dommel) |
 
 <hr>
 
