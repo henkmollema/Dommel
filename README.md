@@ -32,6 +32,6 @@ The documentation is available at **[Learn Dapper](https://www.learndapper.com/e
 ## Sponsors
 [Dapper Plus](https://dapper-plus.net/) and [Entity Framework Extensions](https://entityframework-extensions.net/) are major sponsors and are proud to contribute to the development of Dommel.
 
-![dapper-plus-sponsor](https://github.com/user-attachments/assets/e14fc116-436e-4746-a97b-27890a0b773b)
+[![Dapper Plus](https://github.com/user-attachments/assets/e14fc116-436e-4746-a97b-27890a0b773b)](https://dapper-plus.net/bulk-insert)
 
-![entity-framework-extensions-sponsor](https://github.com/user-attachments/assets/f98d302c-9a1f-4073-9ac8-671e8628cc86)
+[![Entity Framework Extensions](https://github.com/user-attachments/assets/f98d302c-9a1f-4073-9ac8-671e8628cc86)](https://entityframework-extensions.net/bulk-insert)
