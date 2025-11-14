@@ -1,6 +1,6 @@
 language: csharp
 mono: none
-dotnet: 6.0
+dotnet: 10.0
 dist: xenial
 env:
   global:

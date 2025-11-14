@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -335,29 +336,37 @@ public class SqlExpression<TEntity>
     /// <returns>The result of the processing.</returns>
     protected virtual object VisitInExpression(MethodCallExpression expression)
     {
-        Expression collection;
-        Expression property;
+        Expression collectionExpression;
+        Expression propertyExpression;
         if (expression.Object == null && expression.Arguments.Count == 2)
         {
             // The method is a static method, and has 2 arguments.
             // usually, it's from System.Linq.Enumerable
-            collection = expression.Arguments[0];
-            property = expression.Arguments[1];
+            collectionExpression = expression.Arguments[0];
+            propertyExpression = expression.Arguments[1];
         }
         else if (expression.Object != null && expression.Arguments.Count == 1)
         {
             // The method is an instance method, and has only 1 argument.
             // usually, it's from System.Collections.IList
-            collection = expression.Object;
-            property = expression.Arguments[0];
+            collectionExpression = expression.Object;
+            propertyExpression = expression.Arguments[0];
         }
         else
         {
             throw new Exception("Unsupported method call: " + expression.Method.Name);
         }
 
+        var memberExpression = collectionExpression switch
+        {
+            MemberExpression me => me,
+            MethodCallExpression mce when mce.Arguments.Count > 0 && mce.Arguments[0] is MemberExpression innerMe => innerMe,
+            _ => throw new Exception("Unsupported collection expression in IN clause."),
+        };
+
+        var collection = (IEnumerable)VisitMemberAccess(memberExpression);
         var inClause = new StringBuilder("(");
-        foreach (var value in (System.Collections.IEnumerable)VisitMemberAccess((MemberExpression)collection))
+        foreach (var value in collection)
         {
             AddParameter(value, out var paramName);
             inClause.Append($"{paramName},");
@@ -368,7 +377,7 @@ public class SqlExpression<TEntity>
         }
         inClause[inClause.Length - 1] = ')';
 
-        return $"{VisitExpression(property)} in {inClause}";
+        return $"{VisitExpression(propertyExpression)} in {inClause}";
     }
 
     /// <summary>
