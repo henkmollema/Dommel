@@ -19,6 +19,7 @@ public class SqlExpression<TEntity>
     private static readonly Func<TEntity> NewEntityFunc = Expression.Lambda<Func<TEntity>>(
         Expression.New(typeof(TEntity).GetConstructors()[0])).Compile();
     private readonly List<(string, string?)> _whereStatements = [];
+    private readonly List<(string, string)> _setStatements = [];
     private readonly StringBuilder _orderByBuilder = new();
     private readonly DynamicParameters _parameters = new();
     private string? _selectQuery;
@@ -102,6 +103,21 @@ public class SqlExpression<TEntity>
         // Create the select query
         var tableName = Resolvers.Table(EntityType, SqlBuilder);
         _selectQuery = $"select {string.Join(", ", columns)} from {tableName}";
+        return this;
+    }
+
+    /// <summary>
+    /// Updates the specified column with the specified value.
+    /// </summary>
+    /// <typeparam name="TValue">The type of the value.</typeparam>
+    /// <param name="selector">The column to update.</param>
+    /// <param name="value">The value to set.</param>
+    /// <returns>The current <see cref="SqlExpression{TEntity}"/> instance.</returns>
+    public virtual SqlExpression<TEntity> Set<TValue>(Expression<Func<TEntity, TValue>> selector, TValue value)
+    {
+        var column = VisitExpression(selector.Body) as string;
+        AddParameter(value, out var paramName);
+        _setStatements.Add((column!, paramName));
         return this;
     }
 
@@ -620,7 +636,7 @@ public class SqlExpression<TEntity>
     /// </summary>
     /// <param name="value">The value of the parameter.</param>
     /// <param name="paramName">When this method returns, contains the generated parameter name.</param>
-    protected virtual void AddParameter(object value, out string paramName)
+    protected virtual void AddParameter(object? value, out string paramName)
     {
         _parameterIndex++;
         paramName = SqlBuilder.PrefixParameter($"p{_parameterIndex}");
@@ -637,6 +653,24 @@ public class SqlExpression<TEntity>
         if (!string.IsNullOrEmpty(_selectQuery))
         {
             query += _selectQuery;
+        }
+
+        if (_setStatements.Count > 0)
+        {
+            var setBuilder = new StringBuilder();
+            foreach (var (column, paramName) in _setStatements)
+            {
+                if (setBuilder.Length == 0)
+                {
+                    setBuilder.Append(" set ");
+                }
+                else
+                {
+                    setBuilder.Append(", ");
+                }
+                setBuilder.Append($"{column} = {paramName}");
+            }
+            query += setBuilder.ToString();
         }
 
         if (_whereStatements.Count > 0)
