@@ -9,6 +9,7 @@ internal enum QueryCacheType
     GetByMultipleIds,
     GetAll,
     Project,
+    ProjectByMultipleIds,
     ProjectAll,
     Count,
     Insert,
