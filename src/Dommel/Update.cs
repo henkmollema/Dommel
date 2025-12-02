@@ -65,4 +65,45 @@ public static partial class DommelMapper
 
         return sql;
     }
+
+    /// <summary>
+    /// Updates the entities matching the specified predicate with the specified values.
+    /// </summary>
+    /// <typeparam name="TEntity">The type of the entity.</typeparam>
+    /// <param name="connection">The connection to the database. This can either be open or closed.</param>
+    /// <param name="sqlBuilder">A callback to build a <see cref="SqlExpression{TEntity}"/>.</param>
+    /// <param name="transaction">Optional transaction for the command.</param>
+    /// <returns>The number of rows affected.</returns>
+    public static int Update<TEntity>(this IDbConnection connection, Action<SqlExpression<TEntity>> sqlBuilder, IDbTransaction? transaction = null)
+    {
+        var builder = GetSqlBuilder(connection);
+        var expression = CreateSqlExpression<TEntity>(builder);
+        sqlBuilder(expression);
+        var sql = expression.ToSql(out var parameters);
+        var table = Resolvers.Table(typeof(TEntity), builder);
+        sql = $"update {table}{sql}";
+        LogQuery<TEntity>(sql);
+        return connection.Execute(sql, parameters, transaction);
+    }
+
+    /// <summary>
+    /// Updates the entities matching the specified predicate with the specified values.
+    /// </summary>
+    /// <typeparam name="TEntity">The type of the entity.</typeparam>
+    /// <param name="connection">The connection to the database. This can either be open or closed.</param>
+    /// <param name="sqlBuilder">A callback to build a <see cref="SqlExpression{TEntity}"/>.</param>
+    /// <param name="transaction">Optional transaction for the command.</param>
+    /// <param name="cancellationToken">Optional cancellation token for the command.</param>
+    /// <returns>The number of rows affected.</returns>
+    public static async Task<int> UpdateAsync<TEntity>(this IDbConnection connection, Action<SqlExpression<TEntity>> sqlBuilder, IDbTransaction? transaction = null, CancellationToken cancellationToken = default)
+    {
+        var builder = GetSqlBuilder(connection);
+        var expression = CreateSqlExpression<TEntity>(builder);
+        sqlBuilder(expression);
+        var sql = expression.ToSql(out var parameters);
+        var table = Resolvers.Table(typeof(TEntity), builder);
+        sql = $"update {table}{sql}";
+        LogQuery<TEntity>(sql);
+        return await connection.ExecuteAsync(new CommandDefinition(sql, parameters, transaction: transaction, cancellationToken: cancellationToken));
+    }
 }
