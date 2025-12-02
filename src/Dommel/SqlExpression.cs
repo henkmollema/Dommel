@@ -16,8 +16,10 @@ namespace Dommel;
 public class SqlExpression<TEntity>
 {
     private static readonly Type EntityType = typeof(TEntity);
+
     private static readonly Func<TEntity> NewEntityFunc = Expression.Lambda<Func<TEntity>>(
         Expression.New(typeof(TEntity).GetConstructors()[0])).Compile();
+
     private readonly List<(string, string?)> _whereStatements = [];
     private readonly List<(string, string)> _setStatements = [];
     private readonly StringBuilder _orderByBuilder = new();
@@ -95,7 +97,8 @@ public class SqlExpression<TEntity>
 
         if (props.Length == 0)
         {
-            throw new ArgumentException($"Projection over type '{typeof(TEntity).Name}' yielded no properties.", nameof(selector));
+            throw new ArgumentException($"Projection over type '{typeof(TEntity).Name}' yielded no properties.",
+                nameof(selector));
         }
 
         var columns = props.Select(p => Resolvers.Column(p, SqlBuilder));
@@ -116,8 +119,14 @@ public class SqlExpression<TEntity>
     public virtual SqlExpression<TEntity> Set<TValue>(Expression<Func<TEntity, TValue>> selector, TValue value)
     {
         var column = VisitExpression(selector.Body) as string;
+        if (string.IsNullOrEmpty(column))
+        {
+            throw new ArgumentException($"Could not resolve column from expression.", nameof(selector));
+        }
+
         AddParameter(value, out var paramName);
         _setStatements.Add((column!, paramName));
+
         return this;
     }
 
@@ -147,10 +156,12 @@ public class SqlExpression<TEntity>
         {
             throw new InvalidOperationException("Start the where statement with the 'Where' method.");
         }
+
         if (expression != null)
         {
             AppendToWhere("and", expression);
         }
+
         return this;
     }
 
@@ -165,10 +176,12 @@ public class SqlExpression<TEntity>
         {
             throw new InvalidOperationException("Start the where statement with the 'Where' method.");
         }
+
         if (expression != null)
         {
             AppendToWhere("or", expression);
         }
+
         return this;
     }
 
@@ -251,10 +264,12 @@ public class SqlExpression<TEntity>
         {
             throw new ArgumentNullException(nameof(column));
         }
+
         if (string.IsNullOrEmpty(direction))
         {
             throw new ArgumentNullException(nameof(direction));
         }
+
         if (_orderByBuilder.Length == 0)
         {
             _orderByBuilder.Append($" order by {column} {direction}");
@@ -279,8 +294,8 @@ public class SqlExpression<TEntity>
     {
         ExpressionType.Lambda => VisitLambda((LambdaExpression)expression),
         ExpressionType.LessThan or ExpressionType.LessThanOrEqual or ExpressionType.GreaterThan or
-        ExpressionType.GreaterThanOrEqual or ExpressionType.Equal or ExpressionType.NotEqual or
-        ExpressionType.And or ExpressionType.AndAlso or ExpressionType.Or or ExpressionType.OrElse
+            ExpressionType.GreaterThanOrEqual or ExpressionType.Equal or ExpressionType.NotEqual or
+            ExpressionType.And or ExpressionType.AndAlso or ExpressionType.Or or ExpressionType.OrElse
             => VisitBinary((BinaryExpression)expression),
         ExpressionType.Convert or ExpressionType.Not => VisitUnary((UnaryExpression)expression),
         ExpressionType.New => VisitNew((NewExpression)expression),
@@ -376,7 +391,8 @@ public class SqlExpression<TEntity>
         var memberExpression = collectionExpression switch
         {
             MemberExpression me => me,
-            MethodCallExpression mce when mce.Arguments.Count > 0 && mce.Arguments[0] is MemberExpression innerMe => innerMe,
+            MethodCallExpression mce when mce.Arguments.Count > 0 && mce.Arguments[0] is MemberExpression innerMe =>
+                innerMe,
             _ => throw new Exception("Unsupported collection expression in IN clause."),
         };
 
@@ -387,10 +403,12 @@ public class SqlExpression<TEntity>
             AddParameter(value, out var paramName);
             inClause.Append($"{paramName},");
         }
+
         if (inClause.Length == 1)
         {
             inClause.Append("null,");
         }
+
         inClause[inClause.Length - 1] = ')';
 
         return $"{VisitExpression(propertyExpression)} in {inClause}";
@@ -457,7 +475,8 @@ public class SqlExpression<TEntity>
         return VisitExpression(epxression.Body);
     }
 
-    private static bool IsAndOr(ExpressionType expressionType) => expressionType is ExpressionType.AndAlso or ExpressionType.OrElse;
+    private static bool IsAndOr(ExpressionType expressionType) =>
+        expressionType is ExpressionType.AndAlso or ExpressionType.OrElse;
 
     /// <summary>
     /// Processes a binary expression.
@@ -474,7 +493,8 @@ public class SqlExpression<TEntity>
             // Foo == 42    or      Bar == 42
             //   left    operand     right
 
-            if (expression.Left is MemberExpression leftMember && leftMember.Expression?.NodeType == ExpressionType.Parameter)
+            if (expression.Left is MemberExpression leftMember &&
+                leftMember.Expression?.NodeType == ExpressionType.Parameter)
             {
                 left = $"{VisitMemberAccess(leftMember)} = '1'";
             }
@@ -488,7 +508,8 @@ public class SqlExpression<TEntity>
                 }
             }
 
-            if (expression.Right is MemberExpression rightMember && rightMember.Expression?.NodeType == ExpressionType.Parameter)
+            if (expression.Right is MemberExpression rightMember &&
+                rightMember.Expression?.NodeType == ExpressionType.Parameter)
             {
                 right = $"{VisitMemberAccess(rightMember)} = '1'";
             }
@@ -555,6 +576,7 @@ public class SqlExpression<TEntity>
                 {
                     return Expression.Lambda(expression).Compile()!.DynamicInvoke()!;
                 }
+
                 break;
         }
 
@@ -649,6 +671,11 @@ public class SqlExpression<TEntity>
     /// <returns>The current SQL query.</returns>
     public string ToSql()
     {
+        if (!string.IsNullOrEmpty(_selectQuery) && _setStatements.Count > 0)
+        {
+            throw new InvalidOperationException("A SQL expression cannot contain both a Select and Set statement.");
+        }
+
         var query = "";
         if (!string.IsNullOrEmpty(_selectQuery))
         {
@@ -668,8 +695,10 @@ public class SqlExpression<TEntity>
                 {
                     setBuilder.Append(", ");
                 }
+
                 setBuilder.Append($"{column} = {paramName}");
             }
+
             query += setBuilder.ToString();
         }
 
@@ -722,13 +751,15 @@ public class SqlExpression<TEntity>
             {
                 // When we're paging we'll need an order to guarantee consistent paging results, when
                 // the user did not specified an order themself we'll order on the PKs of the table.
-                var keyColumns = Resolvers.KeyProperties(typeof(TEntity)).Select(p => Resolvers.Column(p.Property, SqlBuilder));
+                var keyColumns = Resolvers.KeyProperties(typeof(TEntity))
+                    .Select(p => Resolvers.Column(p.Property, SqlBuilder));
                 AppendOrderBy(string.Join(", ", keyColumns), direction: "asc", prepend: true);
                 query += _orderByBuilder.ToString();
             }
 
             query += _pagingQuery;
         }
+
         return query;
     }
 
