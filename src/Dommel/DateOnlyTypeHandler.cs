@@ -7,7 +7,10 @@ namespace Dommel;
 #if NET6_0_OR_GREATER
 internal class DateOnlyTypeHandler : SqlMapper.TypeHandler<DateOnly>
 {
-    public override DateOnly Parse(object value) => DateOnly.FromDateTime((DateTime)value);
+    public override DateOnly Parse(object value) { 
+        if (value is DateOnly) return value;
+        return DateOnly.FromDateTime((DateTime)value);
+    }
 
     public override void SetValue(IDbDataParameter parameter, DateOnly value)
     {
