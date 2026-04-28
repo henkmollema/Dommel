@@ -40,8 +40,10 @@ public class AutoMultiMapTests
     public void Get_OneToOneOneToMany(DatabaseDriver database)
     {
         using var con = database.GetConnection();
-        var products = con.GetAll<Product>();
-        var product = con.Get<Product, Category, ProductOption, Product>(products.First().ProductId);
+        // Use the specific product that has a ProductOption (the "Chai" product)
+        var chai = con.FirstOrDefault<Product>(x => x.Name == "Chai");
+        Assert.NotNull(chai);
+        var product = con.Get<Product, Category, ProductOption, Product>(chai!.ProductId);
         Assert.NotNull(product);
         Assert.NotNull(product!.Category);
         Assert.Equal("Food", product.Category?.Name);
@@ -54,8 +56,10 @@ public class AutoMultiMapTests
     public async Task GetAsync_OneToOneOneToMany(DatabaseDriver database)
     {
         using var con = database.GetConnection();
-        var products = await con.GetAllAsync<Product>();
-        var product = await con.GetAsync<Product, Category, ProductOption, Product>(products.First().ProductId);
+        // Use the specific product that has a ProductOption (the "Chai" product)
+        var chai = await con.FirstOrDefaultAsync<Product>(x => x.Name == "Chai");
+        Assert.NotNull(chai);
+        var product = await con.GetAsync<Product, Category, ProductOption, Product>(chai!.ProductId);
         Assert.NotNull(product);
         Assert.NotNull(product!.Category);
         Assert.Equal("Food", product.Category?.Name);

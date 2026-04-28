@@ -21,12 +21,19 @@ public class InsertTests
         // Act
         var id = Convert.ToInt32(con.Insert(productToInsert));
 
-        // Assert
-        var product = con.Get<Product>(id);
-        Assert.NotNull(product);
-        Assert.Equal(id, product!.ProductId);
-        Assert.Equal("Foo Product", product.Name);
-        Assert.Equal("foo-product", product.Slug);
+        try
+        {
+            // Assert
+            var product = con.Get<Product>(id);
+            Assert.NotNull(product);
+            Assert.Equal(id, product!.ProductId);
+            Assert.Equal("Foo Product", product.Name);
+            Assert.Equal("foo-product", product.Slug);
+        }
+        finally
+        {
+            con.Delete(con.Get<Product>(id)!);
+        }
     }
 
     [Theory]
@@ -41,12 +48,19 @@ public class InsertTests
         // Act
         var id = Convert.ToInt32(await con.InsertAsync(productToInsert));
 
-        // Assert
-        var product = await con.GetAsync<Product>(id);
-        Assert.NotNull(product);
-        Assert.Equal(id, product!.ProductId);
-        Assert.Equal("Foo Product", product.Name);
-        Assert.Equal("foo-product", product.Slug);
+        try
+        {
+            // Assert
+            var product = await con.GetAsync<Product>(id);
+            Assert.NotNull(product);
+            Assert.Equal(id, product!.ProductId);
+            Assert.Equal("Foo Product", product.Name);
+            Assert.Equal("foo-product", product.Slug);
+        }
+        finally
+        {
+            await con.DeleteAsync((await con.GetAsync<Product>(id))!);
+        }
     }
 
     [Theory]

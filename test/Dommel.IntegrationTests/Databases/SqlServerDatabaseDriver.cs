@@ -9,9 +9,19 @@ public class SqlServerDatabaseDriver : DatabaseDriver
 {
     public override DbConnection GetConnection(string databaseName)
     {
-        var connectionString = CI.IsAppVeyor
-            ? $"Server=(local)\\SQL2019;Database={databaseName};User ID=sa;Password=Password12!;Encrypt=False"
-            : $"Server=(LocalDb)\\mssqllocaldb;Database={databaseName};User ID=dommel;Password=dommel;Encrypt=False";
+        string connectionString;
+        if (CI.IsAppVeyor)
+        {
+            connectionString = $"Server=(local)\\SQL2019;Database={databaseName};User ID=sa;Password=Password12!;Encrypt=False";
+        }
+        else if (CI.IsGitHubActions)
+        {
+            connectionString = $"Server=localhost;Database={databaseName};User ID=sa;Password=Password12!;Encrypt=False";
+        }
+        else
+        {
+            connectionString = $"Server=(LocalDb)\\mssqllocaldb;Database={databaseName};User ID=dommel;Password=dommel;Encrypt=False";
+        }
 
         return new SqlConnection(connectionString);
     }

@@ -18,6 +18,10 @@ public class MySqlDatabaseDriver : DatabaseDriver
         {
             connectionString = $"Server=localhost;Database={databaseName};Uid=root;Pwd=;";
         }
+        else if (CI.IsGitHubActions)
+        {
+            connectionString = $"Server=localhost;Database={databaseName};Uid=root;Pwd=root;";
+        }
 
         return new MySqlConnection(connectionString);
     }
