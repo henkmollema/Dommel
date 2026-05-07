@@ -8,5 +8,7 @@ public static class CI
 
     public static bool IsTravis => EnvBool("TRAVIS");
 
+    public static bool IsGitHubActions => EnvBool("GITHUB_ACTIONS");
+
     private static bool EnvBool(string env) => bool.TryParse(Environment.GetEnvironmentVariable(env), out var b) && b;
 }
