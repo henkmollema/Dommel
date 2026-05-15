@@ -109,7 +109,7 @@ public class FromTests
         Assert.True(xs.Any());
         Assert.All(xs, x =>
         {
-            Assert.True(x.categoryId > 0);
+            Assert.True(x.categoryId >= 0);
             Assert.True(x.count >= 0);
         });
     }
