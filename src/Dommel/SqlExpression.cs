@@ -20,6 +20,7 @@ public class SqlExpression<TEntity>
         Expression.New(typeof(TEntity).GetConstructors()[0])).Compile();
     private readonly List<(string, string?)> _whereStatements = [];
     private readonly StringBuilder _orderByBuilder = new();
+    private readonly StringBuilder _groupByBuilder = new();
     private readonly DynamicParameters _parameters = new();
     private string? _selectQuery;
     private string? _pagingQuery;
@@ -52,6 +53,23 @@ public class SqlExpression<TEntity>
     public virtual SqlExpression<TEntity> Select()
     {
         _selectQuery = $"select * from {Resolvers.Table(typeof(TEntity), SqlBuilder)}";
+        return this;
+    }
+
+    /// <summary>
+    /// Selects the specified custom SQL expression from <typeparamref name="TEntity"/>.
+    /// </summary>
+    /// <param name="sql">The custom SQL select expression. E.g. <c>"max(Id)"</c>.</param>
+    /// <returns>The current <see cref="SqlExpression{TEntity}"/> instance.</returns>
+    public virtual SqlExpression<TEntity> Select(string sql)
+    {
+        if (sql == null)
+        {
+            throw new ArgumentNullException(nameof(sql));
+        }
+
+        var tableName = Resolvers.Table(EntityType, SqlBuilder);
+        _selectQuery = $"select {sql} from {tableName}";
         return this;
     }
 
@@ -216,6 +234,50 @@ public class SqlExpression<TEntity>
     {
         AppendOrderBy(Resolvers.Column(property, SqlBuilder), direction: "desc");
         return this;
+    }
+
+    /// <summary>
+    /// Adds a group-by-statement to the current expression.
+    /// </summary>
+    /// <param name="selector">The column to group by. E.g. <code>x => x.Name</code>.</param>
+    /// <returns>The current <see cref="SqlExpression{TEntity}"/> instance.</returns>
+    public virtual SqlExpression<TEntity> GroupBy(Expression<Func<TEntity, object?>> selector)
+    {
+        if (selector == null)
+        {
+            throw new ArgumentNullException(nameof(selector));
+        }
+
+        var column = VisitExpression(selector.Body) as string;
+        AppendGroupBy(column);
+        return this;
+    }
+
+    /// <summary>
+    /// Adds a group-by-statement to the current expression.
+    /// </summary>
+    /// <param name="property">The property info of the column to group by.</param>
+    /// <returns>The current <see cref="SqlExpression{TEntity}"/> instance.</returns>
+    public virtual SqlExpression<TEntity> GroupBy(PropertyInfo property)
+    {
+        AppendGroupBy(Resolvers.Column(property, SqlBuilder));
+        return this;
+    }
+
+    private void AppendGroupBy(string? column)
+    {
+        if (string.IsNullOrEmpty(column))
+        {
+            throw new ArgumentNullException(nameof(column));
+        }
+        if (_groupByBuilder.Length == 0)
+        {
+            _groupByBuilder.Append($" group by {column}");
+        }
+        else
+        {
+            _groupByBuilder.Append($", {column}");
+        }
     }
 
     private void OrderByCore(Expression<Func<TEntity, object?>> selector, string direction)
@@ -679,6 +741,12 @@ public class SqlExpression<TEntity>
             {
                 query += whereBuilder.ToString();
             }
+        }
+
+        var groupBy = _groupByBuilder.ToString();
+        if (!string.IsNullOrEmpty(groupBy))
+        {
+            query += groupBy;
         }
 
         var orderBy = _orderByBuilder.ToString();

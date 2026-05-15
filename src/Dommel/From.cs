@@ -45,4 +45,44 @@ public static partial class DommelMapper
         LogReceived?.Invoke(sql);
         return await con.QueryAsync<TEntity>(sql, parameters, transaction);
     }
+
+    /// <summary>
+    /// Executes an expression to query data from <typeparamref name="TEntity"/> with a specific result type <typeparamref name="TResult"/>.
+    /// </summary>
+    /// <typeparam name="TEntity">The entity to query data from.</typeparam>
+    /// <typeparam name="TResult">The type of the result.</typeparam>
+    /// <param name="con">The connection to query data from.</param>
+    /// <param name="sqlBuilder">A callback to build a <see cref="SqlExpression{TEntity}"/>.</param>
+    /// <param name="transaction">Optional transaction for the command.</param>
+    /// <param name="buffered">
+    /// A value indicating whether the result of the query should be executed directly,
+    /// or when the query is materialized (using <c>ToList()</c> for example).
+    /// </param>
+    /// <returns>The collection of entities returned from the query.</returns>
+    public static IEnumerable<TResult> From<TEntity, TResult>(this IDbConnection con, Action<SqlExpression<TEntity>> sqlBuilder, IDbTransaction? transaction = null, bool buffered = true)
+    {
+        var sqlExpression = CreateSqlExpression<TEntity>(GetSqlBuilder(con));
+        sqlBuilder(sqlExpression);
+        var sql = sqlExpression.ToSql(out var parameters);
+        LogReceived?.Invoke(sql);
+        return con.Query<TResult>(sql, parameters, transaction, buffered);
+    }
+
+    /// <summary>
+    /// Executes an expression to query data from <typeparamref name="TEntity"/> with a specific result type <typeparamref name="TResult"/>.
+    /// </summary>
+    /// <typeparam name="TEntity">The entity to query data from.</typeparam>
+    /// <typeparam name="TResult">The type of the result.</typeparam>
+    /// <param name="con">The connection to query data from.</param>
+    /// <param name="sqlBuilder">A callback to build a <see cref="SqlExpression{TEntity}"/>.</param>
+    /// <param name="transaction">Optional transaction for the command.</param>
+    /// <returns>The collection of entities returned from the query.</returns>
+    public static async Task<IEnumerable<TResult>> FromAsync<TEntity, TResult>(this IDbConnection con, Action<SqlExpression<TEntity>> sqlBuilder, IDbTransaction? transaction = null)
+    {
+        var sqlExpression = CreateSqlExpression<TEntity>(GetSqlBuilder(con));
+        sqlBuilder(sqlExpression);
+        var sql = sqlExpression.ToSql(out var parameters);
+        LogReceived?.Invoke(sql);
+        return await con.QueryAsync<TResult>(sql, parameters, transaction);
+    }
 }

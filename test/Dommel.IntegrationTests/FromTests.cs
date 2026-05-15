@@ -98,4 +98,19 @@ public class FromTests
 
         Assert.Equal(5, products.Count());
     }
+
+    [Theory]
+    [ClassData(typeof(DatabaseTestData))]
+    public async Task GroupBy(DatabaseDriver database)
+    {
+        using var con = database.GetConnection();
+        var xs = await con.FromAsync<Product, (int categoryId, int count)>(
+            sql => sql.Select("CategoryId, count(*)").GroupBy(x => x.CategoryId));
+        Assert.True(xs.Any());
+        Assert.All(xs, x =>
+        {
+            Assert.True(x.categoryId > 0);
+            Assert.True(x.count > 0);
+        });
+    }
 }
