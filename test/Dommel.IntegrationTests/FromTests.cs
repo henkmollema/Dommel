@@ -104,8 +104,10 @@ public class FromTests
     public async Task GroupBy(DatabaseDriver database)
     {
         using var con = database.GetConnection();
+        var sqlBuilder = DommelMapper.GetSqlBuilder(con);
+        var columnName = sqlBuilder.QuoteIdentifier("CategoryId");
         var xs = await con.FromAsync<Product, (int categoryId, int count)>(
-            sql => sql.Select("CategoryId, count(*)").GroupBy(x => x.CategoryId));
+            sql => sql.Select($"{columnName}, count(*)").GroupBy(x => x.CategoryId));
         Assert.True(xs.Any());
         Assert.All(xs, x =>
         {
