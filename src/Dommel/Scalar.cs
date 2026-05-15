@@ -16,6 +16,7 @@ public static partial class DommelMapper
     /// <param name="con">The connection to query data from.</param>
     /// <param name="sqlBuilder">A callback to build a <see cref="SqlExpression{TEntity}"/>.</param>
     /// <param name="transaction">Optional transaction for the command.</param>
+    /// <remarks>Make sure that both <typeparamref name="TResult"/> and the selected columns in <paramref name="sqlBuilder"/> represent a scalar (single) value.</remarks>
     /// <returns>The scalar value returned from the query.</returns>
     public static TResult? Scalar<TEntity, TResult>(this IDbConnection con, Action<SqlExpression<TEntity>> sqlBuilder, IDbTransaction? transaction = null)
     {
@@ -35,6 +36,7 @@ public static partial class DommelMapper
     /// <param name="con">The connection to query data from.</param>
     /// <param name="sqlBuilder">A callback to build a <see cref="SqlExpression{TEntity}"/>.</param>
     /// <param name="transaction">Optional transaction for the command.</param>
+    /// <remarks>Make sure that both <typeparamref name="TResult"/> and the selected columns in <paramref name="sqlBuilder"/> represent a scalar (single) value.</remarks>
     /// <returns>The scalar value returned from the query.</returns>
     public static async Task<TResult?> ScalarAsync<TEntity, TResult>(this IDbConnection con, Action<SqlExpression<TEntity>> sqlBuilder, IDbTransaction? transaction = null)
     {

@@ -24,23 +24,6 @@ public class ScalarTests
         Assert.True(maxId > 0);
     }
 
-    [Theory]
-    [ClassData(typeof(DatabaseTestData))]
-    public void Scalar_Tuple(DatabaseDriver database)
-    {
-        using var con = database.GetConnection();
-        var (minId, maxId) = con.Scalar<Product, (int, int)>(sql => sql.Select("min(ProductId), max(ProductId)"));
-        Assert.True(minId > 0);
-        Assert.True(maxId > 0);
-    }
-
-    [Theory]
-    [ClassData(typeof(DatabaseTestData))]
-    public async Task ScalarAsync_Tuple(DatabaseDriver database)
-    {
-        using var con = database.GetConnection();
-        var (minId, maxId) = await con.ScalarAsync<Product, (int, int)>(sql => sql.Select("min(ProductId), max(ProductId)"));
-        Assert.True(minId > 0);
         Assert.True(maxId > 0);
     }
 
