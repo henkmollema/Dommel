@@ -11,7 +11,9 @@ public class ScalarTests
     public void ScalarSync(DatabaseDriver database)
     {
         using var con = database.GetConnection();
-        var maxId = con.Scalar<Product, int>(sql => sql.Select("max(ProductId)"));
+        var sqlBuilder = DommelMapper.GetSqlBuilder(con);
+        var columnName = sqlBuilder.QuoteIdentifier("ProductId");
+        var maxId = con.Scalar<Product, int>(sql => sql.Select($"max({columnName})"));
         Assert.True(maxId > 0);
     }
 
@@ -20,10 +22,9 @@ public class ScalarTests
     public async Task ScalarAsync(DatabaseDriver database)
     {
         using var con = database.GetConnection();
-        var maxId = await con.ScalarAsync<Product, int>(sql => sql.Select("max(ProductId)"));
-        Assert.True(maxId > 0);
-    }
-
+        var sqlBuilder = DommelMapper.GetSqlBuilder(con);
+        var columnName = sqlBuilder.QuoteIdentifier("ProductId");
+        var maxId = await con.ScalarAsync<Product, int>(sql => sql.Select($"max({columnName})"));
         Assert.True(maxId > 0);
     }
 
