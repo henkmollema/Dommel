@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Data;
+using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using Dapper;
@@ -15,6 +16,7 @@ namespace Dommel;
 public static partial class DommelMapper
 {
     private static readonly Func<Type, SqlMapper.ITypeMap> DefaultTypeMapProvider;
+    private static readonly ConcurrentDictionary<Type, Func<ISqlBuilder, object>> ExpressionCache = new();
 
     internal static ConcurrentDictionary<QueryCacheKey, string> QueryCache { get; } = new ConcurrentDictionary<QueryCacheKey, string>();
     internal static IPropertyResolver PropertyResolver = new DefaultPropertyResolver();
@@ -139,12 +141,35 @@ public static partial class DommelMapper
     }
 
     /// <summary>
-    /// The factory to create <see cref="SqlExpression{TEntity}"/> or custom instances.
+    /// A compiled expression cache factory to create <see cref="SqlExpression{TEntity}"/>.
+    /// Creates a compiled lambda expression to instantiate the generic type, passing the
+    /// parameter and constructor an <see cref="ISqlBuilder"/>. Delegate for a given type
+    /// is compiled only once and stored in the ExpressionCache. All subsequent calls use the cached delegate.
     /// </summary>
     public static Func<Type, ISqlBuilder, object> SqlExpressionFactory = (type, sqlBuilder) =>
     {
-        var expr = typeof(SqlExpression<>).MakeGenericType(type);
-        return Activator.CreateInstance(expr, sqlBuilder)!;
+        var compiledFactory = ExpressionCache.GetOrAdd(type, t =>
+        {
+            // Create the type `SqlExpression<TEntity>`
+            var sqlExpressionType = typeof(SqlExpression<>).MakeGenericType(t);
+
+            // Parameter: ISqlBuilder sqlBuilder
+            var sqlBuilderParam = Expression.Parameter(typeof(ISqlBuilder), "sqlBuilder");
+
+            // Constructor that takes ISqlBuilder
+            var ctor = sqlExpressionType.GetConstructor([typeof(ISqlBuilder)])
+            ?? throw new InvalidOperationException($"No suitable constructor found for type {sqlExpressionType.Name}");
+
+            // Expression: new SqlExpression<TEntity>(sqlBuilder)
+            var newExpression = Expression.New(ctor, sqlBuilderParam);
+
+            // Compile: (ISqlBuilder sqlBuilder) => new SqlExpression<TEntity>(sqlBuilder)
+            var lambda = Expression.Lambda<Func<ISqlBuilder, object>>(newExpression, sqlBuilderParam);
+            return lambda.Compile();
+        });
+
+        // Execute the compiled delegate
+        return compiledFactory(sqlBuilder);
     };
 
     internal static SqlExpression<TEntity> CreateSqlExpression<TEntity>(ISqlBuilder sqlBuilder)
