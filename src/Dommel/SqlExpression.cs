@@ -181,6 +181,125 @@ public class SqlExpression<TEntity>
     }
 
     /// <summary>
+    /// Builds the set-clause of a bulk update query from the specified chain of
+    /// <see cref="SetPropertyCalls{TEntity}.SetProperty{TProperty}(Func{TEntity, TProperty}, TProperty)"/> calls.
+    /// Parameters created for the assigned values are added to this expression so they share
+    /// numbering with any subsequent <see cref="Where(Expression{Func{TEntity, bool}})"/> call.
+    /// </summary>
+    /// <param name="setExpression">The update expression chaining <c>SetProperty</c> calls.</param>
+    /// <returns>The set-clause, e.g. <c>[FullName] = @p1, [CategoryId] = [Products].[CategoryId] * @p2</c>.</returns>
+    public virtual string ToSetClause(Expression<Func<SetPropertyCalls<TEntity>, SetPropertyCalls<TEntity>>> setExpression)
+    {
+        if (setExpression == null)
+        {
+            throw new ArgumentNullException(nameof(setExpression));
+        }
+
+        var setters = new List<(LambdaExpression Property, Expression Value)>();
+        PopulateSetPropertyCalls(setExpression.Body, setters, setExpression.Parameters[0]);
+        if (setters.Count == 0)
+        {
+            throw new ArgumentException("At least one SetProperty call is required.", nameof(setExpression));
+        }
+
+        // Calls are collected outermost-first; reverse to match the order they were written.
+        setters.Reverse();
+
+        var assignments = new List<string>(setters.Count);
+        foreach (var (propertyLambda, valueArgument) in setters)
+        {
+            // Resolve the assignment target. It must not be table-qualified, because some
+            // databases (e.g. Postgres) reject "set products.name = ..." in an update.
+            var propertyBody = StripConvert(propertyLambda.Body);
+            if (propertyBody is not MemberExpression { Member: PropertyInfo property })
+            {
+                throw new ArgumentException("The SetProperty target must be a property access expression, e.g. p => p.Name.", nameof(setExpression));
+            }
+
+            var column = Resolvers.Column(property, SqlBuilder, includeTableName: false);
+
+            // Determine the value. A value selector (p => p.X * 2) translates to a SQL fragment
+            // when it references the entity; everything else (constants, captured variables) is
+            // parameterized.
+            string valueSql;
+            if (UnwrapQuote(valueArgument) is LambdaExpression valueSelector)
+            {
+                var value = VisitExpression(valueSelector.Body);
+                if (ReferencesParameter(valueSelector.Body, valueSelector.Parameters[0]))
+                {
+                    valueSql = (string)value;
+                }
+                else
+                {
+                    AddParameter(value!, out valueSql);
+                }
+            }
+            else
+            {
+                AddParameter(VisitExpression(valueArgument)!, out valueSql);
+            }
+
+            assignments.Add($"{column} = {valueSql}");
+        }
+
+        return string.Join(", ", assignments);
+
+        static void PopulateSetPropertyCalls(Expression expression, List<(LambdaExpression, Expression)> list, ParameterExpression parameter)
+        {
+            switch (expression)
+            {
+                case ParameterExpression p when p == parameter:
+                    break;
+
+                case MethodCallExpression
+                {
+                    Method: { IsGenericMethod: true, Name: nameof(SetPropertyCalls<TEntity>.SetProperty), DeclaringType.IsGenericType: true }
+                } methodCall when methodCall.Method.DeclaringType!.GetGenericTypeDefinition() == typeof(SetPropertyCalls<>):
+                    list.Add(((LambdaExpression)UnwrapQuote(methodCall.Arguments[0]), methodCall.Arguments[1]));
+                    PopulateSetPropertyCalls(methodCall.Object!, list, parameter);
+                    break;
+
+                default:
+                    throw new ArgumentException($"Unsupported expression in the SetProperty chain: '{expression}'.");
+            }
+        }
+    }
+
+    private static Expression UnwrapQuote(Expression expression) =>
+        expression is UnaryExpression { NodeType: ExpressionType.Quote } quote ? quote.Operand : expression;
+
+    private static Expression StripConvert(Expression expression)
+    {
+        while (expression is UnaryExpression { NodeType: ExpressionType.Convert } convert)
+        {
+            expression = convert.Operand;
+        }
+        return expression;
+    }
+
+    private static bool ReferencesParameter(Expression expression, ParameterExpression parameter)
+    {
+        var visitor = new ParameterUsageVisitor(parameter);
+        visitor.Visit(expression);
+        return visitor.Found;
+    }
+
+    private sealed class ParameterUsageVisitor(ParameterExpression parameter) : ExpressionVisitor
+    {
+        public bool Found { get; private set; }
+
+        protected override Expression VisitParameter(ParameterExpression node)
+        {
+            if (node == parameter)
+            {
+                Found = true;
+            }
+
+            return base.VisitParameter(node);
+        }
+    }
+
+    /// <summary>
     /// Adds a paging-statement to the current expression.
     /// </summary>
     /// <param name="pageNumber">The number of the page to fetch, starting at 1.</param>
@@ -326,7 +445,9 @@ public class SqlExpression<TEntity>
         ExpressionType.Lambda => VisitLambda((LambdaExpression)expression),
         ExpressionType.LessThan or ExpressionType.LessThanOrEqual or ExpressionType.GreaterThan or
         ExpressionType.GreaterThanOrEqual or ExpressionType.Equal or ExpressionType.NotEqual or
-        ExpressionType.And or ExpressionType.AndAlso or ExpressionType.Or or ExpressionType.OrElse
+        ExpressionType.And or ExpressionType.AndAlso or ExpressionType.Or or ExpressionType.OrElse or
+        ExpressionType.Add or ExpressionType.Subtract or ExpressionType.Multiply or
+        ExpressionType.Divide or ExpressionType.Modulo
             => VisitBinary((BinaryExpression)expression),
         ExpressionType.Convert or ExpressionType.Not => VisitUnary((UnaryExpression)expression),
         ExpressionType.New => VisitNew((NewExpression)expression),
