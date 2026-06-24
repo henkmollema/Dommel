@@ -25,6 +25,14 @@ public class SqlExpressionTests
     }
 
     [Fact]
+    public void Where_TranslatesArithmetic()
+    {
+        var sqlExpression = new SqlExpression<Product>(new SqlServerSqlBuilder());
+        var sql = sqlExpression.Where(p => p.CategoryId * 2 == 4).ToSql();
+        Assert.Equal(" where [Products].[CategoryId] * @p1 = @p2", sql);
+    }
+
+    [Fact]
     public void ToString_ThrowsWhenCalledWithArgument()
     {
         var sqlExpression = new SqlExpression<Product>(new SqlServerSqlBuilder());
